@@ -15,11 +15,13 @@ from cairn.embed.base import Embedder
 from cairn.embed.fake import FakeEmbedder
 from cairn.embed.openai_compatible import OpenAICompatibleEmbedder
 from cairn.engine.indexer import Indexer
+from cairn.entity.heuristic import HeuristicExtractor
 from cairn.ingest.markdown import MarkdownParser
 from cairn.summarize.base import Summarizer
 from cairn.summarize.fake import FakeSummarizer
 from cairn.summarize.openai_compatible import OpenAICompatibleSummarizer
 from cairn.tools.base import DocumentIndex
+from cairn.tools.find_mentions import find_mentions as find_mentions_tool
 from cairn.tools.outline import outline as outline_tool
 from cairn.tools.search_keyword import Mode
 from cairn.tools.search_keyword import search_keyword as search_keyword_tool
@@ -114,6 +116,7 @@ async def _run_index(
         parser=parser,
         summarizer=_make_summarizer(use_fake),
         embedder=_make_embedder(use_fake),
+        entity_extractor=HeuristicExtractor(),
     )
     manifest_path = await indexer.index_path(
         source, out_dir=out_dir, doc_id=doc_id
@@ -208,6 +211,30 @@ async def _run_search_keyword(
     cast_mode: Mode = mode  # type: ignore[assignment]
     idx = DocumentIndex.load(doc_dir)
     resp = await search_keyword_tool(idx, terms=terms, k=k, mode=cast_mode)
+    typer.echo(json.dumps(resp.data, ensure_ascii=False, indent=2))
+
+
+@query_app.command("mentions")
+def query_mentions(
+    doc_dir: Annotated[
+        Path,
+        typer.Argument(exists=True, file_okay=False, dir_okay=True, readable=True),
+    ],
+    entity: Annotated[str, typer.Argument(help="Entity name (canonical or surface form).")],
+    scope: Annotated[
+        str | None,
+        typer.Option(help="Restrict to a section-id prefix."),
+    ] = None,
+) -> None:
+    """Locate every section that mentions an entity."""
+    asyncio.run(_run_find_mentions(doc_dir, entity, scope))
+
+
+async def _run_find_mentions(
+    doc_dir: Path, entity: str, scope: str | None
+) -> None:
+    idx = DocumentIndex.load(doc_dir)
+    resp = await find_mentions_tool(idx, entity=entity, scope=scope)
     typer.echo(json.dumps(resp.data, ensure_ascii=False, indent=2))
 
 

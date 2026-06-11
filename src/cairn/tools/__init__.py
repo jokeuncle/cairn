@@ -8,6 +8,7 @@ themselves; the ``cairn.mcp`` layer translates :class:`ToolResponse` and
 """
 
 from cairn.tools.base import DocumentIndex, ToolResponse, estimate_tokens
+from cairn.tools.find_mentions import find_mentions
 from cairn.tools.get_section import expand, get_section
 from cairn.tools.outline import outline
 from cairn.tools.search_keyword import search_keyword
@@ -18,6 +19,7 @@ __all__ = [
     "ToolResponse",
     "estimate_tokens",
     "expand",
+    "find_mentions",
     "get_section",
     "outline",
     "search_keyword",

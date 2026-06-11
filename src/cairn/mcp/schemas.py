@@ -101,6 +101,25 @@ _SEARCH_KEYWORD_SCHEMA: Final[dict[str, Any]] = {
     },
 }
 
+_FIND_MENTIONS_SCHEMA: Final[dict[str, Any]] = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": ["entity"],
+    "properties": {
+        "entity": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Entity name (canonical or any registered surface form).",
+        },
+        "scope": {"type": ["string", "null"], "default": None},
+        "kinds": {
+            "type": ["array", "null"],
+            "items": {"enum": ["term", "code", "proper", "defined"]},
+            "default": None,
+        },
+    },
+}
+
 
 CAIRN_TOOLS: Final[list[Tool]] = [
     Tool(
@@ -141,5 +160,13 @@ CAIRN_TOOLS: Final[list[Tool]] = [
             "code symbols, technical terms."
         ),
         inputSchema=_SEARCH_KEYWORD_SCHEMA,
+    ),
+    Tool(
+        name="find_mentions",
+        description=(
+            "Locate every section where a named entity is mentioned. Requires "
+            "the entities sub-index (v0.2+)."
+        ),
+        inputSchema=_FIND_MENTIONS_SCHEMA,
     ),
 ]

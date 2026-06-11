@@ -14,7 +14,7 @@ from cairn.tools.base import DocumentIndex
 
 
 class TestSchemas:
-    def test_five_tools_registered(self) -> None:
+    def test_v02_tools_registered(self) -> None:
         names = {t.name for t in CAIRN_TOOLS}
         assert names == {
             "outline",
@@ -22,6 +22,7 @@ class TestSchemas:
             "expand",
             "search_semantic",
             "search_keyword",
+            "find_mentions",
         }
 
     def test_every_tool_has_description_and_schema(self) -> None:

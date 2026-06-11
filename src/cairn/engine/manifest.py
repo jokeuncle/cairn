@@ -31,6 +31,7 @@ class SubIndexEntry(BaseModel):
     # Optional fields that describe what produced this artifact.
     model: str | None = None
     embedder: str | None = None
+    extractor: str | None = None
     dim: int | None = None
     levels: list[str] | None = None
 

@@ -7,7 +7,8 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from cairn.core.errors import IndexBuildError
+from cairn.core.errors import IndexBuildError, IndexNotFoundError
+from cairn.index.entities import Entities
 from cairn.index.summaries import Summaries
 from cairn.index.tree import Tree
 from cairn.index.vectors import Vectors
@@ -16,8 +17,9 @@ from cairn.index.vectors import Vectors
 class DocumentIndex:
     """All sub-indexes loaded for a single document.
 
-    Holds the Tree, Summaries, and Vectors sub-indexes. v0.2 will add
-    Entities and Cross-references.
+    Holds Tree, Summaries, Vectors, and (since v0.2) Entities. The Entities
+    sub-index is optional — older v0.1 indexes don't have it, and tools that
+    need it must check ``index.entities is not None``.
     """
 
     def __init__(
@@ -26,34 +28,44 @@ class DocumentIndex:
         tree: Tree,
         summaries: Summaries,
         vectors: Vectors,
+        entities: Entities | None = None,
     ) -> None:
-        if not (tree.doc_id == summaries.doc_id == vectors.doc_id):
-            msg = (
-                "sub-index doc_id mismatch: "
-                f"tree={tree.doc_id!r}, "
-                f"summaries={summaries.doc_id!r}, "
-                f"vectors={vectors.doc_id!r}"
+        doc_ids = {
+            "tree": tree.doc_id,
+            "summaries": summaries.doc_id,
+            "vectors": vectors.doc_id,
+        }
+        if entities is not None:
+            doc_ids["entities"] = entities.doc_id
+        if len(set(doc_ids.values())) > 1:
+            msg = "sub-index doc_id mismatch: " + ", ".join(
+                f"{k}={v!r}" for k, v in doc_ids.items()
             )
-            raise IndexBuildError(
-                msg,
-                details={
-                    "tree": tree.doc_id,
-                    "summaries": summaries.doc_id,
-                    "vectors": vectors.doc_id,
-                },
-            )
+            raise IndexBuildError(msg, details=doc_ids)
+
         self.tree = tree
         self.summaries = summaries
         self.vectors = vectors
+        self.entities = entities
         self.doc_id = tree.doc_id
 
     @classmethod
     def load(cls, doc_dir: Path) -> DocumentIndex:
-        """Load all sub-indexes from a single document directory."""
+        """Load all sub-indexes from a single document directory.
+
+        Entities is optional: v0.1 indexes don't have it, and we degrade
+        gracefully rather than refuse to load.
+        """
+        entities: Entities | None
+        try:
+            entities = Entities.load(doc_dir)
+        except IndexNotFoundError:
+            entities = None
         return cls(
             tree=Tree.load(doc_dir),
             summaries=Summaries.load(doc_dir),
             vectors=Vectors.load(doc_dir),
+            entities=entities,
         )
 
     def anchor(self, section_id: str) -> str:

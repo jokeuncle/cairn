@@ -18,6 +18,7 @@ from cairn.core.errors import CairnError, ToolError
 from cairn.embed.base import Embedder
 from cairn.mcp.schemas import CAIRN_TOOLS
 from cairn.tools.base import DocumentIndex
+from cairn.tools.find_mentions import find_mentions as find_mentions_tool
 from cairn.tools.get_section import expand as expand_tool
 from cairn.tools.get_section import get_section as get_section_tool
 from cairn.tools.outline import outline as outline_tool
@@ -50,6 +51,8 @@ async def dispatch_tool(
             resp = await search_semantic_tool(index, embedder=embedder, **args)
         elif name == "search_keyword":
             resp = await search_keyword_tool(index, **args)
+        elif name == "find_mentions":
+            resp = await find_mentions_tool(index, **args)
         else:
             msg = f"unknown tool: {name!r}"
             raise ToolError(msg, details={"name": name})

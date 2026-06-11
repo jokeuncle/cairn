@@ -20,6 +20,12 @@ from cairn.engine.manifest import (
     SubIndexEntry,
     write_manifest,
 )
+from cairn.entity.base import EntityExtractor
+from cairn.index.entities import (
+    ENTITIES_FILENAME,
+    ENTITIES_FORMAT_VERSION,
+    EntityBuilder,
+)
 from cairn.index.summaries import (
     SUMMARIES_FILENAME,
     SUMMARIES_FORMAT_VERSION,
@@ -39,7 +45,11 @@ _TREE_BUILDER_VERSION = 1
 
 
 class Indexer:
-    """Orchestrates the three v0.1 sub-index builders for one document."""
+    """Orchestrates the sub-index builders for one document.
+
+    Tree + Summaries + Vectors are always built. The Entities sub-index is
+    built when ``entity_extractor`` is supplied (default since v0.2).
+    """
 
     def __init__(
         self,
@@ -47,6 +57,7 @@ class Indexer:
         parser: Parser,
         summarizer: Summarizer,
         embedder: Embedder,
+        entity_extractor: EntityExtractor | None = None,
         summary_cache: SummaryCache | None = None,
         summary_concurrency: int = 4,
         embed_batch_size: int = 32,
@@ -54,6 +65,7 @@ class Indexer:
         self.parser = parser
         self.summarizer = summarizer
         self.embedder = embedder
+        self.entity_extractor = entity_extractor
         self.summary_cache = summary_cache
         self.summary_concurrency = summary_concurrency
         self.embed_batch_size = embed_batch_size
@@ -87,7 +99,7 @@ class Indexer:
             SummaryLevel.SYNOPSIS,
         ),
     ) -> Path:
-        """Run the three builders against an already-parsed Document."""
+        """Run every configured builder against an already-parsed Document."""
         out_dir.mkdir(parents=True, exist_ok=True)
 
         TreeBuilder().build(document, out_dir=out_dir)
@@ -100,6 +112,35 @@ class Indexer:
             self.embedder, batch_size=self.embed_batch_size
         ).build(document, out_dir=out_dir)
 
+        subindexes: dict[str, SubIndexEntry] = {
+            "tree": SubIndexEntry(
+                path=TREE_FILENAME,
+                builder_version=_TREE_BUILDER_VERSION,
+            ),
+            "summaries": SubIndexEntry(
+                path=SUMMARIES_FILENAME,
+                builder_version=SUMMARIES_FORMAT_VERSION,
+                model=self.summarizer.name,
+                levels=[lvl.value for lvl in summary_levels],
+            ),
+            "vectors": SubIndexEntry(
+                path=VECTORS_MANIFEST_FILENAME,
+                builder_version=VECTORS_FORMAT_VERSION,
+                embedder=self.embedder.name,
+                dim=self.embedder.dim,
+            ),
+        }
+
+        if self.entity_extractor is not None:
+            await EntityBuilder(self.entity_extractor).build(
+                document, out_dir=out_dir
+            )
+            subindexes["entities"] = SubIndexEntry(
+                path=ENTITIES_FILENAME,
+                builder_version=ENTITIES_FORMAT_VERSION,
+                extractor=self.entity_extractor.name,
+            )
+
         manifest = Manifest(
             format_version=MANIFEST_FORMAT_VERSION,
             doc_id=document.id,
@@ -107,23 +148,6 @@ class Indexer:
             source_path=str(document.source_path),
             source_hash=document.source_hash,
             indexed_at=datetime.now(UTC),
-            subindexes={
-                "tree": SubIndexEntry(
-                    path=TREE_FILENAME,
-                    builder_version=_TREE_BUILDER_VERSION,
-                ),
-                "summaries": SubIndexEntry(
-                    path=SUMMARIES_FILENAME,
-                    builder_version=SUMMARIES_FORMAT_VERSION,
-                    model=self.summarizer.name,
-                    levels=[lvl.value for lvl in summary_levels],
-                ),
-                "vectors": SubIndexEntry(
-                    path=VECTORS_MANIFEST_FILENAME,
-                    builder_version=VECTORS_FORMAT_VERSION,
-                    embedder=self.embedder.name,
-                    dim=self.embedder.dim,
-                ),
-            },
+            subindexes=subindexes,
         )
         return write_manifest(out_dir, manifest)
