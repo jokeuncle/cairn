@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "cairn"
-version = "0.1.0a1"
+version = "0.1.0a2"
 description = "Structure-aware, MCP-native retrieval for large documents. Agents navigate by markers, not chunks."
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -70,11 +70,11 @@ dev = [
 cairn = "cairn.cli:app"
 
 [project.urls]
-Homepage = "https://github.com/cairn-dev/cairn"
-Documentation = "https://github.com/cairn-dev/cairn/tree/main/docs"
-Repository = "https://github.com/cairn-dev/cairn"
-Issues = "https://github.com/cairn-dev/cairn/issues"
-Changelog = "https://github.com/cairn-dev/cairn/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/jokeuncle/cairn"
+Documentation = "https://github.com/jokeuncle/cairn/tree/main/docs"
+Repository = "https://github.com/jokeuncle/cairn"
+Issues = "https://github.com/jokeuncle/cairn/issues"
+Changelog = "https://github.com/jokeuncle/cairn/blob/main/CHANGELOG.md"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/cairn"]

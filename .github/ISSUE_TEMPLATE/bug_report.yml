@@ -1,0 +1,65 @@
+name: Bug report
+description: Something Cairn does, but shouldn't (or doesn't, but should).
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time. Please fill in the boxes below — the
+        more concrete the reproducer, the faster the fix.
+
+  - type: input
+    id: version
+    attributes:
+      label: Cairn version
+      description: Output of `cairn version` (or your installed package version).
+      placeholder: "0.1.0a1"
+    validations:
+      required: true
+
+  - type: input
+    id: python
+    attributes:
+      label: Python version
+      placeholder: "3.12.3"
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: "macOS 14.5 / Ubuntu 24.04 / Windows 11"
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproducer
+    attributes:
+      label: Minimal reproducer
+      description: A short markdown file, a shell command, or a Python snippet that triggers the issue.
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include any error output. If `cairn serve` is involved, the JSON-line log is very helpful.
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: extras
+    attributes:
+      label: Additional context
+      description: Endpoint configuration (Ollama / OpenAI / other), document size, anything else relevant.

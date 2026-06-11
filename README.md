@@ -2,8 +2,10 @@
 
 > **Cairns for your largest documents. Agents navigate by markers, not chunks.**
 
+[![CI](https://github.com/jokeuncle/cairn/actions/workflows/ci.yml/badge.svg)](https://github.com/jokeuncle/cairn/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache_2.0-blue.svg)](LICENSE)
-[![Status](https://img.shields.io/badge/status-pre--alpha-orange.svg)](ROADMAP.md)
+[![Version](https://img.shields.io/badge/version-0.1.0a2-blue.svg)](CHANGELOG.md)
+[![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
 [![MCP](https://img.shields.io/badge/MCP-native-7c3aed.svg)](https://modelcontextprotocol.io/)
 
 Cairn is a **structure-aware, MCP-native retrieval system** for large structured
@@ -66,7 +68,7 @@ and search it. **Zero API keys, zero model downloads** — the `--fake` flag
 uses deterministic in-process plugins so the whole thing runs offline.
 
 ```bash
-git clone https://github.com/cairn-dev/cairn.git
+git clone https://github.com/jokeuncle/cairn.git
 cd cairn
 
 python3.11 -m venv .venv

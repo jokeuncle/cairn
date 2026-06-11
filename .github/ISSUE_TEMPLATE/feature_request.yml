@@ -1,0 +1,55 @@
+name: Feature request
+description: Propose a change to Cairn.
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before opening a feature request, please read
+        [`PRODUCT.md`](https://github.com/jokeuncle/cairn/blob/main/PRODUCT.md)
+        — especially §6 (Non-goals). The project is deliberately
+        opinionated, and proposals that contradict the thesis or expand
+        the scope beyond structured-document retrieval are unlikely to
+        land.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem are you trying to solve?
+      description: Describe the user-facing problem first, the proposed solution second.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Sketch the API or behavior. If it touches the MCP tool catalog, sub-index format, or layer boundaries, an ADR will be required before code.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What else did you look at, and why was it not enough?
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Which subsystem does this touch?
+      multiple: true
+      options:
+        - Markdown ingest
+        - PDF ingest
+        - Summaries (S)
+        - Vectors (V)
+        - Entities (E)
+        - Cross-references (X)
+        - Tools / MCP server
+        - CLI
+        - Bench
+        - Documentation
+        - Other (please describe in "Proposed solution")
+    validations:
+      required: true

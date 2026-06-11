@@ -12,7 +12,7 @@ any OpenAI-compatible endpoint (see the bottom of this file).
 ## Setup
 
 ```bash
-git clone https://github.com/cairn-dev/cairn.git
+git clone https://github.com/jokeuncle/cairn.git
 cd cairn
 python3.11 -m venv .venv
 .venv/bin/pip install -e ".[dev]"

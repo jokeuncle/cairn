@@ -4,6 +4,34 @@ All notable changes to Cairn. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows
 [Semantic Versioning](https://semver.org/) once it reaches 1.0.
 
+## [0.1.0a2] — 2026-06-11
+
+Second alpha. Adds document-level incremental rebuild, validates the
+full stack end-to-end against a real LLM (Volcengine Doubao Seed 2.0),
+and lands the OSS housekeeping needed for a public repo.
+
+### Added
+
+- **v0.2.5 — Incremental rebuild.** `cairn index <source>` now skips
+  the rebuild when the existing manifest's `source_hash` matches the
+  incoming source. `--force` overrides. `Indexer.index_path` returns an
+  `IndexResult(manifest_path, rebuilt)` so callers can distinguish a
+  no-op from a real build.
+- **Real-LLM validation.** `examples/real-llm-doubao.md` captures the
+  exact summaries Cairn produced against Doubao via the
+  OpenAI-compatible endpoint at `https://ark.cn-beijing.volces.com/api/v3`
+  — the local-first promise extends to any OpenAI-compatible cloud
+  endpoint with zero code changes.
+- **OSS housekeeping.** `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1),
+  GitHub Actions CI (ruff + mypy --strict + pytest on Python 3.11/3.12/
+  3.13), release workflow that builds wheel + sdist on tag, issue and
+  PR templates.
+
+### Changed
+
+- All repository URLs point at `github.com/jokeuncle/cairn`.
+- README gains the CI status badge.
+
 ## [0.1.0a1] — 2026-06-11
 
 First public alpha. The full structure-aware retrieval pyramid is

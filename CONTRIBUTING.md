@@ -46,7 +46,7 @@ ADRs are short (one page is ideal). They document *why*, not *how*.
 
 ```bash
 # Clone
-git clone https://github.com/cairn-dev/cairn.git
+git clone https://github.com/jokeuncle/cairn.git
 cd cairn
 
 # Use uv (preferred) or pip with a venv
