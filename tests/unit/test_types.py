@@ -107,16 +107,30 @@ class TestSectionNode:
 # -- Composite types --------------------------------------------------------
 
 
-def test_summary_set_constructs() -> None:
+def test_summary_set_with_digest() -> None:
     s = SummarySet(
         section_id="intro",
         gist="g",
         synopsis="s",
         digest="d",
         model="test-model",
+        section_hash="a" * 64,
         generated_at=datetime.now(UTC),
     )
     assert s.section_id == "intro"
+    assert s.digest == "d"
+
+
+def test_summary_set_digest_optional_for_v01() -> None:
+    s = SummarySet(
+        section_id="intro",
+        gist="g",
+        synopsis="s",
+        model="test-model",
+        section_hash="a" * 64,
+        generated_at=datetime.now(UTC),
+    )
+    assert s.digest is None
 
 
 def test_entity_constructs() -> None:
