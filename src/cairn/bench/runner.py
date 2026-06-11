@@ -6,8 +6,9 @@ from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict
 
-from cairn.bench.baseline import NaiveRAG
+from cairn.bench.baseline import NaiveHit, NaiveRAG
 from cairn.bench.dataset import BenchDocument, BenchQuestion, BenchSuite
+from cairn.bench.judge import LLMJudge
 from cairn.bench.metrics import recall_at_k
 from cairn.bench.report import BenchSummary, QuestionResult, SystemResult
 from cairn.embed.base import Embedder
@@ -35,10 +36,12 @@ class BenchRunner:
         *,
         summarizer: Summarizer,
         embedder: Embedder,
+        judge: LLMJudge | None = None,
         options: BenchOptions | None = None,
     ) -> None:
         self.summarizer = summarizer
         self.embedder = embedder
+        self.judge = judge
         self.options = options or BenchOptions()
 
     async def run(self, suite: BenchSuite, *, work_dir: Path) -> BenchSummary:
@@ -86,8 +89,21 @@ class BenchRunner:
 
         results: list[QuestionResult] = []
         for question in document.questions:
-            cairn_result = await self._run_cairn(cairn_index, question)
-            naive_result = await self._run_naive(naive, question, naive_dir)
+            cairn_result, cairn_context = await self._run_cairn(
+                cairn_index, question
+            )
+            naive_result, naive_context = await self._run_naive(
+                naive, question, naive_dir
+            )
+
+            if self.judge is not None and question.reference is not None:
+                cairn_result = await self._judge_result(
+                    cairn_result, question, cairn_context
+                )
+                naive_result = await self._judge_result(
+                    naive_result, question, naive_context
+                )
+
             results.append(
                 QuestionResult(
                     document_id=document.id,
@@ -101,11 +117,27 @@ class BenchRunner:
             )
         return results
 
+    async def _judge_result(
+        self,
+        result: SystemResult,
+        question: BenchQuestion,
+        context: str,
+    ) -> SystemResult:
+        if self.judge is None or question.reference is None:
+            return result
+        answer = await self.judge.answer(question.question, context)
+        is_correct, _ = await self.judge.judge(
+            question.question, question.reference, answer
+        )
+        return result.model_copy(
+            update={"qa_correct": is_correct, "qa_answer": answer}
+        )
+
     async def _run_cairn(
         self,
         index: DocumentIndex,
         question: BenchQuestion,
-    ) -> SystemResult:
+    ) -> tuple[SystemResult, str]:
         response = await search_semantic(
             index,
             embedder=self.embedder,
@@ -116,19 +148,21 @@ class BenchRunner:
         recall = recall_at_k(
             section_ids, question.expected_anchors, k=self.options.k
         )
-        return SystemResult(
+        context = _format_cairn_context(response.data["hits"])
+        result = SystemResult(
             system="cairn",
             section_ids=tuple(section_ids),
             recall_at_k=recall,
             tokens_returned=response.tokens_returned,
         )
+        return result, context
 
     async def _run_naive(
         self,
         naive: NaiveRAG,
         question: BenchQuestion,
         naive_dir: Path,
-    ) -> SystemResult:
+    ) -> tuple[SystemResult, str]:
         hits = await naive.retrieve(
             question.question, out_dir=naive_dir, k=self.options.k
         )
@@ -137,9 +171,26 @@ class BenchRunner:
             section_ids, question.expected_anchors, k=self.options.k
         )
         tokens = sum(estimate_tokens(hit.text) for hit in hits)
-        return SystemResult(
+        context = _format_naive_context(hits)
+        result = SystemResult(
             system="naive",
             section_ids=tuple(section_ids),
             recall_at_k=recall,
             tokens_returned=tokens,
         )
+        return result, context
+
+
+def _format_cairn_context(hits: list[dict[str, object]]) -> str:
+    parts: list[str] = []
+    for hit in hits:
+        title = str(hit.get("title", ""))
+        synopsis = str(hit.get("synopsis", ""))
+        head = str(hit.get("head", ""))
+        body = synopsis or head
+        parts.append(f"## {title}\n\n{body}".strip())
+    return "\n\n---\n\n".join(parts)
+
+
+def _format_naive_context(hits: list[NaiveHit]) -> str:
+    return "\n\n---\n\n".join(hit.text for hit in hits)

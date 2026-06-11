@@ -282,22 +282,45 @@ def bench(
         bool,
         typer.Option("--fake", help="Use FakeSummarizer + FakeEmbedder (deterministic, offline)."),
     ] = False,
+    judge: Annotated[
+        bool,
+        typer.Option(
+            "--judge",
+            help="Run LLM-as-judge for QA accuracy (uses CAIRN_LLM_* settings).",
+        ),
+    ] = False,
 ) -> None:
     """Run a benchmark suite comparing Cairn against a naive vector-RAG baseline."""
-    asyncio.run(_run_bench(suite, k, out, fake))
+    asyncio.run(_run_bench(suite, k, out, fake, judge))
 
 
 async def _run_bench(
-    suite_path: Path, k: int, out: Path | None, use_fake: bool
+    suite_path: Path,
+    k: int,
+    out: Path | None,
+    use_fake: bool,
+    use_judge: bool,
 ) -> None:
     from cairn.bench.dataset import load_suite
+    from cairn.bench.judge import LLMJudge
     from cairn.bench.report import format_markdown_report, write_json_report
     from cairn.bench.runner import BenchOptions, BenchRunner
 
     suite = load_suite(suite_path)
+
+    judge_client: LLMJudge | None = None
+    if use_judge:
+        cfg = load_llm_config()
+        judge_client = LLMJudge(
+            base_url=cfg.base_url,
+            model=cfg.model,
+            api_key=cfg.api_key,
+        )
+
     runner = BenchRunner(
         summarizer=_make_summarizer(use_fake),
         embedder=_make_embedder(use_fake),
+        judge=judge_client,
         options=BenchOptions(k=k),
     )
 

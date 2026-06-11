@@ -12,6 +12,7 @@ from cairn.bench.dataset import (
     BenchSuite,
     load_suite,
 )
+from cairn.bench.judge import LLMJudge
 from cairn.bench.metrics import recall_at_k
 from cairn.bench.report import (
     BenchSummary,
@@ -27,6 +28,7 @@ __all__ = [
     "BenchRunner",
     "BenchSuite",
     "BenchSummary",
+    "LLMJudge",
     "QuestionResult",
     "format_markdown_report",
     "load_suite",
