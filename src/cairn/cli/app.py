@@ -98,9 +98,16 @@ def index(
             help="Use deterministic FakeSummarizer + FakeEmbedder (no network).",
         ),
     ] = False,
+    force: Annotated[
+        bool,
+        typer.Option(
+            "--force",
+            help="Rebuild even if the source file is unchanged since last index.",
+        ),
+    ] = False,
 ) -> None:
     """Index a source document — build Tree + Summaries + Vectors."""
-    asyncio.run(_run_index(source, doc_id, out, fake))
+    asyncio.run(_run_index(source, doc_id, out, fake, force))
 
 
 async def _run_index(
@@ -108,6 +115,7 @@ async def _run_index(
     doc_id: str | None,
     out: Path | None,
     use_fake: bool,
+    force: bool,
 ) -> None:
     parser = parser_for_path(source)
     resolved_doc_id = doc_id or source.stem
@@ -121,10 +129,13 @@ async def _run_index(
         entity_extractor=HeuristicExtractor(),
         xref_extractor=HeuristicXRefExtractor(),
     )
-    manifest_path = await indexer.index_path(
-        source, out_dir=out_dir, doc_id=doc_id
+    result = await indexer.index_path(
+        source, out_dir=out_dir, doc_id=doc_id, force=force
     )
-    typer.echo(f"indexed: {manifest_path}")
+    if result.rebuilt:
+        typer.echo(f"indexed: {result.manifest_path}")
+    else:
+        typer.echo(f"already up to date: {result.manifest_path}")
 
 
 @app.command()

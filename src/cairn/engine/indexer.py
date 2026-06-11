@@ -8,16 +8,20 @@ the top-level ``manifest.json`` that ties the artifacts together.
 from __future__ import annotations
 
 from collections.abc import Sequence
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 
 from cairn import __version__
+from cairn.core.errors import IndexNotFoundError
 from cairn.core.types import Document
 from cairn.embed.base import Embedder
 from cairn.engine.manifest import (
+    MANIFEST_FILENAME,
     MANIFEST_FORMAT_VERSION,
     Manifest,
     SubIndexEntry,
+    read_manifest,
     write_manifest,
 )
 from cairn.entity.base import EntityExtractor
@@ -49,6 +53,18 @@ from cairn.summarize.cache import SummaryCache
 from cairn.xref.base import XRefExtractor
 
 _TREE_BUILDER_VERSION = 1
+
+
+@dataclass(frozen=True)
+class IndexResult:
+    """Outcome of an :meth:`Indexer.index_path` call.
+
+    ``rebuilt`` is ``False`` when the source's hash matched the previous
+    build's manifest and the existing index was kept as-is (a no-op).
+    """
+
+    manifest_path: Path
+    rebuilt: bool
 
 
 class Indexer:
@@ -90,14 +106,30 @@ class Indexer:
             SummaryLevel.SYNOPSIS,
             SummaryLevel.DIGEST,
         ),
-    ) -> Path:
-        """Parse a source file and build all sub-indexes. Returns manifest path."""
+        force: bool = False,
+    ) -> IndexResult:
+        """Parse a source file and build all sub-indexes.
+
+        When ``force`` is ``False`` (default), the indexer first checks
+        whether ``out_dir`` already contains a manifest whose source_hash
+        matches the new source. If so, the existing index is left untouched
+        and ``IndexResult.rebuilt`` is ``False``. Pass ``force=True`` to
+        always rebuild.
+        """
         document = self.parser.parse(source, doc_id=doc_id)
-        return await self.index_document(
+
+        if not force and _existing_matches(out_dir, document.source_hash):
+            return IndexResult(
+                manifest_path=out_dir / MANIFEST_FILENAME,
+                rebuilt=False,
+            )
+
+        manifest_path = await self.index_document(
             document,
             out_dir=out_dir,
             summary_levels=summary_levels,
         )
+        return IndexResult(manifest_path=manifest_path, rebuilt=True)
 
     async def index_document(
         self,
@@ -176,3 +208,14 @@ class Indexer:
             subindexes=subindexes,
         )
         return write_manifest(out_dir, manifest)
+
+
+def _existing_matches(out_dir: Path, source_hash: str) -> bool:
+    """Return ``True`` when ``out_dir`` holds an index for the same source bytes."""
+    if not (out_dir / MANIFEST_FILENAME).exists():
+        return False
+    try:
+        existing = read_manifest(out_dir)
+    except IndexNotFoundError:
+        return False
+    return existing.source_hash == source_hash

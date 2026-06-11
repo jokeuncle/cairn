@@ -37,8 +37,9 @@ class TestIndexer:
         self, indexer: Indexer, tmp_path: Path, fixture_md: Path
     ) -> None:
         out = tmp_path / "doc"
-        manifest_path = await indexer.index_path(fixture_md, out_dir=out)
-        assert manifest_path == out / MANIFEST_FILENAME
+        result = await indexer.index_path(fixture_md, out_dir=out)
+        assert result.manifest_path == out / MANIFEST_FILENAME
+        assert result.rebuilt is True
         for filename in (
             MANIFEST_FILENAME,
             TREE_FILENAME,
@@ -97,3 +98,55 @@ class TestIndexer:
         )
         manifest = read_manifest(out)
         assert manifest.subindexes["summaries"].levels == ["gist"]
+
+
+class TestIncrementalRebuild:
+    async def test_second_call_is_no_op(
+        self, indexer: Indexer, tmp_path: Path, fixture_md: Path
+    ) -> None:
+        out = tmp_path / "doc"
+        first = await indexer.index_path(fixture_md, out_dir=out)
+        assert first.rebuilt is True
+        first_indexed_at = read_manifest(out).indexed_at
+
+        second = await indexer.index_path(fixture_md, out_dir=out)
+        assert second.rebuilt is False
+        assert second.manifest_path == first.manifest_path
+        # Manifest was not touched.
+        assert read_manifest(out).indexed_at == first_indexed_at
+
+    async def test_force_overrides_no_op(
+        self, indexer: Indexer, tmp_path: Path, fixture_md: Path
+    ) -> None:
+        out = tmp_path / "doc"
+        first = await indexer.index_path(fixture_md, out_dir=out)
+        assert first.rebuilt is True
+        first_indexed_at = read_manifest(out).indexed_at
+
+        second = await indexer.index_path(fixture_md, out_dir=out, force=True)
+        assert second.rebuilt is True
+        # Rebuilt → new indexed_at.
+        assert read_manifest(out).indexed_at >= first_indexed_at
+
+    async def test_changed_source_triggers_rebuild(
+        self, indexer: Indexer, tmp_path: Path, fixture_md: Path
+    ) -> None:
+        out = tmp_path / "doc"
+        await indexer.index_path(fixture_md, out_dir=out)
+
+        # Modify the source and re-index.
+        modified = tmp_path / "modified.md"
+        modified.write_text(
+            fixture_md.read_text() + "\n\n## New section\n\nnew body.\n",
+            encoding="utf-8",
+        )
+        result = await indexer.index_path(modified, out_dir=out)
+        assert result.rebuilt is True
+
+    async def test_missing_manifest_still_builds(
+        self, indexer: Indexer, tmp_path: Path, fixture_md: Path
+    ) -> None:
+        out = tmp_path / "doc"
+        # First call: no manifest exists → must build.
+        result = await indexer.index_path(fixture_md, out_dir=out)
+        assert result.rebuilt is True

@@ -67,6 +67,28 @@ class TestIndex:
         assert result.exit_code == 0
         assert "indexed:" in result.output
 
+    def test_second_index_reports_no_op(
+        self, tmp_path: Path, fixture_dir: Path, runner: CliRunner
+    ) -> None:
+        out = tmp_path / "noop"
+        args = ["index", str(fixture_dir / "simple.md"), "--out", str(out), "--fake"]
+        first = runner.invoke(app, args)
+        assert first.exit_code == 0
+        assert "indexed:" in first.output
+        second = runner.invoke(app, args)
+        assert second.exit_code == 0
+        assert "already up to date" in second.output
+
+    def test_force_overrides_noop(
+        self, tmp_path: Path, fixture_dir: Path, runner: CliRunner
+    ) -> None:
+        out = tmp_path / "forced"
+        args = ["index", str(fixture_dir / "simple.md"), "--out", str(out), "--fake"]
+        runner.invoke(app, args)
+        result = runner.invoke(app, [*args, "--force"])
+        assert result.exit_code == 0
+        assert "indexed:" in result.output
+
     def test_missing_source_file_fails(self, runner: CliRunner) -> None:
         result = runner.invoke(app, ["index", "/no/such/file.md", "--fake"])
         assert result.exit_code != 0
