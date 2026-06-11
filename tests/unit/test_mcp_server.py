@@ -24,6 +24,7 @@ class TestSchemas:
             "search_keyword",
             "find_mentions",
             "get_related",
+            "read_range",
         }
 
     def test_every_tool_has_description_and_schema(self) -> None:

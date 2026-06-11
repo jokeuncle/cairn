@@ -12,6 +12,7 @@ from cairn.tools.find_mentions import find_mentions
 from cairn.tools.get_related import get_related
 from cairn.tools.get_section import expand, get_section
 from cairn.tools.outline import outline
+from cairn.tools.read_range import read_range
 from cairn.tools.search_keyword import search_keyword
 from cairn.tools.search_semantic import search_semantic
 
@@ -24,6 +25,7 @@ __all__ = [
     "get_related",
     "get_section",
     "outline",
+    "read_range",
     "search_keyword",
     "search_semantic",
 ]

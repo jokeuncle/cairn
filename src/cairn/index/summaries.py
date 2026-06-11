@@ -64,7 +64,11 @@ class SummaryBuilder:
         document: Document,
         *,
         out_dir: Path,
-        levels: Sequence[SummaryLevel] = (SummaryLevel.GIST, SummaryLevel.SYNOPSIS),
+        levels: Sequence[SummaryLevel] = (
+            SummaryLevel.GIST,
+            SummaryLevel.SYNOPSIS,
+            SummaryLevel.DIGEST,
+        ),
     ) -> Path:
         """Summarize every section in ``document`` and write ``summaries.json``.
 
@@ -72,8 +76,8 @@ class SummaryBuilder:
             document: The parsed document.
             out_dir: Directory to write into. Created if absent.
             levels: Which granularity levels to generate. Order is preserved
-                and duplicates are dropped. Defaults to (gist, synopsis) per
-                the v0.1 scope.
+                and duplicates are dropped. Defaults to all three levels
+                (gist, synopsis, digest) since v0.2.4.
 
         Returns:
             Path to the written ``summaries.json``.

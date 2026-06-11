@@ -38,7 +38,8 @@ class TestLoad:
             assert s.model == "fake:words"
             assert s.gist  # non-empty
             assert s.synopsis  # non-empty
-            assert s.digest is None
+            # Since v0.2.4 the default includes digest.
+            assert s.digest
 
     async def test_load_missing_raises(self, tmp_path: Path) -> None:
         with pytest.raises(IndexNotFoundError):

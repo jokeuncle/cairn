@@ -59,7 +59,11 @@ class TestIndexer:
         assert manifest.cairn_version
         assert set(manifest.subindexes) == {"tree", "summaries", "vectors"}
         assert manifest.subindexes["summaries"].model == "fake:words"
-        assert manifest.subindexes["summaries"].levels == ["gist", "synopsis"]
+        assert manifest.subindexes["summaries"].levels == [
+            "gist",
+            "synopsis",
+            "digest",
+        ]
         assert manifest.subindexes["vectors"].embedder == "fake:bow-hash"
         assert manifest.subindexes["vectors"].dim == 32
 

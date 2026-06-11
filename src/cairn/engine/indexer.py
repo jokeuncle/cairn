@@ -88,6 +88,7 @@ class Indexer:
         summary_levels: Sequence[SummaryLevel] = (
             SummaryLevel.GIST,
             SummaryLevel.SYNOPSIS,
+            SummaryLevel.DIGEST,
         ),
     ) -> Path:
         """Parse a source file and build all sub-indexes. Returns manifest path."""
@@ -106,6 +107,7 @@ class Indexer:
         summary_levels: Sequence[SummaryLevel] = (
             SummaryLevel.GIST,
             SummaryLevel.SYNOPSIS,
+            SummaryLevel.DIGEST,
         ),
     ) -> Path:
         """Run every configured builder against an already-parsed Document."""

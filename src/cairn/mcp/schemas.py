@@ -136,6 +136,25 @@ _GET_RELATED_SCHEMA: Final[dict[str, Any]] = {
     },
 }
 
+_READ_RANGE_SCHEMA: Final[dict[str, Any]] = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": ["start_id", "end_id"],
+    "properties": {
+        "start_id": {"type": "string", "description": "First section to include."},
+        "end_id": {
+            "type": "string",
+            "description": "Last section to include (inclusive).",
+        },
+        "max_tokens": {
+            "type": "integer",
+            "minimum": 1,
+            "default": 4000,
+            "description": "Soft cap on the returned content's token count.",
+        },
+    },
+}
+
 
 CAIRN_TOOLS: Final[list[Tool]] = [
     Tool(
@@ -192,5 +211,13 @@ CAIRN_TOOLS: Final[list[Tool]] = [
             "and the structural tree (xref/sibling/parent/child)."
         ),
         inputSchema=_GET_RELATED_SCHEMA,
+    ),
+    Tool(
+        name="read_range",
+        description=(
+            "Read continuous content across consecutive sections from "
+            "start_id through end_id, truncating at max_tokens."
+        ),
+        inputSchema=_READ_RANGE_SCHEMA,
     ),
 ]

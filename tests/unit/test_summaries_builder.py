@@ -194,13 +194,14 @@ class TestSummaryBuilderCache:
             original, out_dir=tmp_path / "out"
         )
         first_calls = counter.calls
-        assert first_calls == 3 * 2  # 3 sections x 2 levels
+        # 3 sections x 3 levels (default since v0.2.4 includes digest).
+        assert first_calls == 3 * 3
 
         await SummaryBuilder(counter, cache=cache).build(
             modified, out_dir=tmp_path / "out2"
         )
-        # Only Introduction's section_hash differs → gist + synopsis = 2 new calls.
-        assert counter.calls == first_calls + 2
+        # Only Introduction's section_hash differs → 3 new calls (one per level).
+        assert counter.calls == first_calls + 3
 
     async def test_no_cache_means_every_section_is_called(
         self, tmp_path: Path, parsed_simple: Document

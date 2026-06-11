@@ -23,6 +23,7 @@ from cairn.tools.get_related import get_related as get_related_tool
 from cairn.tools.get_section import expand as expand_tool
 from cairn.tools.get_section import get_section as get_section_tool
 from cairn.tools.outline import outline as outline_tool
+from cairn.tools.read_range import read_range as read_range_tool
 from cairn.tools.search_keyword import search_keyword as search_keyword_tool
 from cairn.tools.search_semantic import search_semantic as search_semantic_tool
 
@@ -56,6 +57,8 @@ async def dispatch_tool(
             resp = await find_mentions_tool(index, **args)
         elif name == "get_related":
             resp = await get_related_tool(index, **args)
+        elif name == "read_range":
+            resp = await read_range_tool(index, **args)
         else:
             msg = f"unknown tool: {name!r}"
             raise ToolError(msg, details={"name": name})
