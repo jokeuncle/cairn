@@ -1,0 +1,83 @@
+# cairn-bench starter dataset
+#
+# Hand-curated questions over Cairn's own ARCHITECTURE.md. Use as a
+# template for adding your own documents.
+#
+# `expected_anchors` are substring matches against retrieved section ids,
+# so short suffixes (the last hierarchical component) are enough.
+
+name = "Cairn Architecture v0.2.2 (starter)"
+
+[[documents]]
+id = "architecture"
+source = "../ARCHITECTURE.md"
+
+# 1. Direct definition lookup.
+[[documents.questions]]
+id = "default-vector-store"
+question = "What is the default vector store and where in the architecture is it specified?"
+expected_anchors = ["2-5-vectors-v-semantic-overlay", "7-tech-stack-and-rationale"]
+tags = ["definition", "tech-stack"]
+
+# 2. Concept the architecture deliberately enforces.
+[[documents.questions]]
+id = "progressive-disclosure"
+question = "What is the progressive-disclosure contract and why is it non-negotiable?"
+expected_anchors = ["3-3-progressive-disclosure-contract"]
+tags = ["definition", "policy"]
+
+# 3. Cross-section structural query.
+[[documents.questions]]
+id = "cross-ref-kinds"
+question = "What three kinds of cross-references does Cairn detect?"
+expected_anchors = ["2-4-cross-references-x-document-graph"]
+tags = ["structural", "definition"]
+
+# 4. Storage / format question.
+[[documents.questions]]
+id = "storage-layout"
+question = "How is a built document persisted on disk?"
+expected_anchors = ["5-storage-layout"]
+tags = ["storage"]
+
+# 5. Multi-section reasoning (Entities + plug-in interface).
+[[documents.questions]]
+id = "entity-kinds"
+question = "What entity kinds does the index support and what extractor produces each?"
+expected_anchors = ["2-3-entities-e-term-and-concept-index", "3-plug-in-architecture"]
+tags = ["definition", "multi-hop"]
+
+# 6. Architectural rule (invariants).
+[[documents.questions]]
+id = "layer-dependencies"
+question = "What is the dependency rule between architectural layers?"
+expected_anchors = ["invariants-across-all-layers"]
+tags = ["policy", "structural"]
+
+# 7. Concrete data-model lookup.
+[[documents.questions]]
+id = "section-node-fields"
+question = "What fields does a SectionNode carry and what do span and raw_text mean?"
+expected_anchors = ["4-data-model", "2-1-tree-t-structural-backbone"]
+tags = ["data-model", "multi-hop"]
+
+# 8. Non-functional / performance.
+[[documents.questions]]
+id = "perf-budget"
+question = "What are the v1.0 indexing throughput and query latency targets?"
+expected_anchors = ["performance-budgets", "8-non-functional-requirements"]
+tags = ["non-functional", "performance"]
+
+# 9. What's deliberately rejected (anti-stack).
+[[documents.questions]]
+id = "anti-stack"
+question = "What dependencies are explicitly forbidden in the core path?"
+expected_anchors = ["7-tech-stack-and-rationale"]
+tags = ["anti-pattern", "policy"]
+
+# 10. Plug-in / extension surface.
+[[documents.questions]]
+id = "pluggable-interfaces"
+question = "Which interfaces in Cairn are pluggable and which are frozen?"
+expected_anchors = ["3-plug-in-architecture", "9-extensibility-boundaries"]
+tags = ["extensibility", "multi-hop"]

@@ -267,5 +267,52 @@ async def _run_get_related(
     typer.echo(json.dumps(resp.data, ensure_ascii=False, indent=2))
 
 
+@app.command()
+def bench(
+    suite: Annotated[
+        Path,
+        typer.Argument(exists=True, file_okay=True, dir_okay=False, readable=True),
+    ],
+    k: Annotated[int, typer.Option(min=1, max=32)] = 8,
+    out: Annotated[
+        Path | None,
+        typer.Option(help="Where to write the JSON report."),
+    ] = None,
+    fake: Annotated[
+        bool,
+        typer.Option("--fake", help="Use FakeSummarizer + FakeEmbedder (deterministic, offline)."),
+    ] = False,
+) -> None:
+    """Run a benchmark suite comparing Cairn against a naive vector-RAG baseline."""
+    asyncio.run(_run_bench(suite, k, out, fake))
+
+
+async def _run_bench(
+    suite_path: Path, k: int, out: Path | None, use_fake: bool
+) -> None:
+    from cairn.bench.dataset import load_suite
+    from cairn.bench.report import format_markdown_report, write_json_report
+    from cairn.bench.runner import BenchOptions, BenchRunner
+
+    suite = load_suite(suite_path)
+    runner = BenchRunner(
+        summarizer=_make_summarizer(use_fake),
+        embedder=_make_embedder(use_fake),
+        options=BenchOptions(k=k),
+    )
+
+    import tempfile
+
+    with tempfile.TemporaryDirectory(prefix="cairn-bench-") as work_str:
+        work_dir = Path(work_str)
+        summary = await runner.run(suite, work_dir=work_dir)
+
+    typer.echo(format_markdown_report(summary))
+
+    out_path = out or Path("/tmp/cairn-bench") / f"{suite_path.stem}.json"
+    write_json_report(summary, out_path)
+    typer.echo(f"\njson report written → {out_path}", err=True)
+
+
 if __name__ == "__main__":
     app()

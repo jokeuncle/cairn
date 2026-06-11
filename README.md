@@ -92,6 +92,33 @@ python3.11 -m venv .venv
 A walkthrough with full output and an MCP-client config snippet is in
 [`examples/hero-demo.md`](examples/hero-demo.md).
 
+### Benchmarks
+
+Cairn ships with `cairn-bench`, a small framework that compares Cairn against
+a naive 512-word-chunk vector-RAG baseline (both backed by LanceDB and the
+same embedder, so the comparison is apples-to-apples).
+
+Running the starter suite (10 hand-curated questions over Cairn's own
+`ARCHITECTURE.md`) with deterministic in-process plugins:
+
+```bash
+cairn bench benchmarks/architecture.toml --fake
+```
+
+| metric | naive vector RAG | Cairn |
+|---|---:|---:|
+| mean recall@8 | 25% | 25% |
+| mean tokens returned | 3,670 | **925 (25.2% of naive)** |
+
+Caveat — these numbers come from the deterministic `FakeEmbedder` (a
+bag-of-words hash with no semantic understanding). Recall ties because
+neither system has semantics; **the 4× token efficiency win is independent
+of the embedder**: it comes from progressive disclosure and section-aware
+retrieval, not from vector quality. Reproduce these numbers in under a
+second on any machine — and re-run with Ollama (`nomic-embed-text`) for
+the real-semantics version. See [`benchmarks/README.md`](benchmarks/README.md)
+for caveats and how to author your own suites.
+
 ### Real LLM + real embeddings
 
 The `--fake` plugins are great for offline reproducibility but they have no
@@ -141,12 +168,12 @@ choices we adopted, modified, or declined.
 |---|---|---|
 | 0 — Foundation | ☑ | Authoritative docs in place (PRODUCT, ARCHITECTURE, CLAUDE, ROADMAP, ADR-0001) |
 | 1 — v0.1 walking skeleton | ☑ | Markdown ingest, Tree + Summaries + Vectors indexes, 5 MCP tools, stdio server, CLI, hero demo |
-| 2 — v0.2 structure-aware retrieval | ☐ | Entities (`find_mentions`), Cross-references (`get_related`), digest summaries, PDF, incremental rebuild, benchmark |
+| 2 — v0.2 structure-aware retrieval | ◐ | Entities + `find_mentions` ☑, Cross-references + `get_related` ☑, `cairn-bench` framework ☑. PDF, digest summaries, incremental rebuild ☐ |
 | 3 — v0.3 federation & inspection | ☐ | Multi-doc, HTML/mkdocs, web inspector, OpenTelemetry |
 | 4 — v0.4 polish for production | ☐ | DOCX/RTF/EPUB, VSCode extension, security review |
 | v1.0 GA | ☐ | All `PRODUCT.md` §7 success criteria met |
 
-Full plan: [`ROADMAP.md`](ROADMAP.md). Current test suite: **234 passing**,
+Full plan: [`ROADMAP.md`](ROADMAP.md). Current test suite: **323 passing**,
 mypy strict clean, ruff clean.
 
 ---
