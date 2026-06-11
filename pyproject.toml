@@ -1,0 +1,61 @@
+[build-system]
+requires = ["hatchling>=1.21"]
+build-backend = "hatchling.build"
+
+[project]
+name = "cairn"
+version = "0.0.0"
+description = "Structure-aware, MCP-native retrieval for large documents. Agents navigate by markers, not chunks."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.11"
+authors = [{ name = "The Cairn Authors" }]
+keywords = ["rag", "mcp", "retrieval", "documents", "agents", "hierarchical"]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries",
+]
+dependencies = [
+    # Pinned later in v0.1. Kept empty for the foundation commit.
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "pytest-cov",
+    "ruff>=0.5",
+    "mypy>=1.10",
+]
+
+[project.scripts]
+cairn = "cairn.cli:app"
+
+[project.urls]
+Homepage = "https://github.com/cairn-dev/cairn"
+Documentation = "https://github.com/cairn-dev/cairn/tree/main/docs"
+Issues = "https://github.com/cairn-dev/cairn/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/cairn"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "RUF"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
