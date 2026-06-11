@@ -10,13 +10,12 @@ Suitable for unit tests and pipeline plumbing checks; never for production.
 from __future__ import annotations
 
 import hashlib
-from typing import Final
 
 
 class FakeEmbedder:
     """Bag-of-words hash embedder. Deterministic; no network."""
 
-    name: Final = "fake:bow-hash"
+    name = "fake:bow-hash"
 
     def __init__(self, dim: int = 64) -> None:
         if dim < 1:

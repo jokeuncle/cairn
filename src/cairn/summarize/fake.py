@@ -8,7 +8,7 @@ LLM and no network.
 from __future__ import annotations
 
 import re
-from typing import ClassVar, Final
+from typing import ClassVar
 
 from cairn.summarize.base import SummaryLevel
 
@@ -18,7 +18,7 @@ _WORD = re.compile(r"\S+")
 class FakeSummarizer:
     """Word-truncation summarizer. Deterministic; no network."""
 
-    name: Final = "fake:words"
+    name = "fake:words"
 
     _BUDGETS: ClassVar[dict[SummaryLevel, int]] = {
         SummaryLevel.GIST: 15,

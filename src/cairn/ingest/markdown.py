@@ -15,7 +15,6 @@ import hashlib
 from collections import defaultdict
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Final
 
 from markdown_it import MarkdownIt
 from markdown_it.token import Token
@@ -30,8 +29,8 @@ from cairn.core.types import Document, SectionNode, Span
 class MarkdownParser:
     """CommonMark-compliant Markdown parser with front-matter and tables."""
 
-    name: Final = "markdown"
-    extensions: Final = (".md", ".markdown", ".mdown", ".mkd")
+    name = "markdown"
+    extensions: tuple[str, ...] = (".md", ".markdown", ".mdown", ".mkd")
 
     def __init__(self) -> None:
         md = MarkdownIt("commonmark", {"html": False})
