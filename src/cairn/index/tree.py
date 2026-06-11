@@ -156,6 +156,10 @@ class Tree:
     def __len__(self) -> int:
         return len(self._sections)
 
+    def __iter__(self) -> Iterator[SectionNode]:
+        """Yield every section in document order."""
+        return iter(self._sections)
+
     def roots(self) -> tuple[SectionNode, ...]:
         """Top-level sections (those with `parent is None`)."""
         return self._roots
