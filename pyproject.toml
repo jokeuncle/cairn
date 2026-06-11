@@ -21,15 +21,21 @@ classifiers = [
     "Topic :: Software Development :: Libraries",
 ]
 dependencies = [
-    # Pinned later in v0.1. Kept empty for the foundation commit.
+    "pydantic>=2.7",
+    "markdown-it-py>=3.0",
+    "mdit-py-plugins>=0.4",
+    "python-slugify>=8.0",
+    "structlog>=24.1",
 ]
 
 [project.optional-dependencies]
 dev = [
     "pytest>=8",
-    "pytest-cov",
+    "pytest-cov>=5",
+    "hypothesis>=6.100",
     "ruff>=0.5",
     "mypy>=1.10",
+    "types-python-slugify",
 ]
 
 [project.scripts]
