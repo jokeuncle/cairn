@@ -23,6 +23,7 @@ class TestSchemas:
             "search_semantic",
             "search_keyword",
             "find_mentions",
+            "get_related",
         }
 
     def test_every_tool_has_description_and_schema(self) -> None:

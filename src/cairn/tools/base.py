@@ -12,14 +12,16 @@ from cairn.index.entities import Entities
 from cairn.index.summaries import Summaries
 from cairn.index.tree import Tree
 from cairn.index.vectors import Vectors
+from cairn.index.xrefs import XRefs
 
 
 class DocumentIndex:
     """All sub-indexes loaded for a single document.
 
-    Holds Tree, Summaries, Vectors, and (since v0.2) Entities. The Entities
-    sub-index is optional — older v0.1 indexes don't have it, and tools that
-    need it must check ``index.entities is not None``.
+    Tree, Summaries, and Vectors are required. Entities (v0.2.0+) and XRefs
+    (v0.2.2+) are optional; v0.1/early v0.2 indexes don't have them and
+    tools that need them must check ``index.entities`` / ``index.xrefs``
+    against ``None``.
     """
 
     def __init__(
@@ -29,6 +31,7 @@ class DocumentIndex:
         summaries: Summaries,
         vectors: Vectors,
         entities: Entities | None = None,
+        xrefs: XRefs | None = None,
     ) -> None:
         doc_ids = {
             "tree": tree.doc_id,
@@ -37,6 +40,8 @@ class DocumentIndex:
         }
         if entities is not None:
             doc_ids["entities"] = entities.doc_id
+        if xrefs is not None:
+            doc_ids["xrefs"] = xrefs.doc_id
         if len(set(doc_ids.values())) > 1:
             msg = "sub-index doc_id mismatch: " + ", ".join(
                 f"{k}={v!r}" for k, v in doc_ids.items()
@@ -47,25 +52,32 @@ class DocumentIndex:
         self.summaries = summaries
         self.vectors = vectors
         self.entities = entities
+        self.xrefs = xrefs
         self.doc_id = tree.doc_id
 
     @classmethod
     def load(cls, doc_dir: Path) -> DocumentIndex:
         """Load all sub-indexes from a single document directory.
 
-        Entities is optional: v0.1 indexes don't have it, and we degrade
-        gracefully rather than refuse to load.
+        Entities and XRefs are optional: older indexes don't have them, and
+        we degrade gracefully rather than refuse to load.
         """
         entities: Entities | None
         try:
             entities = Entities.load(doc_dir)
         except IndexNotFoundError:
             entities = None
+        xrefs: XRefs | None
+        try:
+            xrefs = XRefs.load(doc_dir)
+        except IndexNotFoundError:
+            xrefs = None
         return cls(
             tree=Tree.load(doc_dir),
             summaries=Summaries.load(doc_dir),
             vectors=Vectors.load(doc_dir),
             entities=entities,
+            xrefs=xrefs,
         )
 
     def anchor(self, section_id: str) -> str:

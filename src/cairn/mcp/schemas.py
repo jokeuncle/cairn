@@ -120,6 +120,22 @@ _FIND_MENTIONS_SCHEMA: Final[dict[str, Any]] = {
     },
 }
 
+_GET_RELATED_SCHEMA: Final[dict[str, Any]] = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": ["id"],
+    "properties": {
+        "id": {"type": "string", "description": "Section id to find neighbors of."},
+        "kinds": {
+            "type": "array",
+            "items": {"enum": ["xref", "sibling", "parent", "child"]},
+            "default": ["xref"],
+            "description": "Which relation channels to traverse.",
+        },
+        "k": {"type": "integer", "minimum": 1, "maximum": 32, "default": 8},
+    },
+}
+
 
 CAIRN_TOOLS: Final[list[Tool]] = [
     Tool(
@@ -168,5 +184,13 @@ CAIRN_TOOLS: Final[list[Tool]] = [
             "the entities sub-index (v0.2+)."
         ),
         inputSchema=_FIND_MENTIONS_SCHEMA,
+    ),
+    Tool(
+        name="get_related",
+        description=(
+            "Return neighbors of a section across the cross-reference graph "
+            "and the structural tree (xref/sibling/parent/child)."
+        ),
+        inputSchema=_GET_RELATED_SCHEMA,
     ),
 ]

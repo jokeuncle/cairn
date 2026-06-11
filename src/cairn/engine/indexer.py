@@ -24,6 +24,7 @@ from cairn.entity.base import EntityExtractor
 from cairn.index.entities import (
     ENTITIES_FILENAME,
     ENTITIES_FORMAT_VERSION,
+    Entities,
     EntityBuilder,
 )
 from cairn.index.summaries import (
@@ -37,9 +38,15 @@ from cairn.index.vectors import (
     VECTORS_MANIFEST_FILENAME,
     VectorBuilder,
 )
+from cairn.index.xrefs import (
+    XREFS_FILENAME,
+    XREFS_FORMAT_VERSION,
+    XRefBuilder,
+)
 from cairn.ingest.base import Parser
 from cairn.summarize.base import Summarizer, SummaryLevel
 from cairn.summarize.cache import SummaryCache
+from cairn.xref.base import XRefExtractor
 
 _TREE_BUILDER_VERSION = 1
 
@@ -58,6 +65,7 @@ class Indexer:
         summarizer: Summarizer,
         embedder: Embedder,
         entity_extractor: EntityExtractor | None = None,
+        xref_extractor: XRefExtractor | None = None,
         summary_cache: SummaryCache | None = None,
         summary_concurrency: int = 4,
         embed_batch_size: int = 32,
@@ -66,6 +74,7 @@ class Indexer:
         self.summarizer = summarizer
         self.embedder = embedder
         self.entity_extractor = entity_extractor
+        self.xref_extractor = xref_extractor
         self.summary_cache = summary_cache
         self.summary_concurrency = summary_concurrency
         self.embed_batch_size = embed_batch_size
@@ -131,6 +140,7 @@ class Indexer:
             ),
         }
 
+        entities_reader: Entities | None = None
         if self.entity_extractor is not None:
             await EntityBuilder(self.entity_extractor).build(
                 document, out_dir=out_dir
@@ -139,6 +149,19 @@ class Indexer:
                 path=ENTITIES_FILENAME,
                 builder_version=ENTITIES_FORMAT_VERSION,
                 extractor=self.entity_extractor.name,
+            )
+            # Reload from disk so the xref extractor can use the canonical
+            # form of the just-built Entities sub-index.
+            entities_reader = Entities.load(out_dir)
+
+        if self.xref_extractor is not None:
+            await XRefBuilder(self.xref_extractor).build(
+                document, out_dir=out_dir, entities=entities_reader
+            )
+            subindexes["xrefs"] = SubIndexEntry(
+                path=XREFS_FILENAME,
+                builder_version=XREFS_FORMAT_VERSION,
+                extractor=self.xref_extractor.name,
             )
 
         manifest = Manifest(

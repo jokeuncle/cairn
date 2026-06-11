@@ -15,6 +15,7 @@ from cairn.index.vectors import (
     VectorHit,
     Vectors,
 )
+from cairn.index.xrefs import XREFS_FILENAME, XRefBuilder, XRefs
 
 __all__ = [
     "ENTITIES_FILENAME",
@@ -22,6 +23,7 @@ __all__ = [
     "TREE_FILENAME",
     "VECTORS_DB_DIRNAME",
     "VECTORS_MANIFEST_FILENAME",
+    "XREFS_FILENAME",
     "Entities",
     "EntityBuilder",
     "Summaries",
@@ -31,5 +33,7 @@ __all__ = [
     "VectorBuilder",
     "VectorHit",
     "Vectors",
+    "XRefBuilder",
+    "XRefs",
     "section_hash",
 ]

@@ -22,10 +22,12 @@ from cairn.summarize.fake import FakeSummarizer
 from cairn.summarize.openai_compatible import OpenAICompatibleSummarizer
 from cairn.tools.base import DocumentIndex
 from cairn.tools.find_mentions import find_mentions as find_mentions_tool
+from cairn.tools.get_related import get_related as get_related_tool
 from cairn.tools.outline import outline as outline_tool
 from cairn.tools.search_keyword import Mode
 from cairn.tools.search_keyword import search_keyword as search_keyword_tool
 from cairn.tools.search_semantic import search_semantic as search_semantic_tool
+from cairn.xref.heuristic import HeuristicXRefExtractor
 
 app = typer.Typer(
     name="cairn",
@@ -117,6 +119,7 @@ async def _run_index(
         summarizer=_make_summarizer(use_fake),
         embedder=_make_embedder(use_fake),
         entity_extractor=HeuristicExtractor(),
+        xref_extractor=HeuristicXRefExtractor(),
     )
     manifest_path = await indexer.index_path(
         source, out_dir=out_dir, doc_id=doc_id
@@ -235,6 +238,32 @@ async def _run_find_mentions(
 ) -> None:
     idx = DocumentIndex.load(doc_dir)
     resp = await find_mentions_tool(idx, entity=entity, scope=scope)
+    typer.echo(json.dumps(resp.data, ensure_ascii=False, indent=2))
+
+
+@query_app.command("related")
+def query_related(
+    doc_dir: Annotated[
+        Path,
+        typer.Argument(exists=True, file_okay=False, dir_okay=True, readable=True),
+    ],
+    section_id: Annotated[str, typer.Argument(help="Section id to find neighbors of.")],
+    kinds: Annotated[
+        str,
+        typer.Option(help="Comma-separated channels: xref,sibling,parent,child"),
+    ] = "xref",
+    k: Annotated[int, typer.Option(min=1, max=32)] = 8,
+) -> None:
+    """Return neighbors of a section across the xref graph and tree."""
+    parsed = tuple(s.strip() for s in kinds.split(",") if s.strip())
+    asyncio.run(_run_get_related(doc_dir, section_id, parsed, k))
+
+
+async def _run_get_related(
+    doc_dir: Path, section_id: str, kinds: tuple[str, ...], k: int
+) -> None:
+    idx = DocumentIndex.load(doc_dir)
+    resp = await get_related_tool(idx, id=section_id, kinds=kinds, k=k)  # type: ignore[arg-type]
     typer.echo(json.dumps(resp.data, ensure_ascii=False, indent=2))
 
 
