@@ -4,21 +4,41 @@ build-backend = "hatchling.build"
 
 [project]
 name = "cairn"
-version = "0.0.0"
+version = "0.1.0a1"
 description = "Structure-aware, MCP-native retrieval for large documents. Agents navigate by markers, not chunks."
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.11"
 authors = [{ name = "The Cairn Authors" }]
-keywords = ["rag", "mcp", "retrieval", "documents", "agents", "hierarchical"]
+keywords = [
+    "rag",
+    "mcp",
+    "model-context-protocol",
+    "retrieval",
+    "documents",
+    "agents",
+    "hierarchical",
+    "vector-search",
+    "lancedb",
+    "pdf",
+    "markdown",
+]
 classifiers = [
-    "Development Status :: 2 - Pre-Alpha",
+    "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: Science/Research",
     "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Text Processing :: Indexing",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Typing :: Typed",
 ]
 dependencies = [
     "pydantic>=2.7",
@@ -52,7 +72,9 @@ cairn = "cairn.cli:app"
 [project.urls]
 Homepage = "https://github.com/cairn-dev/cairn"
 Documentation = "https://github.com/cairn-dev/cairn/tree/main/docs"
+Repository = "https://github.com/cairn-dev/cairn"
 Issues = "https://github.com/cairn-dev/cairn/issues"
+Changelog = "https://github.com/cairn-dev/cairn/blob/main/CHANGELOG.md"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/cairn"]

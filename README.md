@@ -17,10 +17,11 @@ structured documents, compared to naive RAG. Local-first. Vendor-neutral.
 Built to be the layer between your documents and every AI agent you'll use over
 the next decade.
 
-> ⚠️ **Pre-alpha — v0.1 walking skeleton.** End-to-end Markdown indexing,
-> all five v0.1 retrieval tools, stdio MCP server, and a typer CLI are
-> working today. PDF, entity index, and cross-references are scheduled for
-> v0.2. See [`ROADMAP.md`](ROADMAP.md).
+> 🚀 **Alpha — `0.1.0a1`.** Markdown + PDF ingest, all eight MCP tools,
+> the full structure-aware index (tree + summaries + entities + xrefs +
+> vectors), stdio MCP server, typer CLI, and a benchmark harness with
+> headline numbers. See [`CHANGELOG.md`](CHANGELOG.md) for what's in
+> this release and [`ROADMAP.md`](ROADMAP.md) for what's next.
 
 ---
 
