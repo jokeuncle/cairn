@@ -16,7 +16,7 @@ from cairn.embed.fake import FakeEmbedder
 from cairn.embed.openai_compatible import OpenAICompatibleEmbedder
 from cairn.engine.indexer import Indexer
 from cairn.entity.heuristic import HeuristicExtractor
-from cairn.ingest.markdown import MarkdownParser
+from cairn.ingest import parser_for_path
 from cairn.summarize.base import Summarizer
 from cairn.summarize.fake import FakeSummarizer
 from cairn.summarize.openai_compatible import OpenAICompatibleSummarizer
@@ -109,7 +109,7 @@ async def _run_index(
     out: Path | None,
     use_fake: bool,
 ) -> None:
-    parser = MarkdownParser()
+    parser = parser_for_path(source)
     resolved_doc_id = doc_id or source.stem
     out_dir = out or Path.cwd() / ".cairn" / "documents" / resolved_doc_id
     out_dir.mkdir(parents=True, exist_ok=True)
