@@ -17,8 +17,10 @@ structured documents, compared to naive RAG. Local-first. Vendor-neutral.
 Built to be the layer between your documents and every AI agent you'll use over
 the next decade.
 
-> ⚠️ **Pre-alpha.** Foundation docs in place; first code (`v0.1`) lands soon.
-> See [`ROADMAP.md`](ROADMAP.md).
+> ⚠️ **Pre-alpha — v0.1 walking skeleton.** End-to-end Markdown indexing,
+> all five v0.1 retrieval tools, stdio MCP server, and a typer CLI are
+> working today. PDF, entity index, and cross-references are scheduled for
+> v0.2. See [`ROADMAP.md`](ROADMAP.md).
 
 ---
 
@@ -56,23 +58,57 @@ lives at [`docs/canvas.html`](docs/canvas.html). Open it in any browser.
 
 ---
 
-## Quickstart *(coming with v0.1)*
+## Quickstart
+
+The fastest way to see Cairn work: index Cairn's own architecture document
+and search it. **Zero API keys, zero model downloads** — the `--fake` flag
+uses deterministic in-process plugins so the whole thing runs offline.
 
 ```bash
-# Install
-pip install cairn
+git clone https://github.com/cairn-dev/cairn.git
+cd cairn
 
-# Index a document
-cairn index ./my-large-doc.md
+python3.11 -m venv .venv
+.venv/bin/pip install -e ".[dev]"
 
-# Start the MCP server (stdio)
-cairn serve
+# 1. Index a document (Cairn's own architecture, ~18k words, 32 sections)
+.venv/bin/cairn index ARCHITECTURE.md --out /tmp/cairn-arch --fake
+# → indexed: /tmp/cairn-arch/manifest.json   (under one second)
 
-# Point Claude Code / Cursor / Cline at it — done.
+# 2. Get the map — gists only, never full text
+.venv/bin/cairn outline /tmp/cairn-arch --depth 2
+
+# 3. Keyword search: every section that mentions "LanceDB"
+.venv/bin/cairn query keyword /tmp/cairn-arch LanceDB
+
+# 4. Multi-term keyword search with mode=all
+.venv/bin/cairn query keyword /tmp/cairn-arch progressive disclosure --mode all
+# → top hit: "3.3 Progressive-disclosure contract"
+
+# 5. Start the MCP stdio server for Claude Code / Cursor / Cline / Goose
+.venv/bin/cairn serve /tmp/cairn-arch --fake
 ```
 
-Worked example with the React docs is planned for the v0.1 launch demo. See
-[`ROADMAP.md`](ROADMAP.md) for the current milestone.
+A walkthrough with full output and an MCP-client config snippet is in
+[`examples/hero-demo.md`](examples/hero-demo.md).
+
+### Real LLM + real embeddings
+
+The `--fake` plugins are great for offline reproducibility but they have no
+semantic understanding. For production indexing, point Cairn at any
+OpenAI-compatible endpoint. The defaults target a **local Ollama** so you
+keep the local-first promise without paying for API tokens:
+
+```bash
+ollama serve
+ollama pull llama3.2:3b
+ollama pull nomic-embed-text
+
+.venv/bin/cairn index ARCHITECTURE.md --out /tmp/cairn-arch   # no --fake
+```
+
+OpenAI, vLLM, Together, Anyscale, …all of them work the same way; override
+`CAIRN_LLM_*` and `CAIRN_EMBED_*` environment variables.
 
 ---
 
@@ -101,10 +137,17 @@ choices we adopted, modified, or declined.
 
 ## Status & Roadmap
 
-We're at **Phase 0 — Foundation**. Authoritative documents are in place.
-v0.1 (the Markdown walking skeleton) lands next.
+| Phase | Status | What |
+|---|---|---|
+| 0 — Foundation | ☑ | Authoritative docs in place (PRODUCT, ARCHITECTURE, CLAUDE, ROADMAP, ADR-0001) |
+| 1 — v0.1 walking skeleton | ☑ | Markdown ingest, Tree + Summaries + Vectors indexes, 5 MCP tools, stdio server, CLI, hero demo |
+| 2 — v0.2 structure-aware retrieval | ☐ | Entities (`find_mentions`), Cross-references (`get_related`), digest summaries, PDF, incremental rebuild, benchmark |
+| 3 — v0.3 federation & inspection | ☐ | Multi-doc, HTML/mkdocs, web inspector, OpenTelemetry |
+| 4 — v0.4 polish for production | ☐ | DOCX/RTF/EPUB, VSCode extension, security review |
+| v1.0 GA | ☐ | All `PRODUCT.md` §7 success criteria met |
 
-Full plan: [`ROADMAP.md`](ROADMAP.md).
+Full plan: [`ROADMAP.md`](ROADMAP.md). Current test suite: **234 passing**,
+mypy strict clean, ruff clean.
 
 ---
 
