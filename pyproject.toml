@@ -69,7 +69,7 @@ dev = [
     "types-python-slugify",
 ]
 markitdown = [
-    "markitdown>=0.1.0",
+    "markitdown>=0.1.6",
 ]
 
 [project.scripts]
