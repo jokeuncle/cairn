@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "cairn"
 version = "0.1.0a2"
-description = "Structure-aware, MCP-native retrieval for large documents. Agents navigate by markers, not chunks."
+description = "Local-first documentation graph for AI agents. CodeGraph for docs, exposed through MCP."
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.11"
@@ -16,7 +16,10 @@ keywords = [
     "model-context-protocol",
     "retrieval",
     "documents",
+    "documentation",
     "agents",
+    "ai-agents",
+    "repository",
     "hierarchical",
     "vector-search",
     "lancedb",
@@ -46,7 +49,7 @@ dependencies = [
     "mdit-py-plugins>=0.4",
     "python-slugify>=8.0",
     "structlog>=24.1",
-    "httpx>=0.27",
+    "httpx[socks]>=0.27",
     "lancedb>=0.13",
     "pyarrow>=15.0",
     "mcp>=1.2",
@@ -65,9 +68,12 @@ dev = [
     "mypy>=1.10",
     "types-python-slugify",
 ]
+markitdown = [
+    "markitdown>=0.1.0",
+]
 
 [project.scripts]
-cairn = "cairn.cli:app"
+cairn = "cairn.cli.app:app"
 
 [project.urls]
 Homepage = "https://github.com/jokeuncle/cairn"
@@ -102,6 +108,10 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = ["fitz", "pymupdf"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["markitdown", "markitdown.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

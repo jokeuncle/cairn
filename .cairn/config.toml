@@ -1,0 +1,40 @@
+# Cairn repository documentation index.
+# Paths are relative to the repository root.
+documents_dir = "documents"
+enable_markitdown = false
+search_sections_per_doc = 1
+primary_doc = "readme"
+
+include = [
+  "*.md",
+  "*.markdown",
+  "*.mdown",
+  "*.mkd",
+  "*.pdf",
+  "*/README.md",
+  "*/README.markdown",
+  "docs/**/*.md",
+  "docs/**/*.markdown",
+  "docs/**/*.mdown",
+  "docs/**/*.mkd",
+  "docs/**/*.pdf",
+]
+
+exclude = [
+  ".git/**",
+  ".cairn/**",
+  ".codegraph/**",
+  ".hypothesis/**",
+  ".mypy_cache/**",
+  ".pytest_cache/**",
+  ".ruff_cache/**",
+  ".venv/**",
+  ".tox/**",
+  ".nox/**",
+  "venv/**",
+  "node_modules/**",
+  "dist/**",
+  "build/**",
+  "site/**",
+  "__pycache__/**",
+]

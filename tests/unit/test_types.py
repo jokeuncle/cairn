@@ -45,7 +45,7 @@ class TestSpan:
     def test_frozen(self) -> None:
         s = Span(start=0, end=1)
         with pytest.raises(ValidationError):
-            s.start = 99  # type: ignore[misc]
+            s.start = 99
 
     @given(
         start=st.integers(min_value=0, max_value=10_000),
@@ -101,7 +101,7 @@ class TestSectionNode:
     def test_frozen(self) -> None:
         node = self._make()
         with pytest.raises(ValidationError):
-            node.title = "Other"  # type: ignore[misc]
+            node.title = "Other"
 
 
 # -- Composite types --------------------------------------------------------

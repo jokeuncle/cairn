@@ -7,7 +7,7 @@ import pytest
 from cairn.core.errors import ToolError
 from cairn.embed.fake import FakeEmbedder
 from cairn.tools.base import DocumentIndex
-from cairn.tools.search_semantic import search_semantic
+from cairn.tools.search_semantic import _evidence_snippet, search_semantic
 
 
 class TestInputs:
@@ -83,6 +83,29 @@ class TestRanking:
         for hit in resp.data["hits"]:
             assert "synopsis" in hit
             assert "head" not in hit
+            assert "evidence" not in hit
+
+    async def test_evidence_attached_by_default(
+        self, index: DocumentIndex, fake_embedder: FakeEmbedder
+    ) -> None:
+        resp = await search_semantic(
+            index,
+            embedder=fake_embedder,
+            query="intro body lines",
+            k=3,
+        )
+        hit = resp.data["hits"][0]
+        assert "evidence" in hit
+        assert set(hit["evidence"]) == {"text", "matched_terms", "span"}
+
+    def test_evidence_supports_cjk_queries(self) -> None:
+        evidence = _evidence_snippet(
+            "这里说明向量数据存储在本地向量库, 并由 manifest 记录维度.",
+            "向量数据存储在哪里",
+        )
+
+        assert "本地向量库" in evidence["text"]
+        assert "向量数据存储" in evidence["matched_terms"]
 
 
 class TestScope:

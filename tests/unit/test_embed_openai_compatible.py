@@ -20,6 +20,7 @@ def client() -> OpenAICompatibleEmbedder:
         dim=4,
         api_key="sk-test",
         timeout=5.0,
+        max_retries=0,
     )
 
 
@@ -45,6 +46,10 @@ class TestConfig:
     def test_zero_dim_rejected(self) -> None:
         with pytest.raises(ValueError):
             OpenAICompatibleEmbedder(dim=0)
+
+    def test_negative_retries_rejected(self) -> None:
+        with pytest.raises(ValueError):
+            OpenAICompatibleEmbedder(max_retries=-1)
 
 
 class TestHappyPath:
@@ -94,6 +99,35 @@ class TestErrors:
         with pytest.raises(IndexBuildError) as exc:
             await client.embed(["a"])
         assert exc.value.details["status"] == 503
+
+    @respx.mock
+    async def test_transport_error_raises(
+        self, client: OpenAICompatibleEmbedder
+    ) -> None:
+        respx.post("http://test.local/v1/embeddings").mock(
+            side_effect=httpx.ReadTimeout("slow")
+        )
+        with pytest.raises(IndexBuildError) as exc:
+            await client.embed(["a"])
+        assert exc.value.details["error_type"] == "ReadTimeout"
+
+    @respx.mock
+    async def test_transport_error_retried_then_succeeds(self) -> None:
+        c = OpenAICompatibleEmbedder(
+            base_url="http://test.local/v1",
+            model="test-embed",
+            dim=4,
+            max_retries=1,
+            retry_base_delay=0.0,
+        )
+        route = respx.post("http://test.local/v1/embeddings").mock(
+            side_effect=[
+                httpx.ReadTimeout("slow"),
+                httpx.Response(200, json=_response([[1.0, 0, 0, 0]])),
+            ]
+        )
+        assert await c.embed(["a"]) == [[1.0, 0, 0, 0]]
+        assert route.call_count == 2
 
     @respx.mock
     async def test_malformed_response_raises(

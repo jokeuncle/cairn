@@ -7,6 +7,7 @@ are the public contract; updates here are versioned breaking changes per
 
 from __future__ import annotations
 
+import copy
 from typing import Any, Final
 
 from mcp.types import Tool
@@ -78,8 +79,8 @@ _SEARCH_SEMANTIC_SCHEMA: Final[dict[str, Any]] = {
         "k": {"type": "integer", "minimum": 1, "maximum": 32, "default": 8},
         "include": {
             "type": "array",
-            "items": {"enum": ["synopsis", "head"]},
-            "default": ["synopsis", "head"],
+            "items": {"enum": ["synopsis", "head", "evidence"]},
+            "default": ["synopsis", "head", "evidence"],
         },
     },
 }
@@ -220,4 +221,91 @@ CAIRN_TOOLS: Final[list[Tool]] = [
         ),
         inputSchema=_READ_RANGE_SCHEMA,
     ),
+]
+
+
+def _with_doc(schema: dict[str, Any]) -> dict[str, Any]:
+    out = copy.deepcopy(schema)
+    properties = out.setdefault("properties", {})
+    properties["doc"] = {
+        "type": ["string", "null"],
+        "default": None,
+        "description": (
+            "Repository document id. Omit to use the configured primary doc."
+        ),
+    }
+    return out
+
+
+_LIST_DOCUMENTS_SCHEMA: Final[dict[str, Any]] = {
+    "type": "object",
+    "additionalProperties": False,
+    "properties": {
+        "state": {
+            "type": ["string", "null"],
+            "enum": ["indexed", "stale", "missing", "error", "orphaned", None],
+            "default": None,
+            "description": "Optional state filter.",
+        }
+    },
+}
+
+
+_SEARCH_DOCUMENTS_SCHEMA: Final[dict[str, Any]] = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": ["query"],
+    "properties": {
+        "query": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Conceptual query to search across all indexed repo docs.",
+        },
+        "k": {"type": "integer", "minimum": 1, "maximum": 32, "default": 8},
+        "sections_per_doc": {
+            "type": ["integer", "null"],
+            "minimum": 1,
+            "maximum": 8,
+            "default": None,
+            "description": (
+                "Maximum section hits per document. Omit to use "
+                ".cairn/config.toml search_sections_per_doc."
+            ),
+        },
+        "include": {
+            "type": "array",
+            "items": {"enum": ["synopsis", "head", "evidence"]},
+            "default": ["synopsis", "head", "evidence"],
+            "description": "Fields to attach to each cross-document hit.",
+        },
+    },
+}
+
+
+REPO_TOOLS: Final[list[Tool]] = [
+    Tool(
+        name="list_documents",
+        description=(
+            "List repository documents known to Cairn and their index status. "
+            "Use this first when serving a repo-scoped Cairn index."
+        ),
+        inputSchema=_LIST_DOCUMENTS_SCHEMA,
+    ),
+    Tool(
+        name="search_documents",
+        description=(
+            "Search across every indexed repository document and return globally "
+            "ranked section hits with doc ids. Use this before drilling into a "
+            "specific document."
+        ),
+        inputSchema=_SEARCH_DOCUMENTS_SCHEMA,
+    ),
+    *[
+        Tool(
+            name=tool.name,
+            description=f"{tool.description} Accepts optional `doc` in repo mode.",
+            inputSchema=_with_doc(tool.inputSchema),
+        )
+        for tool in CAIRN_TOOLS
+    ],
 ]

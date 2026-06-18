@@ -64,6 +64,105 @@ All tools accept these optional parameters:
 |---|---|---|---|
 | `doc` | `string` | server primary | Document namespace (`doc_id`). Required only when the server hosts multiple documents and no primary is configured. |
 
+In single-document mode (`cairn serve <doc-dir>`), clients should omit `doc`.
+In repository mode (`cairn serve` from a repo initialized with `cairn init -y`),
+clients should call `list_documents` first, use `search_documents` for global
+repo discovery, then pass `doc` to route normal retrieval tools to a specific
+indexed document.
+
+### Repository-only tool: `list_documents`
+
+`list_documents` is advertised only by repo-scoped MCP servers.
+
+Inputs:
+
+| Param | Type | Default | Description |
+|---|---|---|---|
+| `state` | `"indexed"\|"stale"\|"missing"\|"error"\|"orphaned"\|null` | `null` | Optional state filter. |
+
+Output:
+
+```json
+{
+  "ok": true,
+  "tokens_returned": 0,
+  "data": {
+    "root": "/repo",
+    "primary_doc": "readme",
+    "documents": [
+      {
+        "id": "architecture",
+        "source": "ARCHITECTURE.md",
+        "doc_dir": ".cairn/documents/architecture",
+        "state": "indexed",
+        "section_count": 32
+      }
+    ]
+  }
+}
+```
+
+### Repository-only tool: `search_documents`
+
+`search_documents` is advertised only by repo-scoped MCP servers. It searches
+every indexed repository document and returns globally ranked section hits with
+their `doc` ids so clients can immediately drill down with normal tools.
+
+Inputs:
+
+| Param | Type | Default | Description |
+|---|---|---|---|
+| `query` | `string` | required | Conceptual query to search across indexed repo docs. |
+| `k` | `int` (1–32) | `8` | Number of globally ranked section hits to return. |
+| `sections_per_doc` | `int \| null` (1–8) | `.cairn/config.toml search_sections_per_doc` (`1` by default) | Maximum section hits per document. Omit it for the repository default; override it per query when you need either wider document discovery or deeper hits from one doc. |
+| `include` | `list["synopsis"\|"head"\|"evidence"]` | `["synopsis", "head", "evidence"]` | Fields to attach to each hit. |
+
+Output:
+
+```json
+{
+  "ok": true,
+  "tokens_returned": 740,
+  "data": {
+    "query": "how do plugin tools work?",
+    "hits": [
+      {
+        "doc": "docs-specs-mcp-tools",
+        "source": "docs/specs/mcp-tools.md",
+        "id": "repository-only-tool-search-documents",
+        "title": "Repository-only tool: search_documents",
+        "score": 0.86,
+        "anchor": "cairn://docs-specs-mcp-tools/repository-only-tool-search-documents",
+        "synopsis": "Repo-scoped MCP servers expose a cross-document search tool...",
+        "evidence": {
+          "text": "search_documents is advertised only by repo-scoped MCP servers...",
+          "matched_terms": ["search", "documents"],
+          "span": {"start": 0, "end": 123}
+        }
+      }
+    ],
+    "searched_documents": 12,
+    "skipped_documents": [],
+    "cursor": null
+  }
+}
+```
+
+Semantics:
+
+- The query embedding is computed once, then searched against each indexed
+  document's vector overlay.
+- Hits use hybrid ranking: vector similarity plus a small lexical boost from
+  document id, source path, title, synopsis, and section text.
+- By default, results use `.cairn/config.toml search_sections_per_doc` (`1`
+  in the generated config) so agents can find the right document before
+  drilling down. Set `sections_per_doc > 1` per call, or raise the config
+  value, for deeper per-document recall.
+- Hits include `doc`, `source`, and section `id` for follow-up calls such as
+  `get_section(doc=..., id=...)`.
+- Documents with incompatible embedding dimensions or load errors are reported
+  in `skipped_documents` instead of failing the whole call.
+
 ---
 
 ## 1. `outline`
@@ -201,7 +300,7 @@ but doesn't have an exact phrase.
 | `scope` | `string` (section_id prefix) \| `null` | `null` | Restrict search to this section's subtree. |
 | `k` | `int` (1–32) | `8` | Number of results to return. |
 | `return_` | `"sections"\|"chunks"` | `"sections"` | Granularity of results. `chunks` only available in v0.2+. |
-| `include` | `list["synopsis"\|"head"]` | `["synopsis", "head"]` | What to attach to each hit. `head` = first 200 chars of raw_text. |
+| `include` | `list["synopsis"\|"head"\|"evidence"]` | `["synopsis", "head", "evidence"]` | What to attach to each hit. `head` = first 200 chars of raw_text. `evidence` = a short lexical window explaining the hit. |
 | `cursor` | `string` \| `null` | `null` | Pagination cursor. |
 
 ### Output
@@ -220,7 +319,12 @@ but doesn't have an exact phrase.
         "score": 0.87,
         "anchor": "cairn://react-docs/hooks/use-effect/data-fetching",
         "synopsis": "Use useEffect to load data when a component mounts...",
-        "head": "useEffect can run side effects after render. A common pattern..."
+        "head": "useEffect can run side effects after render. A common pattern...",
+        "evidence": {
+          "text": "...data fetching can be implemented inside an Effect...",
+          "matched_terms": ["data", "fetching"],
+          "span": {"start": 142, "end": 502}
+        }
       }
     ],
     "cursor": null
@@ -232,6 +336,9 @@ but doesn't have an exact phrase.
 
 - Scores are cosine similarity, normalized to [0, 1]. Comparable within a
   single query but not across queries.
+- `evidence` is explanatory, not a ranking input. It is generated after vector
+  search from the section's raw text so humans and agents can inspect why a
+  hit may be relevant.
 - Hits are **deduplicated by section** when `return_="sections"`: at most one
   hit per section, even if multiple chunks matched.
 - `scope` is a prefix match on `section_id`. `scope="hooks"` matches

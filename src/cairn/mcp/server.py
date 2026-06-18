@@ -16,7 +16,8 @@ from mcp.types import TextContent, Tool
 
 from cairn.core.errors import CairnError, ToolError
 from cairn.embed.base import Embedder
-from cairn.mcp.schemas import CAIRN_TOOLS
+from cairn.mcp.schemas import CAIRN_TOOLS, REPO_TOOLS
+from cairn.repo import load_repo_document_index, repo_status, search_repo_documents
 from cairn.tools.base import DocumentIndex
 from cairn.tools.find_mentions import find_mentions as find_mentions_tool
 from cairn.tools.get_related import get_related as get_related_tool
@@ -103,10 +104,82 @@ def build_server(index: DocumentIndex, embedder: Embedder) -> Server:
     return server
 
 
+async def dispatch_repo_tool(
+    name: str,
+    arguments: dict[str, Any] | None,
+    repo_root: Path,
+    embedder: Embedder,
+) -> dict[str, Any]:
+    """Run a tool against one document from a repo-scoped Cairn index."""
+    args: dict[str, Any] = dict(arguments or {})
+    try:
+        if name == "list_documents":
+            state = args.get("state")
+            status = repo_status(repo_root)
+            docs = [
+                doc.model_dump(mode="json")
+                for doc in status.documents
+                if state is None or doc.state == state
+            ]
+            return {
+                "ok": True,
+                "tokens_returned": 0,
+                "data": {
+                    "root": str(status.root),
+                    "primary_doc": status.primary_doc,
+                    "documents": docs,
+                },
+            }
+        if name == "search_documents":
+            result = await search_repo_documents(repo_root, embedder=embedder, **args)
+            return {
+                "ok": True,
+                "tokens_returned": result["tokens_returned"],
+                "data": result["data"],
+            }
+
+        doc_id = args.pop("doc", None)
+        if doc_id is not None and not isinstance(doc_id, str):
+            msg = "`doc` must be a string when provided"
+            raise ToolError(msg, details={"doc": doc_id})
+        index = load_repo_document_index(repo_root, doc_id=doc_id)
+        return await dispatch_tool(name, args, index, embedder)
+    except CairnError as exc:
+        return {"ok": False, "error": exc.to_envelope()}
+
+
+def build_repo_server(repo_root: Path, embedder: Embedder) -> Server:
+    """Construct an MCP Server for a repo-scoped Cairn documentation index."""
+    server: Server = Server(SERVER_NAME)
+
+    @server.list_tools()  # type: ignore[no-untyped-call, untyped-decorator]
+    async def _list_tools() -> list[Tool]:
+        return REPO_TOOLS
+
+    @server.call_tool()  # type: ignore[untyped-decorator]
+    async def _call_tool(
+        name: str, arguments: dict[str, Any] | None
+    ) -> list[TextContent]:
+        envelope = await dispatch_repo_tool(name, arguments, repo_root, embedder)
+        text = json.dumps(envelope, ensure_ascii=False)
+        return [TextContent(type="text", text=text)]
+
+    return server
+
+
 async def serve_stdio(doc_dir: Path, *, embedder: Embedder) -> None:
     """Load a built index and serve MCP over stdio until the peer disconnects."""
     index = DocumentIndex.load(doc_dir)
     server = build_server(index, embedder)
+    async with stdio_server() as (read_stream, write_stream):
+        await server.run(
+            read_stream, write_stream, server.create_initialization_options()
+        )
+
+
+async def serve_repo_stdio(repo_root: Path, *, embedder: Embedder) -> None:
+    """Serve a repo-scoped Cairn document index over MCP stdio."""
+    server = build_repo_server(repo_root, embedder)
     async with stdio_server() as (read_stream, write_stream):
         await server.run(
             read_stream, write_stream, server.create_initialization_options()

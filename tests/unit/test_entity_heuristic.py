@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
+
 import pytest
 
+from cairn.entity.base import ExtractionHit
 from cairn.entity.heuristic import HeuristicExtractor
 from cairn.ingest.markdown import MarkdownParser
 
@@ -18,8 +21,8 @@ def extractor() -> HeuristicExtractor:
     return HeuristicExtractor()
 
 
-def _all_hits(hits: object) -> list:
-    return list(hits)  # type: ignore[arg-type]
+def _all_hits(hits: Iterable[ExtractionHit]) -> list[ExtractionHit]:
+    return list(hits)
 
 
 class TestCodeExtraction:

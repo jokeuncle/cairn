@@ -259,3 +259,18 @@ export CAIRN_EMBED_API_KEY=sk-...
 
 The wire shape (`/v1/chat/completions` and `/v1/embeddings`) is universal —
 any compatible endpoint works without code changes.
+
+Doubao's vision embedding model is the exception: it uses Volcengine's
+multimodal vectorization endpoint instead of the standard `/embeddings`
+response shape. Cairn supports it through a provider flag:
+
+```bash
+export CAIRN_LLM_BASE_URL=https://ark.cn-beijing.volces.com/api/v3
+export CAIRN_LLM_MODEL=doubao-seed-2-0-code-preview-260215
+export CAIRN_LLM_API_KEY=...
+
+export CAIRN_EMBED_PROVIDER=doubao-vision
+export CAIRN_EMBED_API_KEY=...
+
+.venv/bin/cairn index ARCHITECTURE.md --out /tmp/cairn-arch
+```

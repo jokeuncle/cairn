@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from pathlib import Path
 
 import pytest
@@ -9,6 +10,7 @@ import pytest
 from cairn.entity.heuristic import HeuristicExtractor
 from cairn.index.entities import Entities, EntityBuilder
 from cairn.ingest.markdown import MarkdownParser
+from cairn.xref.base import ExtractionEdge
 from cairn.xref.heuristic import HeuristicXRefExtractor
 
 
@@ -22,8 +24,8 @@ def xrefext() -> HeuristicXRefExtractor:
     return HeuristicXRefExtractor()
 
 
-def _all(edges: object) -> list:
-    return list(edges)  # type: ignore[arg-type]
+def _all(edges: Iterable[ExtractionEdge]) -> list[ExtractionEdge]:
+    return list(edges)
 
 
 # -- Anchor-link extraction -------------------------------------------------

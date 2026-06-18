@@ -23,6 +23,7 @@ def client() -> OpenAICompatibleSummarizer:
         model="test-model",
         api_key="sk-test",
         timeout=5.0,
+        max_retries=0,
     )
 
 
@@ -47,6 +48,10 @@ class TestNameAndConfig:
     def test_base_url_trailing_slash_stripped(self) -> None:
         s = OpenAICompatibleSummarizer(base_url="http://x/v1/")
         assert s.base_url == "http://x/v1"
+
+    def test_negative_retries_rejected(self) -> None:
+        with pytest.raises(ValueError):
+            OpenAICompatibleSummarizer(max_retries=-1)
 
 
 class TestHappyPath:
@@ -113,6 +118,37 @@ class TestErrors:
                 title="T", body="b", level=SummaryLevel.GIST
             )
         assert exc.value.details["status"] == 500
+
+    @respx.mock
+    async def test_transport_error_raises_index_build_error(
+        self, client: OpenAICompatibleSummarizer
+    ) -> None:
+        respx.post("http://test.local/v1/chat/completions").mock(
+            side_effect=httpx.ReadTimeout("slow")
+        )
+        with pytest.raises(IndexBuildError) as exc:
+            await client.summarize(
+                title="T", body="b", level=SummaryLevel.GIST
+            )
+        assert exc.value.details["error_type"] == "ReadTimeout"
+
+    @respx.mock
+    async def test_transport_error_retried_then_succeeds(self) -> None:
+        s = OpenAICompatibleSummarizer(
+            base_url="http://test.local/v1",
+            model="test-model",
+            max_retries=1,
+            retry_base_delay=0.0,
+        )
+        route = respx.post("http://test.local/v1/chat/completions").mock(
+            side_effect=[
+                httpx.ReadTimeout("slow"),
+                httpx.Response(200, json=_completion("ok")),
+            ]
+        )
+        out = await s.summarize(title="T", body="b", level=SummaryLevel.GIST)
+        assert out == "ok"
+        assert route.call_count == 2
 
     @respx.mock
     async def test_malformed_response_raises(

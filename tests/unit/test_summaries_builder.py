@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import ClassVar, Final
 
 import pytest
 
@@ -34,11 +33,8 @@ def parsed_simple(simple_md: str) -> Document:
 class CountingSummarizer:
     """Wraps a FakeSummarizer and counts invocations for test assertions."""
 
-    name: Final = "fake:counted"
-
-    _inner: ClassVar[FakeSummarizer]
-
     def __init__(self) -> None:
+        self.name = "fake:counted"
         self._inner = FakeSummarizer()
         self.calls = 0
 

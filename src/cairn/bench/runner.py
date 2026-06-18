@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from cairn.bench.baseline import NaiveHit, NaiveRAG
 from cairn.bench.dataset import BenchDocument, BenchQuestion, BenchSuite
@@ -24,8 +25,10 @@ from cairn.xref.heuristic import HeuristicXRefExtractor
 class BenchOptions(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
-    k: int = 8
-    naive_chunk_size_words: int = 512
+    k: int = Field(default=8, ge=1, le=32)
+    naive_chunk_size_words: int = Field(default=512, ge=1)
+    summary_concurrency: int = Field(default=4, ge=1)
+    embed_batch_size: int = Field(default=32, ge=1)
 
 
 class BenchRunner:
@@ -38,17 +41,21 @@ class BenchRunner:
         embedder: Embedder,
         judge: LLMJudge | None = None,
         options: BenchOptions | None = None,
+        progress: Callable[[str], None] | None = None,
     ) -> None:
         self.summarizer = summarizer
         self.embedder = embedder
         self.judge = judge
         self.options = options or BenchOptions()
+        self.progress = progress
 
     async def run(self, suite: BenchSuite, *, work_dir: Path) -> BenchSummary:
         work_dir.mkdir(parents=True, exist_ok=True)
         results: list[QuestionResult] = []
         for document in suite.documents:
+            self._emit(f"document {document.id}: starting")
             results.extend(await self._run_document(document, work_dir / document.id))
+            self._emit(f"document {document.id}: done")
         return BenchSummary(
             suite_name=suite.name,
             k=self.options.k,
@@ -77,18 +84,30 @@ class BenchRunner:
             embedder=self.embedder,
             entity_extractor=HeuristicExtractor(),
             xref_extractor=HeuristicXRefExtractor(),
+            summary_concurrency=self.options.summary_concurrency,
+            embed_batch_size=self.options.embed_batch_size,
+            progress=lambda message: self._emit(f"cairn index: {message}"),
         )
+        self._emit("cairn index: starting")
         await indexer.index_document(parsed, out_dir=cairn_dir)
+        self._emit("cairn index: loaded")
         cairn_index = DocumentIndex.load(cairn_dir)
 
         naive = NaiveRAG(
             self.embedder,
             chunk_size_words=self.options.naive_chunk_size_words,
+            batch_size=self.options.embed_batch_size,
         )
+        self._emit("naive index: starting")
         await naive.index(parsed, source_text, out_dir=naive_dir)
+        self._emit("naive index: done")
 
         results: list[QuestionResult] = []
-        for question in document.questions:
+        total_questions = len(document.questions)
+        for question_no, question in enumerate(document.questions, start=1):
+            self._emit(
+                f"question {question_no}/{total_questions} {question.id}: retrieving"
+            )
             cairn_result, cairn_context = await self._run_cairn(
                 cairn_index, question
             )
@@ -116,6 +135,10 @@ class BenchRunner:
                 )
             )
         return results
+
+    def _emit(self, message: str) -> None:
+        if self.progress is not None:
+            self.progress(message)
 
     async def _judge_result(
         self,

@@ -7,9 +7,14 @@ envelope shape contract.
 
 from __future__ import annotations
 
+from pathlib import Path
+
+from cairn.cli.config import IndexConfig
 from cairn.embed.fake import FakeEmbedder
-from cairn.mcp.schemas import CAIRN_TOOLS
-from cairn.mcp.server import dispatch_tool
+from cairn.mcp.schemas import CAIRN_TOOLS, REPO_TOOLS
+from cairn.mcp.server import dispatch_repo_tool, dispatch_tool
+from cairn.repo import sync_repo, write_default_config
+from cairn.summarize.fake import FakeSummarizer
 from cairn.tools.base import DocumentIndex
 
 
@@ -31,6 +36,19 @@ class TestSchemas:
         for tool in CAIRN_TOOLS:
             assert tool.description
             assert tool.inputSchema.get("type") == "object"
+
+    def test_repo_tools_add_document_catalog_and_search(self) -> None:
+        names = {t.name for t in REPO_TOOLS}
+        assert "list_documents" in names
+        assert "search_documents" in names
+        assert "outline" in names
+
+    def test_sections_per_doc_is_only_on_repo_search_schema(self) -> None:
+        semantic = next(t for t in CAIRN_TOOLS if t.name == "search_semantic")
+        repo_search = next(t for t in REPO_TOOLS if t.name == "search_documents")
+
+        assert "sections_per_doc" not in semantic.inputSchema["properties"]
+        assert "sections_per_doc" in repo_search.inputSchema["properties"]
 
 
 class TestDispatchHappyPath:
@@ -141,3 +159,63 @@ class TestEnvelopeShape:
         env = await dispatch_tool("nope", {}, index, fake_embedder)
         assert set(env.keys()) == {"ok", "error"}
         assert set(env["error"].keys()) == {"code", "message", "details"}
+
+
+class TestRepoDispatch:
+    async def test_list_documents_and_route_tool(
+        self, tmp_path: Path, fake_embedder: FakeEmbedder
+    ) -> None:
+        (tmp_path / "README.md").write_text(
+            "# Readme\n\nProject overview.\n", encoding="utf-8"
+        )
+        write_default_config(tmp_path)
+        await sync_repo(
+            tmp_path,
+            summarizer=FakeSummarizer(),
+            embedder=fake_embedder,
+            index_config=IndexConfig(),
+        )
+
+        listed = await dispatch_repo_tool(
+            "list_documents", {}, tmp_path, fake_embedder
+        )
+        assert listed["ok"] is True
+        assert listed["data"]["documents"][0]["id"] == "readme"
+
+        outlined = await dispatch_repo_tool(
+            "outline",
+            {"doc": "readme", "depth": 1},
+            tmp_path,
+            fake_embedder,
+        )
+        assert outlined["ok"] is True
+        assert outlined["data"]["doc"] == "readme"
+
+    async def test_search_documents(
+        self, tmp_path: Path, fake_embedder: FakeEmbedder
+    ) -> None:
+        (tmp_path / "README.md").write_text(
+            "# Readme\n\nProject overview.\n", encoding="utf-8"
+        )
+        (tmp_path / "docs").mkdir()
+        (tmp_path / "docs" / "guide.md").write_text(
+            "# Guide\n\nDetailed docs.\n", encoding="utf-8"
+        )
+        write_default_config(tmp_path)
+        await sync_repo(
+            tmp_path,
+            summarizer=FakeSummarizer(),
+            embedder=fake_embedder,
+            index_config=IndexConfig(),
+        )
+
+        env = await dispatch_repo_tool(
+            "search_documents",
+            {"query": "detailed docs", "k": 4},
+            tmp_path,
+            fake_embedder,
+        )
+
+        assert env["ok"] is True
+        assert env["tokens_returned"] > 0
+        assert any(hit["doc"] == "docs-guide" for hit in env["data"]["hits"])

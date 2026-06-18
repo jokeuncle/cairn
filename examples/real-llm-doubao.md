@@ -7,6 +7,8 @@ production-quality model. Run on a 4-section toy markdown document:
 CAIRN_LLM_BASE_URL=https://ark.cn-beijing.volces.com/api/v3 \
 CAIRN_LLM_MODEL=doubao-seed-2-0-code-preview-260215 \
 CAIRN_LLM_API_KEY=<your-ark-key> \
+CAIRN_EMBED_PROVIDER=doubao-vision \
+CAIRN_EMBED_API_KEY=<your-ark-key> \
 cairn index ./doc.md --out /tmp/doc-real
 ```
 
@@ -50,7 +52,8 @@ MCP server, CLI — only the plug-in changes.
 ## Configuration recap
 
 Volcengine ARK exposes Doubao via an OpenAI-compatible
-`/v1/chat/completions` endpoint. Cairn's `OpenAICompatibleSummarizer`
+`/chat/completions` endpoint under `https://ark.cn-beijing.volces.com/api/v3`.
+Cairn's `OpenAICompatibleSummarizer`
 talks to it with zero code changes; just point the standard env vars at
 ARK:
 
@@ -59,6 +62,16 @@ ARK:
 | `CAIRN_LLM_BASE_URL` | `https://ark.cn-beijing.volces.com/api/v3` |
 | `CAIRN_LLM_MODEL` | `doubao-seed-2-0-code-preview-260215` (or any Doubao chat model) |
 | `CAIRN_LLM_API_KEY` | your ARK API key |
+
+For `doubao-embedding-vision-251215`, set
+`CAIRN_EMBED_PROVIDER=doubao-vision`. That model is served through
+`/embeddings/multimodal` and returns a 2048-dimensional dense vector, so it
+does not fit the standard OpenAI `/embeddings` response shape.
+
+For larger documents or benchmark runs, lower `CAIRN_SUMMARY_CONCURRENCY` and
+raise `CAIRN_LLM_TIMEOUT` / `CAIRN_EMBED_TIMEOUT` if ARK is rate-limiting or
+responding slowly. Both LLM and embedding clients retry 429/5xx and transport
+errors by default.
 
 The same pattern works for OpenAI, Together, Anyscale, vLLM, Ollama —
 anything speaking the OpenAI wire format.

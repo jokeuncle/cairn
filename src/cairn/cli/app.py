@@ -10,13 +10,23 @@ from typing import Annotated
 import typer
 
 from cairn import __version__
-from cairn.cli.config import load_embed_config, load_llm_config
+from cairn.cli.config import load_embed_config, load_index_config, load_llm_config
 from cairn.embed.base import Embedder
+from cairn.embed.doubao import DoubaoVisionEmbedder
 from cairn.embed.fake import FakeEmbedder
 from cairn.embed.openai_compatible import OpenAICompatibleEmbedder
 from cairn.engine.indexer import Indexer
 from cairn.entity.heuristic import HeuristicExtractor
 from cairn.ingest import parser_for_path
+from cairn.inspection import write_inspector
+from cairn.repo import (
+    RepoStatus,
+    find_repo_root,
+    load_repo_document_index,
+    repo_status,
+    sync_repo,
+    write_default_config,
+)
 from cairn.summarize.base import Summarizer
 from cairn.summarize.fake import FakeSummarizer
 from cairn.summarize.openai_compatible import OpenAICompatibleSummarizer
@@ -51,6 +61,8 @@ def _make_summarizer(use_fake: bool) -> Summarizer:
         base_url=cfg.base_url,
         model=cfg.model,
         api_key=cfg.api_key,
+        timeout=cfg.timeout,
+        max_retries=cfg.max_retries,
     )
 
 
@@ -58,17 +70,119 @@ def _make_embedder(use_fake: bool) -> Embedder:
     if use_fake:
         return FakeEmbedder(dim=64)
     cfg = load_embed_config()
+    if cfg.provider == "doubao-vision":
+        return DoubaoVisionEmbedder(
+            base_url=cfg.base_url,
+            model=cfg.model,
+            dim=cfg.dim,
+            api_key=cfg.api_key,
+            timeout=cfg.timeout,
+            max_retries=cfg.max_retries,
+        )
     return OpenAICompatibleEmbedder(
         base_url=cfg.base_url,
         model=cfg.model,
         dim=cfg.dim,
         api_key=cfg.api_key,
+        timeout=cfg.timeout,
+        max_retries=cfg.max_retries,
     )
 
 
 # ---------------------------------------------------------------------------
 # Commands
 # ---------------------------------------------------------------------------
+
+
+@app.command()
+def init(
+    yes: Annotated[
+        bool,
+        typer.Option(
+            "-y",
+            "--yes",
+            help="Create .cairn/config.toml without prompting.",
+        ),
+    ] = False,
+    force: Annotated[
+        bool,
+        typer.Option("--force", help="Overwrite an existing .cairn/config.toml."),
+    ] = False,
+    markitdown: Annotated[
+        bool,
+        typer.Option(
+            "--markitdown",
+            help="Include MarkItDown-backed Office/data/web globs in config.",
+        ),
+    ] = False,
+) -> None:
+    """Initialize Cairn for repository documentation indexing."""
+    root = Path.cwd()
+    config_file = root / ".cairn" / "config.toml"
+    if config_file.exists() and not force:
+        typer.echo(f"already initialized: {config_file}")
+        return
+    if not yes and not typer.confirm(f"Create {config_file}?"):
+        raise typer.Exit(code=1)
+    written = write_default_config(root, force=force, enable_markitdown=markitdown)
+    typer.echo(f"initialized: {written}")
+
+
+@app.command()
+def sync(
+    fake: Annotated[
+        bool,
+        typer.Option(
+            "--fake",
+            help="Use deterministic FakeSummarizer + FakeEmbedder (no network).",
+        ),
+    ] = False,
+    force: Annotated[
+        bool,
+        typer.Option("--force", help="Rebuild every configured document."),
+    ] = False,
+) -> None:
+    """Index every configured repository document under .cairn/documents/."""
+    asyncio.run(_run_sync(fake, force))
+
+
+async def _run_sync(use_fake: bool, force: bool) -> None:
+    root = find_repo_root()
+    results = await sync_repo(
+        root,
+        summarizer=_make_summarizer(use_fake),
+        embedder=_make_embedder(use_fake),
+        index_config=load_index_config(),
+        force=force,
+        progress=lambda message: typer.echo(message, err=True),
+    )
+    failed = sum(1 for item in results if not item.ok)
+    successful = len(results) - failed
+    rebuilt = sum(1 for item in results if item.ok and item.rebuilt)
+    skipped = successful - rebuilt
+    typer.echo(
+        "synced: "
+        f"{successful}/{len(results)} documents "
+        f"({rebuilt} rebuilt, {skipped} up to date, {failed} failed)"
+    )
+    if failed:
+        raise typer.Exit(code=1)
+
+
+@app.command()
+def status(
+    json_output: Annotated[
+        bool,
+        typer.Option("--json", help="Print machine-readable JSON."),
+    ] = False,
+) -> None:
+    """Show repository documentation index status."""
+    root = find_repo_root()
+    status_obj = repo_status(root)
+    if json_output:
+        typer.echo(status_obj.model_dump_json(indent=2))
+        return
+    typer.echo(_format_repo_status(status_obj))
 
 
 @app.command()
@@ -121,6 +235,7 @@ async def _run_index(
     resolved_doc_id = doc_id or source.stem
     out_dir = out or Path.cwd() / ".cairn" / "documents" / resolved_doc_id
     out_dir.mkdir(parents=True, exist_ok=True)
+    index_cfg = load_index_config()
 
     indexer = Indexer(
         parser=parser,
@@ -128,6 +243,9 @@ async def _run_index(
         embedder=_make_embedder(use_fake),
         entity_extractor=HeuristicExtractor(),
         xref_extractor=HeuristicXRefExtractor(),
+        summary_concurrency=index_cfg.summary_concurrency,
+        embed_batch_size=index_cfg.embed_batch_size,
+        progress=lambda message: typer.echo(message, err=True),
     )
     result = await indexer.index_path(
         source, out_dir=out_dir, doc_id=doc_id, force=force
@@ -141,9 +259,17 @@ async def _run_index(
 @app.command()
 def serve(
     doc_dir: Annotated[
-        Path,
-        typer.Argument(exists=True, file_okay=False, dir_okay=True, readable=True),
-    ],
+        Path | None,
+        typer.Argument(
+            file_okay=False,
+            dir_okay=True,
+            readable=True,
+            help=(
+                "Built document directory. Omit to serve the current repo's "
+                ".cairn documents."
+            ),
+        ),
+    ] = None,
     fake: Annotated[
         bool,
         typer.Option(
@@ -152,9 +278,15 @@ def serve(
         ),
     ] = False,
 ) -> None:
-    """Start the MCP stdio server against a built document directory."""
-    from cairn.mcp.server import serve_stdio
+    """Start the MCP stdio server against a document or repo index."""
+    from cairn.mcp.server import serve_repo_stdio, serve_stdio
 
+    if doc_dir is None:
+        asyncio.run(serve_repo_stdio(find_repo_root(), embedder=_make_embedder(fake)))
+        return
+    if not doc_dir.exists() or not doc_dir.is_dir():
+        typer.echo(f"error: document directory not found: {doc_dir}", err=True)
+        raise typer.Exit(code=2)
     asyncio.run(serve_stdio(doc_dir, embedder=_make_embedder(fake)))
 
 
@@ -279,6 +411,49 @@ async def _run_get_related(
 
 
 @app.command()
+def inspect(
+    doc_dir: Annotated[
+        Path | None,
+        typer.Argument(
+            file_okay=False,
+            dir_okay=True,
+            readable=True,
+            help=(
+                "Built document directory. Omit to inspect the current repo's "
+                "primary Cairn document."
+            ),
+        ),
+    ] = None,
+    out: Annotated[
+        Path | None,
+        typer.Option(
+            help=(
+                "HTML output path. Defaults to <doc_dir>/inspector.html for "
+                "single-doc mode or .cairn/inspector.html for repo mode."
+            )
+        ),
+    ] = None,
+    doc: Annotated[
+        str | None,
+        typer.Option(help="Repo document id to inspect when doc_dir is omitted."),
+    ] = None,
+) -> None:
+    """Generate a standalone HTML inspector for a document index."""
+    if doc_dir is None:
+        root = find_repo_root()
+        idx = load_repo_document_index(root, doc_id=doc)
+        out_path = out or root / ".cairn" / "inspector.html"
+    else:
+        if not doc_dir.exists() or not doc_dir.is_dir():
+            typer.echo(f"error: document directory not found: {doc_dir}", err=True)
+            raise typer.Exit(code=2)
+        idx = DocumentIndex.load(doc_dir)
+        out_path = out or doc_dir / "inspector.html"
+    written = write_inspector(idx, out=out_path)
+    typer.echo(f"inspector: {written}")
+
+
+@app.command()
 def bench(
     suite: Annotated[
         Path,
@@ -328,11 +503,17 @@ async def _run_bench(
             api_key=cfg.api_key,
         )
 
+    index_cfg = load_index_config()
     runner = BenchRunner(
         summarizer=_make_summarizer(use_fake),
         embedder=_make_embedder(use_fake),
         judge=judge_client,
-        options=BenchOptions(k=k),
+        options=BenchOptions(
+            k=k,
+            summary_concurrency=index_cfg.summary_concurrency,
+            embed_batch_size=index_cfg.embed_batch_size,
+        ),
+        progress=lambda message: typer.echo(message, err=True),
     )
 
     import tempfile
@@ -346,6 +527,27 @@ async def _run_bench(
     out_path = out or Path("/tmp/cairn-bench") / f"{suite_path.stem}.json"
     write_json_report(summary, out_path)
     typer.echo(f"\njson report written → {out_path}", err=True)
+
+
+def _format_repo_status(status_obj: RepoStatus) -> str:
+    lines = [
+        f"Cairn repo: {status_obj.root}",
+        f"config: {status_obj.config_path}",
+        (
+            "documents: "
+            f"{status_obj.indexed_count} indexed, "
+            f"{status_obj.stale_count} stale, "
+            f"{status_obj.missing_count} missing, "
+            f"{status_obj.error_count} errors"
+        ),
+        "",
+        "| state | doc | sections | source |",
+        "|---|---|---:|---|",
+    ]
+    for doc in status_obj.documents:
+        sections = "" if doc.section_count is None else str(doc.section_count)
+        lines.append(f"| {doc.state} | `{doc.id}` | {sections} | {doc.source} |")
+    return "\n".join(lines)
 
 
 if __name__ == "__main__":

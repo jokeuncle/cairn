@@ -1,13 +1,4 @@
-"""OpenAI-compatible HTTP embedder.
-
-Works with any endpoint that implements the OpenAI ``/v1/embeddings``
-contract: OpenAI itself, Ollama (``http://localhost:11434/v1``), vLLM,
-Together, Anyscale, etc.
-
-Default configuration points at a local Ollama instance running the
-``nomic-embed-text`` model (768 dims) — chosen for the same reason as the
-summarizer default: zero API keys, mature stack, runs on a laptop.
-"""
+"""Volcengine/Doubao embedding adapters."""
 
 from __future__ import annotations
 
@@ -19,15 +10,22 @@ import httpx
 from cairn.core.errors import IndexBuildError
 
 
-class OpenAICompatibleEmbedder:
-    """OpenAI-compatible embeddings client."""
+class DoubaoVisionEmbedder:
+    """Client for Doubao's multimodal embedding endpoint.
+
+    ``doubao-embedding-vision-*`` models do not use the OpenAI-compatible
+    ``/embeddings`` wire shape. They are served at
+    ``/embeddings/multimodal`` and return ``{"data": {"embedding": ...}}``
+    for a single multimodal input. Cairn's embedder protocol expects one
+    vector per text, so this adapter issues one request per input text.
+    """
 
     def __init__(
         self,
         *,
-        base_url: str = "http://localhost:11434/v1",
-        model: str = "nomic-embed-text",
-        dim: int = 768,
+        base_url: str = "https://ark.cn-beijing.volces.com/api/v3",
+        model: str = "doubao-embedding-vision-251215",
+        dim: int = 2048,
         api_key: str | None = None,
         timeout: float = 60.0,
         max_retries: int = 2,
@@ -49,9 +47,10 @@ class OpenAICompatibleEmbedder:
         self.timeout = timeout
         self.max_retries = max_retries
         self.retry_base_delay = retry_base_delay
-        self.name = f"openai-compat:{model}"
+        self.name = f"doubao-vision:{model}"
 
     async def embed(self, texts: list[str]) -> list[list[float]]:
+        """Embed each text through Doubao's multimodal vectorization API."""
         if not texts:
             return []
 
@@ -59,34 +58,26 @@ class OpenAICompatibleEmbedder:
         if self.api_key:
             headers["Authorization"] = f"Bearer {self.api_key}"
 
-        payload: dict[str, Any] = {
-            "model": self.model,
-            "input": texts,
-        }
-
+        vectors: list[list[float]] = []
         async with httpx.AsyncClient(timeout=self.timeout) as client:
-            response = await self._post_with_retries(client, payload, headers)
-            data = response.json()
-
-        try:
-            vectors = [list(item["embedding"]) for item in data["data"]]
-        except (KeyError, TypeError, IndexError) as exc:
-            msg = "embedder response did not match OpenAI embeddings shape"
-            raise IndexBuildError(msg, details={"response": data}) from exc
-
-        if len(vectors) != len(texts):
-            msg = (
-                f"embedder returned {len(vectors)} vectors for "
-                f"{len(texts)} inputs"
-            )
-            raise IndexBuildError(msg)
-        for i, vec in enumerate(vectors):
-            if len(vec) != self.dim:
-                msg = (
-                    f"embedder returned dim={len(vec)} but client expects "
-                    f"dim={self.dim} (model {self.model!r}, index {i})"
+            for index, text in enumerate(texts):
+                payload: dict[str, Any] = {
+                    "model": self.model,
+                    "input": [{"type": "text", "text": text}],
+                }
+                response = await self._post_with_retries(
+                    client, payload, headers, index=index
                 )
-                raise IndexBuildError(msg)
+
+                vector = _extract_vector(response.json(), index=index)
+                if len(vector) != self.dim:
+                    msg = (
+                        f"doubao vision embedder returned dim={len(vector)} "
+                        f"but client expects dim={self.dim} "
+                        f"(model {self.model!r}, index {index})"
+                    )
+                    raise IndexBuildError(msg)
+                vectors.append(vector)
 
         return vectors
 
@@ -95,26 +86,26 @@ class OpenAICompatibleEmbedder:
         client: httpx.AsyncClient,
         payload: dict[str, Any],
         headers: dict[str, str],
+        *,
+        index: int,
     ) -> httpx.Response:
         last_exc: httpx.HTTPError | None = None
+        url = f"{self.base_url}/embeddings/multimodal"
         for attempt in range(self.max_retries + 1):
             try:
-                response = await client.post(
-                    f"{self.base_url}/embeddings",
-                    json=payload,
-                    headers=headers,
-                )
+                response = await client.post(url, json=payload, headers=headers)
             except httpx.HTTPError as exc:
                 last_exc = exc
                 if attempt < self.max_retries:
                     await self._sleep_before_retry(attempt)
                     continue
-                msg = f"embedder request failed: {exc}"
+                msg = f"doubao vision embedder request failed: {exc}"
                 raise IndexBuildError(
                     msg,
                     details={
                         "model": self.model,
                         "base_url": self.base_url,
+                        "index": index,
                         "error_type": type(exc).__name__,
                         "attempts": attempt + 1,
                     },
@@ -125,8 +116,8 @@ class OpenAICompatibleEmbedder:
                 continue
             if response.status_code >= 400:
                 msg = (
-                    f"embedder endpoint returned HTTP {response.status_code}: "
-                    f"{response.text[:200]}"
+                    f"doubao vision embedder endpoint returned HTTP "
+                    f"{response.status_code}: {response.text[:200]}"
                 )
                 raise IndexBuildError(
                     msg,
@@ -134,17 +125,19 @@ class OpenAICompatibleEmbedder:
                         "status": response.status_code,
                         "model": self.model,
                         "base_url": self.base_url,
+                        "index": index,
                         "attempts": attempt + 1,
                     },
                 )
             return response
 
-        msg = "embedder request failed without a response"
+        msg = "doubao vision embedder request failed without a response"
         raise IndexBuildError(
             msg,
             details={
                 "model": self.model,
                 "base_url": self.base_url,
+                "index": index,
                 "error_type": type(last_exc).__name__ if last_exc else None,
             },
         )
@@ -153,3 +146,22 @@ class OpenAICompatibleEmbedder:
         if self.retry_base_delay == 0:
             return
         await asyncio.sleep(self.retry_base_delay * (2**attempt))
+
+
+def _extract_vector(data: dict[str, Any], *, index: int) -> list[float]:
+    """Read the dense vector from Doubao's multimodal response shape."""
+    try:
+        embedding = data["data"]["embedding"]
+    except (KeyError, TypeError) as exc:
+        msg = "doubao vision embedder response did not match expected shape"
+        raise IndexBuildError(msg, details={"response": data, "index": index}) from exc
+
+    if not isinstance(embedding, list):
+        msg = "doubao vision embedder embedding is not a list"
+        raise IndexBuildError(msg, details={"response": data, "index": index})
+
+    try:
+        return [float(value) for value in embedding]
+    except (TypeError, ValueError) as exc:
+        msg = "doubao vision embedder embedding contains non-numeric values"
+        raise IndexBuildError(msg, details={"response": data, "index": index}) from exc

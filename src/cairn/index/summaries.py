@@ -15,7 +15,7 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import json
-from collections.abc import Iterator, Sequence
+from collections.abc import Awaitable, Callable, Iterator, Sequence
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Final
@@ -51,6 +51,7 @@ class SummaryBuilder:
         *,
         cache: SummaryCache | None = None,
         concurrency: int = 4,
+        progress: Callable[[int, int], None] | None = None,
     ) -> None:
         if concurrency < 1:
             msg = f"concurrency must be ≥1; got {concurrency}"
@@ -58,6 +59,7 @@ class SummaryBuilder:
         self.summarizer = summarizer
         self.cache = cache
         self.concurrency = concurrency
+        self.progress = progress
 
     async def build(
         self,
@@ -91,9 +93,29 @@ class SummaryBuilder:
         path = out_dir / SUMMARIES_FILENAME
         now = datetime.now(UTC)
         semaphore = asyncio.Semaphore(self.concurrency)
+        progress_lock = asyncio.Lock()
+        completed = 0
+        total = len(document.sections) * len(ordered_levels)
+
+        async def mark_progress() -> None:
+            nonlocal completed
+            async with progress_lock:
+                completed += 1
+                if self.progress is None:
+                    return
+                step = max(5, total // 20)
+                if completed != 1 and completed != total and completed % step != 0:
+                    return
+                self.progress(completed, total)
 
         async def for_section(node: SectionNode) -> dict[str, Any]:
-            return await self._summarize_section(node, ordered_levels, semaphore, now)
+            return await self._summarize_section(
+                node,
+                ordered_levels,
+                semaphore,
+                now,
+                mark_progress=mark_progress,
+            )
 
         records = await asyncio.gather(
             *(for_section(s) for s in document.sections)
@@ -119,6 +141,7 @@ class SummaryBuilder:
         levels: Sequence[SummaryLevel],
         semaphore: asyncio.Semaphore,
         now: datetime,
+        mark_progress: Callable[[], Awaitable[None]],
     ) -> dict[str, Any]:
         sh = section_hash(node)
         results: dict[str, str] = {}
@@ -136,6 +159,7 @@ class SummaryBuilder:
 
             if cached is not None:
                 results[level.value] = cached
+                await mark_progress()
                 continue
 
             async with semaphore:
@@ -145,6 +169,7 @@ class SummaryBuilder:
                     level=level,
                 )
             results[level.value] = text
+            await mark_progress()
             if self.cache is not None and cache_key is not None:
                 self.cache.put(cache_key, text)
 

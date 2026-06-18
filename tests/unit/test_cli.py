@@ -6,6 +6,8 @@ import json
 from pathlib import Path
 
 import pytest
+from pytest import MonkeyPatch
+from typer import Typer
 from typer.testing import CliRunner
 
 from cairn import __version__
@@ -35,6 +37,11 @@ def indexed_dir(tmp_path: Path, fixture_dir: Path, runner: CliRunner) -> Path:
 
 
 class TestVersion:
+    def test_package_level_app_import_is_typer_app(self) -> None:
+        from cairn.cli import app as package_app
+
+        assert isinstance(package_app, Typer)
+
     def test_prints_version(self, runner: CliRunner) -> None:
         result = runner.invoke(app, ["version"])
         assert result.exit_code == 0
@@ -161,3 +168,64 @@ class TestQuery:
             ],
         )
         assert result.exit_code != 0
+
+
+class TestInspect:
+    def test_inspect_writes_html(
+        self, indexed_dir: Path, tmp_path: Path, runner: CliRunner
+    ) -> None:
+        out = tmp_path / "inspect.html"
+        result = runner.invoke(app, ["inspect", str(indexed_dir), "--out", str(out)])
+        assert result.exit_code == 0, result.output
+        assert "inspector:" in result.output
+        text = out.read_text(encoding="utf-8")
+        assert "Cairn Inspector" in text
+        assert "simple" in text
+
+
+class TestRepoCommands:
+    def test_init_can_enable_markitdown(
+        self, tmp_path: Path, monkeypatch: MonkeyPatch, runner: CliRunner
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+
+        result = runner.invoke(app, ["init", "-y", "--markitdown"])
+
+        assert result.exit_code == 0, result.output
+        config = (tmp_path / ".cairn" / "config.toml").read_text(encoding="utf-8")
+        assert "enable_markitdown = true" in config
+        assert '"docs/**/*.html"' in config
+
+    def test_init_sync_status_and_repo_inspect(
+        self, tmp_path: Path, monkeypatch: MonkeyPatch, runner: CliRunner
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / "README.md").write_text(
+            "# Readme\n\nProject overview.\n", encoding="utf-8"
+        )
+        (tmp_path / "docs").mkdir()
+        (tmp_path / "docs" / "guide.md").write_text(
+            "# Guide\n\nDetailed docs.\n", encoding="utf-8"
+        )
+
+        init_result = runner.invoke(app, ["init", "-y"])
+        assert init_result.exit_code == 0, init_result.output
+        assert (tmp_path / ".cairn" / "config.toml").exists()
+
+        sync_result = runner.invoke(app, ["sync", "--fake"])
+        assert sync_result.exit_code == 0, sync_result.output
+        assert "synced: 2/2 documents" in sync_result.output
+        assert (
+            tmp_path / ".cairn" / "documents" / "readme" / "manifest.json"
+        ).exists()
+
+        status_result = runner.invoke(app, ["status"])
+        assert status_result.exit_code == 0, status_result.output
+        assert "`readme`" in status_result.output
+        assert "`docs-guide`" in status_result.output
+
+        inspect_result = runner.invoke(
+            app, ["inspect", "--out", "repo-inspector.html"]
+        )
+        assert inspect_result.exit_code == 0, inspect_result.output
+        assert (tmp_path / "repo-inspector.html").exists()

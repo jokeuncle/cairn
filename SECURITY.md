@@ -16,12 +16,14 @@ between minor releases. We will note breaking changes in `CHANGELOG.md`.
 If you believe you've found a security issue:
 
 1. **Do not** open a public GitHub issue or PR.
-2. Email the maintainers at **security@cairn.dev** (placeholder until the
-   project has a published address) with:
+2. Use GitHub's private vulnerability reporting for this repository. If that
+   is not enabled yet, open a minimal public issue asking for a private contact
+   path, without including exploit details.
+3. Include:
    - A description of the issue and its impact.
    - Steps to reproduce, ideally a minimal repro.
    - Your suggested severity (optional but appreciated).
-3. We will acknowledge receipt within **3 working days** and aim to
+4. We will acknowledge receipt within **3 working days** and aim to
    confirm or refute the report within **14 working days**.
 
 ## What Counts

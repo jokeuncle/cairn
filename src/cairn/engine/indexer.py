@@ -7,7 +7,7 @@ the top-level ``manifest.json`` that ties the artifacts together.
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -85,6 +85,7 @@ class Indexer:
         summary_cache: SummaryCache | None = None,
         summary_concurrency: int = 4,
         embed_batch_size: int = 32,
+        progress: Callable[[str], None] | None = None,
     ) -> None:
         self.parser = parser
         self.summarizer = summarizer
@@ -94,6 +95,7 @@ class Indexer:
         self.summary_cache = summary_cache
         self.summary_concurrency = summary_concurrency
         self.embed_batch_size = embed_batch_size
+        self.progress = progress
 
     async def index_path(
         self,
@@ -145,15 +147,22 @@ class Indexer:
         """Run every configured builder against an already-parsed Document."""
         out_dir.mkdir(parents=True, exist_ok=True)
 
+        self._emit("tree: writing")
         TreeBuilder().build(document, out_dir=out_dir)
+        self._emit("tree: done")
+        self._emit("summaries: starting")
         await SummaryBuilder(
             self.summarizer,
             cache=self.summary_cache,
             concurrency=self.summary_concurrency,
+            progress=lambda done, total: self._emit(f"summaries: {done}/{total}"),
         ).build(document, out_dir=out_dir, levels=summary_levels)
+        self._emit("summaries: done")
+        self._emit("vectors: starting")
         await VectorBuilder(
             self.embedder, batch_size=self.embed_batch_size
         ).build(document, out_dir=out_dir)
+        self._emit("vectors: done")
 
         subindexes: dict[str, SubIndexEntry] = {
             "tree": SubIndexEntry(
@@ -176,9 +185,11 @@ class Indexer:
 
         entities_reader: Entities | None = None
         if self.entity_extractor is not None:
+            self._emit("entities: starting")
             await EntityBuilder(self.entity_extractor).build(
                 document, out_dir=out_dir
             )
+            self._emit("entities: done")
             subindexes["entities"] = SubIndexEntry(
                 path=ENTITIES_FILENAME,
                 builder_version=ENTITIES_FORMAT_VERSION,
@@ -189,9 +200,11 @@ class Indexer:
             entities_reader = Entities.load(out_dir)
 
         if self.xref_extractor is not None:
+            self._emit("xrefs: starting")
             await XRefBuilder(self.xref_extractor).build(
                 document, out_dir=out_dir, entities=entities_reader
             )
+            self._emit("xrefs: done")
             subindexes["xrefs"] = SubIndexEntry(
                 path=XREFS_FILENAME,
                 builder_version=XREFS_FORMAT_VERSION,
@@ -207,7 +220,14 @@ class Indexer:
             indexed_at=datetime.now(UTC),
             subindexes=subindexes,
         )
-        return write_manifest(out_dir, manifest)
+        self._emit("manifest: writing")
+        path = write_manifest(out_dir, manifest)
+        self._emit("manifest: done")
+        return path
+
+    def _emit(self, message: str) -> None:
+        if self.progress is not None:
+            self.progress(message)
 
 
 def _existing_matches(out_dir: Path, source_hash: str) -> bool:

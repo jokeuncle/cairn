@@ -59,18 +59,17 @@ pip install -e ".[dev]"
 ### Tasks
 
 ```bash
-# Lint + format
-uv run ruff check src tests
+# Lint
+uv run ruff check .
+
+# Format when needed
 uv run ruff format src tests
 
 # Type check
-uv run mypy src/cairn
+uv run mypy src tests
 
-# Tests (unit only; no network, no models)
-uv run pytest tests/unit -q
-
-# Tests including integration (requires optional setup)
-uv run pytest -q
+# Tests (no network, no model keys)
+uv run pytest
 ```
 
 ### Branching and commits

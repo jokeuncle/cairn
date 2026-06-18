@@ -45,6 +45,8 @@ coverage.xml
 
 # Tooling
 .uv/
+.codegraph/
+uv.lock
 .python-version
 
 # IDEs
@@ -58,7 +60,9 @@ coverage.xml
 Thumbs.db
 
 # Cairn runtime data
-.cairn/
+.cairn/documents/
+.cairn/manifest.json
+.cairn/inspector.html
 *.lancedb/
 *.sqlite
 *.sqlite-*

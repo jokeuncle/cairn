@@ -4,6 +4,48 @@ All notable changes to Cairn. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows
 [Semantic Versioning](https://semver.org/) once it reaches 1.0.
 
+## Unreleased
+
+### Added
+
+- **Doubao multimodal embeddings.** `CAIRN_EMBED_PROVIDER=doubao-vision`
+  targets Volcengine ARK's `/embeddings/multimodal` shape and defaults to
+  `doubao-embedding-vision-251215` with 2048-dimensional vectors.
+- **Static graph inspector.** `cairn inspect <doc-dir> --out inspector.html`
+  writes a standalone HTML relationship explorer for sections, entities,
+  tree edges, mentions, and cross-references.
+- **Semantic hit evidence.** `search_semantic` now returns an explanatory
+  `evidence` window by default, including CJK-friendly query-term extraction.
+- **Hosted API stability knobs.** LLM and embedding clients now support
+  timeout and retry env vars. Indexing and benchmark runs honor summary
+  concurrency and embedding batch-size env vars.
+- **Benchmark/index progress output.** CLI indexing and benchmark runs now
+  emit stage progress so hosted-model runs do not sit silently during long
+  summary-generation phases.
+- **Repository documentation workflow.** `cairn init -y`, `cairn sync`,
+  `cairn status`, repo-scoped `cairn serve`, and repo-scoped `cairn inspect`
+  turn a project directory into a multi-document MCP knowledge layer. Repo MCP
+  adds `list_documents`, cross-document `search_documents`, and routes normal
+  tools by optional `doc`. Repo sync isolates per-document failures so one bad
+  source does not block the rest of the repository index.
+- **Configurable repo search policy.** `.cairn/config.toml` exposes
+  `include`, `exclude`, `enable_markitdown`, `primary_doc`, and
+  `search_sections_per_doc` so repositories can tune coverage, conversion,
+  and cross-document search diversity without changing code.
+- **Safer monorepo discovery defaults.** Simple directory excludes such as
+  `node_modules/**`, `dist/**`, and `.pytest_cache/**` now apply at any depth,
+  so broad include globs do not accidentally index frontend dependencies,
+  caches, or generated build output.
+- **Optional MarkItDown ingestion.** Installing `cairn[markitdown]` lets Cairn
+  convert local DOCX, PPTX, XLSX, HTML, CSV, JSON, XML, EPUB, and related files
+  to Markdown before indexing them through the canonical Markdown pipeline.
+
+### Changed
+
+- README and benchmark docs now report the latest starter benchmark numbers
+  with evidence snippets included in semantic-search payloads.
+- Strict mypy now passes across both `src` and `tests`.
+
 ## [0.1.0a2] — 2026-06-11
 
 Second alpha. Adds document-level incremental rebuild, validates the
