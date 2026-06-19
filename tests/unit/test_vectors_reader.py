@@ -96,6 +96,14 @@ class TestSearch:
         hits = await vectors.search([0.0] * 64, k=2)
         assert len(hits) <= 2
 
+    async def test_entries_returns_stored_vectors(self, built_dir: Path) -> None:
+        vectors = Vectors.load(built_dir)
+        entries = await vectors.entries()
+
+        assert entries
+        assert {entry.id for entry in entries}
+        assert all(len(entry.vector) == 64 for entry in entries)
+
     async def test_scores_within_unit_range(self, built_dir: Path) -> None:
         vectors = Vectors.load(built_dir)
         hits = await vectors.search([0.1] * 64, k=5)

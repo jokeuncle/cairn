@@ -349,6 +349,11 @@ main {
   min-height: 28px;
   padding: 4px 8px;
 }
+.tool-pill button.active {
+  border-color: var(--focus);
+  background: #e8f2ee;
+  color: #103f35;
+}
 .status {
   color: var(--muted);
   font-size: 12px;
@@ -408,11 +413,17 @@ svg {
 .node text {
   font-size: 12px;
   fill: var(--ink);
+  opacity: 0;
   paint-order: stroke;
   stroke: rgba(255, 255, 255, .9);
   stroke-width: 4px;
   stroke-linejoin: round;
   pointer-events: none;
+}
+.node.selected text,
+.node.neighbor text,
+.node.show-label text {
+  opacity: 1;
 }
 .dim {
   opacity: .15;
@@ -530,6 +541,7 @@ svg {
       <div class="tool-pill">
         <button id="fit">Fit</button>
         <button id="stabilize">Stabilize</button>
+        <button id="labels">Labels</button>
         <span class="status" id="status"></span>
       </div>
     </div>
@@ -544,6 +556,7 @@ const details = document.getElementById('details');
 const search = document.getElementById('search');
 const nodeList = document.getElementById('node-list');
 const statusEl = document.getElementById('status');
+const SVG_NS = 'http://www.w3.org/2000/svg';
 let mode = 'combined';
 let selectedId = DATA.nodes[0] ? DATA.nodes[0].id : null;
 let nodes = [];
@@ -551,6 +564,10 @@ let edges = [];
 let raf = null;
 let settleTicks = 0;
 let dragging = null;
+let showAllLabels = false;
+let edgeEls = [];
+let nodeEls = new Map();
+let layoutCache = new Map();
 function edgeVisible(e) {
   if (mode === 'tree') return e.kind === 'tree';
   if (mode === 'entities') return e.kind === 'mention';
@@ -592,10 +609,11 @@ function initLayout() {
     const row = Math.floor(i / 4);
     const column = i % 4;
     const depth = Math.min(n.level || 1, 6);
+    const cached = layoutCache.get(n.id);
     return {
     ...n,
-    x: n.kind === 'entity' ? w - 160 - (column * 18) : 110 + depth * 90 + (column * 18),
-    y: 86 + ((row * 58) % Math.max(160, h - 128)),
+    x: cached ? cached.x : n.kind === 'entity' ? w - 160 - (column * 18) : 110 + depth * 90 + (column * 18),
+    y: cached ? cached.y : 86 + ((row * 58) % Math.max(160, h - 128)),
     vx: 0,
     vy: 0,
     fixed: false,
@@ -606,12 +624,67 @@ function initLayout() {
   renderNodeList();
   updateStatus();
 }
+function buildGraphDom() {
+  svg.innerHTML = '';
+  edgeEls = [];
+  nodeEls = new Map();
+  const defs = document.createElementNS(SVG_NS, 'defs');
+  const marker = document.createElementNS(SVG_NS, 'marker');
+  marker.setAttribute('id', 'arrow');
+  marker.setAttribute('viewBox', '0 0 10 10');
+  marker.setAttribute('refX', '9');
+  marker.setAttribute('refY', '5');
+  marker.setAttribute('markerWidth', '6');
+  marker.setAttribute('markerHeight', '6');
+  marker.setAttribute('orient', 'auto-start-reverse');
+  const arrow = document.createElementNS(SVG_NS, 'path');
+  arrow.setAttribute('d', 'M 0 0 L 10 5 L 0 10 z');
+  arrow.setAttribute('fill', '#6f5aa5');
+  marker.appendChild(arrow);
+  defs.appendChild(marker);
+  svg.appendChild(defs);
+
+  const edgeLayer = document.createElementNS(SVG_NS, 'g');
+  edgeLayer.setAttribute('class', 'edge-layer');
+  const nodeLayer = document.createElementNS(SVG_NS, 'g');
+  nodeLayer.setAttribute('class', 'node-layer');
+  svg.appendChild(edgeLayer);
+  svg.appendChild(nodeLayer);
+
+  const edgeFragment = document.createDocumentFragment();
+  for (const e of edges) {
+    const line = document.createElementNS(SVG_NS, 'line');
+    const edgeClass = e.kind === 'tree' ? 'tree' : e.kind === 'mention' ? 'mention' : 'xref';
+    line.setAttribute('class', 'edge ' + edgeClass);
+    if (edgeClass === 'xref') line.setAttribute('marker-end', 'url(#arrow)');
+    edgeFragment.appendChild(line);
+    edgeEls.push({ edge: e, el: line, edgeClass });
+  }
+  edgeLayer.appendChild(edgeFragment);
+
+  const nodeFragment = document.createDocumentFragment();
+  for (const n of nodes) {
+    const g = document.createElementNS(SVG_NS, 'g');
+    g.setAttribute('class', 'node ' + n.kind);
+    g.addEventListener('pointerdown', event => startDrag(event, n.id));
+    g.addEventListener('click', () => selectNode(n.id));
+    const c = document.createElementNS(SVG_NS, 'circle');
+    c.setAttribute('r', n.kind === 'entity' ? Math.min(18, 7 + Math.sqrt(n.mentions || 1) * 3) : Math.max(8, 16 - (n.level || 1)));
+    const t = document.createElementNS(SVG_NS, 'text');
+    t.setAttribute('x', 14); t.setAttribute('y', 4);
+    t.textContent = n.label.length > 34 ? n.label.slice(0, 32) + '...' : n.label;
+    g.appendChild(c); g.appendChild(t);
+    nodeFragment.appendChild(g);
+    nodeEls.set(n.id, g);
+  }
+  nodeLayer.appendChild(nodeFragment);
+}
 function tick() {
   const rect = svg.getBoundingClientRect();
   const w = rect.width || 1000;
   const h = rect.height || 800;
   const byId = new Map(nodes.map(n => [n.id, n]));
-  for (let step = 0; step < 2; step++) {
+  for (let step = 0; step < 1; step++) {
     for (const n of nodes) {
       if (n.fixed) continue;
       n.vx += (w / 2 - n.x) * 0.0008;
@@ -659,8 +732,7 @@ function tick() {
   }
   settleTicks += 1;
 }
-function render() {
-  tick();
+function linkedNodeIds() {
   const linked = new Set();
   if (selectedId) {
     linked.add(selectedId);
@@ -669,54 +741,53 @@ function render() {
       if (e.target === selectedId) linked.add(e.source);
     }
   }
+  return linked;
+}
+function updateGraphDom() {
+  const linked = linkedNodeIds();
   const byId = new Map(nodes.map(n => [n.id, n]));
-  svg.innerHTML = '';
-  const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-  const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
-  marker.setAttribute('id', 'arrow');
-  marker.setAttribute('viewBox', '0 0 10 10');
-  marker.setAttribute('refX', '9');
-  marker.setAttribute('refY', '5');
-  marker.setAttribute('markerWidth', '6');
-  marker.setAttribute('markerHeight', '6');
-  marker.setAttribute('orient', 'auto-start-reverse');
-  const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-  arrow.setAttribute('d', 'M 0 0 L 10 5 L 0 10 z');
-  arrow.setAttribute('fill', '#6f5aa5');
-  marker.appendChild(arrow);
-  defs.appendChild(marker);
-  svg.appendChild(defs);
-  for (const e of edges) {
+  for (const item of edgeEls) {
+    const e = item.edge;
     const a = byId.get(e.source), b = byId.get(e.target);
     if (!a || !b) continue;
-    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    line.setAttribute('x1', a.x); line.setAttribute('y1', a.y);
-    line.setAttribute('x2', b.x); line.setAttribute('y2', b.y);
-    const edgeClass = e.kind === 'tree' ? 'tree' : e.kind === 'mention' ? 'mention' : 'xref';
+    item.el.setAttribute('x1', a.x); item.el.setAttribute('y1', a.y);
+    item.el.setAttribute('x2', b.x); item.el.setAttribute('y2', b.y);
     const active = selectedId && (e.source === selectedId || e.target === selectedId);
-    line.setAttribute('class', 'edge ' + edgeClass + (active ? ' active' : '') + (selectedId && !linked.has(e.source) && !linked.has(e.target) ? ' dim' : ''));
-    if (edgeClass === 'xref') line.setAttribute('marker-end', 'url(#arrow)');
-    svg.appendChild(line);
+    item.el.setAttribute('class', 'edge ' + item.edgeClass + (active ? ' active' : '') + (selectedId && !linked.has(e.source) && !linked.has(e.target) ? ' dim' : ''));
   }
   for (const n of nodes) {
-    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    g.setAttribute('class', 'node ' + n.kind + (selectedId === n.id ? ' selected' : '') + (selectedId && !linked.has(n.id) ? ' dim' : ''));
+    const g = nodeEls.get(n.id);
+    if (!g) continue;
+    const labelClass = showAllLabels || selectedId === n.id || linked.has(n.id) ? ' show-label' : '';
+    const neighborClass = selectedId !== n.id && linked.has(n.id) ? ' neighbor' : '';
+    g.setAttribute('class', 'node ' + n.kind + labelClass + neighborClass + (selectedId === n.id ? ' selected' : '') + (selectedId && !linked.has(n.id) ? ' dim' : ''));
     g.setAttribute('transform', `translate(${n.x},${n.y})`);
-    g.addEventListener('pointerdown', event => startDrag(event, n.id));
-    g.addEventListener('click', () => selectNode(n.id));
-    const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    c.setAttribute('r', n.kind === 'entity' ? Math.min(18, 7 + Math.sqrt(n.mentions || 1) * 3) : Math.max(8, 16 - (n.level || 1)));
-    const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    t.setAttribute('x', 14); t.setAttribute('y', 4);
-    t.textContent = n.label.length > 34 ? n.label.slice(0, 32) + '...' : n.label;
-    g.appendChild(c); g.appendChild(t); svg.appendChild(g);
+    layoutCache.set(n.id, { x: n.x, y: n.y });
   }
-  raf = requestAnimationFrame(render);
+}
+function renderFrame() {
+  if (settleTicks < 130 || dragging) tick();
+  updateGraphDom();
+  if (settleTicks < 130 || dragging) {
+    raf = requestAnimationFrame(renderFrame);
+  } else {
+    raf = null;
+  }
+}
+function startAnimation() {
+  if (raf) cancelAnimationFrame(raf);
+  raf = requestAnimationFrame(renderFrame);
+}
+function renderStatic() {
+  if (raf) cancelAnimationFrame(raf);
+  raf = null;
+  updateGraphDom();
 }
 function selectNode(id) {
   selectedId = id;
   showDetails();
   renderNodeList();
+  renderStatic();
 }
 function startDrag(event, id) {
   const node = nodes.find(n => n.id === id);
@@ -724,6 +795,7 @@ function startDrag(event, id) {
   dragging = { id, dx: node.x - event.clientX, dy: node.y - event.clientY };
   node.fixed = true;
   svg.setPointerCapture(event.pointerId);
+  startAnimation();
 }
 svg.addEventListener('pointermove', event => {
   if (!dragging) return;
@@ -734,12 +806,15 @@ svg.addEventListener('pointermove', event => {
   node.y = Math.max(62, Math.min(rect.height - 28, event.clientY + dragging.dy));
   node.vx = 0;
   node.vy = 0;
+  renderStatic();
 });
 svg.addEventListener('pointerup', () => {
   dragging = null;
+  startAnimation();
 });
 svg.addEventListener('pointerleave', () => {
   dragging = null;
+  startAnimation();
 });
 function showDetails() {
   const node = DATA.nodes.find(n => n.id === selectedId) || DATA.nodes[0];
@@ -792,6 +867,7 @@ function updateStatus() {
 function reset() {
   if (raf) cancelAnimationFrame(raf);
   initLayout();
+  buildGraphDom();
   const q = search.value.trim().toLowerCase();
   const directMatch = q ? nodes.find(n => nodeSearchText(n).includes(q)) : null;
   if (directMatch) {
@@ -801,7 +877,7 @@ function reset() {
   }
   showDetails();
   renderNodeList();
-  render();
+  startAnimation();
 }
 document.querySelectorAll('button[data-mode]').forEach(btn => btn.addEventListener('click', () => {
   document.querySelectorAll('button[data-mode]').forEach(b => b.classList.remove('active'));
@@ -812,7 +888,14 @@ document.querySelectorAll('button[data-mode]').forEach(btn => btn.addEventListen
 search.addEventListener('input', reset);
 document.getElementById('fit').addEventListener('click', reset);
 document.getElementById('stabilize').addEventListener('click', () => {
-  for (let i = 0; i < 220; i++) tick();
+  for (let i = 0; i < 180; i++) tick();
+  settleTicks = 130;
+  renderStatic();
+});
+document.getElementById('labels').addEventListener('click', event => {
+  showAllLabels = !showAllLabels;
+  event.currentTarget.classList.toggle('active', showAllLabels);
+  renderStatic();
 });
 window.addEventListener('resize', reset);
 drawStats();

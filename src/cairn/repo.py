@@ -12,6 +12,7 @@ import json
 import re
 import tomllib
 from collections.abc import Callable, Collection, Iterable
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from fnmatch import fnmatchcase
 from pathlib import Path
@@ -26,6 +27,7 @@ from cairn.embed.base import Embedder
 from cairn.engine.indexer import Indexer
 from cairn.engine.manifest import read_manifest
 from cairn.entity.heuristic import HeuristicExtractor
+from cairn.index.vectors import l2_normalize
 from cairn.ingest import parser_for_path, supported_extensions
 from cairn.summarize.base import Summarizer
 from cairn.tools.base import DocumentIndex, estimate_tokens_of_payload
@@ -89,6 +91,7 @@ DEFAULT_EXCLUDE: Final[tuple[str, ...]] = (
 )
 NATIVE_SUFFIXES: Final = frozenset({".md", ".markdown", ".mdown", ".mkd", ".pdf"})
 SUPPORTED_SUFFIXES: Final = supported_extensions()
+_REPO_SEARCH_CACHE_MAX: Final = 4
 
 DocState = Literal["indexed", "stale", "missing", "error", "orphaned"]
 
@@ -178,6 +181,47 @@ class RepoSyncResult(BaseModel):
     rebuilt: bool
     ok: bool = True
     error: str | None = None
+
+
+@dataclass(slots=True)
+class _RepoSectionRecord:
+    doc_id: str
+    source: str
+    index: DocumentIndex
+    section_id: str
+    title: str
+    body: str
+    synopsis: str
+    vector: tuple[float, ...]
+    haystacks: tuple[str, str, str, str, str]
+
+
+@dataclass(slots=True)
+class _RepoLexicalQuery:
+    terms: tuple[str, ...]
+    variants: dict[str, tuple[str, ...]]
+    weights: dict[str, float]
+    phrases: tuple[str, ...]
+    max_score: float
+
+
+@dataclass(slots=True)
+class _RepoScoredHit:
+    record: _RepoSectionRecord
+    score: float
+    vector_score: float
+    lexical_score: float
+
+
+@dataclass(slots=True)
+class _RepoSearchCache:
+    signature: tuple[tuple[str, str, str, str, int], ...]
+    records: tuple[_RepoSectionRecord, ...]
+    skipped: tuple[dict[str, str], ...]
+    doc_dims: dict[str, int]
+
+
+_REPO_SEARCH_CACHES: dict[Path, _RepoSearchCache] = {}
 
 
 def cairn_dir(root: Path) -> Path:
@@ -404,83 +448,49 @@ async def search_repo_documents(
         raise ToolError(msg)
     query_vec = vectors[0]
 
-    status = repo_status(root, config=config)
-    candidates = [doc for doc in status.documents if doc.state in {"indexed", "stale"}]
-    hits_by_key: dict[tuple[str, str], dict[str, Any]] = {}
-    skipped: list[dict[str, str]] = []
-    per_doc_k = min(32, max(k * 3, 12))
+    candidates = _repo_search_candidates(root, config)
+    cache = await _get_repo_search_cache(root, candidates)
+    lexical_query = _build_repo_lexical_query(query)
+    hits_by_key: dict[tuple[str, str], _RepoScoredHit] = {}
+    skipped: list[dict[str, str]] = list(cache.skipped)
+    query_dim = len(query_vec)
+    incompatible_docs = {
+        doc_id for doc_id, dim in cache.doc_dims.items() if dim != query_dim
+    }
+    for doc_id in sorted(incompatible_docs):
+        skipped.append(
+            {
+                "doc": doc_id,
+                "reason": f"query embedding dim {query_dim} != index dim {cache.doc_dims[doc_id]}",
+            }
+        )
+    normalized_query = l2_normalize(query_vec)
 
-    for doc in candidates:
-        try:
-            index = DocumentIndex.load(root / doc.doc_dir)
-            if len(query_vec) != index.vectors.dim:
-                skipped.append(
-                    {
-                        "doc": doc.id,
-                        "reason": (
-                            f"query embedding dim {len(query_vec)} != "
-                            f"index dim {index.vectors.dim}"
-                        ),
-                    }
-                )
-                continue
-            doc_hits = await index.vectors.search(query_vec, k=per_doc_k)
-        except Exception as exc:
-            skipped.append({"doc": doc.id, "reason": str(exc)})
+    for record in cache.records:
+        if record.doc_id in incompatible_docs:
             continue
-
-        for hit in doc_hits:
-            node = index.tree.get(hit.id)
-            if node is None:
-                continue
-            summary = index.summaries.get(hit.id)
-            result = _repo_hit_payload(
-                query=query,
-                include_set=include_set,
-                doc_id=doc.id,
-                source=doc.source,
-                index=index,
-                section_id=hit.id,
-                title=node.title,
-                body=node.raw_text,
-                synopsis=summary.synopsis if summary is not None else "",
-                vector_score=hit.score,
-            )
-            _merge_repo_hit(hits_by_key, result)
-
-        for node in index.tree:
-            summary = index.summaries.get(node.id)
-            lexical_score = _lexical_score(
-                query,
-                doc_id=doc.id,
-                source=doc.source,
-                title=node.title,
-                body=node.raw_text,
-                synopsis=summary.synopsis if summary is not None else "",
-            )
-            if lexical_score <= 0:
-                continue
-            result = _repo_hit_payload(
-                query=query,
-                include_set=include_set,
-                doc_id=doc.id,
-                source=doc.source,
-                index=index,
-                section_id=node.id,
-                title=node.title,
-                body=node.raw_text,
-                synopsis=summary.synopsis if summary is not None else "",
-                vector_score=0.0,
-            )
-            _merge_repo_hit(hits_by_key, result)
+        scored = _score_repo_record(
+            record,
+            query=lexical_query,
+            vector_score=_cosine_score(normalized_query, record.vector),
+        )
+        hits_by_key[(record.doc_id, record.section_id)] = scored
 
     hits = list(hits_by_key.values())
-    hits.sort(key=lambda item: float(item["score"]), reverse=True)
-    selected = _diversify_repo_hits(
+    hits.sort(key=lambda item: item.score, reverse=True)
+    selected_records = _diversify_repo_hits(
         hits,
         limit=k,
         sections_per_doc=effective_sections_per_doc,
     )
+    selected = [
+        _repo_scored_payload(
+            hit,
+            query=query,
+            include_set=include_set,
+        )
+        for hit in selected_records
+    ]
     payload: dict[str, Any] = {
         "query": query,
         "hits": selected,
@@ -493,6 +503,164 @@ async def search_repo_documents(
         "tokens_returned": estimate_tokens_of_payload(payload),
         "data": payload,
     }
+
+
+def _repo_search_candidates(
+    root: Path,
+    config: RepoConfig,
+) -> tuple[RepoDocumentStatus, ...]:
+    manifest = _read_repo_manifest_status(root)
+    if manifest is not None:
+        return tuple(doc for doc in manifest if doc.state in {"indexed", "stale"})
+    status = repo_status(root, config=config)
+    return tuple(doc for doc in status.documents if doc.state in {"indexed", "stale"})
+
+
+def _read_repo_manifest_status(root: Path) -> tuple[RepoDocumentStatus, ...] | None:
+    path = repo_manifest_path(root)
+    if not path.exists():
+        return None
+    try:
+        with path.open("r", encoding="utf-8") as fh:
+            payload = json.load(fh)
+        if payload.get("format_version") != REPO_MANIFEST_VERSION:
+            return None
+        return tuple(
+            RepoDocumentStatus.model_validate(item)
+            for item in payload.get("documents", [])
+        )
+    except (OSError, ValueError, TypeError):
+        return None
+
+
+async def _get_repo_search_cache(
+    root: Path,
+    candidates: Collection[RepoDocumentStatus],
+) -> _RepoSearchCache:
+    resolved_root = root.resolve()
+    signature = _repo_search_signature(candidates)
+    cached = _REPO_SEARCH_CACHES.get(resolved_root)
+    if cached is not None and cached.signature == signature:
+        return cached
+
+    records: list[_RepoSectionRecord] = []
+    skipped: list[dict[str, str]] = []
+    doc_dims: dict[str, int] = {}
+    for doc in candidates:
+        try:
+            index = DocumentIndex.load(root / doc.doc_dir)
+            doc_dims[doc.id] = index.vectors.dim
+            vectors = {
+                entry.id: tuple(entry.vector)
+                for entry in await index.vectors.entries()
+            }
+        except Exception as exc:
+            skipped.append({"doc": doc.id, "reason": str(exc)})
+            continue
+
+        for node in index.tree:
+            vector = vectors.get(node.id)
+            if vector is None:
+                continue
+            summary = index.summaries.get(node.id)
+            synopsis = summary.synopsis if summary is not None else ""
+            records.append(
+                _RepoSectionRecord(
+                    doc_id=doc.id,
+                    source=doc.source,
+                    index=index,
+                    section_id=node.id,
+                    title=node.title,
+                    body=node.raw_text,
+                    synopsis=synopsis,
+                    vector=vector,
+                    haystacks=(
+                        _normalize_field_text(doc.id),
+                        _normalize_field_text(doc.source),
+                        _normalize_field_text(node.title),
+                        _normalize_field_text(synopsis),
+                        _normalize_field_text(node.raw_text[:2000]),
+                    ),
+                )
+            )
+
+    cache = _RepoSearchCache(
+        signature=signature,
+        records=tuple(records),
+        skipped=tuple(skipped),
+        doc_dims=doc_dims,
+    )
+    if (
+        resolved_root not in _REPO_SEARCH_CACHES
+        and len(_REPO_SEARCH_CACHES) >= _REPO_SEARCH_CACHE_MAX
+    ):
+        oldest = next(iter(_REPO_SEARCH_CACHES))
+        del _REPO_SEARCH_CACHES[oldest]
+    _REPO_SEARCH_CACHES[resolved_root] = cache
+    return cache
+
+
+def _repo_search_signature(
+    candidates: Collection[RepoDocumentStatus],
+) -> tuple[tuple[str, str, str, str, int], ...]:
+    return tuple(
+        (
+            doc.id,
+            doc.doc_dir,
+            doc.state,
+            doc.indexed_hash or "",
+            doc.section_count or 0,
+        )
+        for doc in candidates
+    )
+
+
+def _cosine_score(query: list[float], vector: tuple[float, ...]) -> float:
+    if len(query) != len(vector):
+        return 0.0
+    score = sum(a * b for a, b in zip(query, vector, strict=True))
+    return max(0.0, min(1.0, score))
+
+
+def _score_repo_record(
+    record: _RepoSectionRecord,
+    *,
+    query: _RepoLexicalQuery,
+    vector_score: float,
+) -> _RepoScoredHit:
+    lexical_score = _lexical_score_from_profile(query, record.haystacks)
+    return _RepoScoredHit(
+        record=record,
+        score=_combine_repo_scores(vector_score, lexical_score),
+        vector_score=vector_score,
+        lexical_score=lexical_score,
+    )
+
+
+def _repo_scored_payload(
+    hit: _RepoScoredHit,
+    *,
+    query: str,
+    include_set: Collection[str],
+) -> dict[str, Any]:
+    record = hit.record
+    result: dict[str, Any] = {
+        "doc": record.doc_id,
+        "source": record.source,
+        "id": record.section_id,
+        "title": record.title,
+        "score": hit.score,
+        "vector_score": hit.vector_score,
+        "lexical_score": hit.lexical_score,
+        "anchor": record.index.anchor(record.section_id),
+    }
+    if "synopsis" in include_set and record.synopsis:
+        result["synopsis"] = record.synopsis
+    if "head" in include_set:
+        result["head"] = record.body[:200]
+    if "evidence" in include_set:
+        result["evidence"] = _evidence_snippet(record.body, query)
+    return result
 
 
 def _repo_hit_payload(
@@ -516,10 +684,7 @@ def _repo_hit_payload(
         body=body,
         synopsis=synopsis,
     )
-    if lexical_score <= 0:
-        combined_score = vector_score * 0.25
-    else:
-        combined_score = min(1.0, (vector_score * 0.25) + (lexical_score * 0.75))
+    combined_score = _combine_repo_scores(vector_score, lexical_score)
     result: dict[str, Any] = {
         "doc": doc_id,
         "source": source,
@@ -537,6 +702,12 @@ def _repo_hit_payload(
     if "evidence" in include_set:
         result["evidence"] = _evidence_snippet(body, query)
     return result
+
+
+def _combine_repo_scores(vector_score: float, lexical_score: float) -> float:
+    if lexical_score <= 0:
+        return vector_score * 0.25
+    return min(1.0, (vector_score * 0.25) + (lexical_score * 0.75))
 
 
 def _merge_repo_hit(
@@ -559,9 +730,6 @@ def _lexical_score(
     synopsis: str,
 ) -> float:
     """Small lexical boost for repo-wide ranking across heterogeneous docs."""
-    terms = _repo_query_terms(query)
-    if not terms:
-        return 0.0
     haystacks = (
         _normalize_field_text(doc_id),
         _normalize_field_text(source),
@@ -569,26 +737,47 @@ def _lexical_score(
         _normalize_field_text(synopsis),
         _normalize_field_text(body[:2000]),
     )
+    return _lexical_score_from_profile(_build_repo_lexical_query(query), haystacks)
+
+
+def _build_repo_lexical_query(query: str) -> _RepoLexicalQuery:
+    terms = tuple(_repo_query_terms(query))
+    field_weights = (2.5, 2.0, 3.0, 1.0, 1.0)
+    weights = {term: _repo_term_weight(term) for term in terms}
+    max_score = sum(weights[term] * sum(field_weights) for term in terms)
+    return _RepoLexicalQuery(
+        terms=terms,
+        variants={term: _term_variants(term) for term in terms},
+        weights=weights,
+        phrases=(*_command_phrases(query), *_domain_phrases_from_terms(terms)),
+        max_score=max_score,
+    )
+
+
+def _lexical_score_from_profile(
+    query: _RepoLexicalQuery,
+    haystacks: tuple[str, str, str, str, str],
+) -> float:
+    if not query.terms or query.max_score <= 0:
+        return 0.0
     weighted = 0.0
-    max_score = 0.0
-    for term in terms:
-        term_weight = _repo_term_weight(term)
-        variants = _term_variants(term)
+    for term in query.terms:
+        term_weight = query.weights[term]
+        variants = query.variants[term]
         field_weights = (2.5, 2.0, 3.0, 1.0, 1.0)
-        max_score += term_weight * sum(field_weights)
         for haystack, field_weight in zip(haystacks, field_weights, strict=True):
             if any(variant in haystack for variant in variants):
                 weighted += term_weight * field_weight
     combined = _normalize_search_text(" ".join(haystacks))
-    for size in range(min(4, len(terms)), 1, -1):
-        for start in range(0, len(terms) - size + 1):
-            phrase = " ".join(terms[start : start + size])
+    for size in range(min(4, len(query.terms)), 1, -1):
+        for start in range(0, len(query.terms) - size + 1):
+            phrase = " ".join(query.terms[start : start + size])
             if phrase in combined:
                 weighted += float(size)
-    for phrase in (*_command_phrases(query), *_domain_phrases(query)):
+    for phrase in query.phrases:
         if phrase in combined:
             weighted += 4.0
-    return min(1.0, weighted / max_score)
+    return min(1.0, weighted / query.max_score)
 
 
 def _repo_query_terms(query: str) -> list[str]:
@@ -716,13 +905,17 @@ def _term_variants(term: str) -> tuple[str, ...]:
 
 
 def _domain_phrases(query: str) -> tuple[str, ...]:
-    terms = set(_repo_query_terms(query))
+    return _domain_phrases_from_terms(tuple(_repo_query_terms(query)))
+
+
+def _domain_phrases_from_terms(terms: tuple[str, ...]) -> tuple[str, ...]:
+    term_set = set(terms)
     phrases: list[str] = []
-    if terms & {"inject", "injected", "injecting"} and any(
-        term.startswith("depend") for term in terms
+    if term_set & {"inject", "injected", "injecting"} and any(
+        term.startswith("depend") for term in term_set
     ):
         phrases.append("dependency injection")
-    if any(term.startswith(("eval", "evaluat")) for term in terms):
+    if any(term.startswith(("eval", "evaluat")) for term in term_set):
         phrases.extend(["online evaluation", "agent evaluation"])
     return tuple(phrases)
 
@@ -780,21 +973,40 @@ def _command_phrases(query: str) -> list[str]:
 
 
 def _diversify_repo_hits(
-    hits: list[dict[str, Any]],
+    hits: list[_RepoScoredHit],
     *,
     limit: int,
     sections_per_doc: int,
-) -> list[dict[str, Any]]:
-    selected: list[dict[str, Any]] = []
+) -> list[_RepoScoredHit]:
+    selected: list[_RepoScoredHit] = []
     counts: dict[str, int] = {}
-    for hit in hits:
-        doc_id = str(hit["doc"])
-        if counts.get(doc_id, 0) >= sections_per_doc:
-            continue
+
+    def add(hit: _RepoScoredHit) -> None:
+        doc_id = hit.record.doc_id
         selected.append(hit)
         counts[doc_id] = counts.get(doc_id, 0) + 1
+
+    for hit in hits:
+        doc_id = hit.record.doc_id
+        if counts.get(doc_id, 0) > 0:
+            continue
+        add(hit)
         if len(selected) >= limit:
-            break
+            return selected
+
+    if sections_per_doc <= 1:
+        return selected
+
+    seen = {(hit.record.doc_id, hit.record.section_id) for hit in selected}
+    for hit in hits:
+        key = (hit.record.doc_id, hit.record.section_id)
+        doc_id = key[0]
+        if key in seen or counts.get(doc_id, 0) >= sections_per_doc:
+            continue
+        add(hit)
+        seen.add(key)
+        if len(selected) >= limit:
+            return selected
     return selected
 
 

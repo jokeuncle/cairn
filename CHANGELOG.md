@@ -51,6 +51,15 @@ All notable changes to Cairn. Format follows
 
 - README and benchmark docs now report the latest starter benchmark numbers
   with evidence snippets included in semantic-search payloads.
+- Repo-scoped `search_documents` now uses a manifest-backed process cache and
+  flat in-memory section scoring, improving repeated MCP queries on docs-heavy
+  repositories while preserving deterministic fake-embedder behavior.
+- Repo search results now prioritize document diversity before returning
+  multiple sections from the same document, reducing duplicate-heavy top-k
+  answers in large documentation sets.
+- The static inspector now reuses SVG nodes between frames, stops animating
+  after layout stabilization, and hides non-neighbor labels by default so large
+  relation graphs remain responsive.
 - The PyPI distribution name is now `cairn-docs` while the CLI remains
   `cairn`, avoiding the unrelated package that already occupies `cairn`.
 - Strict mypy now passes across both `src` and `tests`.

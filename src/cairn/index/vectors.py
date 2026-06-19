@@ -48,6 +48,15 @@ class VectorHit(BaseModel):
     score: float = Field(ge=0.0, le=1.0)
 
 
+class VectorEntry(BaseModel):
+    """One persisted section vector."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    id: str
+    vector: list[float]
+
+
 def embedding_text(node: SectionNode) -> str:
     """Compose the text we embed for a section.
 
@@ -257,3 +266,22 @@ class Vectors:
     async def count(self) -> int:
         """Total number of indexed sections."""
         return await asyncio.to_thread(self._table.count_rows)
+
+    async def entries(self) -> list[VectorEntry]:
+        """Return every stored vector.
+
+        Repo-scoped search uses this to build a process-local flat index once,
+        then answers repeated MCP queries without reopening every per-document
+        LanceDB table.
+        """
+        return await asyncio.to_thread(self._sync_entries)
+
+    def _sync_entries(self) -> list[VectorEntry]:
+        rows = self._table.to_arrow().to_pylist()
+        return [
+            VectorEntry(
+                id=str(row["id"]),
+                vector=[float(value) for value in row["vector"]],
+            )
+            for row in rows
+        ]

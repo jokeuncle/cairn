@@ -363,6 +363,41 @@ class TestRepoSearch:
         assert len(diversified_docs) == len(set(diversified_docs))
         assert expanded_docs.count("readme") >= 2
 
+    async def test_search_repo_documents_prefers_doc_diversity_before_repeats(
+        self, tmp_path: Path
+    ) -> None:
+        (tmp_path / "README.md").write_text(
+            "# Alpha Root\n\nalpha topic overview.\n\n## Alpha Details\n\nalpha details.\n",
+            encoding="utf-8",
+        )
+        (tmp_path / "docs").mkdir()
+        (tmp_path / "docs" / "guide.md").write_text(
+            "# Alpha Guide\n\nalpha guide.\n", encoding="utf-8"
+        )
+        (tmp_path / "docs" / "ops.md").write_text(
+            "# Alpha Ops\n\nalpha operations.\n", encoding="utf-8"
+        )
+        write_default_config(tmp_path)
+        embedder = FakeEmbedder(dim=32)
+        await sync_repo(
+            tmp_path,
+            summarizer=FakeSummarizer(),
+            embedder=embedder,
+            index_config=IndexConfig(),
+        )
+
+        result = await search_repo_documents(
+            tmp_path,
+            embedder=embedder,
+            query="alpha",
+            k=4,
+            sections_per_doc=2,
+        )
+
+        docs = [hit["doc"] for hit in result["data"]["hits"]]
+        assert len(docs[:3]) == len(set(docs[:3]))
+        assert len(docs) == 4
+
     async def test_search_repo_documents_uses_configured_default_sections_per_doc(
         self, tmp_path: Path
     ) -> None:
