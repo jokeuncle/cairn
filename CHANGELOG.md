@@ -36,6 +36,13 @@ All notable changes to Cairn. Format follows
   `node_modules/**`, `dist/**`, and `.pytest_cache/**` now apply at any depth,
   so broad include globs do not accidentally index frontend dependencies,
   caches, or generated build output.
+- **Open-source DX commands.** `cairn doctor` validates repo setup and index
+  freshness; `cairn mcp config` prints MCP snippets for Claude, Cursor, Codex,
+  and Goose. `cairn serve --repo <path>` makes generated configs independent
+  from the client's working directory.
+- **Public repo smoke evaluator.** `scripts/eval_repos.py` reproduces the
+  uv / MCP Python SDK / FastAPI template repo-document smoke tests used for
+  release readiness.
 - **Optional MarkItDown ingestion.** Installing `cairn[markitdown]` lets Cairn
   convert local DOCX, PPTX, XLSX, HTML, CSV, JSON, XML, EPUB, and related files
   to Markdown before indexing them through the canonical Markdown pipeline.
@@ -44,6 +51,8 @@ All notable changes to Cairn. Format follows
 
 - README and benchmark docs now report the latest starter benchmark numbers
   with evidence snippets included in semantic-search payloads.
+- The PyPI distribution name is now `cairn-docs` while the CLI remains
+  `cairn`, avoiding the unrelated package that already occupies `cairn`.
 - Strict mypy now passes across both `src` and `tests`.
 
 ## [0.1.0a2] — 2026-06-11

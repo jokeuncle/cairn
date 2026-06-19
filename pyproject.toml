@@ -3,7 +3,7 @@ requires = ["hatchling>=1.21"]
 build-backend = "hatchling.build"
 
 [project]
-name = "cairn"
+name = "cairn-docs"
 version = "0.1.0a2"
 description = "Local-first documentation graph for AI agents. CodeGraph for docs, exposed through MCP."
 readme = "README.md"

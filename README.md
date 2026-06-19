@@ -9,6 +9,8 @@
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
 [![MCP](https://img.shields.io/badge/MCP-native-7c3aed.svg)](https://modelcontextprotocol.io/)
 
+![Cairn demo: repository documentation graph and MCP tools](docs/assets/cairn-demo.svg)
+
 Cairn is a **local-first, MCP-native documentation graph** for software
 repositories and large structured documents. It turns README files, specs,
 ADRs, docs folders, PDFs, and optional MarkItDown-converted Office/data/web
@@ -78,6 +80,44 @@ lives at [`docs/canvas.html`](docs/canvas.html). Open it in any browser.
 The fastest way to see Cairn work is to index this repo's own documentation.
 **Zero API keys, zero model downloads** — the `--fake` flag uses deterministic
 in-process plugins so the whole thing runs offline.
+
+The PyPI distribution is `cairn-docs`; the CLI command is `cairn`:
+
+```bash
+pip install cairn-docs
+```
+
+Or run it without installing:
+
+```bash
+uvx --from cairn-docs cairn --help
+```
+
+### Repository Workflow
+
+Inside any repository:
+
+```bash
+cairn init -y
+cairn sync --fake
+cairn status
+cairn doctor
+cairn mcp config --client claude --fake
+cairn serve --fake
+```
+
+`cairn doctor` checks repo config, index freshness, primary-doc routing, and
+model settings. `cairn mcp config` prints copy-pasteable stdio snippets for
+Claude, Cursor, Codex, and Goose:
+
+```bash
+cairn mcp config --client claude
+cairn mcp config --client cursor
+cairn mcp config --client codex
+cairn mcp config --client goose
+```
+
+For local development from source:
 
 ```bash
 git clone https://github.com/jokeuncle/cairn.git
@@ -203,6 +243,15 @@ Doubao for the real-semantics version. See
 [`benchmarks/README.md`](benchmarks/README.md) for caveats and how to author
 your own suites.
 
+Repo-level smoke tests are also public and reproducible:
+
+```bash
+python scripts/eval_repos.py --repo all --refresh
+```
+
+The current smoke set covers `astral-sh/uv`, `modelcontextprotocol/python-sdk`,
+and `fastapi/full-stack-fastapi-template`.
+
 ### Real LLM + real embeddings
 
 The `--fake` plugins are great for offline reproducibility but they have no
@@ -282,7 +331,7 @@ choices we adopted, modified, or declined.
 | 4 — v0.4 polish for production | ☐ | DOCX/RTF/EPUB, VSCode extension, security review |
 | v1.0 GA | ☐ | All `PRODUCT.md` §7 success criteria met |
 
-Full plan: [`ROADMAP.md`](ROADMAP.md). Current test suite: **408 passing**,
+Full plan: [`ROADMAP.md`](ROADMAP.md). Current test suite: **409 passing**,
 mypy strict clean, ruff clean.
 
 Maintainer release gate: [`docs/release-checklist.md`](docs/release-checklist.md).

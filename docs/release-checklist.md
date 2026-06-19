@@ -7,6 +7,9 @@ tagged alpha release.
 
 - README explains the product in the first screen and includes a working
   offline quickstart.
+- The PyPI distribution name is `cairn-docs`; the installed CLI command remains
+  `cairn`. Do not publish this project as `cairn`, which is already occupied
+  on PyPI by an unrelated package.
 - `LICENSE`, `CHANGELOG.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`,
   `SECURITY.md`, and issue/PR templates are present.
 - `.env.example` contains only placeholders.
@@ -15,7 +18,10 @@ tagged alpha release.
   inspectors stay ignored.
 - GitHub repository settings are ready:
   - Description: `Repository documentation graph for AI agents`
-  - Topics: `mcp`, `rag`, `documents`, `ai-agents`, `python`, `retrieval`
+  - Topics: `mcp`, `mcp-server`, `rag`, `documents`, `documentation`,
+    `ai-agents`, `python`, `retrieval`, `repository`
+  - Discussions are enabled; Wiki is disabled unless there is a deliberate
+    docs plan for it.
   - Enable private vulnerability reporting under Security settings.
 
 ## Local Pre-Push Gate
@@ -40,7 +46,7 @@ Expected current gate:
 
 - `ruff check .`: pass
 - `mypy src tests`: pass
-- `pytest`: 408 passing
+- `pytest`: 409 passing
 - `twine check`: wheel and sdist pass
 
 ## Dogfood Checks
@@ -74,6 +80,12 @@ Expected current results with fake plugins:
 
 Do not tune ranking solely to one repository. Treat failures as signals about
 general discovery, evidence, ranking, or drilldown quality.
+
+Run:
+
+```bash
+python scripts/eval_repos.py --repo all --refresh
+```
 
 ## Secret And Generated-File Audit
 

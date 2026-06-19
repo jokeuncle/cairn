@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import json
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Literal
 
 import typer
 
@@ -41,11 +41,15 @@ from cairn.xref.heuristic import HeuristicXRefExtractor
 
 app = typer.Typer(
     name="cairn",
-    help="Structure-aware, MCP-native retrieval for large documents.",
+    help="Local-first documentation graph for AI agents.",
     no_args_is_help=True,
 )
 query_app = typer.Typer(help="Run a single retrieval tool from the command line.")
+mcp_app = typer.Typer(help="Generate MCP client configuration snippets.")
 app.add_typer(query_app, name="query")
+app.add_typer(mcp_app, name="mcp")
+
+McpClient = Literal["claude", "cursor", "codex", "goose"]
 
 
 # ---------------------------------------------------------------------------
@@ -186,6 +190,29 @@ def status(
 
 
 @app.command()
+def doctor(
+    json_output: Annotated[
+        bool,
+        typer.Option("--json", help="Print machine-readable JSON."),
+    ] = False,
+) -> None:
+    """Check repo setup, index freshness, and model configuration."""
+    checks = _doctor_checks()
+    ok = all(item["ok"] for item in checks)
+    payload = {
+        "ok": ok,
+        "version": __version__,
+        "checks": checks,
+    }
+    if json_output:
+        typer.echo(json.dumps(payload, ensure_ascii=False, indent=2))
+    else:
+        typer.echo(_format_doctor(payload))
+    if not ok:
+        raise typer.Exit(code=1)
+
+
+@app.command()
 def version() -> None:
     """Print the Cairn version."""
     typer.echo(__version__)
@@ -277,10 +304,26 @@ def serve(
             help="Use FakeEmbedder for query embedding (no network at query time).",
         ),
     ] = False,
+    repo: Annotated[
+        Path | None,
+        typer.Option(
+            "--repo",
+            file_okay=False,
+            dir_okay=True,
+            readable=True,
+            help="Repository root or child path containing .cairn/config.toml.",
+        ),
+    ] = None,
 ) -> None:
     """Start the MCP stdio server against a document or repo index."""
     from cairn.mcp.server import serve_repo_stdio, serve_stdio
 
+    if repo is not None and doc_dir is not None:
+        typer.echo("error: pass either a document directory or --repo, not both", err=True)
+        raise typer.Exit(code=2)
+    if repo is not None:
+        asyncio.run(serve_repo_stdio(find_repo_root(repo), embedder=_make_embedder(fake)))
+        return
     if doc_dir is None:
         asyncio.run(serve_repo_stdio(find_repo_root(), embedder=_make_embedder(fake)))
         return
@@ -288,6 +331,49 @@ def serve(
         typer.echo(f"error: document directory not found: {doc_dir}", err=True)
         raise typer.Exit(code=2)
     asyncio.run(serve_stdio(doc_dir, embedder=_make_embedder(fake)))
+
+
+@mcp_app.command("config")
+def mcp_config(
+    client: Annotated[
+        McpClient,
+        typer.Option(
+            "--client",
+            case_sensitive=False,
+            help="Client snippet to print: claude, cursor, codex, or goose.",
+        ),
+    ] = "claude",
+    repo: Annotated[
+        Path | None,
+        typer.Option(
+            "--repo",
+            file_okay=False,
+            dir_okay=True,
+            readable=True,
+            help="Repository root. Defaults to the nearest .cairn/config.toml.",
+        ),
+    ] = None,
+    command: Annotated[
+        str,
+        typer.Option(
+            "--command",
+            help="Executable path clients should run.",
+        ),
+    ] = "cairn",
+    fake: Annotated[
+        bool,
+        typer.Option(
+            "--fake",
+            help="Include --fake for deterministic local smoke tests.",
+        ),
+    ] = False,
+) -> None:
+    """Print a copy-pasteable MCP stdio configuration snippet."""
+    root = find_repo_root(repo)
+    args = ["serve", "--repo", str(root)]
+    if fake:
+        args.append("--fake")
+    typer.echo(_format_mcp_config(client, command=command, args=args))
 
 
 @app.command()
@@ -548,6 +634,125 @@ def _format_repo_status(status_obj: RepoStatus) -> str:
         sections = "" if doc.section_count is None else str(doc.section_count)
         lines.append(f"| {doc.state} | `{doc.id}` | {sections} | {doc.source} |")
     return "\n".join(lines)
+
+
+def _doctor_checks() -> list[dict[str, object]]:
+    checks: list[dict[str, object]] = []
+    try:
+        root = find_repo_root()
+    except Exception as exc:
+        return [
+            {
+                "name": "repo_config",
+                "ok": False,
+                "message": f"{exc}. Run `cairn init -y` first.",
+            }
+        ]
+
+    checks.append(
+        {
+            "name": "repo_config",
+            "ok": True,
+            "message": f"found {root / '.cairn' / 'config.toml'}",
+        }
+    )
+    try:
+        status_obj = repo_status(root)
+        unhealthy = (
+            status_obj.missing_count
+            + status_obj.stale_count
+            + status_obj.error_count
+        )
+        checks.append(
+            {
+                "name": "repo_index",
+                "ok": unhealthy == 0 and status_obj.indexed_count > 0,
+                "message": (
+                    f"{status_obj.indexed_count} indexed, "
+                    f"{status_obj.stale_count} stale, "
+                    f"{status_obj.missing_count} missing, "
+                    f"{status_obj.error_count} errors"
+                ),
+            }
+        )
+        if status_obj.primary_doc:
+            primary_ok = any(
+                doc.id == status_obj.primary_doc and doc.state == "indexed"
+                for doc in status_obj.documents
+            )
+            checks.append(
+                {
+                    "name": "primary_doc",
+                    "ok": primary_ok,
+                    "message": status_obj.primary_doc,
+                }
+            )
+    except Exception as exc:
+        checks.append(
+            {
+                "name": "repo_index",
+                "ok": False,
+                "message": f"{exc}. Run `cairn sync --fake` to build locally.",
+            }
+        )
+
+    llm = load_llm_config()
+    embed = load_embed_config()
+    checks.append(
+        {
+            "name": "summarizer",
+            "ok": bool(llm.model and llm.base_url),
+            "message": f"{llm.model} at {llm.base_url}",
+        }
+    )
+    checks.append(
+        {
+            "name": "embedder",
+            "ok": bool(embed.model and embed.base_url and embed.dim > 0),
+            "message": f"{embed.provider}:{embed.model} dim={embed.dim}",
+        }
+    )
+    return checks
+
+
+def _format_doctor(payload: dict[str, object]) -> str:
+    checks = payload["checks"]
+    assert isinstance(checks, list)
+    lines = [f"Cairn doctor: {'ok' if payload['ok'] else 'needs attention'}"]
+    for item in checks:
+        assert isinstance(item, dict)
+        marker = "ok" if item["ok"] else "!!"
+        lines.append(f"[{marker}] {item['name']}: {item['message']}")
+    if not payload["ok"]:
+        lines.append("")
+        lines.append("Next steps: run `cairn init -y`, then `cairn sync --fake`.")
+    return "\n".join(lines)
+
+
+def _format_mcp_config(client: McpClient, *, command: str, args: list[str]) -> str:
+    server = {"command": command, "args": args}
+    if client in {"claude", "cursor"}:
+        return json.dumps({"mcpServers": {"cairn": server}}, indent=2)
+    if client == "codex":
+        quoted_args = ", ".join(json.dumps(arg) for arg in args)
+        return "\n".join(
+            [
+                "[mcp_servers.cairn]",
+                f"command = {json.dumps(command)}",
+                f"args = [{quoted_args}]",
+            ]
+        )
+    yaml_args = "\n".join(f"      - {json.dumps(arg)}" for arg in args)
+    return "\n".join(
+        [
+            "extensions:",
+            "  cairn:",
+            "    type: stdio",
+            f"    command: {json.dumps(command)}",
+            "    args:",
+            yaml_args,
+        ]
+    )
 
 
 if __name__ == "__main__":

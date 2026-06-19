@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="520" viewBox="0 0 1120 520" role="img" aria-labelledby="title desc">
+  <title id="title">Cairn repository documentation graph demo</title>
+  <desc id="desc">A terminal indexing repository documents and a graph view showing README, specs, ADRs, and MCP tools.</desc>
+  <rect width="1120" height="520" fill="#0b1020"/>
+  <rect x="32" y="32" width="1056" height="456" rx="18" fill="#121a2f" stroke="#2e3c61"/>
+  <rect x="56" y="58" width="470" height="404" rx="12" fill="#08111f" stroke="#26344f"/>
+  <circle cx="82" cy="82" r="6" fill="#ff5f57"/>
+  <circle cx="104" cy="82" r="6" fill="#ffbd2e"/>
+  <circle cx="126" cy="82" r="6" fill="#28c840"/>
+  <text x="56" y="124" fill="#8bd5ff" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18">$ cairn init -y</text>
+  <text x="56" y="158" fill="#c8d3f5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="17">initialized: .cairn/config.toml</text>
+  <text x="56" y="210" fill="#8bd5ff" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18">$ cairn sync --fake</text>
+  <text x="56" y="244" fill="#c8d3f5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="17">doc 1/14 readme: README.md</text>
+  <text x="56" y="274" fill="#c8d3f5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="17">doc 2/14 architecture: ARCHITECTURE.md</text>
+  <text x="56" y="304" fill="#c8d3f5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="17">doc 3/14 docs-specs-mcp-tools</text>
+  <text x="56" y="334" fill="#9ece6a" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="17">synced: 14/14 documents, 0 failed</text>
+  <text x="56" y="386" fill="#8bd5ff" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18">$ cairn mcp config --client claude</text>
+  <text x="56" y="420" fill="#c8d3f5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="17">{ "mcpServers": { "cairn": ... } }</text>
+
+  <text x="606" y="96" fill="#f5f7ff" font-family="Inter, ui-sans-serif, system-ui" font-size="28" font-weight="700">Repository Docs Graph</text>
+  <text x="606" y="126" fill="#9aa7c7" font-family="Inter, ui-sans-serif, system-ui" font-size="16">Stable anchors. Cross-document search. MCP-native drilldown.</text>
+
+  <g font-family="Inter, ui-sans-serif, system-ui" font-size="15" font-weight="650">
+    <line x1="742" y1="224" x2="650" y2="170" stroke="#51648d" stroke-width="2"/>
+    <line x1="742" y1="224" x2="640" y2="274" stroke="#51648d" stroke-width="2"/>
+    <line x1="742" y1="224" x2="842" y2="174" stroke="#51648d" stroke-width="2"/>
+    <line x1="742" y1="224" x2="872" y2="278" stroke="#51648d" stroke-width="2"/>
+    <line x1="842" y1="174" x2="872" y2="278" stroke="#51648d" stroke-width="2" stroke-dasharray="7 7"/>
+    <line x1="640" y1="274" x2="872" y2="278" stroke="#51648d" stroke-width="2" stroke-dasharray="7 7"/>
+
+    <rect x="680" y="188" width="124" height="72" rx="12" fill="#5b8cff" stroke="#93b4ff"/>
+    <text x="742" y="230" text-anchor="middle" fill="#06101f">README</text>
+
+    <rect x="584" y="136" width="132" height="66" rx="12" fill="#2dd4bf" stroke="#7ff4e8"/>
+    <text x="650" y="175" text-anchor="middle" fill="#041713">Specs</text>
+
+    <rect x="574" y="242" width="132" height="66" rx="12" fill="#f6c177" stroke="#ffe0a8"/>
+    <text x="640" y="281" text-anchor="middle" fill="#201204">ADRs</text>
+
+    <rect x="784" y="140" width="116" height="66" rx="12" fill="#c099ff" stroke="#ddc6ff"/>
+    <text x="842" y="179" text-anchor="middle" fill="#160b2e">PDFs</text>
+
+    <rect x="812" y="246" width="120" height="66" rx="12" fill="#9ece6a" stroke="#c7f59c"/>
+    <text x="872" y="285" text-anchor="middle" fill="#0b1806">MCP Tools</text>
+  </g>
+
+  <rect x="598" y="354" width="406" height="72" rx="14" fill="#0f172a" stroke="#33415f"/>
+  <text x="622" y="386" fill="#8bd5ff" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="17">search_documents("where is auth configured?")</text>
+  <text x="622" y="414" fill="#c8d3f5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="16">-> doc=docs-auth, id=oauth-provider</text>
+</svg>

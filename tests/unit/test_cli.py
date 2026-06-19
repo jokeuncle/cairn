@@ -224,8 +224,36 @@ class TestRepoCommands:
         assert "`readme`" in status_result.output
         assert "`docs-guide`" in status_result.output
 
+        doctor_result = runner.invoke(app, ["doctor"])
+        assert doctor_result.exit_code == 0, doctor_result.output
+        assert "Cairn doctor: ok" in doctor_result.output
+
+        mcp_result = runner.invoke(app, ["mcp", "config", "--client", "claude"])
+        assert mcp_result.exit_code == 0, mcp_result.output
+        mcp_payload = json.loads(mcp_result.output)
+        assert mcp_payload["mcpServers"]["cairn"]["args"][:2] == [
+            "serve",
+            "--repo",
+        ]
+        assert str(tmp_path) in mcp_payload["mcpServers"]["cairn"]["args"]
+
+        codex_result = runner.invoke(app, ["mcp", "config", "--client", "codex"])
+        assert codex_result.exit_code == 0, codex_result.output
+        assert "[mcp_servers.cairn]" in codex_result.output
+        assert "--repo" in codex_result.output
+
         inspect_result = runner.invoke(
             app, ["inspect", "--out", "repo-inspector.html"]
         )
         assert inspect_result.exit_code == 0, inspect_result.output
         assert (tmp_path / "repo-inspector.html").exists()
+
+    def test_doctor_reports_missing_repo_config(
+        self, tmp_path: Path, monkeypatch: MonkeyPatch, runner: CliRunner
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+
+        result = runner.invoke(app, ["doctor"])
+
+        assert result.exit_code == 1
+        assert "cairn init -y" in result.output
