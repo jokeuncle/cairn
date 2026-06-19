@@ -408,7 +408,7 @@ async def search_repo_documents(
     candidates = [doc for doc in status.documents if doc.state in {"indexed", "stale"}]
     hits_by_key: dict[tuple[str, str], dict[str, Any]] = {}
     skipped: list[dict[str, str]] = []
-    per_doc_k = min(32, max(k, 3))
+    per_doc_k = min(32, max(k * 3, 12))
 
     for doc in candidates:
         try:
@@ -519,7 +519,7 @@ def _repo_hit_payload(
     if lexical_score <= 0:
         combined_score = vector_score * 0.25
     else:
-        combined_score = min(1.0, (vector_score * 0.45) + (lexical_score * 0.55))
+        combined_score = min(1.0, (vector_score * 0.25) + (lexical_score * 0.75))
     result: dict[str, Any] = {
         "doc": doc_id,
         "source": source,
@@ -563,32 +563,29 @@ def _lexical_score(
     if not terms:
         return 0.0
     haystacks = (
-        doc_id.lower().replace("-", " "),
-        source.lower().replace("/", " ").replace("-", " "),
-        title.lower(),
-        synopsis.lower(),
-        body[:2000].lower(),
+        _normalize_field_text(doc_id),
+        _normalize_field_text(source),
+        _normalize_field_text(title),
+        _normalize_field_text(synopsis),
+        _normalize_field_text(body[:2000]),
     )
     weighted = 0.0
-    max_score = len(terms) * 6.0 + max(0, len(terms) - 1) * 2.0
+    max_score = 0.0
     for term in terms:
-        if term in haystacks[0]:
-            weighted += 1.0
-        if term in haystacks[1]:
-            weighted += 1.0
-        if term in haystacks[2]:
-            weighted += 2.0
-        if term in haystacks[3]:
-            weighted += 1.0
-        if term in haystacks[4]:
-            weighted += 1.0
+        term_weight = _repo_term_weight(term)
+        variants = _term_variants(term)
+        field_weights = (2.5, 2.0, 3.0, 1.0, 1.0)
+        max_score += term_weight * sum(field_weights)
+        for haystack, field_weight in zip(haystacks, field_weights, strict=True):
+            if any(variant in haystack for variant in variants):
+                weighted += term_weight * field_weight
     combined = _normalize_search_text(" ".join(haystacks))
     for size in range(min(4, len(terms)), 1, -1):
         for start in range(0, len(terms) - size + 1):
             phrase = " ".join(terms[start : start + size])
             if phrase in combined:
                 weighted += float(size)
-    for phrase in _command_phrases(query):
+    for phrase in (*_command_phrases(query), *_domain_phrases(query)):
         if phrase in combined:
             weighted += 4.0
     return min(1.0, weighted / max_score)
@@ -610,7 +607,20 @@ def _repo_query_terms(query: str) -> list[str]:
     }
     terms = [term for term in _query_terms(query) if term not in generic]
     seen = set(terms)
-    short_code_terms = {"ai", "api", "ci", "cd", "db", "go", "js", "mcp", "py", "ts", "ui", "uv"}
+    short_code_terms = {
+        "ai",
+        "api",
+        "ci",
+        "cd",
+        "db",
+        "go",
+        "js",
+        "mcp",
+        "py",
+        "ts",
+        "ui",
+        "uv",
+    }
     for word in re.findall(r"[A-Za-z0-9_][A-Za-z0-9_-]*", query.lower()):
         if word in short_code_terms and word not in seen:
             seen.add(word)
@@ -618,8 +628,103 @@ def _repo_query_terms(query: str) -> list[str]:
     return terms
 
 
+def _normalize_field_text(text: str) -> str:
+    lowered = text.lower().replace("/", " ").replace("-", " ").replace("_", " ")
+    return _normalize_search_text(lowered)
+
+
 def _normalize_search_text(text: str) -> str:
-    return " ".join(re.findall(r"[a-z0-9_][a-z0-9_-]*", text.lower()))
+    normalized = text.lower().replace("/", " ").replace("-", " ").replace("_", " ")
+    return " ".join(re.findall(r"[a-z0-9][a-z0-9]*", normalized))
+
+
+def _repo_term_weight(term: str) -> float:
+    """Down-weight broad terms that otherwise dominate docs-heavy AI repos."""
+    if term in {
+        "agent",
+        "agents",
+        "run",
+        "runs",
+        "use",
+        "using",
+        "write",
+        "writes",
+        "written",
+    }:
+        return 0.35
+    return 1.0
+
+
+def _term_variants(term: str) -> tuple[str, ...]:
+    variants = {term}
+    if term.endswith("ies") and len(term) > 4:
+        variants.add(f"{term[:-3]}y")
+    if term.endswith("s") and len(term) > 3:
+        variants.add(term[:-1])
+    if not term.endswith("s") and len(term) > 2:
+        variants.add(f"{term}s")
+    if term.endswith("y") and len(term) > 3:
+        variants.add(f"{term[:-1]}ies")
+
+    if term.startswith(("eval", "evaluat")):
+        variants.update(
+            {
+                "eval",
+                "evals",
+                "evaluate",
+                "evaluates",
+                "evaluated",
+                "evaluating",
+                "evaluation",
+                "evaluations",
+                "evaluator",
+                "evaluators",
+            }
+        )
+    if term.startswith(("depend", "deps")):
+        variants.update(
+            {
+                "dep",
+                "deps",
+                "depend",
+                "depends",
+                "dependency",
+                "dependencies",
+                "dependent",
+                "dependents",
+            }
+        )
+    if term.startswith("inject"):
+        variants.update(
+            {
+                "inject",
+                "injects",
+                "injected",
+                "injecting",
+                "injection",
+                "injections",
+            }
+        )
+    if term.startswith("config"):
+        variants.update(
+            {"config", "configs", "configure", "configured", "configuration"}
+        )
+    if term.startswith("auth"):
+        variants.update({"auth", "authenticate", "authentication", "authorization"})
+
+    return tuple(sorted(variants, key=lambda item: (len(item), item), reverse=True))
+
+
+def _domain_phrases(query: str) -> tuple[str, ...]:
+    terms = set(_repo_query_terms(query))
+    phrases: list[str] = []
+    if terms & {"inject", "injected", "injecting"} and any(
+        term.startswith("depend") for term in terms
+    ):
+        phrases.append("dependency injection")
+    if any(term.startswith(("eval", "evaluat")) for term in terms):
+        phrases.extend(["online evaluation", "agent evaluation"])
+    return tuple(phrases)
 
 
 def _command_phrases(query: str) -> list[str]:

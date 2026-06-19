@@ -444,3 +444,88 @@ class TestRepoSearch:
         )
 
         assert result["data"]["hits"][0]["doc"] == "docs-auth-cli"
+
+    async def test_search_repo_documents_boosts_eval_variants(
+        self, tmp_path: Path
+    ) -> None:
+        (tmp_path / "AGENTS.md").write_text(
+            "\n".join(
+                [
+                    "# Development Workflow",
+                    "",
+                    "Contributors write tests for agents and evaluate changes.",
+                ]
+            ),
+            encoding="utf-8",
+        )
+        (tmp_path / "docs").mkdir()
+        (tmp_path / "docs" / "evals.md").write_text(
+            "\n".join(
+                [
+                    "# Pydantic Evals",
+                    "",
+                    "Online evaluation lets teams measure agent behavior.",
+                ]
+            ),
+            encoding="utf-8",
+        )
+        write_default_config(tmp_path)
+        embedder = FakeEmbedder(dim=32)
+        await sync_repo(
+            tmp_path,
+            summarizer=FakeSummarizer(),
+            embedder=embedder,
+            index_config=IndexConfig(),
+        )
+
+        result = await search_repo_documents(
+            tmp_path,
+            embedder=embedder,
+            query="evaluate agents and write tests",
+            k=3,
+        )
+
+        assert result["data"]["hits"][0]["doc"] == "docs-evals"
+
+    async def test_search_repo_documents_boosts_dependency_injection_variants(
+        self, tmp_path: Path
+    ) -> None:
+        (tmp_path / "README.md").write_text("# Root\n\nOverview.\n", encoding="utf-8")
+        (tmp_path / "docs").mkdir()
+        (tmp_path / "docs" / "dependencies.md").write_text(
+            "\n".join(
+                [
+                    "# Dependencies",
+                    "",
+                    "Dependency injection provides typed deps for agent runs.",
+                ]
+            ),
+            encoding="utf-8",
+        )
+        (tmp_path / "docs" / "multi-agent-applications.md").write_text(
+            "\n".join(
+                [
+                    "# Multi-agent Applications",
+                    "",
+                    "Agents can hand off between agent runs in complex workflows.",
+                ]
+            ),
+            encoding="utf-8",
+        )
+        write_default_config(tmp_path)
+        embedder = FakeEmbedder(dim=32)
+        await sync_repo(
+            tmp_path,
+            summarizer=FakeSummarizer(),
+            embedder=embedder,
+            index_config=IndexConfig(),
+        )
+
+        result = await search_repo_documents(
+            tmp_path,
+            embedder=embedder,
+            query="inject dependencies into agent runs",
+            k=3,
+        )
+
+        assert result["data"]["hits"][0]["doc"] == "docs-dependencies"
