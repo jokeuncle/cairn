@@ -152,8 +152,11 @@ Semantics:
 
 - The query embedding is computed once, then searched against each indexed
   document's vector overlay.
-- Hits use hybrid ranking: vector similarity plus a small lexical boost from
-  document id, source path, title, synopsis, and section text.
+- Hits use hybrid ranking: vector similarity, BM25-style sparse evidence,
+  structure-aware field support, weighted query-term coverage, path/title
+  identity, and local graph-neighborhood propagation. The ranker is generic:
+  it does not special-case repository names, document ids, or benchmark
+  answers.
 - By default, results use `.cairn/config.toml search_sections_per_doc` (`1`
   in the generated config) so agents can find the right document before
   drilling down. Set `sections_per_doc > 1` per call, or raise the config

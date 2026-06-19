@@ -9,8 +9,10 @@ document index per discovered source file under ``.cairn/documents/<doc_id>/``.
 from __future__ import annotations
 
 import json
+import math
 import re
 import tomllib
+from collections import Counter, defaultdict
 from collections.abc import Callable, Collection, Iterable
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -194,6 +196,8 @@ class _RepoSectionRecord:
     synopsis: str
     vector: tuple[float, ...]
     haystacks: tuple[str, str, str, str, str]
+    token_counts: dict[str, int]
+    token_count: int
 
 
 @dataclass(slots=True)
@@ -211,6 +215,11 @@ class _RepoScoredHit:
     score: float
     vector_score: float
     lexical_score: float
+    sparse_score: float
+    graph_score: float
+    base_score: float
+    rank_factor: float
+    identity_bonus: float
 
 
 @dataclass(slots=True)
@@ -219,9 +228,37 @@ class _RepoSearchCache:
     records: tuple[_RepoSectionRecord, ...]
     skipped: tuple[dict[str, str], ...]
     doc_dims: dict[str, int]
+    df: dict[str, int]
+    avg_token_count: float
+    graph_neighbors: dict[tuple[str, str], tuple[tuple[tuple[str, str], float], ...]]
+
+
+@dataclass(frozen=True, slots=True)
+class _RepoRankProfile:
+    field_weights: tuple[float, float, float, float, float] = (2.5, 2.0, 3.0, 1.0, 1.0)
+    vector_weight: float = 0.22
+    lexical_weight: float = 0.50
+    sparse_weight: float = 0.28
+    graph_weight: float = 0.10
+    no_lexical_vector_weight: float = 0.25
+    sparse_floor_gate: float = 0.25
+    sparse_lexical_gate_multiplier: float = 2.0
+    overview_doc_bonus: float = 0.16
+    overview_title_bonus: float = 0.12
+    overview_shallow_bonus: float = 0.04
+    overview_max_bonus: float = 0.22
+    focus_support_floor: float = 0.30
+    focus_support_weight: float = 0.70
+    focus_synopsis_support: float = 0.65
+    focus_body_support: float = 0.45
+    root_meta_doc_factor: float = 0.55
+    coverage_floor: float = 0.45
+    coverage_weight: float = 0.55
+    doc_identity_bonus_weight: float = 0.25
 
 
 _REPO_SEARCH_CACHES: dict[Path, _RepoSearchCache] = {}
+_DEFAULT_RANK_PROFILE = _RepoRankProfile()
 
 
 def cairn_dir(root: Path) -> Path:
@@ -450,7 +487,7 @@ async def search_repo_documents(
 
     candidates = _repo_search_candidates(root, config)
     cache = await _get_repo_search_cache(root, candidates)
-    lexical_query = _build_repo_lexical_query(query)
+    lexical_query = _build_repo_lexical_query(query, cache=cache)
     hits_by_key: dict[tuple[str, str], _RepoScoredHit] = {}
     skipped: list[dict[str, str]] = list(cache.skipped)
     query_dim = len(query_vec)
@@ -472,11 +509,13 @@ async def search_repo_documents(
         scored = _score_repo_record(
             record,
             query=lexical_query,
+            cache=cache,
             vector_score=_cosine_score(normalized_query, record.vector),
         )
         hits_by_key[(record.doc_id, record.section_id)] = scored
 
     hits = list(hits_by_key.values())
+    _apply_graph_scores(hits, cache)
     hits.sort(key=lambda item: item.score, reverse=True)
     selected_records = _diversify_repo_hits(
         hits,
@@ -546,6 +585,9 @@ async def _get_repo_search_cache(
     records: list[_RepoSectionRecord] = []
     skipped: list[dict[str, str]] = []
     doc_dims: dict[str, int] = {}
+    df_counter: Counter[str] = Counter()
+    graph_weights: dict[tuple[str, str], dict[tuple[str, str], float]] = defaultdict(dict)
+    entity_sections: dict[str, set[tuple[str, str]]] = defaultdict(set)
     for doc in candidates:
         try:
             index = DocumentIndex.load(root / doc.doc_dir)
@@ -558,12 +600,21 @@ async def _get_repo_search_cache(
             skipped.append({"doc": doc.id, "reason": str(exc)})
             continue
 
+        vector_section_ids = set(vectors)
         for node in index.tree:
             vector = vectors.get(node.id)
             if vector is None:
                 continue
             summary = index.summaries.get(node.id)
             synopsis = summary.synopsis if summary is not None else ""
+            token_counts = _section_token_counts(
+                doc_id=doc.id,
+                source=doc.source,
+                title=node.title,
+                synopsis=synopsis,
+                body=node.raw_text,
+            )
+            df_counter.update(token_counts.keys())
             records.append(
                 _RepoSectionRecord(
                     doc_id=doc.id,
@@ -581,14 +632,62 @@ async def _get_repo_search_cache(
                         _normalize_field_text(synopsis),
                         _normalize_field_text(node.raw_text[:2000]),
                     ),
+                    token_counts=dict(token_counts),
+                    token_count=sum(token_counts.values()),
                 )
             )
+
+        for node in index.tree:
+            if (
+                node.parent is not None
+                and node.id in vector_section_ids
+                and node.parent in vector_section_ids
+            ):
+                _add_graph_edge(
+                    graph_weights,
+                    (doc.id, node.id),
+                    (doc.id, node.parent),
+                    weight=0.55,
+                )
+        if index.xrefs is not None:
+            for ref in index.xrefs:
+                if ref.src in vector_section_ids and ref.dst in vector_section_ids:
+                    _add_graph_edge(
+                        graph_weights,
+                        (doc.id, ref.src),
+                        (doc.id, ref.dst),
+                        weight=max(0.2, min(1.0, ref.confidence)),
+                    )
+        if index.entities is not None:
+            for entity in index.entities:
+                key = f"{entity.kind}:{entity.canonical}".lower()
+                for mention in entity.mentions:
+                    if mention.section_id in vector_section_ids:
+                        entity_sections[key].add((doc.id, mention.section_id))
+
+    for section_keys in entity_sections.values():
+        if len(section_keys) < 2 or len(section_keys) > 24:
+            continue
+        ordered = sorted(section_keys)
+        for i, src in enumerate(ordered):
+            for dst in ordered[i + 1 :]:
+                _add_graph_edge(graph_weights, src, dst, weight=0.18)
 
     cache = _RepoSearchCache(
         signature=signature,
         records=tuple(records),
         skipped=tuple(skipped),
         doc_dims=doc_dims,
+        df=dict(df_counter),
+        avg_token_count=(
+            sum(record.token_count for record in records) / len(records)
+            if records
+            else 0.0
+        ),
+        graph_neighbors={
+            key: tuple(neighbors.items())
+            for key, neighbors in graph_weights.items()
+        },
     )
     if (
         resolved_root not in _REPO_SEARCH_CACHES
@@ -622,19 +721,165 @@ def _cosine_score(query: list[float], vector: tuple[float, ...]) -> float:
     return max(0.0, min(1.0, score))
 
 
+def _section_token_counts(
+    *,
+    doc_id: str,
+    source: str,
+    title: str,
+    synopsis: str,
+    body: str,
+) -> Counter[str]:
+    text = " ".join(
+        (
+            doc_id,
+            source,
+            title,
+            title,
+            synopsis,
+            body[:4000],
+        )
+    )
+    return Counter(_tokenize_search_text(text))
+
+
+def _tokenize_search_text(text: str) -> list[str]:
+    return re.findall(
+        r"[a-z0-9][a-z0-9]*",
+        text.lower().replace("/", " ").replace("-", " ").replace("_", " "),
+    )
+
+
+def _bm25_sparse_score(
+    query: _RepoLexicalQuery,
+    record: _RepoSectionRecord,
+    cache: _RepoSearchCache,
+) -> float:
+    if not query.terms or record.token_count <= 0 or cache.avg_token_count <= 0:
+        return 0.0
+    corpus_size = max(1, len(cache.records))
+    k1 = 1.2
+    b = 0.75
+    raw = 0.0
+    max_raw = 0.0
+    length_norm = k1 * (
+        (1.0 - b) + b * (record.token_count / cache.avg_token_count)
+    )
+    for term in query.terms:
+        tf = max(
+            (
+                record.token_counts.get(variant, 0)
+                for variant in query.variants[term]
+                if " " not in variant
+            ),
+            default=0,
+        )
+        df = max(
+            (
+                cache.df.get(variant, 0)
+                for variant in query.variants[term]
+                if " " not in variant
+            ),
+            default=0,
+        )
+        if tf <= 0 or df <= 0:
+            continue
+        idf = math.log(1.0 + ((corpus_size - df + 0.5) / (df + 0.5)))
+        weighted_idf = idf * query.weights[term]
+        raw += weighted_idf * ((tf * (k1 + 1.0)) / (tf + length_norm))
+        max_raw += weighted_idf * (k1 + 1.0)
+    if max_raw <= 0:
+        return 0.0
+    return max(0.0, min(1.0, raw / max_raw))
+
+
+def _add_graph_edge(
+    graph: dict[tuple[str, str], dict[tuple[str, str], float]],
+    left: tuple[str, str],
+    right: tuple[str, str],
+    *,
+    weight: float,
+) -> None:
+    if left == right:
+        return
+    graph[left][right] = max(graph[left].get(right, 0.0), weight)
+    graph[right][left] = max(graph[right].get(left, 0.0), weight)
+
+
 def _score_repo_record(
     record: _RepoSectionRecord,
     *,
     query: _RepoLexicalQuery,
+    cache: _RepoSearchCache,
     vector_score: float,
 ) -> _RepoScoredHit:
-    lexical_score = _lexical_score_from_profile(query, record.haystacks)
+    focus_support = _focus_field_support(query, record.haystacks)
+    coverage = _weighted_term_coverage(query, record.haystacks)
+    lexical_score = min(
+        1.0,
+        _field_supported_lexical_score(
+            _lexical_score_from_profile(query, record.haystacks),
+            focus_support=focus_support,
+        )
+        * _coverage_factor(coverage)
+        + _overview_intent_bonus(query, record),
+    )
+    sparse_score = _bm25_sparse_score(query, record, cache)
+    rank_factor = _root_meta_doc_factor(query, record)
+    identity_bonus = _doc_identity_bonus(query, record.haystacks)
+    base_score = min(
+        1.0,
+        _combine_repo_scores(
+            vector_score,
+            lexical_score,
+            sparse_score=sparse_score,
+            graph_score=0.0,
+        )
+        + identity_bonus,
+    ) * rank_factor
     return _RepoScoredHit(
         record=record,
-        score=_combine_repo_scores(vector_score, lexical_score),
+        score=base_score,
         vector_score=vector_score,
         lexical_score=lexical_score,
+        sparse_score=sparse_score,
+        graph_score=0.0,
+        base_score=base_score,
+        rank_factor=rank_factor,
+        identity_bonus=identity_bonus,
     )
+
+
+def _apply_graph_scores(
+    hits: list[_RepoScoredHit],
+    cache: _RepoSearchCache,
+) -> None:
+    by_key = {
+        (hit.record.doc_id, hit.record.section_id): hit
+        for hit in hits
+    }
+    for hit in hits:
+        key = (hit.record.doc_id, hit.record.section_id)
+        neighbors = cache.graph_neighbors.get(key, ())
+        total = 0.0
+        weight_sum = 0.0
+        for neighbor_key, weight in neighbors:
+            neighbor = by_key.get(neighbor_key)
+            if neighbor is None:
+                continue
+            total += neighbor.base_score * weight
+            weight_sum += weight
+        graph_score = total / weight_sum if weight_sum else 0.0
+        hit.graph_score = graph_score
+        hit.score = min(
+            1.0,
+            _combine_repo_scores(
+                hit.vector_score,
+                hit.lexical_score,
+                sparse_score=hit.sparse_score,
+                graph_score=graph_score,
+            )
+            + hit.identity_bonus,
+        ) * hit.rank_factor
 
 
 def _repo_scored_payload(
@@ -652,6 +897,8 @@ def _repo_scored_payload(
         "score": hit.score,
         "vector_score": hit.vector_score,
         "lexical_score": hit.lexical_score,
+        "sparse_score": hit.sparse_score,
+        "graph_score": hit.graph_score,
         "anchor": record.index.anchor(record.section_id),
     }
     if "synopsis" in include_set and record.synopsis:
@@ -684,7 +931,12 @@ def _repo_hit_payload(
         body=body,
         synopsis=synopsis,
     )
-    combined_score = _combine_repo_scores(vector_score, lexical_score)
+    combined_score = _combine_repo_scores(
+        vector_score,
+        lexical_score,
+        sparse_score=0.0,
+        graph_score=0.0,
+    )
     result: dict[str, Any] = {
         "doc": doc_id,
         "source": source,
@@ -693,6 +945,8 @@ def _repo_hit_payload(
         "score": combined_score,
         "vector_score": vector_score,
         "lexical_score": lexical_score,
+        "sparse_score": 0.0,
+        "graph_score": 0.0,
         "anchor": index.anchor(section_id),
     }
     if "synopsis" in include_set and synopsis:
@@ -704,10 +958,47 @@ def _repo_hit_payload(
     return result
 
 
-def _combine_repo_scores(vector_score: float, lexical_score: float) -> float:
+def _combine_repo_scores(
+    vector_score: float,
+    lexical_score: float,
+    *,
+    sparse_score: float,
+    graph_score: float,
+) -> float:
+    profile = _DEFAULT_RANK_PROFILE
+    if lexical_score <= 0 and sparse_score <= 0:
+        return vector_score * profile.no_lexical_vector_weight
+    trusted_sparse = _trusted_sparse_score(
+        lexical_score=lexical_score,
+        sparse_score=sparse_score,
+    )
+    base = (
+        (vector_score * profile.vector_weight)
+        + (lexical_score * profile.lexical_weight)
+        + (trusted_sparse * profile.sparse_weight)
+    )
+    if graph_score <= 0:
+        return min(1.0, base)
+    return min(
+        1.0,
+        (base * (1.0 - profile.graph_weight)) + (graph_score * profile.graph_weight),
+    )
+
+
+def _trusted_sparse_score(*, lexical_score: float, sparse_score: float) -> float:
+    if sparse_score <= 0:
+        return 0.0
     if lexical_score <= 0:
-        return vector_score * 0.25
-    return min(1.0, (vector_score * 0.25) + (lexical_score * 0.75))
+        return sparse_score * 0.15
+    profile = _DEFAULT_RANK_PROFILE
+    gate = min(
+        1.0,
+        max(
+            profile.sparse_floor_gate,
+            lexical_score * profile.sparse_lexical_gate_multiplier,
+        ),
+    )
+    return sparse_score * gate
 
 
 def _merge_repo_hit(
@@ -740,18 +1031,51 @@ def _lexical_score(
     return _lexical_score_from_profile(_build_repo_lexical_query(query), haystacks)
 
 
-def _build_repo_lexical_query(query: str) -> _RepoLexicalQuery:
+def _build_repo_lexical_query(
+    query: str,
+    *,
+    cache: _RepoSearchCache | None = None,
+) -> _RepoLexicalQuery:
     terms = tuple(_repo_query_terms(query))
-    field_weights = (2.5, 2.0, 3.0, 1.0, 1.0)
-    weights = {term: _repo_term_weight(term) for term in terms}
+    field_weights = _DEFAULT_RANK_PROFILE.field_weights
+    variants = {term: _term_variants(term) for term in terms}
+    weights = {
+        term: _repo_term_weight(term)
+        * _repo_corpus_term_weight(variants[term], cache)
+        for term in terms
+    }
     max_score = sum(weights[term] * sum(field_weights) for term in terms)
     return _RepoLexicalQuery(
         terms=terms,
-        variants={term: _term_variants(term) for term in terms},
+        variants=variants,
         weights=weights,
-        phrases=(*_command_phrases(query), *_domain_phrases_from_terms(terms)),
+        phrases=tuple(_command_phrases(query)),
         max_score=max_score,
     )
+
+
+def _repo_corpus_term_weight(
+    variants: tuple[str, ...],
+    cache: _RepoSearchCache | None,
+) -> float:
+    if cache is None or not cache.records:
+        return 1.0
+    token_variants = {variant for variant in variants if " " not in variant}
+    if not token_variants:
+        return 1.0
+    coverage = sum(
+        1
+        for record in cache.records
+        if any(variant in record.token_counts for variant in token_variants)
+    )
+    if coverage <= 0:
+        return 1.0
+    corpus_size = len(cache.records)
+    idf = math.log(1.0 + ((corpus_size - coverage + 0.5) / (coverage + 0.5)))
+    max_idf = math.log(1.0 + ((corpus_size + 0.5) / 0.5))
+    if max_idf <= 0:
+        return 1.0
+    return 0.35 + (0.65 * max(0.0, min(1.0, idf / max_idf)))
 
 
 def _lexical_score_from_profile(
@@ -764,7 +1088,7 @@ def _lexical_score_from_profile(
     for term in query.terms:
         term_weight = query.weights[term]
         variants = query.variants[term]
-        field_weights = (2.5, 2.0, 3.0, 1.0, 1.0)
+        field_weights = _DEFAULT_RANK_PROFILE.field_weights
         for haystack, field_weight in zip(haystacks, field_weights, strict=True):
             if any(variant in haystack for variant in variants):
                 weighted += term_weight * field_weight
@@ -776,42 +1100,39 @@ def _lexical_score_from_profile(
                 weighted += float(size)
     for phrase in query.phrases:
         if phrase in combined:
-            weighted += 4.0
+            weighted += _repo_phrase_weight(phrase)
     return min(1.0, weighted / query.max_score)
 
 
 def _repo_query_terms(query: str) -> list[str]:
     generic = {
         "about",
+        "do",
         "does",
         "from",
         "how",
+        "in",
         "into",
+        "it",
+        "on",
         "using",
         "what",
         "when",
         "where",
         "which",
+        "work",
+        "works",
         "with",
     }
     terms = [term for term in _query_terms(query) if term not in generic]
     seen = set(terms)
-    short_code_terms = {
-        "ai",
-        "api",
-        "ci",
-        "cd",
-        "db",
-        "go",
-        "js",
-        "mcp",
-        "py",
-        "ts",
-        "ui",
-        "uv",
-    }
     for word in re.findall(r"[A-Za-z0-9_][A-Za-z0-9_-]*", query.lower()):
-        if word in short_code_terms and word not in seen:
+        if (
+            len(word) >= 2
+            and word not in generic
+            and word not in seen
+            and _looks_like_compact_identifier(word)
+        ):
             seen.add(word)
             terms.append(word)
     return terms
@@ -827,13 +1148,18 @@ def _normalize_search_text(text: str) -> str:
     return " ".join(re.findall(r"[a-z0-9][a-z0-9]*", normalized))
 
 
+def _looks_like_compact_identifier(token: str) -> bool:
+    return len(token) <= 4 or any(char.isdigit() for char in token) or "_" in token
+
+
 def _repo_term_weight(term: str) -> float:
-    """Down-weight broad terms that otherwise dominate docs-heavy AI repos."""
+    """Down-weight broad verbs that otherwise dominate docs-heavy repos."""
     if term in {
-        "agent",
-        "agents",
         "run",
         "runs",
+        "test",
+        "tests",
+        "testing",
         "use",
         "using",
         "write",
@@ -842,6 +1168,170 @@ def _repo_term_weight(term: str) -> float:
     }:
         return 0.35
     return 1.0
+
+
+def _overview_intent_bonus(
+    query: _RepoLexicalQuery,
+    record: _RepoSectionRecord,
+) -> float:
+    if not query.terms:
+        return 0.0
+    focus_term = query.terms[0]
+
+    doc_tokens = tuple(_tokenize_search_text(record.doc_id))
+    title = _normalize_search_text(record.title)
+    profile = _DEFAULT_RANK_PROFILE
+    bonus = 0.0
+    variants = {
+        variant
+        for variant in query.variants.get(focus_term, ())
+        if " " not in variant
+    }
+    if not variants:
+        return 0.0
+    if any(doc_tokens in {(variant,), ("docs", variant)} for variant in variants):
+        bonus = max(bonus, profile.overview_doc_bonus)
+    if title in variants:
+        bonus = max(bonus, profile.overview_title_bonus)
+
+    if bonus > 0 and record.section_id.count("/") <= 1:
+        bonus += profile.overview_shallow_bonus
+    return min(profile.overview_max_bonus, bonus)
+
+
+def _focus_field_support(
+    query: _RepoLexicalQuery,
+    haystacks: tuple[str, str, str, str, str],
+) -> float:
+    if not query.terms:
+        return 1.0
+    doc_id, source, title, synopsis, body = haystacks
+    profile = _DEFAULT_RANK_PROFILE
+    focus_terms = tuple(
+        term for term in query.terms if query.weights.get(term, 0.0) > 0
+    )[:2]
+    if not focus_terms:
+        return 1.0
+    total = sum(query.weights[term] for term in focus_terms)
+    if total <= 0:
+        return 1.0
+    support = 0.0
+    for term in focus_terms:
+        variants = {
+            variant
+            for variant in query.variants.get(term, ())
+            if " " not in variant
+        }
+        if not variants:
+            continue
+        if any(
+            variant in doc_id or variant in source or variant in title
+            for variant in variants
+        ):
+            support += query.weights[term]
+        elif any(variant in synopsis for variant in variants):
+            support += query.weights[term] * profile.focus_synopsis_support
+        elif any(variant in body for variant in variants):
+            support += query.weights[term] * profile.focus_body_support
+    return max(0.0, min(1.0, support / total))
+
+
+def _field_supported_lexical_score(score: float, *, focus_support: float) -> float:
+    if score <= 0 or focus_support >= 1:
+        return score
+    profile = _DEFAULT_RANK_PROFILE
+    multiplier = profile.focus_support_floor + (
+        profile.focus_support_weight * max(0.0, focus_support)
+    )
+    return score * multiplier
+
+
+def _weighted_term_coverage(
+    query: _RepoLexicalQuery,
+    haystacks: tuple[str, str, str, str, str],
+) -> float:
+    if not query.terms:
+        return 1.0
+    combined = " ".join(haystacks)
+    total = sum(query.weights[term] for term in query.terms)
+    if total <= 0:
+        return 1.0
+    matched = 0.0
+    for term in query.terms:
+        variants = query.variants.get(term, ())
+        if any(variant in combined for variant in variants):
+            matched += query.weights[term]
+    return max(0.0, min(1.0, matched / total))
+
+
+def _coverage_factor(coverage: float) -> float:
+    profile = _DEFAULT_RANK_PROFILE
+    return profile.coverage_floor + (
+        profile.coverage_weight * max(0.0, min(1.0, coverage))
+    )
+
+
+def _doc_identity_bonus(
+    query: _RepoLexicalQuery,
+    haystacks: tuple[str, str, str, str, str],
+) -> float:
+    if not query.terms:
+        return 0.0
+    doc_id, source, _, _, _ = haystacks
+    focus_terms = tuple(
+        term for term in query.terms if query.weights.get(term, 0.0) > 0
+    )[:3]
+    total = sum(query.weights[term] for term in focus_terms)
+    if total <= 0:
+        return 0.0
+    matched = 0.0
+    for term in focus_terms:
+        variants = {
+            variant
+            for variant in query.variants.get(term, ())
+            if " " not in variant
+        }
+        if any(variant in doc_id or variant in source for variant in variants):
+            matched += query.weights[term]
+    support = matched / total
+    return _DEFAULT_RANK_PROFILE.doc_identity_bonus_weight * max(
+        0.0,
+        min(1.0, support),
+    )
+
+
+def _root_meta_doc_factor(
+    query: _RepoLexicalQuery,
+    record: _RepoSectionRecord,
+) -> float:
+    source_path = Path(record.source)
+    if source_path.parent != Path(".") or source_path.stem in {"README", "CHANGELOG"}:
+        return 1.0
+    if source_path.stem != source_path.stem.upper():
+        return 1.0
+    if _first_term_has_structural_support(query, record.haystacks):
+        return 1.0
+    return _DEFAULT_RANK_PROFILE.root_meta_doc_factor
+
+
+def _first_term_has_structural_support(
+    query: _RepoLexicalQuery,
+    haystacks: tuple[str, str, str, str, str],
+) -> bool:
+    if not query.terms:
+        return True
+    variants = {
+        variant
+        for variant in query.variants.get(query.terms[0], ())
+        if " " not in variant
+    }
+    if not variants:
+        return True
+    doc_id, source, title, _, _ = haystacks
+    return any(
+        variant in doc_id or variant in source or variant in title
+        for variant in variants
+    )
 
 
 def _term_variants(term: str) -> tuple[str, ...]:
@@ -900,24 +1390,36 @@ def _term_variants(term: str) -> tuple[str, ...]:
         )
     if term.startswith("auth"):
         variants.update({"auth", "authenticate", "authentication", "authorization"})
+    if term.startswith("install"):
+        variants.update(
+            {
+                "install",
+                "installs",
+                "installed",
+                "installer",
+                "installers",
+                "installing",
+                "installation",
+            }
+        )
+    if term.startswith("login"):
+        variants.update({"login", "logins", "logged", "logging"})
+    if term.startswith("publish"):
+        variants.update({"publish", "published", "publishes", "publishing"})
+    if term.startswith("store"):
+        variants.update({"store", "stored", "stores", "storage"})
+    if term.startswith("stream"):
+        variants.update({"stream", "streams", "streamed", "streaming"})
 
     return tuple(sorted(variants, key=lambda item: (len(item), item), reverse=True))
 
 
-def _domain_phrases(query: str) -> tuple[str, ...]:
-    return _domain_phrases_from_terms(tuple(_repo_query_terms(query)))
-
-
-def _domain_phrases_from_terms(terms: tuple[str, ...]) -> tuple[str, ...]:
-    term_set = set(terms)
-    phrases: list[str] = []
-    if term_set & {"inject", "injected", "injecting"} and any(
-        term.startswith("depend") for term in term_set
-    ):
-        phrases.append("dependency injection")
-    if any(term.startswith(("eval", "evaluat")) for term in term_set):
-        phrases.extend(["online evaluation", "agent evaluation"])
-    return tuple(phrases)
+def _repo_phrase_weight(phrase: str) -> float:
+    tokens = phrase.split()
+    base = 2.0 + min(4.0, float(len(tokens)))
+    if any(_looks_like_compact_identifier(token) for token in tokens):
+        base += 2.0
+    return min(8.0, base)
 
 
 def _command_phrases(query: str) -> list[str]:
@@ -941,21 +1443,6 @@ def _command_phrases(query: str) -> list[str]:
         "where",
         "with",
     }
-    codeish = {
-        "api",
-        "auth",
-        "cli",
-        "compose",
-        "docker",
-        "git",
-        "http",
-        "mcp",
-        "pip",
-        "pytest",
-        "sdk",
-        "uv",
-        "uvx",
-    }
     phrases: list[str] = []
     seen: set[str] = set()
     for size in range(min(4, len(tokens)), 1, -1):
@@ -963,7 +1450,7 @@ def _command_phrases(query: str) -> list[str]:
             window = tokens[start : start + size]
             if any(token in generic for token in window):
                 continue
-            if not any(token in codeish or len(token) <= 4 for token in window):
+            if not any(_looks_like_compact_identifier(token) for token in window):
                 continue
             phrase = " ".join(window)
             if phrase not in seen:

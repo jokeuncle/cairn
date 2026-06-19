@@ -564,3 +564,146 @@ class TestRepoSearch:
         )
 
         assert result["data"]["hits"][0]["doc"] == "docs-dependencies"
+
+    async def test_search_repo_documents_does_not_overtrust_sparse_hits(
+        self, tmp_path: Path
+    ) -> None:
+        (tmp_path / "README.md").write_text("# Root\n\nOverview.\n", encoding="utf-8")
+        (tmp_path / "docs").mkdir()
+        (tmp_path / "docs" / "agent.md").write_text(
+            "\n".join(
+                [
+                    "# Agent",
+                    "",
+                    "## Streaming Events and Final Output",
+                    "",
+                    "Stream structured responses and events from an agent run.",
+                ]
+            ),
+            encoding="utf-8",
+        )
+        (tmp_path / "docs" / "capabilities.md").write_text(
+            "\n".join(
+                [
+                    "# Capabilities",
+                    "",
+                    "## Event stream hook",
+                    "",
+                    "The event stream hook observes stream events for API capabilities.",
+                    "Event stream hook entries are useful for low-level integrations.",
+                ]
+            ),
+            encoding="utf-8",
+        )
+        write_default_config(tmp_path)
+        embedder = FakeEmbedder(dim=32)
+        await sync_repo(
+            tmp_path,
+            summarizer=FakeSummarizer(),
+            embedder=embedder,
+            index_config=IndexConfig(),
+        )
+
+        result = await search_repo_documents(
+            tmp_path,
+            embedder=embedder,
+            query="stream structured responses and events from a run",
+            k=3,
+        )
+
+        hits = result["data"]["hits"]
+        assert hits[0]["doc"] == "docs-agent"
+        assert hits[0]["sparse_score"] > 0
+        assert "graph_score" in hits[0]
+
+    async def test_search_repo_documents_prefers_overview_for_broad_queries(
+        self, tmp_path: Path
+    ) -> None:
+        (tmp_path / "README.md").write_text("# Root\n\nOverview.\n", encoding="utf-8")
+        (tmp_path / "docs").mkdir()
+        (tmp_path / "docs" / "tools.md").write_text(
+            "\n".join(
+                [
+                    "# Tools",
+                    "",
+                    "Tools let agents call Python functions during a run.",
+                    "",
+                    "## Registering tools",
+                    "",
+                    "Register function tools on an agent.",
+                ]
+            ),
+            encoding="utf-8",
+        )
+        (tmp_path / "docs" / "deferred-tools.md").write_text(
+            "\n".join(
+                [
+                    "# Deferred Tools",
+                    "",
+                    "Deferred tools are specialized external tool execution hooks.",
+                    "Use deferred tools when a workflow must pause for approval.",
+                ]
+            ),
+            encoding="utf-8",
+        )
+        write_default_config(tmp_path)
+        embedder = FakeEmbedder(dim=32)
+        await sync_repo(
+            tmp_path,
+            summarizer=FakeSummarizer(),
+            embedder=embedder,
+            index_config=IndexConfig(),
+        )
+
+        result = await search_repo_documents(
+            tmp_path,
+            embedder=embedder,
+            query="how do tools work in agents",
+            k=3,
+        )
+
+        assert result["data"]["hits"][0]["doc"] == "docs-tools"
+
+    async def test_search_repo_documents_uses_doc_identity_for_topic_pages(
+        self, tmp_path: Path
+    ) -> None:
+        (tmp_path / "README.md").write_text("# Root\n\nOverview.\n", encoding="utf-8")
+        (tmp_path / "docs").mkdir()
+        (tmp_path / "docs" / "mcp-server.md").write_text(
+            "\n".join(
+                [
+                    "# MCP Server",
+                    "",
+                    "Expose a server endpoint for tools and resources.",
+                ]
+            ),
+            encoding="utf-8",
+        )
+        (tmp_path / "docs" / "mcp-client.md").write_text(
+            "\n".join(
+                [
+                    "# MCP Client",
+                    "",
+                    "The client can connect to a remote MCP server.",
+                    "Client configuration may mention server URLs many times.",
+                ]
+            ),
+            encoding="utf-8",
+        )
+        write_default_config(tmp_path)
+        embedder = FakeEmbedder(dim=32)
+        await sync_repo(
+            tmp_path,
+            summarizer=FakeSummarizer(),
+            embedder=embedder,
+            index_config=IndexConfig(),
+        )
+
+        result = await search_repo_documents(
+            tmp_path,
+            embedder=embedder,
+            query="how to expose an MCP server",
+            k=3,
+        )
+
+        assert result["data"]["hits"][0]["doc"] == "docs-mcp-server"

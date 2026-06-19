@@ -73,10 +73,16 @@ The current public-readiness smoke set:
 
 Expected current results with fake plugins:
 
-- `uv`: 89/89 docs indexed, 0 errors; 16-case deep eval top1 12/16,
+- `pydantic/pydantic-ai`: 178/178 docs indexed, 0 errors; 8-case deep
+  eval top1 8/8, top5 8/8, drilldown 8/8.
+- `uv`: 89/89 docs indexed, 0 errors; 16-case deep eval top1 15/16,
   top3 16/16, top5 16/16, drilldown 16/16.
-- `modelcontextprotocol/python-sdk`: 17/17 docs indexed, 0 errors.
-- `fastapi/full-stack-fastapi-template`: 7/7 docs indexed, 0 errors.
+- `modelcontextprotocol/python-sdk`: 17/17 docs indexed, 0 errors; 4-case
+  deep eval top1 4/4, drilldown 4/4.
+- `fastapi/full-stack-fastapi-template`: 7/7 docs indexed, 0 errors; 4-case
+  deep eval top1 4/4, drilldown 4/4.
+- `scripts/smoke_many_repos.py --limit 32`: 1076 docs indexed across 32
+  repos, 0 sync failures, 160/160 searches with hits, 160/160 drilldowns.
 
 Do not tune ranking solely to one repository. Treat failures as signals about
 general discovery, evidence, ranking, or drilldown quality.
@@ -85,6 +91,7 @@ Run:
 
 ```bash
 python scripts/eval_repos.py --repo all --refresh
+python scripts/smoke_many_repos.py --limit 32 --refresh
 ```
 
 ## Secret And Generated-File Audit

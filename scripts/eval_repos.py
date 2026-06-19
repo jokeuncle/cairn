@@ -13,7 +13,9 @@ import argparse
 import asyncio
 import json
 import shutil
+import statistics
 import subprocess
+import time
 from pathlib import Path
 from typing import Any
 
@@ -172,6 +174,55 @@ REPOS: dict[str, dict[str, Any]] = {
             },
         ],
     },
+    "pydantic-ai": {
+        "url": "https://github.com/pydantic/pydantic-ai",
+        "cases": [
+            {
+                "id": "tools",
+                "query": "how do tools work in agents",
+                "acceptable": {"docs-tools", "docs-tools-advanced"},
+            },
+            {
+                "id": "mcp-server",
+                "query": "how to expose an MCP server from pydantic ai",
+                "acceptable": {"docs-mcp-server"},
+            },
+            {
+                "id": "openai-models",
+                "query": "configure OpenAI model settings",
+                "acceptable": {"docs-models", "docs-models-openai"},
+            },
+            {
+                "id": "message-history",
+                "query": "reuse message history in conversations",
+                "acceptable": {"docs-message-history"},
+            },
+            {
+                "id": "multi-agent",
+                "query": "build multi agent handoffs between agents",
+                "acceptable": {"docs-multi-agent-applications"},
+            },
+            {
+                "id": "streaming",
+                "query": "stream structured responses and events from a run",
+                "acceptable": {"docs-agent", "docs-output"},
+            },
+            {
+                "id": "testing-evals",
+                "query": "evaluate agents and write tests",
+                "acceptable": {
+                    "docs-evals",
+                    "docs-evals-online-evaluation",
+                    "docs-testing-evals",
+                },
+            },
+            {
+                "id": "dependencies",
+                "query": "inject dependencies into agent runs",
+                "acceptable": {"docs-dependencies"},
+            },
+        ],
+    },
     "fastapi-template": {
         "url": "https://github.com/fastapi/full-stack-fastapi-template",
         "cases": [
@@ -237,6 +288,19 @@ def ensure_clone(name: str, url: str, workdir: Path, *, refresh: bool) -> Path:
     return root
 
 
+def latency_summary(values: list[float]) -> dict[str, float]:
+    if not values:
+        return {"avg": 0.0, "p50": 0.0, "p95": 0.0, "max": 0.0}
+    ordered = sorted(values)
+    p95_index = min(len(ordered) - 1, round((len(ordered) - 1) * 0.95))
+    return {
+        "avg": round(statistics.fmean(values), 2),
+        "p50": round(statistics.median(values), 2),
+        "p95": round(ordered[p95_index], 2),
+        "max": round(max(values), 2),
+    }
+
+
 async def evaluate_repo(
     name: str,
     spec: dict[str, Any],
@@ -257,13 +321,17 @@ async def evaluate_repo(
     top3 = 0
     top5 = 0
     drilldown = 0
+    latencies: list[float] = []
     for case in spec["cases"]:
+        started = time.perf_counter()
         env = await dispatch_repo_tool(
             "search_documents",
             {"query": case["query"], "k": args.k, "sections_per_doc": 1},
             root,
             embedder,
         )
+        elapsed_ms = (time.perf_counter() - started) * 1000
+        latencies.append(elapsed_ms)
         hits = env["data"]["hits"] if env.get("ok") else []
         docs = [hit["doc"] for hit in hits]
         acceptable = set(case["acceptable"])
@@ -292,6 +360,7 @@ async def evaluate_repo(
                 "id": case["id"],
                 "query": case["query"],
                 "acceptable": sorted(acceptable),
+                "elapsed_ms": round(elapsed_ms, 2),
                 "top_docs": docs,
                 "top_titles": [hit["title"] for hit in hits],
                 "top1_hit": top1_hit,
@@ -321,6 +390,7 @@ async def evaluate_repo(
         "top3": f"{top3}/{total}",
         "top5": f"{top5}/{total}",
         "drilldown": f"{drilldown}/{total}",
+        "latency_ms": latency_summary(latencies),
         "rows": rows,
     }
 

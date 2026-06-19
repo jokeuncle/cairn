@@ -247,10 +247,31 @@ Repo-level smoke tests are also public and reproducible:
 
 ```bash
 python scripts/eval_repos.py --repo all --refresh
+python scripts/smoke_many_repos.py --limit 32
 ```
 
-The current smoke set covers `astral-sh/uv`, `modelcontextprotocol/python-sdk`,
-and `fastapi/full-stack-fastapi-template`.
+The labeled eval set covers `astral-sh/uv`, `pydantic/pydantic-ai`,
+`modelcontextprotocol/python-sdk`, and `fastapi/full-stack-fastapi-template`.
+The broad smoke matrix currently spans 32 public repositories across Python,
+JavaScript/TypeScript, Rust, and Go ecosystems. It is not an accuracy
+leaderboard; it verifies clone/discovery/sync/search/drilldown robustness and
+latency across different documentation shapes.
+
+Latest fake-plugin runs on this machine:
+
+| suite | result |
+|---|---|
+| `pydantic-ai` labeled eval | 178/178 docs indexed, 8/8 top1, 8/8 top5, 8/8 drilldown |
+| `uv` labeled eval | 89/89 docs indexed, 15/16 top1, 16/16 top3/top5, 16/16 drilldown |
+| `mcp-python-sdk` labeled eval | 17/17 docs indexed, 4/4 top1, 4/4 drilldown |
+| `fastapi-template` labeled eval | 7/7 docs indexed, 4/4 top1, 4/4 drilldown |
+| 32-repo smoke matrix | 1076 docs indexed, 0 sync failures, 160/160 searches with hits, 160/160 drilldowns |
+
+`search_documents` uses a general hybrid ranker: dense vector similarity,
+BM25-style sparse evidence, structure-aware field support, weighted query-term
+coverage, path/title identity prior, and local graph-neighborhood propagation.
+The ranker does not special-case repository names, document ids, or benchmark
+answers.
 
 ### Real LLM + real embeddings
 
