@@ -9,6 +9,7 @@ import pytest
 from cairn.embed.fake import FakeEmbedder
 from cairn.engine.indexer import Indexer
 from cairn.engine.manifest import MANIFEST_FILENAME, read_manifest
+from cairn.entity.heuristic import HeuristicExtractor
 from cairn.index.summaries import SUMMARIES_FILENAME
 from cairn.index.tree import TREE_FILENAME
 from cairn.index.vectors import VECTORS_DB_DIRNAME, VECTORS_MANIFEST_FILENAME
@@ -16,6 +17,7 @@ from cairn.ingest.markdown import MarkdownParser
 from cairn.summarize.base import SummaryLevel
 from cairn.summarize.fake import FakeSummarizer
 from cairn.tools.base import DocumentIndex
+from cairn.xref.heuristic import HeuristicXRefExtractor
 
 
 @pytest.fixture
@@ -30,6 +32,10 @@ def indexer() -> Indexer:
         summarizer=FakeSummarizer(),
         embedder=FakeEmbedder(dim=32),
     )
+
+
+class AlternateFakeSummarizer(FakeSummarizer):
+    name = "fake:alternate-words"
 
 
 class TestIndexer:
@@ -142,6 +148,60 @@ class TestIncrementalRebuild:
         )
         result = await indexer.index_path(modified, out_dir=out)
         assert result.rebuilt is True
+
+    async def test_embedder_dim_change_triggers_rebuild(
+        self, indexer: Indexer, tmp_path: Path, fixture_md: Path
+    ) -> None:
+        out = tmp_path / "doc"
+        await indexer.index_path(fixture_md, out_dir=out)
+
+        changed = Indexer(
+            parser=MarkdownParser(),
+            summarizer=FakeSummarizer(),
+            embedder=FakeEmbedder(dim=64),
+        )
+
+        result = await changed.index_path(fixture_md, out_dir=out)
+
+        assert result.rebuilt is True
+        assert read_manifest(out).subindexes["vectors"].dim == 64
+
+    async def test_summarizer_change_triggers_rebuild(
+        self, indexer: Indexer, tmp_path: Path, fixture_md: Path
+    ) -> None:
+        out = tmp_path / "doc"
+        await indexer.index_path(fixture_md, out_dir=out)
+
+        changed = Indexer(
+            parser=MarkdownParser(),
+            summarizer=AlternateFakeSummarizer(),
+            embedder=FakeEmbedder(dim=32),
+        )
+
+        result = await changed.index_path(fixture_md, out_dir=out)
+
+        assert result.rebuilt is True
+        assert read_manifest(out).subindexes["summaries"].model == "fake:alternate-words"
+
+    async def test_enabling_graph_indexes_triggers_rebuild(
+        self, indexer: Indexer, tmp_path: Path, fixture_md: Path
+    ) -> None:
+        out = tmp_path / "doc"
+        await indexer.index_path(fixture_md, out_dir=out)
+        assert "entities" not in read_manifest(out).subindexes
+
+        changed = Indexer(
+            parser=MarkdownParser(),
+            summarizer=FakeSummarizer(),
+            embedder=FakeEmbedder(dim=32),
+            entity_extractor=HeuristicExtractor(),
+            xref_extractor=HeuristicXRefExtractor(),
+        )
+
+        result = await changed.index_path(fixture_md, out_dir=out)
+
+        assert result.rebuilt is True
+        assert {"entities", "xrefs"} <= set(read_manifest(out).subindexes)
 
     async def test_missing_manifest_still_builds(
         self, indexer: Indexer, tmp_path: Path, fixture_md: Path

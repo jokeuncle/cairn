@@ -557,14 +557,25 @@ const search = document.getElementById('search');
 const nodeList = document.getElementById('node-list');
 const statusEl = document.getElementById('status');
 const SVG_NS = 'http://www.w3.org/2000/svg';
+const PERF = {
+  largeGraph: DATA.nodes.length > 80 || DATA.edges.length > 360,
+  maxVisibleEdges: DATA.edges.length > 900 ? 560 : DATA.edges.length > 360 ? 360 : 900,
+  neighborLabelBudget: DATA.nodes.length > 80 || DATA.edges.length > 360 ? 12 : 28,
+  allLabelBudget: DATA.nodes.length > 80 || DATA.edges.length > 360 ? 42 : 140,
+  allLabelNodeLimit: 120,
+  settleLimit: DATA.nodes.length > 80 || DATA.edges.length > 360 ? 48 : 130,
+  stabilizeTicks: DATA.nodes.length > 80 || DATA.edges.length > 360 ? 72 : 180,
+};
 let mode = 'combined';
 let selectedId = DATA.nodes[0] ? DATA.nodes[0].id : null;
 let nodes = [];
 let edges = [];
+let untrimmedEdgeCount = 0;
+let clippedEdgeCount = 0;
 let raf = null;
 let settleTicks = 0;
 let dragging = null;
-let showAllLabels = false;
+let showAllLabels = !PERF.largeGraph;
 let edgeEls = [];
 let nodeEls = new Map();
 let layoutCache = new Map();
@@ -586,8 +597,9 @@ function nodeSearchText(n) {
 function filteredData() {
   const q = search.value.trim().toLowerCase();
   let outNodes = DATA.nodes.filter(nodeVisible);
+  let matched = new Set();
   if (q) {
-    const matched = new Set(outNodes.filter(n => nodeSearchText(n).includes(q)).map(n => n.id));
+    matched = new Set(outNodes.filter(n => nodeSearchText(n).includes(q)).map(n => n.id));
     for (const e of DATA.edges) {
       if (matched.has(e.source)) matched.add(e.target);
       if (matched.has(e.target)) matched.add(e.source);
@@ -595,10 +607,26 @@ function filteredData() {
     outNodes = outNodes.filter(n => matched.has(n.id));
   }
   const ids = new Set(outNodes.map(n => n.id));
+  const outEdges = DATA.edges.filter(e => edgeVisible(e) && ids.has(e.source) && ids.has(e.target));
+  const visibleEdges = prioritizedEdges(outEdges, matched);
+  untrimmedEdgeCount = outEdges.length;
+  clippedEdgeCount = Math.max(0, outEdges.length - visibleEdges.length);
   return {
     nodes: outNodes,
-    edges: DATA.edges.filter(e => edgeVisible(e) && ids.has(e.source) && ids.has(e.target)),
+    edges: visibleEdges,
   };
+}
+function prioritizedEdges(items, matched) {
+  if (items.length <= PERF.maxVisibleEdges) return items;
+  const selected = selectedId;
+  return [...items].sort((a, b) => edgePriority(b, selected, matched) - edgePriority(a, selected, matched)).slice(0, PERF.maxVisibleEdges);
+}
+function edgePriority(e, selected, matched) {
+  let score = e.kind === 'tree' ? 30 : String(e.kind).startsWith('xref:') ? 22 : 14;
+  if (selected && (e.source === selected || e.target === selected)) score += 100;
+  if (matched.has(e.source) || matched.has(e.target)) score += 60;
+  if (e.confidence) score += Number(e.confidence) * 10;
+  return score;
 }
 function initLayout() {
   const rect = svg.getBoundingClientRect();
@@ -692,8 +720,9 @@ function tick() {
       if (n.kind === 'section') n.vx += ((120 + Math.min(n.level || 1, 5) * 115) - n.x) * 0.0017;
       if (n.kind === 'entity') n.vx += ((w - 190) - n.x) * 0.0014;
     }
+    const pairStep = nodes.length > 180 ? Math.ceil(nodes.length / 160) : 1;
     for (let i = 0; i < nodes.length; i++) {
-      for (let j = i + 1; j < nodes.length; j++) {
+      for (let j = i + 1; j < nodes.length; j += pairStep) {
         const a = nodes[i], b = nodes[j];
         let dx = b.x - a.x, dy = b.y - a.y;
         const d2 = dx * dx + dy * dy || 1;
@@ -743,8 +772,41 @@ function linkedNodeIds() {
   }
   return linked;
 }
+function relationCounts() {
+  const counts = new Map();
+  for (const e of edges) {
+    counts.set(e.source, (counts.get(e.source) || 0) + 1);
+    counts.set(e.target, (counts.get(e.target) || 0) + 1);
+  }
+  return counts;
+}
+function labelNodeIds(linked) {
+  const labels = new Set();
+  const counts = relationCounts();
+  const byImportance = (a, b) => {
+    const aScore = (a.kind === 'entity' ? a.mentions || 0 : counts.get(a.id) || 0);
+    const bScore = (b.kind === 'entity' ? b.mentions || 0 : counts.get(b.id) || 0);
+    return bScore - aScore;
+  };
+  if (showAllLabels) {
+    const candidates = PERF.largeGraph
+      ? [...nodes].sort(byImportance).slice(0, PERF.allLabelBudget)
+      : nodes.length <= PERF.allLabelNodeLimit
+        ? nodes
+        : [...nodes].sort(byImportance).slice(0, PERF.allLabelBudget);
+    for (const n of candidates) labels.add(n.id);
+  }
+  if (selectedId) labels.add(selectedId);
+  const neighbors = nodes
+    .filter(n => n.id !== selectedId && linked.has(n.id))
+    .sort(byImportance)
+    .slice(0, PERF.neighborLabelBudget);
+  for (const n of neighbors) labels.add(n.id);
+  return labels;
+}
 function updateGraphDom() {
   const linked = linkedNodeIds();
+  const labels = labelNodeIds(linked);
   const byId = new Map(nodes.map(n => [n.id, n]));
   for (const item of edgeEls) {
     const e = item.edge;
@@ -758,7 +820,7 @@ function updateGraphDom() {
   for (const n of nodes) {
     const g = nodeEls.get(n.id);
     if (!g) continue;
-    const labelClass = showAllLabels || selectedId === n.id || linked.has(n.id) ? ' show-label' : '';
+    const labelClass = labels.has(n.id) ? ' show-label' : '';
     const neighborClass = selectedId !== n.id && linked.has(n.id) ? ' neighbor' : '';
     g.setAttribute('class', 'node ' + n.kind + labelClass + neighborClass + (selectedId === n.id ? ' selected' : '') + (selectedId && !linked.has(n.id) ? ' dim' : ''));
     g.setAttribute('transform', `translate(${n.x},${n.y})`);
@@ -766,9 +828,9 @@ function updateGraphDom() {
   }
 }
 function renderFrame() {
-  if (settleTicks < 130 || dragging) tick();
+  if (settleTicks < PERF.settleLimit || dragging) tick();
   updateGraphDom();
-  if (settleTicks < 130 || dragging) {
+  if (settleTicks < PERF.settleLimit || dragging) {
     raf = requestAnimationFrame(renderFrame);
   } else {
     raf = null;
@@ -862,7 +924,8 @@ function renderNodeList() {
   nodeList.querySelectorAll('.row').forEach(row => row.addEventListener('click', () => selectNode(row.dataset.id)));
 }
 function updateStatus() {
-  statusEl.textContent = `${nodes.length} nodes - ${edges.length} edges`;
+  const edgeText = clippedEdgeCount > 0 ? `${edges.length}/${untrimmedEdgeCount} edges` : `${edges.length} edges`;
+  statusEl.textContent = `${nodes.length} nodes - ${edgeText}`;
 }
 function reset() {
   if (raf) cancelAnimationFrame(raf);
@@ -888,8 +951,8 @@ document.querySelectorAll('button[data-mode]').forEach(btn => btn.addEventListen
 search.addEventListener('input', reset);
 document.getElementById('fit').addEventListener('click', reset);
 document.getElementById('stabilize').addEventListener('click', () => {
-  for (let i = 0; i < 180; i++) tick();
-  settleTicks = 130;
+  for (let i = 0; i < PERF.stabilizeTicks; i++) tick();
+  settleTicks = PERF.settleLimit;
   renderStatic();
 });
 document.getElementById('labels').addEventListener('click', event => {
@@ -898,6 +961,7 @@ document.getElementById('labels').addEventListener('click', event => {
   renderStatic();
 });
 window.addEventListener('resize', reset);
+document.getElementById('labels').classList.toggle('active', showAllLabels);
 drawStats();
 reset();
 </script>

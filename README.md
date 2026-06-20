@@ -300,10 +300,27 @@ export CAIRN_LLM_MODEL=doubao-seed-2-0-code-preview-260215
 export CAIRN_LLM_API_KEY=...
 
 export CAIRN_EMBED_PROVIDER=doubao-vision
+export CAIRN_EMBED_MODEL=doubao-embedding-vision-251215
 export CAIRN_EMBED_API_KEY=...
 
 cairn index ARCHITECTURE.md --out /tmp/cairn-arch
 ```
+
+To run the public-repo eval with the real provider configured by your
+environment instead of the deterministic fake plugins:
+
+```bash
+python scripts/eval_repos.py --repo pydantic-ai \
+  --provider env \
+  --workdir /tmp/cairn-repo-eval-real \
+  --refresh
+```
+
+The eval report includes provider mode, model names, and vector dimension, but
+never prints API keys. Cairn also invalidates old indexes when the summarizer,
+embedder, vector dimension, entity extractor, or xref extractor changes, so
+switching from `--fake` to Doubao rebuilds the affected documents instead of
+quietly reusing incompatible vectors.
 
 Useful operational knobs when running against hosted APIs:
 

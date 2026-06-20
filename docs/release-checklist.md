@@ -46,7 +46,7 @@ Expected current gate:
 
 - `ruff check .`: pass
 - `mypy src tests`: pass
-- `pytest`: 409 passing
+- `pytest`: 419 passing
 - `twine check`: wheel and sdist pass
 
 ## Dogfood Checks
@@ -93,6 +93,29 @@ Run:
 python scripts/eval_repos.py --repo all --refresh
 python scripts/smoke_many_repos.py --limit 32 --refresh
 ```
+
+Run at least one real-provider eval before claiming production retrieval
+quality. Keep credentials in environment variables only; do not pass them on
+the command line or write them into files:
+
+```bash
+python scripts/eval_repos.py --repo pydantic-ai \
+  --provider env \
+  --workdir /tmp/cairn-repo-eval-real \
+  --refresh
+```
+
+For Doubao, the intended environment shape is:
+
+```bash
+export CAIRN_LLM_BASE_URL=https://ark.cn-beijing.volces.com/api/v3
+export CAIRN_LLM_MODEL=doubao-seed-2-0-code-preview-260215
+export CAIRN_EMBED_PROVIDER=doubao-vision
+export CAIRN_EMBED_MODEL=doubao-embedding-vision-251215
+```
+
+The corresponding API key variables must be set locally, but real values must
+never appear in git, shell history snippets, benchmark reports, or CI logs.
 
 ## Secret And Generated-File Audit
 

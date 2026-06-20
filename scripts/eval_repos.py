@@ -17,15 +17,15 @@ import statistics
 import subprocess
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from cairn.cli.config import IndexConfig
-from cairn.embed.fake import FakeEmbedder
 from cairn.mcp.server import dispatch_repo_tool
+from cairn.providers import make_embedder, make_summarizer
 from cairn.repo import repo_status, sync_repo, write_default_config
-from cairn.summarize.fake import FakeSummarizer
 
 RepoCase = dict[str, Any]
+ProviderMode = Literal["fake", "env"]
 
 
 REPOS: dict[str, dict[str, Any]] = {
@@ -271,20 +271,80 @@ def parse_args() -> argparse.Namespace:
         help="Delete existing clones before cloning.",
     )
     parser.add_argument("--k", type=int, default=5)
+    parser.add_argument(
+        "--provider",
+        choices=("fake", "env"),
+        default="fake",
+        help=(
+            "Use deterministic fake plugins, or use CAIRN_LLM_* and "
+            "CAIRN_EMBED_* from the environment."
+        ),
+    )
+    parser.add_argument(
+        "--real",
+        action="store_true",
+        help="Shortcut for --provider env.",
+    )
+    parser.add_argument(
+        "--force-sync",
+        action="store_true",
+        help="Rebuild indexes even when source and provider fingerprints match.",
+    )
+    parser.add_argument(
+        "--clone-retries",
+        type=int,
+        default=2,
+        help="Retry failed shallow clones this many times before failing.",
+    )
     return parser.parse_args()
 
 
-def ensure_clone(name: str, url: str, workdir: Path, *, refresh: bool) -> Path:
+def selected_provider(args: argparse.Namespace) -> ProviderMode:
+    if bool(args.real):
+        return "env"
+    provider = str(args.provider)
+    if provider == "env":
+        return "env"
+    return "fake"
+
+
+def ensure_clone(
+    name: str,
+    url: str,
+    workdir: Path,
+    *,
+    refresh: bool,
+    clone_retries: int = 2,
+) -> Path:
     root = workdir / name
     if refresh and root.exists():
         shutil.rmtree(root)
     if root.exists():
         return root
     workdir.mkdir(parents=True, exist_ok=True)
-    subprocess.run(
-        ["git", "clone", "--depth", "1", url, str(root)],
-        check=True,
-    )
+    attempts = max(1, clone_retries + 1)
+    for attempt in range(attempts):
+        try:
+            subprocess.run(
+                [
+                    "git",
+                    "-c",
+                    "http.version=HTTP/1.1",
+                    "clone",
+                    "--depth",
+                    "1",
+                    url,
+                    str(root),
+                ],
+                check=True,
+            )
+            break
+        except subprocess.CalledProcessError:
+            if root.exists():
+                shutil.rmtree(root)
+            if attempt >= attempts - 1:
+                raise
+            time.sleep(min(8, 2**attempt))
     return root
 
 
@@ -305,15 +365,25 @@ async def evaluate_repo(
     name: str,
     spec: dict[str, Any],
     args: argparse.Namespace,
+    provider_mode: ProviderMode,
 ) -> dict[str, Any]:
-    root = ensure_clone(name, str(spec["url"]), args.workdir, refresh=bool(args.refresh))
+    root = ensure_clone(
+        name,
+        str(spec["url"]),
+        args.workdir,
+        refresh=bool(args.refresh),
+        clone_retries=int(args.clone_retries),
+    )
     write_default_config(root, force=True)
-    embedder = FakeEmbedder(dim=64)
+    use_fake = provider_mode == "fake"
+    summarizer = make_summarizer(use_fake)
+    embedder = make_embedder(use_fake)
     results = await sync_repo(
         root,
-        summarizer=FakeSummarizer(),
+        summarizer=summarizer,
         embedder=embedder,
         index_config=IndexConfig(),
+        force=bool(args.force_sync),
     )
     status = repo_status(root)
     rows = []
@@ -374,6 +444,12 @@ async def evaluate_repo(
         "name": name,
         "url": spec["url"],
         "root": str(root),
+        "provider": {
+            "mode": provider_mode,
+            "summarizer": summarizer.name,
+            "embedder": embedder.name,
+            "embed_dim": embedder.dim,
+        },
         "sync": {
             "total": len(results),
             "ok": sum(1 for result in results if result.ok),
@@ -397,9 +473,10 @@ async def evaluate_repo(
 
 async def run() -> None:
     args = parse_args()
+    provider_mode = selected_provider(args)
     selected = REPOS if args.repo == "all" else {args.repo: REPOS[args.repo]}
     report = [
-        await evaluate_repo(name, spec, args)
+        await evaluate_repo(name, spec, args, provider_mode)
         for name, spec in selected.items()
     ]
     print(json.dumps(report, ensure_ascii=False, indent=2))

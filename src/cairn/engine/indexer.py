@@ -60,7 +60,8 @@ class IndexResult:
     """Outcome of an :meth:`Indexer.index_path` call.
 
     ``rebuilt`` is ``False`` when the source's hash matched the previous
-    build's manifest and the existing index was kept as-is (a no-op).
+    build's manifest, all producer fingerprints still match, and the existing
+    index was kept as-is (a no-op).
     """
 
     manifest_path: Path
@@ -113,14 +114,22 @@ class Indexer:
         """Parse a source file and build all sub-indexes.
 
         When ``force`` is ``False`` (default), the indexer first checks
-        whether ``out_dir`` already contains a manifest whose source_hash
-        matches the new source. If so, the existing index is left untouched
-        and ``IndexResult.rebuilt`` is ``False``. Pass ``force=True`` to
-        always rebuild.
+        whether ``out_dir`` already contains a manifest whose source_hash and
+        producer fingerprints match the requested build. If so, the existing
+        index is left untouched and ``IndexResult.rebuilt`` is ``False``. Pass
+        ``force=True`` to always rebuild.
         """
         document = self.parser.parse(source, doc_id=doc_id)
 
-        if not force and _existing_matches(out_dir, document.source_hash):
+        if not force and _existing_matches(
+            out_dir,
+            document.source_hash,
+            summarizer=self.summarizer,
+            embedder=self.embedder,
+            summary_levels=summary_levels,
+            entity_extractor=self.entity_extractor,
+            xref_extractor=self.xref_extractor,
+        ):
             return IndexResult(
                 manifest_path=out_dir / MANIFEST_FILENAME,
                 rebuilt=False,
@@ -230,12 +239,60 @@ class Indexer:
             self.progress(message)
 
 
-def _existing_matches(out_dir: Path, source_hash: str) -> bool:
-    """Return ``True`` when ``out_dir`` holds an index for the same source bytes."""
+def _existing_matches(
+    out_dir: Path,
+    source_hash: str,
+    *,
+    summarizer: Summarizer,
+    embedder: Embedder,
+    summary_levels: Sequence[SummaryLevel],
+    entity_extractor: EntityExtractor | None,
+    xref_extractor: XRefExtractor | None,
+) -> bool:
+    """Return ``True`` when the existing index matches source and producers."""
     if not (out_dir / MANIFEST_FILENAME).exists():
         return False
     try:
         existing = read_manifest(out_dir)
     except IndexNotFoundError:
         return False
-    return existing.source_hash == source_hash
+    if existing.source_hash != source_hash:
+        return False
+
+    tree = existing.subindexes.get("tree")
+    summaries = existing.subindexes.get("summaries")
+    vectors = existing.subindexes.get("vectors")
+    if tree is None or tree.builder_version != _TREE_BUILDER_VERSION:
+        return False
+    if (
+        summaries is None
+        or summaries.builder_version != SUMMARIES_FORMAT_VERSION
+        or summaries.model != summarizer.name
+        or summaries.levels != [lvl.value for lvl in summary_levels]
+    ):
+        return False
+    if (
+        vectors is None
+        or vectors.builder_version != VECTORS_FORMAT_VERSION
+        or vectors.embedder != embedder.name
+        or vectors.dim != embedder.dim
+    ):
+        return False
+
+    if entity_extractor is not None:
+        entities = existing.subindexes.get("entities")
+        if (
+            entities is None
+            or entities.builder_version != ENTITIES_FORMAT_VERSION
+            or entities.extractor != entity_extractor.name
+        ):
+            return False
+    if xref_extractor is not None:
+        xrefs = existing.subindexes.get("xrefs")
+        if (
+            xrefs is None
+            or xrefs.builder_version != XREFS_FORMAT_VERSION
+            or xrefs.extractor != xref_extractor.name
+        ):
+            return False
+    return True
