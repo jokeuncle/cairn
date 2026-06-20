@@ -1,0 +1,725 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cairn Inspector Principle</title>
+<style>
+  :root {
+    --page: #f7f8f3;
+    --ink: #17201a;
+    --muted: #607066;
+    --line: #d9dfd4;
+    --panel: #ffffff;
+    --panel-2: #eef4ef;
+    --teal: #187077;
+    --teal-soft: #d9eeec;
+    --gold: #b06a20;
+    --gold-soft: #f5e5cf;
+    --violet: #6250a1;
+    --violet-soft: #e8e3f5;
+    --rose: #a04448;
+    --rose-soft: #f3dddf;
+    --green: #2d7c4e;
+    --green-soft: #dcefe3;
+    --shadow: 0 18px 48px rgba(37, 45, 38, .10);
+    --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    margin: 0;
+  }
+
+  body {
+    min-height: 100vh;
+    background: var(--page);
+    color: var(--ink);
+    font-family: var(--sans);
+    letter-spacing: 0;
+  }
+
+  .shell {
+    width: min(1280px, calc(100% - 32px));
+    margin: 0 auto;
+    padding: 28px 0 40px;
+  }
+
+  header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 24px;
+    align-items: end;
+    padding: 14px 0 22px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .eyebrow {
+    margin: 0 0 8px;
+    color: var(--gold);
+    font: 700 12px/1.2 var(--mono);
+    text-transform: uppercase;
+  }
+
+  h1 {
+    margin: 0;
+    max-width: 820px;
+    font-size: 42px;
+    line-height: 1.08;
+  }
+
+  .lede {
+    margin: 12px 0 0;
+    max-width: 760px;
+    color: var(--muted);
+    font-size: 17px;
+    line-height: 1.55;
+  }
+
+  .legend {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(120px, 1fr));
+    gap: 8px 14px;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--panel);
+    box-shadow: var(--shadow);
+  }
+
+  .legend span {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    color: var(--muted);
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: var(--teal);
+    flex: 0 0 auto;
+  }
+
+  .dot.gold { background: var(--gold); }
+  .dot.violet { background: var(--violet); }
+  .dot.rose { background: var(--rose); }
+
+  .workspace {
+    display: grid;
+    grid-template-columns: 280px minmax(0, 1fr);
+    gap: 18px;
+    margin-top: 22px;
+  }
+
+  .rail {
+    display: grid;
+    align-content: start;
+    gap: 12px;
+  }
+
+  .phase {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px;
+    background: var(--panel);
+    text-align: left;
+    cursor: pointer;
+    color: var(--ink);
+    box-shadow: 0 8px 24px rgba(37, 45, 38, .06);
+  }
+
+  .phase:hover,
+  .phase.active {
+    border-color: var(--teal);
+    background: #f9fcfa;
+  }
+
+  .phase strong {
+    display: block;
+    font-size: 15px;
+    line-height: 1.25;
+  }
+
+  .phase span {
+    display: block;
+    margin-top: 5px;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  .takeaway {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--panel);
+    padding: 16px;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  .takeaway strong {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--ink);
+  }
+
+  .stage {
+    min-width: 0;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--panel);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .stage-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: center;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--line);
+    background: #fbfcf8;
+  }
+
+  .stage-title {
+    margin: 0;
+    font-size: 16px;
+  }
+
+  .status {
+    color: var(--muted);
+    font: 12px/1.2 var(--mono);
+    white-space: nowrap;
+  }
+
+  .canvas-wrap {
+    position: relative;
+    min-height: 640px;
+  }
+
+  canvas {
+    display: block;
+    width: 100%;
+    height: 640px;
+    background: #fbfcf8;
+  }
+
+  .notes {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-top: 1px solid var(--line);
+    background: var(--panel);
+  }
+
+  .note {
+    padding: 14px 16px;
+    border-right: 1px solid var(--line);
+  }
+
+  .note:last-child {
+    border-right: 0;
+  }
+
+  .note b {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 13px;
+  }
+
+  .note p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  @media (max-width: 980px) {
+    header {
+      grid-template-columns: 1fr;
+    }
+
+    .workspace {
+      grid-template-columns: 1fr;
+    }
+
+    .rail {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .takeaway {
+      grid-column: 1 / -1;
+    }
+
+    .notes {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .shell {
+      width: min(100% - 20px, 1280px);
+      padding-top: 18px;
+    }
+
+    h1 {
+      font-size: 30px;
+    }
+
+    .legend,
+    .rail,
+    .notes {
+      grid-template-columns: 1fr;
+    }
+
+    .stage-head {
+      display: block;
+    }
+
+    .status {
+      display: block;
+      margin-top: 8px;
+    }
+
+    .canvas-wrap {
+      min-height: 1120px;
+    }
+
+    canvas {
+      height: 1120px;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <div>
+      <p class="eyebrow">Cairn Inspector</p>
+      <h1>What the inspector is actually showing</h1>
+      <p class="lede">The inspector is a visual debugger for Cairn's document index. It shows how raw repository documents become a structured graph, and why a retrieval result has evidence beyond a single vector hit.</p>
+    </div>
+    <div class="legend" aria-label="diagram legend">
+      <span><i class="dot"></i>Document section</span>
+      <span><i class="dot gold"></i>Extracted entity</span>
+      <span><i class="dot violet"></i>Cross-reference</span>
+      <span><i class="dot rose"></i>Query signal</span>
+    </div>
+  </header>
+
+  <div class="workspace">
+    <aside class="rail" aria-label="diagram phases">
+      <button class="phase active" data-step="0">
+        <strong>1. Parse structure</strong>
+        <span>Headings and paths become a stable section tree.</span>
+      </button>
+      <button class="phase" data-step="1">
+        <strong>2. Attach signals</strong>
+        <span>Summaries, vectors, entities, and xrefs are layered on top.</span>
+      </button>
+      <button class="phase" data-step="2">
+        <strong>3. Search with context</strong>
+        <span>Dense, lexical, path, and graph signals compete and cooperate.</span>
+      </button>
+      <button class="phase" data-step="3">
+        <strong>4. Inspect the reason</strong>
+        <span>The graph exposes what was selected, connected, or suspicious.</span>
+      </button>
+      <div class="takeaway">
+        <strong>Core idea</strong>
+        Inspector is not the retrieval interface itself. It is the window into the index that lets maintainers verify whether Cairn understood a repository's documents correctly.
+      </div>
+    </aside>
+
+    <main class="stage">
+      <div class="stage-head">
+        <h2 class="stage-title" id="stage-title">Parse structure</h2>
+        <span class="status" id="stage-status">section tree + source paths</span>
+      </div>
+      <div class="canvas-wrap">
+        <canvas id="diagram" width="1100" height="640" aria-label="Canvas diagram explaining Cairn inspector internals"></canvas>
+      </div>
+      <div class="notes">
+        <div class="note">
+          <b>Tree</b>
+          <p>Preserves source order, section depth, anchors, and heading paths.</p>
+        </div>
+        <div class="note">
+          <b>Vectors</b>
+          <p>Give semantic recall, but are only one signal in repo ranking.</p>
+        </div>
+        <div class="note">
+          <b>Graph</b>
+          <p>Entities and cross-references reveal relationships between sections.</p>
+        </div>
+        <div class="note">
+          <b>Inspector</b>
+          <p>Helps spot bad splitting, noisy entities, weak xrefs, and ranking drift.</p>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('diagram');
+const ctx = canvas.getContext('2d');
+const phaseButtons = [...document.querySelectorAll('.phase')];
+const titleEl = document.getElementById('stage-title');
+const statusEl = document.getElementById('stage-status');
+const palette = {
+  ink: '#17201a',
+  muted: '#607066',
+  line: '#d9dfd4',
+  panel: '#ffffff',
+  teal: '#187077',
+  tealSoft: '#d9eeec',
+  gold: '#b06a20',
+  goldSoft: '#f5e5cf',
+  violet: '#6250a1',
+  violetSoft: '#e8e3f5',
+  rose: '#a04448',
+  roseSoft: '#f3dddf',
+  green: '#2d7c4e',
+  greenSoft: '#dcefe3'
+};
+const phases = [
+  { title: 'Parse structure', status: 'section tree + source paths' },
+  { title: 'Attach signals', status: 'summaries + vectors + entities + xrefs' },
+  { title: 'Search with context', status: 'hybrid ranker + graph support' },
+  { title: 'Inspect the reason', status: 'explainable index health' }
+];
+let activeStep = 0;
+let animationStart = performance.now();
+
+function setStep(step) {
+  activeStep = step;
+  animationStart = performance.now();
+  titleEl.textContent = phases[step].title;
+  statusEl.textContent = phases[step].status;
+  for (const button of phaseButtons) {
+    button.classList.toggle('active', Number(button.dataset.step) === step);
+  }
+}
+
+phaseButtons.forEach(button => {
+  button.addEventListener('click', () => setStep(Number(button.dataset.step)));
+});
+
+function resizeCanvas() {
+  const cssWidth = canvas.parentElement.getBoundingClientRect().width;
+  const narrow = cssWidth < 1020;
+  const targetHeight = narrow ? 1120 : 640;
+  canvas.style.height = `${targetHeight}px`;
+  canvas.parentElement.style.minHeight = `${targetHeight}px`;
+  const rect = canvas.getBoundingClientRect();
+  const dpr = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));
+  canvas.width = Math.round(rect.width * dpr);
+  canvas.height = Math.round(rect.height * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+
+function roundRect(x, y, w, h, r) {
+  const radius = Math.min(r, w / 2, h / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.arcTo(x + w, y, x + w, y + h, radius);
+  ctx.arcTo(x + w, y + h, x, y + h, radius);
+  ctx.arcTo(x, y + h, x, y, radius);
+  ctx.arcTo(x, y, x + w, y, radius);
+  ctx.closePath();
+}
+
+function fillRoundRect(x, y, w, h, r, fill, stroke = palette.line) {
+  roundRect(x, y, w, h, r);
+  ctx.fillStyle = fill;
+  ctx.fill();
+  ctx.strokeStyle = stroke;
+  ctx.lineWidth = 1;
+  ctx.stroke();
+}
+
+function text(label, x, y, options = {}) {
+  ctx.save();
+  ctx.fillStyle = options.color || palette.ink;
+  ctx.font = `${options.weight || 500} ${options.size || 14}px ${options.mono ? 'ui-monospace, SFMono-Regular, Menlo, monospace' : 'Inter, system-ui, sans-serif'}`;
+  ctx.textAlign = options.align || 'left';
+  ctx.textBaseline = options.baseline || 'alphabetic';
+  const maxWidth = options.maxWidth || 240;
+  const words = String(label).split(' ');
+  let line = '';
+  let lineY = y;
+  const lineHeight = options.lineHeight || 18;
+  for (const word of words) {
+    const test = line ? `${line} ${word}` : word;
+    if (ctx.measureText(test).width > maxWidth && line) {
+      ctx.fillText(line, x, lineY);
+      line = word;
+      lineY += lineHeight;
+    } else {
+      line = test;
+    }
+  }
+  ctx.fillText(line, x, lineY);
+  ctx.restore();
+}
+
+function arrow(x1, y1, x2, y2, color, width = 2, dashed = false) {
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+  ctx.lineWidth = width;
+  ctx.setLineDash(dashed ? [7, 7] : []);
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2, y2);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  const angle = Math.atan2(y2 - y1, x2 - x1);
+  ctx.beginPath();
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - 10 * Math.cos(angle - 0.45), y2 - 10 * Math.sin(angle - 0.45));
+  ctx.lineTo(x2 - 10 * Math.cos(angle + 0.45), y2 - 10 * Math.sin(angle + 0.45));
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+function node(x, y, radius, fill, label, options = {}) {
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(x, y, radius, 0, Math.PI * 2);
+  ctx.fillStyle = fill;
+  ctx.fill();
+  ctx.lineWidth = options.active ? 4 : 2;
+  ctx.strokeStyle = options.active ? palette.ink : '#ffffff';
+  ctx.stroke();
+  ctx.restore();
+  if (label) {
+    text(label, x + radius + 8, y + 5, {
+      size: options.size || 13,
+      weight: options.weight || 600,
+      color: options.color || palette.ink,
+      maxWidth: options.maxWidth || 150
+    });
+  }
+}
+
+function card(x, y, w, h, title, body, fill, stroke) {
+  fillRoundRect(x, y, w, h, 8, fill, stroke);
+  text(title, x + 14, y + 23, { size: 14, weight: 700, maxWidth: w - 28 });
+  text(body, x + 14, y + 49, { size: 12, color: palette.muted, weight: 500, maxWidth: w - 28, lineHeight: 16 });
+}
+
+function drawSourceDocs(x, y, compact) {
+  const w = compact ? 180 : 210;
+  const gap = 12;
+  const docs = [
+    ['README.md', 'Intro · Install · Usage'],
+    ['docs/agent.md', 'Agent · Tools · Streaming'],
+    ['docs/storage.md', 'Storage · Vectors']
+  ];
+  docs.forEach((doc, i) => {
+    const yy = y + i * (compact ? 78 : 86);
+    fillRoundRect(x, yy, w, compact ? 62 : 70, 8, '#ffffff', palette.line);
+    text(doc[0], x + 12, yy + 21, { size: 13, mono: true, weight: 700, maxWidth: w - 24 });
+    text(doc[1], x + 12, yy + 43, { size: 11, mono: true, color: palette.muted, maxWidth: w - 24, lineHeight: 14 });
+  });
+}
+
+function drawTree(x, y, scale = 1, active = false) {
+  const root = { x, y };
+  const branches = [
+    { x: x - 54 * scale, y: y + 72 * scale, label: 'Install' },
+    { x: x + 56 * scale, y: y + 72 * scale, label: 'Agent' },
+    { x: x + 56 * scale, y: y + 146 * scale, label: 'Streaming' },
+    { x: x - 54 * scale, y: y + 146 * scale, label: 'Vectors' }
+  ];
+  for (const item of branches) {
+    arrow(root.x, root.y + 14 * scale, item.x, item.y - 16 * scale, palette.teal, active ? 3 : 2);
+  }
+  node(root.x, root.y, 18 * scale, palette.teal, 'Root', { active, maxWidth: 90 });
+  for (const item of branches) {
+    node(item.x, item.y, 15 * scale, palette.tealSoft, item.label, { size: 12, color: palette.teal, maxWidth: 100 });
+  }
+}
+
+function drawSignals(x, y, t, active) {
+  const rows = [
+    ['Summaries', 'gist / synopsis / digest', palette.green, palette.greenSoft],
+    ['Vectors', 'semantic recall surface', palette.rose, palette.roseSoft],
+    ['Entities', 'tools, agent, RunContext', palette.gold, palette.goldSoft],
+    ['XRefs', 'section-to-section links', palette.violet, palette.violetSoft]
+  ];
+  rows.forEach((row, i) => {
+    const yy = y + i * 74;
+    card(x, yy, 230, 54, row[0], row[1], row[3], row[2]);
+    if (active) {
+      const pulse = 0.45 + Math.sin(t / 500 + i) * 0.2;
+      ctx.save();
+      ctx.globalAlpha = pulse;
+      node(x + 206, yy + 27, 7, row[2], '');
+      ctx.restore();
+    }
+  });
+}
+
+function drawRanker(x, y, t, active) {
+  fillRoundRect(x, y, 260, 210, 8, '#ffffff', palette.line);
+  text('Repo-level hybrid ranker', x + 18, y + 28, { size: 16, weight: 800, maxWidth: 220 });
+  const signals = [
+    ['Dense vector', palette.rose, 0.22],
+    ['BM25 / sparse terms', palette.green, 0.28],
+    ['Title + path identity', palette.teal, 0.25],
+    ['Graph neighborhood', palette.violet, 0.10]
+  ];
+  signals.forEach((signal, i) => {
+    const yy = y + 60 + i * 34;
+    text(signal[0], x + 18, yy + 13, { size: 12, color: palette.muted, maxWidth: 130 });
+    fillRoundRect(x + 150, yy, 82, 13, 999, '#edf0ea', 'transparent');
+    const w = 82 * signal[2] * 3.2;
+    fillRoundRect(x + 150, yy, w, 13, 999, signal[1], 'transparent');
+  });
+  if (active) {
+    const markerX = x + 232 + Math.sin(t / 500) * 8;
+    arrow(markerX, y + 34, markerX, y + 184, palette.gold, 2, true);
+  }
+}
+
+function drawInspectorGraph(x, y, t, active) {
+  const sectionNodes = [
+    { x: x + 90, y: y + 78, label: 'Intro' },
+    { x: x + 190, y: y + 145, label: 'Tools' },
+    { x: x + 118, y: y + 222, label: 'Streaming' },
+    { x: x + 276, y: y + 236, label: 'Output' }
+  ];
+  const entities = [
+    { x: x + 330, y: y + 80, label: 'agent' },
+    { x: x + 386, y: y + 160, label: 'RunContext' },
+    { x: x + 330, y: y + 302, label: 'tool_call' }
+  ];
+  for (let i = 0; i < sectionNodes.length - 1; i++) {
+    arrow(sectionNodes[i].x, sectionNodes[i].y, sectionNodes[i + 1].x, sectionNodes[i + 1].y, palette.teal, 2);
+  }
+  arrow(sectionNodes[1].x, sectionNodes[1].y, sectionNodes[3].x, sectionNodes[3].y, palette.violet, active ? 3 : 2, true);
+  for (const s of sectionNodes) {
+    for (const e of entities) {
+      const alpha = active ? 0.24 : 0.14;
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      arrow(e.x - 14, e.y, s.x + 14, s.y, palette.gold, 1.4, true);
+      ctx.restore();
+    }
+  }
+  sectionNodes.forEach((s, i) => node(s.x, s.y, i === 1 ? 20 : 16, i === 1 ? palette.teal : palette.tealSoft, s.label, { active: active && i === 1, color: palette.teal }));
+  entities.forEach(e => node(e.x, e.y, 17, palette.gold, e.label, { color: palette.gold, size: 12, maxWidth: 110 }));
+  if (active) {
+    const pulse = 1 + Math.sin(t / 420) * 0.12;
+    node(sectionNodes[1].x, sectionNodes[1].y, 28 * pulse, 'rgba(160,68,72,.14)', '', {});
+  }
+}
+
+function drawQuery(x, y, active) {
+  fillRoundRect(x, y, 235, 80, 8, palette.roseSoft, palette.rose);
+  text('Query', x + 14, y + 24, { size: 13, weight: 800, color: palette.rose });
+  text('“stream structured responses”', x + 14, y + 50, { size: 14, weight: 700, color: palette.ink, maxWidth: 200 });
+  if (active) {
+    arrow(x + 235, y + 40, x + 315, y + 40, palette.rose, 3);
+  }
+}
+
+function drawViewport(t) {
+  const rect = canvas.getBoundingClientRect();
+  const w = rect.width;
+  const h = rect.height;
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = '#fbfcf8';
+  ctx.fillRect(0, 0, w, h);
+
+  const compact = w < 1020;
+  if (compact) {
+    drawCompact(w, h, t);
+    return;
+  }
+
+  const left = 42;
+  const top = 46;
+  drawSourceDocs(left, top, false);
+  text('Raw repository docs', left, top - 16, { size: 13, weight: 800, color: palette.muted, maxWidth: 200 });
+
+  arrow(left + 226, top + 120, left + 316, top + 120, palette.teal, activeStep >= 0 ? 3 : 2);
+  drawTree(left + 410, top + 66, 1, activeStep === 0);
+  text('Section tree', left + 330, top - 16, { size: 13, weight: 800, color: palette.muted, maxWidth: 200 });
+
+  arrow(left + 520, top + 120, left + 620, top + 120, palette.green, activeStep >= 1 ? 3 : 2);
+  drawSignals(left + 638, top - 8, t, activeStep === 1);
+
+  drawQuery(left + 42, top + 360, activeStep >= 2);
+  drawRanker(left + 336, top + 322, t, activeStep === 2);
+  arrow(left + 596, top + 428, left + 672, top + 428, palette.violet, activeStep >= 3 ? 3 : 2);
+  drawInspectorGraph(left + 674, top + 252, t, activeStep === 3);
+
+  card(left + 740, top + 96, 260, 82, 'Top hit: Tools / Streaming', 'Inspector shows the winning section plus neighbors, entities, and xrefs that supported the result.', '#ffffff', activeStep === 3 ? palette.violet : palette.line);
+
+  if (activeStep === 0) {
+    callout(left + 294, top + 236, 'If heading structure is wrong here, every retrieval tool inherits that problem.', palette.teal);
+  } else if (activeStep === 1) {
+    callout(left + 632, top + 306, 'Each section carries multiple retrieval signals; the graph is not just decoration.', palette.gold);
+  } else if (activeStep === 2) {
+    callout(left + 304, top + 548, 'The ranker blends evidence instead of trusting one vector score blindly.', palette.rose);
+  } else {
+    callout(left + 674, top + 572, 'This is why the inspector is useful: it reveals the index, not just the answer.', palette.violet);
+  }
+}
+
+function callout(x, y, body, color) {
+  fillRoundRect(x, y, 330, 58, 8, '#ffffff', color);
+  text(body, x + 14, y + 23, { size: 13, color: palette.ink, maxWidth: 300, lineHeight: 17 });
+}
+
+function drawCompact(w, h, t) {
+  const x = 24;
+  let y = 28;
+  text('Inspector pipeline', x, y, { size: 18, weight: 800, maxWidth: w - 48 });
+  y += 26;
+  drawSourceDocs(x, y, true);
+  const treeY = y + 240;
+  arrow(x + 88, y + 226, x + 88, treeY - 20, palette.teal, 3);
+  drawTree(x + 92, treeY, 0.78, activeStep === 0);
+  const signalY = treeY + 210;
+  arrow(x + 92, treeY + 166, x + 92, signalY - 16, palette.green, 3);
+  drawSignals(x, signalY, t, activeStep === 1);
+  if (activeStep >= 2) {
+    drawQuery(x, signalY + 296, true);
+  }
+  const graphScale = Math.min(0.72, (w - 48) / 540);
+  ctx.save();
+  ctx.translate(x, signalY + 392);
+  ctx.scale(graphScale, graphScale);
+  drawInspectorGraph(0, 0, t, activeStep >= 2);
+  ctx.restore();
+}
+
+function frame(now) {
+  drawViewport(now - animationStart);
+  requestAnimationFrame(frame);
+}
+
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+setStep(0);
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
