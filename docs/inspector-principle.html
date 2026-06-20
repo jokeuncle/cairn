@@ -138,10 +138,15 @@
     box-shadow: 0 8px 24px rgba(37, 45, 38, .06);
   }
 
-  .phase:hover,
+  .phase:hover {
+    border-color: #b7c3ba;
+    background: #f9fcfa;
+  }
+
   .phase.active {
     border-color: var(--teal);
     background: #f9fcfa;
+    box-shadow: inset 0 0 0 1px rgba(24, 112, 119, .22), 0 8px 24px rgba(37, 45, 38, .06);
   }
 
   .phase strong {
@@ -419,8 +424,7 @@ phaseButtons.forEach(button => {
 
 function resizeCanvas() {
   const cssWidth = canvas.parentElement.getBoundingClientRect().width;
-  const narrow = cssWidth < 1020;
-  const targetHeight = narrow ? 1120 : 640;
+  const targetHeight = cssWidth < 860 ? 1120 : cssWidth < 1020 ? 760 : 640;
   canvas.style.height = `${targetHeight}px`;
   canvas.parentElement.style.minHeight = `${targetHeight}px`;
   const rect = canvas.getBoundingClientRect();
@@ -522,6 +526,13 @@ function card(x, y, w, h, title, body, fill, stroke) {
   text(body, x + 14, y + 49, { size: 12, color: palette.muted, weight: 500, maxWidth: w - 28, lineHeight: 16 });
 }
 
+function withAlpha(alpha, draw) {
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  draw();
+  ctx.restore();
+}
+
 function drawSourceDocs(x, y, compact) {
   const w = compact ? 180 : 210;
   const gap = 12;
@@ -576,7 +587,7 @@ function drawSignals(x, y, t, active) {
 }
 
 function drawRanker(x, y, t, active) {
-  fillRoundRect(x, y, 260, 210, 8, '#ffffff', palette.line);
+  fillRoundRect(x, y, 260, 210, 8, '#ffffff', active ? palette.rose : palette.line);
   text('Repo-level hybrid ranker', x + 18, y + 28, { size: 16, weight: 800, maxWidth: 220 });
   const signals = [
     ['Dense vector', palette.rose, 0.22],
@@ -591,10 +602,6 @@ function drawRanker(x, y, t, active) {
     const w = 82 * signal[2] * 3.2;
     fillRoundRect(x + 150, yy, w, 13, 999, signal[1], 'transparent');
   });
-  if (active) {
-    const markerX = x + 232 + Math.sin(t / 500) * 8;
-    arrow(markerX, y + 34, markerX, y + 184, palette.gold, 2, true);
-  }
 }
 
 function drawInspectorGraph(x, y, t, active) {
@@ -647,9 +654,12 @@ function drawViewport(t) {
   ctx.fillStyle = '#fbfcf8';
   ctx.fillRect(0, 0, w, h);
 
-  const compact = w < 1020;
-  if (compact) {
+  if (w < 860) {
     drawCompact(w, h, t);
+    return;
+  }
+  if (w < 1020) {
+    drawMedium(w, h, t);
     return;
   }
 
@@ -688,6 +698,109 @@ function callout(x, y, body, color) {
   text(body, x + 14, y + 23, { size: 13, color: palette.ink, maxWidth: 300, lineHeight: 17 });
 }
 
+function drawScaledInspectorGraph(x, y, scale, t, active) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(scale, scale);
+  drawInspectorGraph(0, 0, t, active);
+  ctx.restore();
+}
+
+function drawMedium(w, h, t) {
+  const pad = 32;
+  text('Inspector pipeline', pad, 36, { size: 18, weight: 800, maxWidth: 260 });
+
+  drawSourceDocs(pad, 62, true);
+  text('Raw docs', pad, 52, { size: 12, weight: 800, color: palette.muted, maxWidth: 160 });
+
+  const treeX = 326;
+  const treeY = 112;
+  arrow(pad + 196, 170, treeX - 52, treeY + 10, palette.teal, activeStep >= 0 ? 3 : 2);
+  drawTree(treeX, treeY, 0.82, activeStep === 0);
+  text('Section tree', treeX - 78, 52, { size: 12, weight: 800, color: palette.muted, maxWidth: 160 });
+
+  const signalX = pad;
+  const signalY = 340;
+  withAlpha(activeStep >= 1 ? 1 : .28, () => {
+    arrow(treeX, treeY + 168, signalX + 116, signalY - 14, palette.green, activeStep >= 1 ? 3 : 2);
+    drawSignals(signalX, signalY, t, activeStep === 1);
+  });
+
+  const rankX = 298;
+  const queryY = 340;
+  withAlpha(activeStep >= 2 ? 1 : .24, () => {
+    drawQuery(rankX, queryY, false);
+    drawRanker(rankX, 454, t, activeStep === 2);
+    arrow(rankX + 122, queryY + 82, rankX + 122, 454, palette.rose, activeStep >= 2 ? 3 : 2);
+  });
+
+  const graphPanelX = Math.max(rankX + 300, w - 390);
+  const graphPanelY = 328;
+  const graphPanelW = w - graphPanelX - 30;
+  const graphPanelH = 292;
+  const graphScale = Math.min(0.66, (graphPanelW - 40) / 520, (graphPanelH - 34) / 340);
+  withAlpha(activeStep >= 3 ? 1 : .24, () => {
+    fillRoundRect(
+      graphPanelX,
+      graphPanelY,
+      graphPanelW,
+      graphPanelH,
+      8,
+      'rgba(255,255,255,.55)',
+      activeStep >= 3 ? palette.violet : palette.line
+    );
+    arrow(
+      rankX + 260,
+      558,
+      graphPanelX - 10,
+      graphPanelY + graphPanelH / 2,
+      palette.violet,
+      activeStep >= 3 ? 3 : 2
+    );
+    drawScaledInspectorGraph(graphPanelX + 20, graphPanelY + 18, graphScale, t, activeStep === 3);
+  });
+
+  const phaseCards = [
+    [
+      'Parsed output: section tree',
+      'The first thing to inspect is whether headings became stable sections and anchors.'
+    ],
+    [
+      'Signals attached to sections',
+      'Summaries, vectors, entities, and xrefs are layered onto the same section tree.'
+    ],
+    [
+      'Query evidence is blended',
+      'The ranker compares dense, lexical, path, and graph signals before choosing hits.'
+    ],
+    [
+      'Top hit: Tools / Streaming',
+      'The graph keeps the winning section near its neighbors, entities, and xrefs.'
+    ],
+  ];
+  const phaseAccent = [palette.teal, palette.gold, palette.rose, palette.violet][activeStep];
+  card(
+    graphPanelX,
+    64,
+    Math.min(300, w - graphPanelX - 28),
+    86,
+    phaseCards[activeStep][0],
+    phaseCards[activeStep][1],
+    '#ffffff',
+    phaseAccent
+  );
+
+  if (activeStep === 0) {
+    callout(548, 190, 'Wrong section structure here means every retrieval tool starts from bad anchors.', palette.teal);
+  } else if (activeStep === 1) {
+    callout(548, 190, 'These signals are layered onto the tree; they are not separate documents.', palette.gold);
+  } else if (activeStep === 2) {
+    callout(548, 190, 'The ranker blends dense, sparse, path, and graph evidence.', palette.rose);
+  } else {
+    callout(548, 190, 'Inspector is useful because it exposes why the index thinks this hit is connected.', palette.violet);
+  }
+}
+
 function drawCompact(w, h, t) {
   const x = 24;
   let y = 28;
@@ -704,11 +817,7 @@ function drawCompact(w, h, t) {
     drawQuery(x, signalY + 296, true);
   }
   const graphScale = Math.min(0.72, (w - 48) / 540);
-  ctx.save();
-  ctx.translate(x, signalY + 392);
-  ctx.scale(graphScale, graphScale);
-  drawInspectorGraph(0, 0, t, activeStep >= 2);
-  ctx.restore();
+  drawScaledInspectorGraph(x, signalY + 392, graphScale, t, activeStep >= 2);
 }
 
 function frame(now) {
