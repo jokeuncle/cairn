@@ -13,6 +13,7 @@ import json
 import shutil
 import statistics
 import subprocess
+import sys
 import time
 from collections.abc import Iterable
 from pathlib import Path
@@ -60,6 +61,17 @@ SMOKE_REPOS: tuple[RepoSpec, ...] = (
     {"name": "github-cli", "url": "https://github.com/cli/cli"},
     {"name": "helm", "url": "https://github.com/helm/helm"},
     {"name": "k6", "url": "https://github.com/grafana/k6"},
+    {"name": "fastapi", "url": "https://github.com/fastapi/fastapi"},
+    {"name": "textual", "url": "https://github.com/Textualize/textual"},
+    {"name": "openai-python", "url": "https://github.com/openai/openai-python"},
+    {
+        "name": "anthropic-sdk-python",
+        "url": "https://github.com/anthropics/anthropic-sdk-python",
+    },
+    {
+        "name": "mcp-typescript-sdk",
+        "url": "https://github.com/modelcontextprotocol/typescript-sdk",
+    },
 )
 
 SMOKE_QUERIES: tuple[str, ...] = (
@@ -82,6 +94,38 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--refresh", action="store_true", help="Delete clones first.")
     parser.add_argument("--limit", type=int, default=len(SMOKE_REPOS))
     parser.add_argument("--k", type=int, default=5)
+    parser.add_argument(
+        "--strict",
+        action="store_true",
+        help=(
+            "Exit non-zero unless every selected repo succeeds, sync has zero "
+            "document failures, every query has hits, and every drilldown works."
+        ),
+    )
+    parser.add_argument(
+        "--min-ok-repos",
+        type=int,
+        default=None,
+        help="Minimum successful repositories required before exiting 0.",
+    )
+    parser.add_argument(
+        "--max-sync-failures",
+        type=int,
+        default=None,
+        help="Maximum allowed per-document sync failures.",
+    )
+    parser.add_argument(
+        "--min-queries-with-hits",
+        type=int,
+        default=None,
+        help="Minimum number of query rows that must return at least one hit.",
+    )
+    parser.add_argument(
+        "--min-drilldowns-ok",
+        type=int,
+        default=None,
+        help="Minimum number of top-hit drilldowns that must succeed.",
+    )
     parser.add_argument(
         "--queries",
         nargs="*",
@@ -242,6 +286,70 @@ async def run() -> None:
         "rows": rows,
     }
     print(json.dumps(report, ensure_ascii=False, indent=2))
+    failures = smoke_gate_failures(
+        report,
+        strict=bool(args.strict),
+        min_ok_repos=args.min_ok_repos,
+        max_sync_failures=args.max_sync_failures,
+        min_queries_with_hits=args.min_queries_with_hits,
+        min_drilldowns_ok=args.min_drilldowns_ok,
+    )
+    if failures:
+        print("strict smoke gate failed:", file=sys.stderr)
+        for failure in failures:
+            print(f"- {failure}", file=sys.stderr)
+        raise SystemExit(1)
+
+
+def smoke_gate_failures(
+    report: dict[str, Any],
+    *,
+    strict: bool,
+    min_ok_repos: int | None = None,
+    max_sync_failures: int | None = None,
+    min_queries_with_hits: int | None = None,
+    min_drilldowns_ok: int | None = None,
+) -> list[str]:
+    """Return unmet smoke thresholds for CI/release gating."""
+    repos = int(report.get("repos", 0))
+    query_count = int(report.get("query_count", 0))
+    required_ok_repos = repos if strict and min_ok_repos is None else min_ok_repos
+    allowed_sync_failures = (
+        0 if strict and max_sync_failures is None else max_sync_failures
+    )
+    required_hit_queries = (
+        query_count
+        if strict and min_queries_with_hits is None
+        else min_queries_with_hits
+    )
+    required_drilldowns = (
+        query_count if strict and min_drilldowns_ok is None else min_drilldowns_ok
+    )
+
+    failures: list[str] = []
+    ok_repos = int(report.get("ok", 0))
+    failed_repos = int(report.get("failed", 0))
+    sync_failures = int(report.get("sync_failures", 0))
+    queries_with_hits = int(report.get("queries_with_hits", 0))
+    drilldowns_ok = int(report.get("drilldowns_ok", 0))
+
+    if strict and failed_repos:
+        failures.append(f"{failed_repos} repositories failed")
+    if required_ok_repos is not None and ok_repos < required_ok_repos:
+        failures.append(f"ok repos {ok_repos} < required {required_ok_repos}")
+    if allowed_sync_failures is not None and sync_failures > allowed_sync_failures:
+        failures.append(
+            f"sync failures {sync_failures} > allowed {allowed_sync_failures}"
+        )
+    if required_hit_queries is not None and queries_with_hits < required_hit_queries:
+        failures.append(
+            f"queries with hits {queries_with_hits} < required {required_hit_queries}"
+        )
+    if required_drilldowns is not None and drilldowns_ok < required_drilldowns:
+        failures.append(
+            f"drilldowns ok {drilldowns_ok} < required {required_drilldowns}"
+        )
+    return failures
 
 
 if __name__ == "__main__":

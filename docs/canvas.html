@@ -301,8 +301,46 @@
     border-radius: 12px;
     padding: 40px;
     margin-top: 24px;
+    overflow-x: auto;
   }
   .arch-wrap svg { width: 100%; height: auto; display: block; }
+
+  /* ---------- Implementation notes ---------- */
+  .impl-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin: 32px 0 64px;
+  }
+  .impl-card {
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    padding: 24px;
+  }
+  .impl-card h4 {
+    margin: 0 0 12px;
+    color: var(--cairn-warm);
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .impl-card p {
+    margin: 0 0 14px;
+    color: var(--text-dim);
+    font-size: 14.5px;
+    line-height: 1.6;
+  }
+  .impl-card p:last-child {
+    margin-bottom: 0;
+  }
+  .impl-card code,
+  .pillar code {
+    color: var(--cairn-warm);
+    font-family: var(--mono);
+    font-size: 0.94em;
+  }
 
   /* ---------- Flow demo ---------- */
   .flow {
@@ -347,6 +385,7 @@
     font-family: var(--mono);
     font-size: 13px;
     color: var(--text);
+    overflow-wrap: anywhere;
   }
   .flow-step .tok {
     margin-left: 8px;
@@ -432,10 +471,22 @@
     .hero h1 { font-size: 38px; }
     .approach { grid-template-columns: 1fr; gap: 24px; }
     .cairn-pillars { grid-template-columns: repeat(2, 1fr); }
+    .impl-grid { grid-template-columns: 1fr; }
     .problem-grid { grid-template-columns: 1fr; }
     .flow { grid-template-columns: 1fr; }
     section { padding: 56px 0; }
     section h2 { font-size: 28px; }
+  }
+
+  @media (max-width: 640px) {
+    .container { padding: 0 20px; }
+    .cairn-pillars { grid-template-columns: 1fr; }
+    .arch-wrap { padding: 18px; }
+    .arch-wrap svg { min-width: 720px; }
+    .impl-card,
+    .flow-card {
+      padding: 20px;
+    }
   }
 </style>
 </head>
@@ -444,19 +495,19 @@
 <!-- ============= HERO ============= -->
 <header class="hero">
   <div class="container">
-    <div class="brand">CAIRN · canvas v0.1</div>
+    <div class="brand">CAIRN · implementation canvas · 0.1.0a2</div>
     <h1>Stop dumping documents into AI.<br><em>Give it a map instead.</em></h1>
     <p class="lede">
       How <strong>RAPTOR</strong>, <strong>BookRAG</strong>, and <strong>A-RAG</strong>
       each tried to fix retrieval — and how <strong style="color: var(--cairn-warm);">Cairn</strong>
-      synthesizes their ideas into a structure-aware, MCP-native retrieval system
-      for large structured documents.
+      synthesizes their ideas into a repo-aware, MCP-native documentation graph
+      for software repositories and large structured documents.
     </p>
     <div class="meta">
-      <span><strong>STATUS</strong>&nbsp;&nbsp;Pre-alpha · Phase 0</span>
+      <span><strong>STATUS</strong>&nbsp;&nbsp;Alpha · 0.1.0a2</span>
       <span><strong>LICENSE</strong>&nbsp;&nbsp;Apache 2.0</span>
       <span><strong>RUNTIME</strong>&nbsp;&nbsp;Python 3.11+ · Local-first</span>
-      <span><strong>INTEROP</strong>&nbsp;&nbsp;Model Context Protocol</span>
+      <span><strong>INTEROP</strong>&nbsp;&nbsp;MCP stdio · repo or document mode</span>
     </div>
   </div>
 </header>
@@ -884,55 +935,56 @@
 <section class="cairn-section">
   <div class="container">
     <div class="eyebrow" style="text-align:center;">Synthesis</div>
-    <h2>Cairn — <em>structure-aware index</em> + <em>agentic tools</em> + <em>MCP</em>.</h2>
+    <h2>Cairn — <em>repo graph</em> + <em>document index</em> + <em>MCP tools</em>.</h2>
     <p class="section-lede">
       BookRAG's vision of a document-native index, A-RAG's discipline of agentic
-      multi-granularity tools, RAPTOR's idea of multi-level summaries — wrapped
-      in MCP so any compliant agent can navigate. Local-first. File-system-native.
+      multi-granularity tools, RAPTOR's idea of multi-level summaries — shipped as
+      a local repository workflow. Cairn discovers docs, builds one structured
+      index per source, then exposes repo search and per-document drilldown over MCP.
     </p>
 
     <div class="cairn-pillars">
       <div class="pillar">
-        <div class="pill-num">01 · INDEX</div>
-        <h4>Structure first</h4>
+        <div class="pill-num">01 · REPO INDEX</div>
+        <h4>Documents stay separate</h4>
         <p>
-          The document's own TOC is the primary index. Five sub-indexes:
-          Tree, Summaries, Entities, Cross-references, Vectors. Vectors
-          supplement structure — they don't replace it.
+          <code>cairn sync</code> discovers README files, docs, specs, ADRs, PDFs, and
+          optional MarkItDown sources. Each source gets its own Tree, Summaries,
+          Entities, Cross-references, and Vectors.
         </p>
       </div>
       <div class="pillar">
         <div class="pill-num">02 · TOOLS</div>
-        <h4>Few, sharp, typed</h4>
+        <h4>Repo first, then drill in</h4>
         <p>
-          Eight tools, each well-typed: outline, get_section, expand,
-          search_semantic, search_keyword, find_mentions, get_related,
-          read_range. The agent composes; Cairn never speaks for it.
+          Repo mode adds <code>list_documents</code> and <code>search_documents</code>, then routes the
+          eight document tools with optional <code>doc</code>. The agent composes; Cairn
+          never speaks for it.
         </p>
       </div>
       <div class="pillar">
         <div class="pill-num">03 · DISCLOSURE</div>
         <h4>Progressive by default</h4>
         <p>
-          outline returns gists. search returns synopses. Full text is opt-in.
-          The agent always sees the smallest useful slice and asks for more
-          when justified.
+          Outlines return gists. Searches return synopses, short heads, and
+          evidence snippets. Full text is opt-in through <code>get_section</code>,
+          <code>expand</code>, or <code>read_range</code>.
         </p>
       </div>
       <div class="pillar">
         <div class="pill-num">04 · INTEROP</div>
         <h4>MCP-native</h4>
         <p>
-          Works with Claude Code, Cursor, Cline, Goose, anything speaking MCP.
-          One tool stack across every agent you'll use. Local by default;
-          no API keys required to ship.
+          Works with Claude Code, Cursor, Codex, Goose, and other MCP clients.
+          Fake providers support offline smoke tests; production embedders and
+          summarizers stay pluggable.
         </p>
       </div>
     </div>
 
     <!-- ============= ARCHITECTURE DIAGRAM ============= -->
     <div class="arch-wrap">
-      <svg viewBox="0 0 1080 520" xmlns="http://www.w3.org/2000/svg">
+      <svg viewBox="0 0 1080 580" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="goldFade" x1="0" x2="0" y1="0" y2="1">
             <stop offset="0" stop-color="#d4a574" stop-opacity="0.15"/>
@@ -964,61 +1016,104 @@
         <rect x="60" y="130" width="960" height="60" rx="8" fill="#1b1a14" stroke="#d4a574" stroke-width="1.5"/>
         <text x="80" y="152" fill="#d4a574" font-family="ui-monospace" font-size="11">L4</text>
         <text x="540" y="156" text-anchor="middle" fill="#e8b787" font-family="ui-monospace" font-size="14" font-weight="600">MCP Server</text>
-        <text x="540" y="178" text-anchor="middle" fill="#8b92a5" font-family="ui-monospace" font-size="11">stdio · SSE · per-doc namespacing · hot-reload · audit log</text>
+        <text x="540" y="178" text-anchor="middle" fill="#8b92a5" font-family="ui-monospace" font-size="11">stdio · structured envelopes · repo mode routes optional doc</text>
 
         <line x1="540" y1="192" x2="540" y2="218" stroke="#d4a574" stroke-width="2" marker-end="url(#ar-down)"/>
 
         <!-- LAYER 3: Retrieval tools -->
-        <rect x="60" y="226" width="960" height="76" rx="8" fill="#1b1a14" stroke="#d4a574" stroke-width="1.5"/>
+        <rect x="60" y="226" width="960" height="116" rx="8" fill="#1b1a14" stroke="#d4a574" stroke-width="1.5"/>
         <text x="80" y="248" fill="#d4a574" font-family="ui-monospace" font-size="11">L3</text>
-        <text x="540" y="252" text-anchor="middle" fill="#e8b787" font-family="ui-monospace" font-size="14" font-weight="600">Retrieval Tools</text>
-        <g font-family="ui-monospace" font-size="11.5" fill="#d4a574" text-anchor="middle">
-          <text x="130" y="284">outline</text>
-          <text x="232" y="284">get_section</text>
-          <text x="334" y="284">expand</text>
-          <text x="450" y="284">search_semantic</text>
-          <text x="586" y="284">search_keyword</text>
-          <text x="710" y="284">find_mentions</text>
-          <text x="838" y="284">get_related</text>
-          <text x="952" y="284">read_range</text>
+        <text x="540" y="252" text-anchor="middle" fill="#e8b787" font-family="ui-monospace" font-size="14" font-weight="600">Repo-Scoped MCP Surface</text>
+        <g font-family="ui-monospace" font-size="10.5" fill="#d4a574">
+          <rect x="118" y="266" width="300" height="58" rx="6" fill="#211c12" stroke="#5a4427" stroke-width="1"/>
+          <text x="138" y="286" fill="#8b92a5" letter-spacing="1.2">REPO DISCOVERY</text>
+          <text x="288" y="286" text-anchor="middle">list_documents</text>
+          <text x="288" y="309" text-anchor="middle">search_documents · repo_context</text>
+          <text x="138" y="309" fill="#8b92a5">repo_graph · repo_impact</text>
+
+          <rect x="438" y="266" width="524" height="58" rx="6" fill="#211c12" stroke="#5a4427" stroke-width="1"/>
+          <text x="456" y="286" fill="#8b92a5" letter-spacing="1.2">DOC TOOLS (+ doc)</text>
+          <g text-anchor="middle">
+            <text x="610" y="286">outline</text>
+            <text x="710" y="286">get_section</text>
+            <text x="806" y="286">expand</text>
+            <text x="908" y="286">read_range</text>
+            <text x="608" y="309">search_semantic</text>
+            <text x="738" y="309">search_keyword</text>
+            <text x="854" y="309">find_mentions</text>
+            <text x="946" y="309">get_related</text>
+          </g>
+          <text x="700" y="334" text-anchor="middle" fill="#8b92a5">document tools accept optional doc in repo mode</text>
         </g>
 
-        <line x1="540" y1="304" x2="540" y2="330" stroke="#d4a574" stroke-width="2" marker-end="url(#ar-down)"/>
+        <line x1="540" y1="344" x2="540" y2="368" stroke="#d4a574" stroke-width="2" marker-end="url(#ar-down)"/>
 
         <!-- LAYER 2: Index (5 sub-indexes) -->
-        <rect x="60" y="338" width="960" height="100" rx="8" fill="#1b1a14" stroke="#d4a574" stroke-width="1.5"/>
-        <text x="80" y="360" fill="#d4a574" font-family="ui-monospace" font-size="11">L2</text>
-        <text x="540" y="364" text-anchor="middle" fill="#e8b787" font-family="ui-monospace" font-size="14" font-weight="600">BookIndex — five sub-indexes</text>
+        <rect x="60" y="376" width="960" height="100" rx="8" fill="#1b1a14" stroke="#d4a574" stroke-width="1.5"/>
+        <text x="80" y="398" fill="#d4a574" font-family="ui-monospace" font-size="11">L2</text>
+        <text x="540" y="402" text-anchor="middle" fill="#e8b787" font-family="ui-monospace" font-size="14" font-weight="600">DocumentIndex — one per source document</text>
         <g font-family="ui-monospace" font-size="11" text-anchor="middle">
           <!-- T -->
-          <rect x="92" y="380" width="170" height="46" rx="6" fill="#211c12" stroke="#d4a574" stroke-width="1"/>
-          <text x="177" y="400" fill="#e8b787" font-size="13" font-weight="600">T · Tree</text>
-          <text x="177" y="418" fill="#8b92a5">hierarchical TOC</text>
+          <rect x="92" y="418" width="170" height="46" rx="6" fill="#211c12" stroke="#d4a574" stroke-width="1"/>
+          <text x="177" y="438" fill="#e8b787" font-size="13" font-weight="600">T · Tree</text>
+          <text x="177" y="456" fill="#8b92a5">hierarchical sections</text>
           <!-- S -->
-          <rect x="272" y="380" width="170" height="46" rx="6" fill="#211c12" stroke="#d4a574" stroke-width="1"/>
-          <text x="357" y="400" fill="#e8b787" font-size="13" font-weight="600">S · Summaries</text>
-          <text x="357" y="418" fill="#8b92a5">gist · synopsis · digest</text>
+          <rect x="272" y="418" width="170" height="46" rx="6" fill="#211c12" stroke="#d4a574" stroke-width="1"/>
+          <text x="357" y="438" fill="#e8b787" font-size="13" font-weight="600">S · Summaries</text>
+          <text x="357" y="456" fill="#8b92a5">gist · synopsis · digest</text>
           <!-- E -->
-          <rect x="452" y="380" width="170" height="46" rx="6" fill="#211c12" stroke="#d4a574" stroke-width="1"/>
-          <text x="537" y="400" fill="#e8b787" font-size="13" font-weight="600">E · Entities</text>
-          <text x="537" y="418" fill="#8b92a5">terms · code · proper</text>
+          <rect x="452" y="418" width="170" height="46" rx="6" fill="#211c12" stroke="#d4a574" stroke-width="1"/>
+          <text x="537" y="438" fill="#e8b787" font-size="13" font-weight="600">E · Entities</text>
+          <text x="537" y="456" fill="#8b92a5">terms · code · proper</text>
           <!-- X -->
-          <rect x="632" y="380" width="170" height="46" rx="6" fill="#211c12" stroke="#d4a574" stroke-width="1"/>
-          <text x="717" y="400" fill="#e8b787" font-size="13" font-weight="600">X · Cross-refs</text>
-          <text x="717" y="418" fill="#8b92a5">links · textual · entity</text>
+          <rect x="632" y="418" width="170" height="46" rx="6" fill="#211c12" stroke="#d4a574" stroke-width="1"/>
+          <text x="717" y="438" fill="#e8b787" font-size="13" font-weight="600">X · Cross-refs</text>
+          <text x="717" y="456" fill="#8b92a5">links · textual · entity</text>
           <!-- V -->
-          <rect x="812" y="380" width="170" height="46" rx="6" fill="#211c12" stroke="#d4a574" stroke-width="1"/>
-          <text x="897" y="400" fill="#e8b787" font-size="13" font-weight="600">V · Vectors</text>
-          <text x="897" y="418" fill="#8b92a5">supplement only</text>
+          <rect x="812" y="418" width="170" height="46" rx="6" fill="#211c12" stroke="#d4a574" stroke-width="1"/>
+          <text x="897" y="438" fill="#e8b787" font-size="13" font-weight="600">V · Vectors</text>
+          <text x="897" y="456" fill="#8b92a5">dense overlay</text>
         </g>
 
-        <line x1="540" y1="440" x2="540" y2="466" stroke="#d4a574" stroke-width="2" marker-end="url(#ar-down)"/>
+        <line x1="540" y1="478" x2="540" y2="522" stroke="#d4a574" stroke-width="2" marker-end="url(#ar-down)"/>
 
         <!-- LAYER 1: Ingestion -->
-        <rect x="60" y="474" width="960" height="40" rx="8" fill="#1b1a14" stroke="#d4a574" stroke-width="1.5"/>
-        <text x="80" y="496" fill="#d4a574" font-family="ui-monospace" font-size="11">L1</text>
-        <text x="540" y="499" text-anchor="middle" fill="#e8b787" font-family="ui-monospace" font-size="13" font-weight="600">Ingestion · parsers: Markdown · PDF · HTML · DOCX → Document AST</text>
+        <rect x="60" y="530" width="960" height="40" rx="8" fill="#1b1a14" stroke="#d4a574" stroke-width="1.5"/>
+        <text x="80" y="552" fill="#d4a574" font-family="ui-monospace" font-size="11">L1</text>
+        <text x="540" y="555" text-anchor="middle" fill="#e8b787" font-family="ui-monospace" font-size="12" font-weight="600">Ingestion · native Markdown/PDF · optional MarkItDown Office/data/web → Document AST</text>
       </svg>
+    </div>
+
+    <div class="impl-grid">
+      <div class="impl-card">
+        <h4>Repo search is hybrid</h4>
+        <p>
+          <code>search_documents</code> searches every indexed repo document and
+          returns globally ranked section hits with <code>doc</code>, source,
+          section id, stable anchor, evidence, score breakdown, and explanation.
+          <code>repo_context</code> composes those hits into an agent-ready context pack.
+        </p>
+        <p>
+          The ranker blends dense vector similarity, field-supported lexical
+          evidence, BM25-style sparse score, document/path identity, and graph
+          propagation from tree, xref, and entity-neighborhood edges.
+          <code>repo_graph</code> and <code>repo_impact</code> expose that docs graph
+          without reimplementing CodeGraph's source-code symbol graph.
+        </p>
+      </div>
+      <div class="impl-card">
+        <h4>Document tools stay explicit</h4>
+        <p>
+          <code>search_semantic</code> is dense vector search inside one document.
+          <code>search_keyword</code> is exact case-insensitive lexical scan, not
+          BM25. <code>get_related</code> returns tree and xref neighbors.
+        </p>
+        <p>
+          That separation is intentional: repo discovery gets the hybrid ranker;
+          follow-up tools stay predictable so an agent can inspect, expand, and
+          cite exactly what it selected.
+        </p>
+      </div>
     </div>
 
     <!-- ============= FLOW DEMO ============= -->
@@ -1035,38 +1130,39 @@
         <div class="flow-step"><span class="num">03</span><div>agent reads them all to figure out which is relevant<span class="tok">5,120 tok</span></div></div>
         <div class="flow-step"><span class="num">04</span><div>agent realizes context is missing — needs surrounding sections<span class="tok">+ retry</span></div></div>
         <div class="flow-step"><span class="num">05</span><div>second pass: another 10 chunks<span class="tok">5,120 tok</span></div></div>
-        <div class="flow-step"><span class="num">06</span><div>still no cross-references; answer is guessed<span class="tok">— · ≈70%</span></div></div>
+        <div class="flow-step"><span class="num">06</span><div>still no cross-references; answer is guessed<span class="tok">low trace</span></div></div>
         <div class="flow-total">
           <span>Total tokens consumed</span>
           <span class="total-tok">≈ 15,360</span>
         </div>
         <div class="flow-total">
-          <span>Answer confidence</span>
-          <span class="total-tok">≈ 70%</span>
+          <span>Traceability</span>
+          <span class="total-tok">low</span>
         </div>
       </div>
 
       <div class="flow-card good">
-        <h4>// Cairn (structure-aware)</h4>
-        <div class="flow-step"><span class="num">01</span><div><span class="code">outline(depth=2)</span> — get the document map<span class="tok">320 tok</span></div></div>
-        <div class="flow-step"><span class="num">02</span><div><span class="code">find_mentions("retry middleware")</span><span class="tok">120 tok</span></div></div>
-        <div class="flow-step"><span class="num">03</span><div><span class="code">get_section("middleware/retry", level="synopsis")</span><span class="tok">280 tok</span></div></div>
-        <div class="flow-step"><span class="num">04</span><div><span class="code">get_related(id, kinds=["xref"])</span> — finds "Timeouts" §<span class="tok">180 tok</span></div></div>
-        <div class="flow-step"><span class="num">05</span><div><span class="code">expand("middleware/retry", to="full")</span><span class="tok">1,200 tok</span></div></div>
-        <div class="flow-step"><span class="num">06</span><div>cites <span class="code">cairn://handbook/middleware/retry#timeout-handling</span><span class="tok">— · ≈95%</span></div></div>
+        <h4>// Cairn (repo-scoped)</h4>
+        <div class="flow-step"><span class="num">01</span><div><span class="code">list_documents()</span> — see indexed docs and freshness<span class="tok">metadata</span></div></div>
+        <div class="flow-step"><span class="num">02</span><div><span class="code">search_documents("retry middleware timeouts")</span><span class="tok">620 tok</span></div></div>
+        <div class="flow-step"><span class="num">03</span><div><span class="code">get_section(doc="handbook", id="middleware/retry")</span><span class="tok">280 tok</span></div></div>
+        <div class="flow-step"><span class="num">04</span><div><span class="code">get_related(doc="handbook", kinds=["xref","parent"])</span><span class="tok">240 tok</span></div></div>
+        <div class="flow-step"><span class="num">05</span><div><span class="code">expand(doc="handbook", id="middleware/retry", to="full")</span><span class="tok">1,200 tok</span></div></div>
+        <div class="flow-step"><span class="num">06</span><div>cites <span class="code">cairn://handbook/middleware/retry#timeout-handling</span><span class="tok">stable anchor</span></div></div>
         <div class="flow-total">
           <span>Total tokens consumed</span>
-          <span class="total-tok">≈ 2,100</span>
+          <span class="total-tok">≈ 2,340</span>
         </div>
         <div class="flow-total">
-          <span>Answer confidence</span>
-          <span class="total-tok">≈ 95%</span>
+          <span>Traceability</span>
+          <span class="total-tok">high</span>
         </div>
       </div>
     </div>
 
     <p style="text-align:center; color: var(--text-faint); font-family: var(--mono); font-size: 12px; margin-top: 24px;">
-      Illustrative numbers. Real benchmarks land with v0.2 (<code>cairn-bench</code>).
+      Flow numbers are illustrative. The benchmark harness ships now; README has
+      starter-suite numbers and reproduction commands.
     </p>
 
     <!-- ============= COMPARISON TABLE ============= -->
@@ -1091,7 +1187,7 @@
             <td>Clustered tree</td>
             <td class="h">Doc TOC + graph</td>
             <td>Vector chunks</td>
-            <td class="cairn-col h">Doc TOC + 4 overlays</td>
+            <td class="cairn-col h">Repo catalog + doc TOC + 4 overlays</td>
           </tr>
           <tr>
             <td>Respects authorial structure</td>
@@ -1123,7 +1219,7 @@
             <td class="meh">partial</td>
             <td class="yes">yes</td>
             <td class="meh">partial</td>
-            <td class="cairn-col yes">enforced</td>
+            <td class="cairn-col yes">implemented</td>
           </tr>
           <tr>
             <td>MCP-native</td>

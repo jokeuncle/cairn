@@ -71,7 +71,7 @@ graph, no cross-refs yet.**
 
 ### Quality bars
 
-- `pip install cairn && cairn index ./README.md && cairn serve` works on a
+- `pip install docsgraph && docsgraph index ./README.md && docsgraph serve` works on a
   fresh machine in under 60 seconds (model download excluded).
 - `mypy --strict src/cairn/` clean.
 - ≥ 80% test coverage on new code.
@@ -134,7 +134,12 @@ Goal: multi-document, multi-format, human-inspectable.
 
 ### In scope
 
-- ☐ Multi-document namespacing in MCP server
+- ☑ Multi-document namespacing in MCP server
+- ☑ Repo-scoped discovery/sync/status and shareable `.cairn/config.toml`
+- ☑ Repo tools: `list_documents`, `search_documents`, `repo_context`,
+  `repo_graph`, `repo_impact`, plus normal tools routed by optional `doc`
+- ☑ Public repo eval/smoke scripts with strict release-gate thresholds
+- ☑ Public golden documentation standard for repo authors and ranker tuning
 - ☐ HTML / mkdocs / docusaurus site parser
 - ☐ Web inspector (`cairn web`): read-only, browse index, see what agents
   retrieved, replay sessions

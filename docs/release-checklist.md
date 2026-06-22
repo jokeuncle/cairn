@@ -7,11 +7,14 @@ tagged alpha release.
 
 - README explains the product in the first screen and includes a working
   offline quickstart.
-- The PyPI distribution name is `cairn-docs`; the installed CLI command remains
-  `cairn`. Do not publish this project as `cairn`, which is already occupied
-  on PyPI by an unrelated package.
+- The PyPI distribution name is `docsgraph`; the primary installed CLI command
+  is `docsgraph`, with `cairn` retained as a compatibility alias. Do not publish
+  this project as `cairn`, which is already occupied on PyPI by an unrelated
+  package.
 - `LICENSE`, `CHANGELOG.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`,
   `SECURITY.md`, and issue/PR templates are present.
+- `docs/golden-docs-standard.md` reflects the current repo-search preferences
+  and any new broadly tuned ranking/discovery rule.
 - `.env.example` contains only placeholders.
 - `.cairn/config.toml` is committed if the repository wants a stable Cairn
   docs policy; `.cairn/documents/`, `.cairn/manifest.json`, and generated
@@ -34,27 +37,23 @@ UV_PROJECT_ENVIRONMENT=/tmp/cairn-test-venv-py313 uv run --python 3.13 --extra d
 UV_PROJECT_ENVIRONMENT=/tmp/cairn-test-venv-py313 uv run --python 3.13 --extra dev pytest
 
 rm -rf /tmp/cairn-dist
-UV_PROJECT_ENVIRONMENT=/tmp/cairn-build-venv-py313 \
-  uv run --python 3.13 --with build --with twine \
-  python -m build --outdir /tmp/cairn-dist
-UV_PROJECT_ENVIRONMENT=/tmp/cairn-build-venv-py313 \
-  uv run --python 3.13 --with build --with twine \
-  python -m twine check /tmp/cairn-dist/*
+uv build --out-dir /tmp/cairn-dist
+uv publish --dry-run /tmp/cairn-dist/*
 ```
 
 Expected current gate:
 
 - `ruff check .`: pass
 - `mypy src tests`: pass
-- `pytest`: 419 passing
-- `twine check`: wheel and sdist pass
+- `pytest`: 440 passing
+- `uv publish --dry-run`: wheel and sdist pass upload validation
 
 ## Dogfood Checks
 
 ```bash
-cairn sync --fake
-cairn status --json
-cairn bench benchmarks/architecture.toml --fake
+docsgraph sync --fake
+docsgraph status --json
+docsgraph bench benchmarks/architecture.toml --fake
 ```
 
 Expected current dogfood:
@@ -81,8 +80,8 @@ Expected current results with fake plugins:
   deep eval top1 4/4, drilldown 4/4.
 - `fastapi/full-stack-fastapi-template`: 7/7 docs indexed, 0 errors; 4-case
   deep eval top1 4/4, drilldown 4/4.
-- `scripts/smoke_many_repos.py --limit 32`: 1076 docs indexed across 32
-  repos, 0 sync failures, 160/160 searches with hits, 160/160 drilldowns.
+- `scripts/smoke_many_repos.py --limit 37`: 2931 docs indexed across 37
+  repos, 0 sync failures, 185/185 searches with hits, 185/185 drilldowns.
 
 Do not tune ranking solely to one repository. Treat failures as signals about
 general discovery, evidence, ranking, or drilldown quality.
@@ -90,8 +89,8 @@ general discovery, evidence, ranking, or drilldown quality.
 Run:
 
 ```bash
-python scripts/eval_repos.py --repo all --refresh
-python scripts/smoke_many_repos.py --limit 32 --refresh
+python scripts/eval_repos.py --repo all --refresh --strict
+python scripts/smoke_many_repos.py --limit 37 --refresh --strict
 ```
 
 Run at least one real-provider eval before claiming production retrieval
@@ -102,7 +101,8 @@ the command line or write them into files:
 python scripts/eval_repos.py --repo pydantic-ai \
   --provider env \
   --workdir /tmp/cairn-repo-eval-real \
-  --refresh
+  --refresh \
+  --strict
 ```
 
 For Doubao, the intended environment shape is:
@@ -116,6 +116,27 @@ export CAIRN_EMBED_MODEL=doubao-embedding-vision-251215
 
 The corresponding API key variables must be set locally, but real values must
 never appear in git, shell history snippets, benchmark reports, or CI logs.
+
+## Trusted Publishing
+
+Public PyPI publishing must use GitHub OIDC Trusted Publishing, not a long-lived
+API token in a local shell. Configure PyPI before pushing a release tag:
+
+- Project: `docsgraph`
+- Owner / repository: `jokeuncle/cairn`
+- Workflow: `.github/workflows/release.yml`
+- Environment: `pypi`
+
+In GitHub, create the `pypi` environment and require maintainer approval if the
+repository is not fully locked down. Revoke any account-wide PyPI token used for
+manual bootstrapping after the first project-scoped setup is in place.
+
+After the tag workflow publishes, verify the official source install from a
+clean temporary environment:
+
+```bash
+python scripts/verify_pypi_install.py --version "$(uv run docsgraph version)" --repo . --sync-repo
+```
 
 ## Secret And Generated-File Audit
 
@@ -140,5 +161,5 @@ git push origin main --tags
 ```
 
 The release workflow builds wheel/sdist and attaches them to the GitHub
-release. PyPI publishing is intentionally disabled until trusted publishing is
-configured for the package.
+release. It also publishes to PyPI through Trusted Publishing when the `pypi`
+environment is approved and the PyPI project trusts this workflow.

@@ -25,9 +25,10 @@ All notable changes to Cairn. Format follows
 - **Repository documentation workflow.** `cairn init -y`, `cairn sync`,
   `cairn status`, repo-scoped `cairn serve`, and repo-scoped `cairn inspect`
   turn a project directory into a multi-document MCP knowledge layer. Repo MCP
-  adds `list_documents`, cross-document `search_documents`, and routes normal
-  tools by optional `doc`. Repo sync isolates per-document failures so one bad
-  source does not block the rest of the repository index.
+  adds `list_documents`, cross-document `search_documents`, `repo_context`,
+  `repo_graph`, `repo_impact`, and routes normal tools by optional `doc`.
+  Repo sync isolates per-document failures so one bad source does not block the
+  rest of the repository index.
 - **Configurable repo search policy.** `.cairn/config.toml` exposes
   `include`, `exclude`, `enable_markitdown`, `primary_doc`, and
   `search_sections_per_doc` so repositories can tune coverage, conversion,
@@ -40,10 +41,23 @@ All notable changes to Cairn. Format follows
   freshness; `cairn mcp config` prints MCP snippets for Claude, Cursor, Codex,
   and Goose. `cairn serve --repo <path>` makes generated configs independent
   from the client's working directory.
+- **Agent self-install command.** `docsgraph install` writes the Cairn MCP
+  server config for Codex, Claude, Cursor, or Goose, while
+  `docsgraph install --dry-run` prints the target path and config without
+  touching disk.
 - **Public repo smoke evaluator.** `scripts/eval_repos.py` reproduces the
   uv / MCP Python SDK / FastAPI template repo-document smoke tests used for
   release readiness.
-- **Optional MarkItDown ingestion.** Installing `cairn[markitdown]` lets Cairn
+- **Strict repo gates.** `scripts/eval_repos.py --strict` and
+  `scripts/smoke_many_repos.py --strict` exit non-zero when sync, top-k, hit, or
+  drilldown thresholds fail, making repo regressions CI/release-gate friendly.
+- **Golden documentation standard.** `docs/golden-docs-standard.md` publishes
+  the repo-doc shapes Cairn rewards and the tuning policy maintainers must
+  follow when mature-repository smoke runs expose quality gaps.
+- **PyPI installation verifier.** `scripts/verify_pypi_install.py` installs a
+  released `docsgraph` wheel from the official Python index into a clean
+  temporary environment and checks both `docsgraph` and `cairn` console scripts.
+- **Optional MarkItDown ingestion.** Installing `docsgraph[markitdown]` lets Cairn
   convert local DOCX, PPTX, XLSX, HTML, CSV, JSON, XML, EPUB, and related files
   to Markdown before indexing them through the canonical Markdown pipeline.
 
@@ -53,16 +67,46 @@ All notable changes to Cairn. Format follows
   with evidence snippets included in semantic-search payloads.
 - Repo-scoped `search_documents` now uses a manifest-backed process cache and
   flat in-memory section scoring, improving repeated MCP queries on docs-heavy
-  repositories while preserving deterministic fake-embedder behavior.
+  repositories while preserving deterministic fake-embedder behavior. Repo
+  status now records file-level fingerprints, and search/context responses expose
+  `stale_documents` when sources changed after the last sync.
+- Repo-scoped search internals moved into `cairn.repo_search`, keeping
+  `cairn.repo` as the lifecycle/API surface while isolating ranker and cache
+  complexity for future performance work.
+- Repo-scoped dense-vector scoring is now batched through a warm in-memory
+  matrix, reducing Python-loop overhead on large repositories while retaining
+  full fallback recall.
+- Large repo search now uses a two-stage warm-query path: dense vector seeds,
+  cheap lexical/path seeds, and graph neighbors form a wide shortlist before the
+  full BM25/graph/explanation ranker runs. Search responses expose ranker mode
+  and section counts for observability.
+- Repo search locale detection now recognizes script/region path segments such
+  as `zh-hant`, `pt-br`, and `en-us`, and shortlist graph scoring no longer
+  inflates local neighborhoods when some neighbors are outside the candidate
+  set.
+- Repo-scoped cold search-cache construction now loads per-document indexes
+  concurrently with bounded read parallelism and per-document failure isolation.
+- Repo-scoped ranking now intent-gates changelog, release-note, and migration
+  history documents so broad topic queries prefer guides/API docs/README-style
+  docs while explicit release/version/change queries still retrieve history docs.
+- Repo-scoped ranking now supports `preferred_locales` in `.cairn/config.toml`
+  and auto-prefers English/locale-neutral docs for English queries when
+  multilingual documentation trees contain equivalent pages.
+- Repo-scoped MCP dispatch now returns the same structured `INVALID_INPUT`
+  envelope for bad tool arguments as single-document dispatch.
 - Repo search results now prioritize document diversity before returning
   multiple sections from the same document, reducing duplicate-heavy top-k
   answers in large documentation sets.
 - The static inspector now reuses SVG nodes between frames, stops animating
   after layout stabilization, and hides non-neighbor labels by default so large
   relation graphs remain responsive.
-- The PyPI distribution name is now `cairn-docs` while the CLI remains
-  `cairn`, avoiding the unrelated package that already occupies `cairn`.
+- The PyPI distribution name is now `docsgraph`; the primary CLI is
+  `docsgraph`, and `cairn` remains a compatibility alias. This keeps the
+  Cairn product name while making the installed tool obvious and avoiding the
+  unrelated package that already occupies `cairn`.
 - Strict mypy now passes across both `src` and `tests`.
+- The release workflow now runs lint, type checks, tests, build validation, and
+  PyPI Trusted Publishing from the `pypi` GitHub environment on version tags.
 
 ## [0.1.0a2] — 2026-06-11
 

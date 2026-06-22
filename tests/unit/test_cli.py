@@ -228,9 +228,17 @@ class TestRepoCommands:
         assert doctor_result.exit_code == 0, doctor_result.output
         assert "Cairn doctor: ok" in doctor_result.output
 
+        query_result = runner.invoke(app, ["query", "repo", "detailed docs", "--fake"])
+        assert query_result.exit_code == 0, query_result.output
+        query_payload = json.loads(query_result.output)
+        assert query_payload["query"] == "detailed docs"
+        assert any(hit["doc"] == "docs-guide" for hit in query_payload["hits"])
+        assert "explanation" in query_payload["hits"][0]
+
         mcp_result = runner.invoke(app, ["mcp", "config", "--client", "claude"])
         assert mcp_result.exit_code == 0, mcp_result.output
         mcp_payload = json.loads(mcp_result.output)
+        assert mcp_payload["mcpServers"]["cairn"]["command"] == "docsgraph"
         assert mcp_payload["mcpServers"]["cairn"]["args"][:2] == [
             "serve",
             "--repo",
@@ -248,6 +256,82 @@ class TestRepoCommands:
         assert inspect_result.exit_code == 0, inspect_result.output
         assert (tmp_path / "repo-inspector.html").exists()
 
+    def test_install_dry_run_prints_target_and_config(
+        self, tmp_path: Path, monkeypatch: MonkeyPatch, runner: CliRunner
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / "README.md").write_text("# Readme\n", encoding="utf-8")
+        init_result = runner.invoke(app, ["init", "-y"])
+        assert init_result.exit_code == 0, init_result.output
+
+        home = tmp_path / "home"
+        monkeypatch.setenv("HOME", str(home))
+
+        result = runner.invoke(
+            app, ["install", "--client", "codex", "--dry-run", "--fake"]
+        )
+
+        assert result.exit_code == 0, result.output
+        assert "# target:" in result.output
+        assert "[mcp_servers.cairn]" in result.output
+        assert 'command = "docsgraph"' in result.output
+        assert not (home / ".codex" / "config.toml").exists()
+
+    def test_install_codex_writes_managed_block(
+        self, tmp_path: Path, monkeypatch: MonkeyPatch, runner: CliRunner
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / "README.md").write_text("# Readme\n", encoding="utf-8")
+        init_result = runner.invoke(app, ["init", "-y"])
+        assert init_result.exit_code == 0, init_result.output
+
+        home = tmp_path / "home"
+        monkeypatch.setenv("HOME", str(home))
+
+        first = runner.invoke(app, ["install", "--client", "codex", "--yes", "--fake"])
+        assert first.exit_code == 0, first.output
+        config = home / ".codex" / "config.toml"
+        text = config.read_text(encoding="utf-8")
+        assert "[mcp_servers.cairn]" in text
+        assert 'command = "docsgraph"' in text
+        assert "--fake" in text
+
+        second = runner.invoke(app, ["install", "--client", "codex", "--yes"])
+        assert second.exit_code == 0, second.output
+        updated = config.read_text(encoding="utf-8")
+        assert updated.count("BEGIN DOCSGRAPH MCP") == 1
+        assert "--fake" not in updated
+
+    def test_install_cursor_merges_json_config(
+        self, tmp_path: Path, monkeypatch: MonkeyPatch, runner: CliRunner
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / "README.md").write_text("# Readme\n", encoding="utf-8")
+        init_result = runner.invoke(app, ["init", "-y"])
+        assert init_result.exit_code == 0, init_result.output
+
+        output = tmp_path / "mcp.json"
+        output.write_text('{"other": true, "mcpServers": {"existing": {}}}\n')
+
+        result = runner.invoke(
+            app,
+            [
+                "install",
+                "--client",
+                "cursor",
+                "--output",
+                str(output),
+                "--yes",
+            ],
+        )
+
+        assert result.exit_code == 0, result.output
+        payload = json.loads(output.read_text(encoding="utf-8"))
+        assert payload["other"] is True
+        assert "existing" in payload["mcpServers"]
+        assert payload["mcpServers"]["cairn"]["command"] == "docsgraph"
+        assert payload["mcpServers"]["cairn"]["args"][:2] == ["serve", "--repo"]
+
     def test_doctor_reports_missing_repo_config(
         self, tmp_path: Path, monkeypatch: MonkeyPatch, runner: CliRunner
     ) -> None:
@@ -256,4 +340,5 @@ class TestRepoCommands:
         result = runner.invoke(app, ["doctor"])
 
         assert result.exit_code == 1
-        assert "cairn init -y" in result.output
+        assert "docsgraph init -y" in result.output
+        assert "cairn" in result.output

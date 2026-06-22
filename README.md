@@ -1,17 +1,18 @@
 # Cairn
 
-> **Repository documentation graph for AI agents. CodeGraph helps agents
-> navigate code; Cairn helps them navigate docs.**
+> **The DocsGraph for AI agents. CodeGraph helps agents navigate code; Cairn
+> helps them navigate docs. Install it as `docsgraph`; keep the `cairn` name
+> for the product and compatibility alias.**
 
 [![CI](https://github.com/jokeuncle/cairn/actions/workflows/ci.yml/badge.svg)](https://github.com/jokeuncle/cairn/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache_2.0-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.1.0a2-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.1.0a3-blue.svg)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
 [![MCP](https://img.shields.io/badge/MCP-native-7c3aed.svg)](https://modelcontextprotocol.io/)
 
 ![Cairn demo: repository documentation graph and MCP tools](docs/assets/cairn-demo.svg)
 
-Cairn is a **local-first, MCP-native documentation graph** for software
+Cairn is a **local-first, MCP-native DocsGraph** for software
 repositories and large structured documents. It turns README files, specs,
 ADRs, docs folders, PDFs, and optional MarkItDown-converted Office/data/web
 files into a navigable map: document catalog, hierarchical sections,
@@ -27,12 +28,13 @@ The result: better retrieval accuracy, lower token spend, and a practical MCP
 tool layer between your project documentation and every AI coding agent you
 use. Local-first. Vendor-neutral. Designed for open-source repos.
 
-> 🚀 **Alpha — `0.1.0a2`.** Markdown + PDF ingest, all eight MCP tools,
+> 🚀 **Alpha — `0.1.0a3`.** Markdown + PDF ingest, all eight MCP tools,
 > the full structure-aware index (tree + summaries + entities + xrefs +
 > vectors), repo-level `init/sync/status`, repo-scoped MCP with
-> `list_documents` + `search_documents`, failure-isolated sync, static graph
-> inspector, Doubao multimodal embeddings, and a benchmark harness with
-> headline numbers. See [`CHANGELOG.md`](CHANGELOG.md) for what's in this
+> `list_documents`, `search_documents`, `repo_context`, `repo_graph`, and
+> `repo_impact`, failure-isolated sync, static graph inspector, Doubao
+> multimodal embeddings, and a benchmark harness with headline numbers. See
+> [`CHANGELOG.md`](CHANGELOG.md) for what's in this
 > release and [`ROADMAP.md`](ROADMAP.md) for what's next.
 
 ---
@@ -50,19 +52,21 @@ use. Local-first. Vendor-neutral. Designed for open-source repos.
 
 For the in-depth motivation, see [`PRODUCT.md`](PRODUCT.md).
 For the technical design, see [`ARCHITECTURE.md`](ARCHITECTURE.md).
+For the public documentation quality contract Cairn optimizes for, see
+[`docs/golden-docs-standard.md`](docs/golden-docs-standard.md).
 
 ---
 
 ## How It Works (90 seconds)
 
-1. **Discover.** `cairn init -y` writes `.cairn/config.toml`; `cairn sync`
+1. **Discover.** `docsgraph init -y` writes `.cairn/config.toml`; `docsgraph sync`
    discovers README, Markdown docs, ADRs, specs, and PDFs from conservative
    repo globs.
 2. **Index.** Each document becomes a normal Cairn index: structural tree (T),
    multi-level summaries (S), entity index (E), cross-reference graph (X), and
    vector overlay (V). A bad source file is isolated instead of breaking the
    whole repo sync.
-3. **Serve.** `cairn serve` exposes repo-scoped MCP tools:
+3. **Serve.** `docsgraph serve` exposes repo-scoped MCP tools:
    `list_documents`, `search_documents`, plus `outline`, `get_section`,
    `expand`, `search_semantic`, `search_keyword`, `find_mentions`,
    `get_related`, and `read_range` routed by optional `doc`.
@@ -81,40 +85,58 @@ The fastest way to see Cairn work is to index this repo's own documentation.
 **Zero API keys, zero model downloads** — the `--fake` flag uses deterministic
 in-process plugins so the whole thing runs offline.
 
-The PyPI distribution is `cairn-docs`; the CLI command is `cairn`:
+The PyPI distribution is `docsgraph`; the primary CLI command is `docsgraph`.
+The older `cairn` command is installed as a compatibility alias:
 
 ```bash
-pip install cairn-docs
+pip install docsgraph
 ```
 
 Or run it without installing:
 
 ```bash
-uvx --from cairn-docs cairn --help
+uvx docsgraph --help
 ```
+
+AI agents that can run shell commands can install and wire Cairn into their own
+MCP config. Start with a dry run, then write the config once the target path
+looks right:
+
+```bash
+uvx docsgraph init -y
+uvx docsgraph sync --fake
+uvx docsgraph install --client codex --dry-run --fake
+uvx docsgraph install --client codex --yes --fake
+```
+
+Use `--client claude`, `--client cursor`, or `--client goose` for other MCP
+clients. `docsgraph install` writes the same server config that
+`docsgraph mcp config` prints, with `command = "docsgraph"` and
+`args = ["serve", "--repo", "..."]`.
 
 ### Repository Workflow
 
 Inside any repository:
 
 ```bash
-cairn init -y
-cairn sync --fake
-cairn status
-cairn doctor
-cairn mcp config --client claude --fake
-cairn serve --fake
+docsgraph init -y
+docsgraph sync --fake
+docsgraph status
+docsgraph query repo "where are docs indexed?" --fake
+docsgraph doctor
+docsgraph mcp config --client claude --fake
+docsgraph serve --fake
 ```
 
-`cairn doctor` checks repo config, index freshness, primary-doc routing, and
-model settings. `cairn mcp config` prints copy-pasteable stdio snippets for
+`docsgraph doctor` checks repo config, index freshness, primary-doc routing,
+and model settings. `docsgraph mcp config` prints copy-pasteable stdio snippets for
 Claude, Cursor, Codex, and Goose:
 
 ```bash
-cairn mcp config --client claude
-cairn mcp config --client cursor
-cairn mcp config --client codex
-cairn mcp config --client goose
+docsgraph mcp config --client claude
+docsgraph mcp config --client cursor
+docsgraph mcp config --client codex
+docsgraph mcp config --client goose
 ```
 
 For local development from source:
@@ -127,16 +149,19 @@ python3.11 -m venv .venv
 .venv/bin/pip install -e ".[dev]"
 
 # 1. Create .cairn/config.toml with conservative documentation globs.
-.venv/bin/cairn init -y
+.venv/bin/docsgraph init -y
 
 # 2. Index README, Markdown docs, and PDFs.
-.venv/bin/cairn sync --fake
+.venv/bin/docsgraph sync --fake
 
 # 3. Inspect freshness and indexed document ids.
-.venv/bin/cairn status
+.venv/bin/docsgraph status
 
-# 4. Start the repo-scoped MCP stdio server for Claude Code / Cursor / Cline / Goose.
-.venv/bin/cairn serve --fake
+# 4. Search across all indexed repository docs.
+.venv/bin/docsgraph query repo "where are docs indexed?" --fake
+
+# 5. Start the repo-scoped MCP stdio server for Claude Code / Cursor / Cline / Goose.
+.venv/bin/docsgraph serve --fake
 ```
 
 Repo mode writes a shareable config plus ignored runtime data:
@@ -156,7 +181,10 @@ Repo-scoped MCP adds:
 | Tool | Use it for |
 |---|---|
 | `list_documents` | See every indexed doc, its source path, freshness, and section count. |
-| `search_documents` | Search across all indexed docs and get globally ranked section hits with `doc` ids. |
+| `search_documents` | Search across all indexed docs and get globally ranked, explainable section hits with `doc` ids, skipped docs, and stale-doc warnings. |
+| `repo_context` | Get a ready-to-read context pack: ranked hits, selected section text, hit explanations, and a relationship map. |
+| `repo_graph` | Inspect the repo documentation graph: document, section, entity, contains, xref, and mention edges. Cross-document links are exposed through shared entity nodes. |
+| `repo_impact` | Estimate documentation surfaces affected by a document or section change. |
 | normal Cairn tools + `doc` | Drill into a chosen document with `outline`, `get_section`, `search_semantic`, `get_related`, etc. |
 
 Repo behavior is intentionally configurable in `.cairn/config.toml`:
@@ -168,6 +196,7 @@ Repo behavior is intentionally configurable in `.cairn/config.toml`:
 | `enable_markitdown` | `false` | Enables non-Markdown/PDF conversion when the `markitdown` extra is installed. Useful for DOCX/PPTX/XLSX/HTML-heavy repos, slower and less deterministic than native Markdown/PDF parsing. |
 | `primary_doc` | `readme` | Chooses the default document for normal tools when `doc` is omitted in repo mode. |
 | `search_sections_per_doc` | `1` | Default diversity for `search_documents`. `1` helps agents find the right doc first; raise it when a repo has a few long docs and you want deeper hits from each doc by default. |
+| `preferred_locales` | `[]` | Optional locale preference for repo search, for example `["en"]` or `["zh"]`. When omitted, English queries prefer English or locale-neutral docs without hiding other languages. |
 
 MarkItDown integration is local-file only and optional. Cairn uses it as a
 conversion layer, then feeds the generated Markdown into the same canonical
@@ -175,15 +204,15 @@ Markdown parser. This expands coverage to formats such as DOCX, PPTX, XLSX,
 HTML, CSV, JSON, XML, and EPUB without making the base install heavy:
 
 ```bash
-.venv/bin/pip install -e ".[markitdown]"
-.venv/bin/cairn init -y --force --markitdown
-.venv/bin/cairn sync --fake
+pip install "docsgraph[markitdown]"
+.venv/bin/docsgraph init -y --force --markitdown
+.venv/bin/docsgraph sync --fake
 ```
 
 Generate a standalone graph inspector for the primary repo doc:
 
 ```bash
-cairn inspect --out /tmp/cairn-repo-inspector.html
+docsgraph inspect --out /tmp/cairn-repo-inspector.html
 ```
 
 ### Single Document Workflow
@@ -192,22 +221,22 @@ Cairn still works as a focused index for one large document:
 
 ```bash
 # Index Cairn's own architecture document.
-.venv/bin/cairn index ARCHITECTURE.md --out /tmp/cairn-arch --fake
+.venv/bin/docsgraph index ARCHITECTURE.md --out /tmp/cairn-arch --fake
 
 # Get the map — gists only, never full text.
-.venv/bin/cairn outline /tmp/cairn-arch --depth 2
+.venv/bin/docsgraph outline /tmp/cairn-arch --depth 2
 
 # Keyword search: every section that mentions "LanceDB".
-.venv/bin/cairn query keyword /tmp/cairn-arch LanceDB
+.venv/bin/docsgraph query keyword /tmp/cairn-arch LanceDB
 
 # Multi-term keyword search with mode=all.
-.venv/bin/cairn query keyword /tmp/cairn-arch progressive disclosure --mode all
+.venv/bin/docsgraph query keyword /tmp/cairn-arch progressive disclosure --mode all
 
 # Generate a standalone graph inspector for the built index.
-.venv/bin/cairn inspect /tmp/cairn-arch --out /tmp/cairn-arch/inspector.html
+.venv/bin/docsgraph inspect /tmp/cairn-arch --out /tmp/cairn-arch/inspector.html
 
 # Start a single-document MCP stdio server.
-.venv/bin/cairn serve /tmp/cairn-arch --fake
+.venv/bin/docsgraph serve /tmp/cairn-arch --fake
 ```
 
 A walkthrough with full output and an MCP-client config snippet is in
@@ -223,7 +252,7 @@ Running the starter suite (10 hand-curated questions over Cairn's own
 `ARCHITECTURE.md`) with deterministic in-process plugins:
 
 ```bash
-cairn bench benchmarks/architecture.toml --fake
+docsgraph bench benchmarks/architecture.toml --fake
 ```
 
 | metric | naive vector RAG | Cairn |
@@ -246,13 +275,13 @@ your own suites.
 Repo-level smoke tests are also public and reproducible:
 
 ```bash
-python scripts/eval_repos.py --repo all --refresh
-python scripts/smoke_many_repos.py --limit 32
+python scripts/eval_repos.py --repo all --refresh --strict
+python scripts/smoke_many_repos.py --limit 37 --strict
 ```
 
 The labeled eval set covers `astral-sh/uv`, `pydantic/pydantic-ai`,
 `modelcontextprotocol/python-sdk`, and `fastapi/full-stack-fastapi-template`.
-The broad smoke matrix currently spans 32 public repositories across Python,
+The broad smoke matrix currently spans 37 public repositories across Python,
 JavaScript/TypeScript, Rust, and Go ecosystems. It is not an accuracy
 leaderboard; it verifies clone/discovery/sync/search/drilldown robustness and
 latency across different documentation shapes.
@@ -265,11 +294,32 @@ Latest fake-plugin runs on this machine:
 | `uv` labeled eval | 89/89 docs indexed, 15/16 top1, 16/16 top3/top5, 16/16 drilldown |
 | `mcp-python-sdk` labeled eval | 17/17 docs indexed, 4/4 top1, 4/4 drilldown |
 | `fastapi-template` labeled eval | 7/7 docs indexed, 4/4 top1, 4/4 drilldown |
-| 32-repo smoke matrix | 1076 docs indexed, 0 sync failures, 160/160 searches with hits, 160/160 drilldowns |
+| 37-repo smoke matrix | 2931 docs indexed, 0 sync failures, 185/185 searches with hits, 185/185 drilldowns |
 
 `search_documents` uses a general hybrid ranker: dense vector similarity,
 BM25-style sparse evidence, structure-aware field support, weighted query-term
 coverage, path/title identity prior, and local graph-neighborhood propagation.
+Repo search builds a process-local cache and scores dense vectors in batches so
+large documentation sets stay warm-query friendly. On large section sets it
+uses a two-stage path: dense seeds, cheap lexical/path seeds, and graph
+neighbors form a wide shortlist, then the full BM25/graph/explanation ranker
+scores only that candidate set. Cold cache construction loads per-document
+indexes concurrently while preserving per-document failure isolation.
+Search responses expose `ranker.mode`, `total_sections`, and `scored_sections`
+so the performance path is visible to clients and benchmarks.
+Each hit includes a score breakdown and short explanation so agents and humans
+can see whether dense, lexical, sparse, or graph evidence dominated the result.
+Changelog, release-note, and migration-history documents are intent-gated: they
+stay first-class results for release/version/change queries, but broad topic
+queries prefer guides, API docs, and README-style docs when comparable evidence
+exists.
+Search candidates are freshness-aware: repo status records a file-level
+fingerprint, and query responses expose `stale_documents` when source files have
+changed since the last sync.
+`repo_context` composes search, section content, and local relationships into
+one agent-ready payload; `repo_graph` and `repo_impact` expose the documentation
+graph without reimplementing source-code analysis. Pair Cairn with CodeGraph
+when you need AST symbols, callers/callees, or code impact.
 The ranker does not special-case repository names, document ids, or benchmark
 answers.
 
@@ -285,7 +335,7 @@ ollama serve
 ollama pull llama3.2:3b
 ollama pull nomic-embed-text
 
-.venv/bin/cairn index ARCHITECTURE.md --out /tmp/cairn-arch   # no --fake
+.venv/bin/docsgraph index ARCHITECTURE.md --out /tmp/cairn-arch   # no --fake
 ```
 
 OpenAI, vLLM, Together, Anyscale, …all of them work the same way; override
@@ -303,7 +353,7 @@ export CAIRN_EMBED_PROVIDER=doubao-vision
 export CAIRN_EMBED_MODEL=doubao-embedding-vision-251215
 export CAIRN_EMBED_API_KEY=...
 
-cairn index ARCHITECTURE.md --out /tmp/cairn-arch
+docsgraph index ARCHITECTURE.md --out /tmp/cairn-arch
 ```
 
 To run the public-repo eval with the real provider configured by your
@@ -365,11 +415,11 @@ choices we adopted, modified, or declined.
 | 0 — Foundation | ☑ | Authoritative docs in place (PRODUCT, ARCHITECTURE, CLAUDE, ROADMAP, ADR-0001) |
 | 1 — v0.1 walking skeleton | ☑ | Markdown ingest, Tree + Summaries + Vectors indexes, 5 MCP tools, stdio server, CLI, hero demo |
 | 2 — v0.2 structure-aware retrieval | ☑ | Entities, cross-references, PDF ingest, digest summaries, incremental rebuild, static inspector, `cairn-bench` |
-| 3 — v0.3 repo docs graph | ◐ | Repo `init/sync/status`, repo-scoped MCP, `list_documents`, `search_documents`, shareable `.cairn/config.toml`; hosted inspector and telemetry still next |
+| 3 — v0.3 repo docs graph | ◐ | Repo `init/sync/status`, repo-scoped MCP, `list_documents`, `search_documents`, `repo_context`, `repo_graph`, `repo_impact`, shareable `.cairn/config.toml`; hosted inspector and telemetry still next |
 | 4 — v0.4 polish for production | ☐ | DOCX/RTF/EPUB, VSCode extension, security review |
 | v1.0 GA | ☐ | All `PRODUCT.md` §7 success criteria met |
 
-Full plan: [`ROADMAP.md`](ROADMAP.md). Current test suite: **409 passing**,
+Full plan: [`ROADMAP.md`](ROADMAP.md). Current test suite: **440 passing**,
 mypy strict clean, ruff clean.
 
 Maintainer release gate: [`docs/release-checklist.md`](docs/release-checklist.md).

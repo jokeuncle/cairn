@@ -152,7 +152,7 @@ Concrete, measurable, time-bounded. v1.0 ships when **all** of these are true.
 ### Ecosystem
 
 - [ ] Works out-of-the-box with: Claude Code, Cursor, Cline, Goose.
-- [ ] `pip install cairn && cairn index ./doc.md && cairn serve` reaches a
+- [ ] `pip install docsgraph && docsgraph index ./doc.md && docsgraph serve` reaches a
       working MCP endpoint in < 60 seconds on a fresh machine (excluding model
       download).
 - [ ] ≥ 1,500 GitHub stars within 6 months of public launch.

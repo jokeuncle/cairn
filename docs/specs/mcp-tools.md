@@ -22,8 +22,35 @@ This is **v0.1-frozen for the included tools**; tools listed but marked
 
 Every tool result includes `tokens_returned: int` so an agent can budget its
 context. The count is for the **textual content** in the response (excluding
-JSON envelope). It is an estimate using the indexing-time tokenizer; agents
-should treat it as accurate to within ±10%.
+JSON envelope and `trace`). It is an estimate using the indexing-time tokenizer;
+agents should treat it as accurate to within ±10%.
+
+### Trace
+
+Every MCP tool result includes a top-level `trace` object so AI clients and
+humans can inspect what Cairn did for the call without relying on transport
+logs. The MCP server also declares a generic output schema for the envelope so
+clients that support structured tool results can render this trace separately
+from the textual JSON fallback.
+
+Common trace shape:
+
+```json
+{
+  "server": "cairn",
+  "tool": "repo_context",
+  "mode": "repo" | "document" | "repo_document",
+  "status": "ok" | "error",
+  "arguments": { ... normalized MCP arguments ... },
+  "steps": [
+    {"name": "search_documents", "status": "ok", "hits": 3},
+    {"name": "return_result", "status": "ok", "tokens_returned": 920}
+  ]
+}
+```
+
+Tool-specific examples below may elide `trace` for readability; the real MCP
+response includes it.
 
 ### Errors
 
@@ -36,7 +63,8 @@ Tools never raise to the MCP transport. They return a structured envelope:
     "code": "NOT_FOUND" | "INVALID_INPUT" | "INDEX_STALE" | "INTERNAL",
     "message": "human-readable",
     "details": { ... }
-  }
+  },
+  "trace": { ... }
 }
 ```
 
@@ -46,7 +74,8 @@ Successful responses:
 {
   "ok": true,
   "tokens_returned": 412,
-  "data": { ... tool-specific payload ... }
+  "data": { ... tool-specific payload ... },
+  "trace": { ... }
 }
 ```
 
@@ -122,7 +151,7 @@ Output:
 ```json
 {
   "ok": true,
-  "tokens_returned": 740,
+  "tokens_returned": 920,
   "data": {
     "query": "how do plugin tools work?",
     "hits": [
@@ -132,7 +161,27 @@ Output:
         "id": "repository-only-tool-search-documents",
         "title": "Repository-only tool: search_documents",
         "score": 0.86,
+        "vector_score": 0.71,
+        "lexical_score": 0.94,
+        "sparse_score": 0.63,
+        "graph_score": 0.18,
         "anchor": "cairn://docs-specs-mcp-tools/repository-only-tool-search-documents",
+        "explanation": {
+          "dominant_signal": "lexical",
+          "matched_terms": ["plugin", "tools", "work"],
+          "signals": {
+            "vector": {"score": 0.71, "weight": 0.22},
+            "lexical": {"score": 0.94, "weight": 0.5},
+            "sparse": {"score": 0.63, "weight": 0.28},
+            "graph": {"score": 0.18, "weight": 0.1}
+          },
+          "rank_factor": 1.0,
+          "identity_bonus": 0.0,
+          "notes": [
+            "matched query terms in doc/source/title/summary/body fields",
+            "BM25-style sparse evidence contributed"
+          ]
+        },
         "synopsis": "Repo-scoped MCP servers expose a cross-document search tool...",
         "evidence": {
           "text": "search_documents is advertised only by repo-scoped MCP servers...",
@@ -141,7 +190,15 @@ Output:
         }
       }
     ],
+    "sections_per_doc": 1,
     "searched_documents": 12,
+    "ranker": {
+      "mode": "full",
+      "total_sections": 140,
+      "compatible_sections": 140,
+      "scored_sections": 140
+    },
+    "stale_documents": [],
     "skipped_documents": [],
     "cursor": null
   }
@@ -157,14 +214,141 @@ Semantics:
   identity, and local graph-neighborhood propagation. The ranker is generic:
   it does not special-case repository names, document ids, or benchmark
   answers.
+- Large repositories use a two-stage scoring path. Cairn always computes dense
+  scores in batch, then combines dense seeds, cheap lexical/path seeds, and
+  graph neighbors into a wide shortlist before running the full BM25/graph
+  explanation ranker. Small repositories stay in `full` mode. The `ranker`
+  object reports `mode`, `total_sections`, `compatible_sections`, and
+  `scored_sections` for observability.
+- Every hit includes raw signal scores plus an `explanation` object with the
+  dominant signal, matched query terms, configured signal weights, rank
+  adjustments, and short notes. This makes repo search debuggable by agents,
+  CLI users, and benchmark reports.
 - By default, results use `.cairn/config.toml search_sections_per_doc` (`1`
   in the generated config) so agents can find the right document before
   drilling down. Set `sections_per_doc > 1` per call, or raise the config
   value, for deeper per-document recall.
 - Hits include `doc`, `source`, and section `id` for follow-up calls such as
   `get_section(doc=..., id=...)`.
+- `stale_documents` lists indexed documents whose source file fingerprint no
+  longer matches the last synced fingerprint. Search still returns the existing
+  index for continuity, but clients should run `cairn sync` before relying on it
+  for final answers.
 - Documents with incompatible embedding dimensions or load errors are reported
   in `skipped_documents` instead of failing the whole call.
+
+---
+
+### Repository-only tool: `repo_context`
+
+`repo_context` is a composite retrieval tool for agents that need a ready-to-read
+context pack rather than a list of hits. It runs repo search, attaches compact
+section content, adds local relationships, and returns a small relationship map.
+
+Inputs:
+
+| Param | Type | Default | Description |
+|---|---|---|---|
+| `query` | `string` | required | Conceptual query to search across indexed repo docs. |
+| `k` | `int` (1-32) | `5` | Number of ranked hits to include. |
+| `sections_per_doc` | `int \| null` (1-8) | repo config | Diversity override passed through to `search_documents`. |
+| `related_k` | `int` (0-12) | `3` | Related sections to attach per selected hit. |
+| `level` | `"gist"\|"synopsis"\|"full"` | `"synopsis"` | Content granularity for `context_sections`. |
+| `max_section_chars` | `int` (200-8000) | `1600` | Hard character cap per selected section. |
+
+Output shape:
+
+```json
+{
+  "ok": true,
+  "data": {
+    "query": "where are tools configured?",
+    "hits": [{"doc": "docs-tools", "id": "tools/configuration"}],
+    "context_sections": [
+      {
+        "rank": 1,
+        "doc": "docs-tools",
+        "id": "tools/configuration",
+        "level": "synopsis",
+        "content": "Tools are configured...",
+        "hit": {"score": 0.91, "explanation": {"dominant_signal": "lexical"}},
+        "relationships": [
+          {"id": "tools/install", "kind": "parent", "confidence": 1.0}
+        ]
+      }
+    ],
+    "relationship_map": {"nodes": [], "edges": []},
+    "stale_documents": [],
+    "skipped_documents": [],
+    "codegraph_bridge": {
+      "status": "not_invoked",
+      "note": "Cairn does not parse source code..."
+    }
+  }
+}
+```
+
+Semantics:
+
+- This is the preferred one-call context builder for MCP clients.
+- It propagates `stale_documents` and `skipped_documents` from
+  `search_documents`.
+- The relationship map covers documentation nodes only. For source-code symbols,
+  callers/callees, and code impact, pair the result with the CodeGraph MCP server.
+
+---
+
+### Repository-only tool: `repo_graph`
+
+`repo_graph` returns a bounded documentation relationship map. It is useful for
+inspectors, debugging ranker behavior, and giving agents a structured view of
+docs before they drill into exact sections.
+
+Inputs:
+
+| Param | Type | Default | Description |
+|---|---|---|---|
+| `doc` | `string \| null` | `null` | Optional document id to restrict the graph. |
+| `max_sections` | `int` (1-500) | `120` | Maximum section nodes to include. |
+| `max_entities` | `int` (0-200) | `40` | Maximum entity nodes to include. |
+| `include_entities` | `boolean` | `true` | Include entity nodes and mention edges. |
+| `include_xrefs` | `boolean` | `true` | Include xref edges when available. |
+
+Output nodes use stable ids such as `doc:readme`,
+`section:readme:introduction`, and `entity:code:runcontext`. Edge kinds include
+`contains`, `xref`, and `mentions`.
+
+Semantics:
+
+- `repo_graph` is a documentation graph, not a source-code graph. Structural and
+  xref edges are document-local today; cross-document connectivity is represented
+  through shared entity nodes and `mentions` edges.
+- The response includes `codegraph_bridge.status = "external"` to make that
+  boundary explicit.
+
+---
+
+### Repository-only tool: `repo_impact`
+
+`repo_impact` estimates documentation surfaces affected by a document or section
+change. It reports derived artifacts, MCP surfaces, nearby sections, and related
+documents connected by shared entities.
+
+Inputs:
+
+| Param | Type | Default | Description |
+|---|---|---|---|
+| `doc` | `string` | required | Repository document id. |
+| `id` | `string \| null` | `null` | Optional section id. Omit for document-level impact. |
+| `max_results` | `int` (1-100) | `24` | Maximum impacted sections/documents to return. |
+
+Semantics:
+
+- Document-level impact names generated artifacts such as `.cairn/manifest.json`,
+  per-document tree/summaries/vectors/entities/xrefs, inspectors, and repo tools.
+- Section-level impact includes parent/child/xref/shared-entity neighbors when
+  present.
+- This is docs graph impact. Use CodeGraph for source-code symbol impact.
 
 ---
 

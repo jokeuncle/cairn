@@ -3,7 +3,11 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any, cast
 
+import pytest
+
+from cairn import repo_search as repo_search_module
 from cairn.cli.config import IndexConfig
 from cairn.embed.fake import FakeEmbedder
 from cairn.repo import (
@@ -12,6 +16,9 @@ from cairn.repo import (
     discover_documents,
     load_repo_config,
     load_repo_document_index,
+    repo_context,
+    repo_graph,
+    repo_impact,
     repo_status,
     search_repo_documents,
     sync_repo,
@@ -211,6 +218,67 @@ class TestRepoSync:
         status = repo_status(tmp_path)
         readme = next(doc for doc in status.documents if doc.id == "readme")
         assert readme.state == "stale"
+        assert readme.source_file_hash != readme.indexed_source_file_hash
+
+    async def test_orphaned_status_hashes_relative_source_from_repo_root(
+        self, tmp_path: Path
+    ) -> None:
+        _write_repo_docs(tmp_path)
+        write_default_config(tmp_path)
+        await sync_repo(
+            tmp_path,
+            summarizer=FakeSummarizer(),
+            embedder=FakeEmbedder(dim=32),
+            index_config=IndexConfig(),
+        )
+        indexed = repo_status(tmp_path)
+        readme_hash = next(
+            doc for doc in indexed.documents if doc.id == "readme"
+        ).source_file_hash
+        (tmp_path / ".cairn" / "config.toml").write_text(
+            "\n".join(
+                [
+                    'documents_dir = "documents"',
+                    "enable_markitdown = false",
+                    'include = ["docs/guide.md"]',
+                    "exclude = []",
+                    "",
+                ]
+            ),
+            encoding="utf-8",
+        )
+
+        status = repo_status(tmp_path)
+
+        orphaned = next(doc for doc in status.documents if doc.id == "readme")
+        assert orphaned.state == "orphaned"
+        assert orphaned.indexed_source_file_hash == readme_hash
+
+    async def test_search_repo_documents_reports_stale_sources(
+        self, tmp_path: Path
+    ) -> None:
+        _write_repo_docs(tmp_path)
+        write_default_config(tmp_path)
+        embedder = FakeEmbedder(dim=32)
+        await sync_repo(
+            tmp_path,
+            summarizer=FakeSummarizer(),
+            embedder=embedder,
+            index_config=IndexConfig(),
+        )
+
+        (tmp_path / "README.md").write_text(
+            "# Readme\n\nProject overview changed.\n", encoding="utf-8"
+        )
+
+        result = await search_repo_documents(
+            tmp_path,
+            embedder=embedder,
+            query="project overview",
+            k=4,
+        )
+
+        assert "readme" in result["data"]["stale_documents"]
 
     async def test_sync_continues_when_one_document_fails(
         self, tmp_path: Path
@@ -251,6 +319,84 @@ class TestRepoSync:
 
 
 class TestRepoSearch:
+    def test_source_locale_recognizes_script_and_region_segments(self) -> None:
+        assert repo_search_module._source_locale("docs/zh-hant/index.md") == "zh"
+        assert repo_search_module._source_locale("docs/pt-br/index.md") == "pt"
+        assert repo_search_module._source_locale("docs/en-us/index.md") == "en"
+
+    def test_graph_scores_do_not_inflate_missing_shortlist_neighbors(self) -> None:
+        first = repo_search_module._RepoSectionRecord(
+            doc_id="doc",
+            source="doc.md",
+            index=cast(Any, None),
+            section_id="first",
+            title="First",
+            body="",
+            synopsis="",
+            vector=(),
+            haystacks=("", "", "", "", ""),
+            token_counts={},
+            token_count=0,
+        )
+        second = repo_search_module._RepoSectionRecord(
+            doc_id="doc",
+            source="doc.md",
+            index=cast(Any, None),
+            section_id="second",
+            title="Second",
+            body="",
+            synopsis="",
+            vector=(),
+            haystacks=("", "", "", "", ""),
+            token_counts={},
+            token_count=0,
+        )
+        cache = repo_search_module._RepoSearchCache(
+            signature=(),
+            records=(first, second),
+            skipped=(),
+            doc_dims={},
+            df={},
+            avg_token_count=0.0,
+            graph_neighbors={
+                ("doc", "first"): (
+                    (("doc", "second"), 1.0),
+                    (("doc", "missing"), 1.0),
+                )
+            },
+            record_index_by_key={("doc", "first"): 0, ("doc", "second"): 1},
+            vector_matrices={},
+            vector_record_indices={},
+        )
+        hits = [
+            repo_search_module._RepoScoredHit(
+                record=first,
+                score=0.0,
+                vector_score=0.0,
+                lexical_score=0.0,
+                sparse_score=0.0,
+                graph_score=0.0,
+                base_score=0.0,
+                rank_factor=1.0,
+                identity_bonus=0.0,
+            ),
+            repo_search_module._RepoScoredHit(
+                record=second,
+                score=1.0,
+                vector_score=1.0,
+                lexical_score=0.0,
+                sparse_score=0.0,
+                graph_score=0.0,
+                base_score=1.0,
+                rank_factor=1.0,
+                identity_bonus=0.0,
+            ),
+        ]
+
+        repo_search_module._apply_graph_scores(hits, cache)
+
+        assert hits[0].graph_score == 0.5
+
     async def test_search_repo_documents_merges_hits(self, tmp_path: Path) -> None:
         _write_repo_docs(tmp_path)
         write_default_config(tmp_path)
@@ -273,6 +419,17 @@ class TestRepoSearch:
         assert hits
         assert any(hit["doc"] == "docs-guide" for hit in hits)
         assert all({"doc", "source", "id", "anchor"} <= set(hit) for hit in hits)
+        explanation = hits[0]["explanation"]
+        assert explanation["dominant_signal"] in {
+            "vector",
+            "lexical",
+            "sparse",
+            "graph",
+        }
+        assert {"vector", "lexical", "sparse", "graph"} <= set(
+            explanation["signals"]
+        )
+        assert isinstance(explanation["matched_terms"], list)
 
     async def test_search_repo_documents_handles_complex_repo(
         self, tmp_path: Path
@@ -298,6 +455,81 @@ class TestRepoSearch:
         assert hits[0]["doc"] == "docs-specs-storage"
         assert hits[0]["lexical_score"] > 0
         assert "vector_score" in hits[0]
+        assert hits[0]["explanation"]["dominant_signal"] in {
+            "lexical",
+            "sparse",
+            "vector",
+            "graph",
+        }
+        assert "vector" in hits[0]["explanation"]["signals"]
+
+    async def test_repo_context_returns_composite_context(
+        self, tmp_path: Path
+    ) -> None:
+        _write_complex_repo_docs(tmp_path)
+        write_default_config(tmp_path)
+        embedder = FakeEmbedder(dim=32)
+        await sync_repo(
+            tmp_path,
+            summarizer=FakeSummarizer(),
+            embedder=embedder,
+            index_config=IndexConfig(),
+        )
+
+        result = await repo_context(
+            tmp_path,
+            embedder=embedder,
+            query="where is vector data stored",
+            k=2,
+            related_k=2,
+        )
+
+        data = result["data"]
+        assert data["context_sections"]
+        assert data["relationship_map"]["nodes"]
+        assert data["codegraph_bridge"]["status"] == "not_invoked"
+
+    async def test_repo_graph_returns_relationship_map(self, tmp_path: Path) -> None:
+        _write_complex_repo_docs(tmp_path)
+        write_default_config(tmp_path)
+        embedder = FakeEmbedder(dim=32)
+        await sync_repo(
+            tmp_path,
+            summarizer=FakeSummarizer(),
+            embedder=embedder,
+            index_config=IndexConfig(),
+        )
+
+        result = await repo_graph(tmp_path, doc="docs-specs-storage")
+
+        data = result["data"]
+        assert any(node["kind"] == "document" for node in data["nodes"])
+        assert any(node["kind"] == "section" for node in data["nodes"])
+        assert any(edge["kind"] == "contains" for edge in data["edges"])
+        assert data["codegraph_bridge"]["status"] == "external"
+
+    async def test_repo_impact_reports_section_surfaces(self, tmp_path: Path) -> None:
+        _write_complex_repo_docs(tmp_path)
+        write_default_config(tmp_path)
+        embedder = FakeEmbedder(dim=32)
+        await sync_repo(
+            tmp_path,
+            summarizer=FakeSummarizer(),
+            embedder=embedder,
+            index_config=IndexConfig(),
+        )
+
+        result = await repo_impact(
+            tmp_path,
+            doc="docs-specs-storage",
+            id="storage-spec",
+        )
+
+        data = result["data"]
+        assert data["scope"] == "section"
+        assert data["doc"] == "docs-specs-storage"
+        assert "repo_context" in data["affected_surfaces"]
+        assert any("CodeGraph" in note for note in data["notes"])
 
     async def test_search_repo_documents_skips_incompatible_indexes(
         self, tmp_path: Path
@@ -707,3 +939,170 @@ class TestRepoSearch:
         )
 
         assert result["data"]["hits"][0]["doc"] == "docs-mcp-server"
+
+    async def test_search_repo_documents_shortlists_large_surfaces(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        (tmp_path / "README.md").write_text("# Root\n\nOverview.\n", encoding="utf-8")
+        (tmp_path / "docs").mkdir()
+        for index in range(6):
+            topic = "needle topic" if index == 5 else f"filler topic {index}"
+            (tmp_path / "docs" / f"page-{index}.md").write_text(
+                f"# Page {index}\n\n{topic} with reusable operations notes.\n",
+                encoding="utf-8",
+            )
+        monkeypatch.setattr(repo_search_module, "_REPO_SEARCH_FULL_SCORE_LIMIT", 2)
+        monkeypatch.setattr(repo_search_module, "_REPO_SEARCH_SHORTLIST_MIN", 2)
+        monkeypatch.setattr(repo_search_module, "_REPO_SEARCH_SHORTLIST_PER_RESULT", 1)
+        monkeypatch.setattr(
+            repo_search_module,
+            "_REPO_SEARCH_SHORTLIST_PER_DOC_RESULT",
+            1,
+        )
+        write_default_config(tmp_path)
+        embedder = FakeEmbedder(dim=32)
+        await sync_repo(
+            tmp_path,
+            summarizer=FakeSummarizer(),
+            embedder=embedder,
+            index_config=IndexConfig(),
+        )
+
+        result = await search_repo_documents(
+            tmp_path,
+            embedder=embedder,
+            query="needle topic",
+            k=2,
+        )
+
+        assert result["data"]["hits"][0]["doc"] == "docs-page-5"
+        ranker = result["data"]["ranker"]
+        assert ranker["mode"] == "shortlist"
+        assert ranker["scored_sections"] < ranker["compatible_sections"]
+
+    async def test_search_repo_documents_gates_changelog_for_generic_queries(
+        self, tmp_path: Path
+    ) -> None:
+        (tmp_path / "README.md").write_text("# Root\n\nOverview.\n", encoding="utf-8")
+        (tmp_path / "CHANGELOG.md").write_text(
+            "\n".join(
+                [
+                    "# Changelog",
+                    "",
+                    "## 1.2.0",
+                    "",
+                    "Authentication authentication authentication release notes.",
+                    "Authentication changes were mentioned in this version history.",
+                ]
+            ),
+            encoding="utf-8",
+        )
+        (tmp_path / "docs").mkdir()
+        (tmp_path / "docs" / "authentication.md").write_text(
+            "\n".join(
+                [
+                    "# Authentication",
+                    "",
+                    "Configure API keys and bearer token authentication.",
+                ]
+            ),
+            encoding="utf-8",
+        )
+        write_default_config(tmp_path)
+        embedder = FakeEmbedder(dim=32)
+        await sync_repo(
+            tmp_path,
+            summarizer=FakeSummarizer(),
+            embedder=embedder,
+            index_config=IndexConfig(),
+        )
+
+        generic = await search_repo_documents(
+            tmp_path,
+            embedder=embedder,
+            query="authentication",
+            k=3,
+        )
+        history = await search_repo_documents(
+            tmp_path,
+            embedder=embedder,
+            query="authentication release changes",
+            k=3,
+        )
+
+        assert generic["data"]["hits"][0]["doc"] == "docs-authentication"
+        assert history["data"]["hits"][0]["doc"] == "changelog"
+
+    async def test_search_repo_documents_prefers_query_locale(
+        self, tmp_path: Path
+    ) -> None:
+        (tmp_path / "README.md").write_text("# Root\n\nOverview.\n", encoding="utf-8")
+        (tmp_path / "docs" / "en").mkdir(parents=True)
+        (tmp_path / "docs" / "de").mkdir(parents=True)
+        body = "# Configuration\n\nConfigure runtime settings and application options."
+        (tmp_path / "docs" / "en" / "configuration.md").write_text(
+            body,
+            encoding="utf-8",
+        )
+        (tmp_path / "docs" / "de" / "configuration.md").write_text(
+            body,
+            encoding="utf-8",
+        )
+        write_default_config(tmp_path)
+        embedder = FakeEmbedder(dim=32)
+        await sync_repo(
+            tmp_path,
+            summarizer=FakeSummarizer(),
+            embedder=embedder,
+            index_config=IndexConfig(),
+        )
+
+        result = await search_repo_documents(
+            tmp_path,
+            embedder=embedder,
+            query="configuration",
+            k=2,
+        )
+
+        assert result["data"]["hits"][0]["doc"] == "docs-en-configuration"
+
+    async def test_search_repo_documents_honors_configured_locale_preference(
+        self, tmp_path: Path
+    ) -> None:
+        (tmp_path / "README.md").write_text("# Root\n\nOverview.\n", encoding="utf-8")
+        (tmp_path / "docs" / "en").mkdir(parents=True)
+        (tmp_path / "docs" / "de").mkdir(parents=True)
+        body = "# Configuration\n\nConfigure runtime settings and application options."
+        (tmp_path / "docs" / "en" / "configuration.md").write_text(
+            body,
+            encoding="utf-8",
+        )
+        (tmp_path / "docs" / "de" / "configuration.md").write_text(
+            body,
+            encoding="utf-8",
+        )
+        write_default_config(tmp_path)
+        cfg_path = tmp_path / ".cairn" / "config.toml"
+        cfg_path.write_text(
+            cfg_path.read_text(encoding="utf-8").replace(
+                "preferred_locales = []",
+                'preferred_locales = ["de"]',
+            ),
+            encoding="utf-8",
+        )
+        embedder = FakeEmbedder(dim=32)
+        await sync_repo(
+            tmp_path,
+            summarizer=FakeSummarizer(),
+            embedder=embedder,
+            index_config=IndexConfig(),
+        )
+
+        result = await search_repo_documents(
+            tmp_path,
+            embedder=embedder,
+            query="configuration",
+            k=2,
+        )
+
+        assert result["data"]["hits"][0]["doc"] == "docs-de-configuration"

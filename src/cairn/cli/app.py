@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
+import sys
 from pathlib import Path
 from typing import Annotated, Literal
 
@@ -22,6 +24,7 @@ from cairn.repo import (
     find_repo_root,
     load_repo_document_index,
     repo_status,
+    search_repo_documents,
     sync_repo,
     write_default_config,
 )
@@ -36,7 +39,7 @@ from cairn.tools.search_semantic import search_semantic as search_semantic_tool
 from cairn.xref.heuristic import HeuristicXRefExtractor
 
 app = typer.Typer(
-    name="cairn",
+    name="docsgraph",
     help="Local-first documentation graph for AI agents.",
     no_args_is_help=True,
 )
@@ -46,6 +49,8 @@ app.add_typer(query_app, name="query")
 app.add_typer(mcp_app, name="mcp")
 
 McpClient = Literal["claude", "cursor", "codex", "goose"]
+_MANAGED_MCP_START = "# BEGIN DOCSGRAPH MCP: cairn"
+_MANAGED_MCP_END = "# END DOCSGRAPH MCP: cairn"
 
 
 # ---------------------------------------------------------------------------
@@ -327,7 +332,7 @@ def mcp_config(
             "--command",
             help="Executable path clients should run.",
         ),
-    ] = "cairn",
+    ] = "docsgraph",
     fake: Annotated[
         bool,
         typer.Option(
@@ -342,6 +347,84 @@ def mcp_config(
     if fake:
         args.append("--fake")
     typer.echo(_format_mcp_config(client, command=command, args=args))
+
+
+@app.command()
+def install(
+    client: Annotated[
+        McpClient,
+        typer.Option(
+            "--client",
+            case_sensitive=False,
+            help="Agent config to install: claude, cursor, codex, or goose.",
+        ),
+    ] = "codex",
+    repo: Annotated[
+        Path | None,
+        typer.Option(
+            "--repo",
+            file_okay=False,
+            dir_okay=True,
+            readable=True,
+            help="Repository root. Defaults to the nearest .cairn/config.toml.",
+        ),
+    ] = None,
+    command: Annotated[
+        str,
+        typer.Option(help="Executable path clients should run."),
+    ] = "docsgraph",
+    fake: Annotated[
+        bool,
+        typer.Option(
+            "--fake",
+            help="Include --fake for deterministic local smoke tests.",
+        ),
+    ] = False,
+    output: Annotated[
+        Path | None,
+        typer.Option(
+            "--output",
+            help="Config file to write. Defaults to the common path for --client.",
+        ),
+    ] = None,
+    yes: Annotated[
+        bool,
+        typer.Option("-y", "--yes", help="Write without prompting."),
+    ] = False,
+    dry_run: Annotated[
+        bool,
+        typer.Option("--dry-run", help="Print the target and config without writing."),
+    ] = False,
+    force: Annotated[
+        bool,
+        typer.Option(
+            "--force",
+            help="Replace an unmanaged existing docsgraph/cairn block when safe.",
+        ),
+    ] = False,
+) -> None:
+    """Install the Cairn MCP server config into an agent config file."""
+    root = find_repo_root(repo)
+    args = ["serve", "--repo", str(root)]
+    if fake:
+        args.append("--fake")
+    target = output or _default_mcp_config_path(client)
+    rendered = _format_mcp_config(client, command=command, args=args)
+
+    if dry_run:
+        typer.echo(f"# target: {target}")
+        typer.echo(rendered)
+        return
+
+    if not yes and not typer.confirm(f"Install Cairn MCP config into {target}?"):
+        raise typer.Exit(code=1)
+
+    try:
+        _write_mcp_config(client, target, command=command, args=args, force=force)
+    except ValueError as exc:
+        typer.echo(f"error: {exc}", err=True)
+        raise typer.Exit(code=1) from exc
+    typer.echo(f"installed: {target}")
 
 
 @app.command()
@@ -386,6 +469,51 @@ async def _run_search_semantic(
     embedder = _make_embedder(use_fake)
     resp = await search_semantic_tool(idx, embedder=embedder, query=query, k=k)
     typer.echo(json.dumps(resp.data, ensure_ascii=False, indent=2))
+
+
+@query_app.command("repo")
+def query_repo(
+    query: Annotated[
+        str,
+        typer.Argument(help="Conceptual query across indexed repo docs."),
+    ],
+    k: Annotated[int, typer.Option(min=1, max=32)] = 8,
+    sections_per_doc: Annotated[
+        int | None,
+        typer.Option(help="Maximum section hits per document (1-8)."),
+    ] = None,
+    repo: Annotated[
+        Path | None,
+        typer.Option(
+            "--repo",
+            file_okay=False,
+            dir_okay=True,
+            readable=True,
+            help="Repository root or child path containing .cairn/config.toml.",
+        ),
+    ] = None,
+    fake: Annotated[bool, typer.Option("--fake")] = False,
+) -> None:
+    """Run repo-scoped hybrid search and print results as JSON."""
+    asyncio.run(_run_search_repo(query, k, sections_per_doc, repo, fake))
+
+
+async def _run_search_repo(
+    query: str,
+    k: int,
+    sections_per_doc: int | None,
+    repo: Path | None,
+    use_fake: bool,
+) -> None:
+    root = find_repo_root(repo)
+    resp = await search_repo_documents(
+        root,
+        embedder=_make_embedder(use_fake),
+        query=query,
+        k=k,
+        sections_per_doc=sections_per_doc,
+    )
+    typer.echo(json.dumps(resp["data"], ensure_ascii=False, indent=2))
 
 
 @query_app.command("keyword")
@@ -613,7 +741,7 @@ def _doctor_checks() -> list[dict[str, object]]:
             {
                 "name": "repo_config",
                 "ok": False,
-                "message": f"{exc}. Run `cairn init -y` first.",
+                "message": f"{exc}. Run `docsgraph init -y` first.",
             }
         ]
 
@@ -660,7 +788,7 @@ def _doctor_checks() -> list[dict[str, object]]:
             {
                 "name": "repo_index",
                 "ok": False,
-                "message": f"{exc}. Run `cairn sync --fake` to build locally.",
+                "message": f"{exc}. Run `docsgraph sync --fake` to build locally.",
             }
         )
 
@@ -693,7 +821,10 @@ def _format_doctor(payload: dict[str, object]) -> str:
         lines.append(f"[{marker}] {item['name']}: {item['message']}")
     if not payload["ok"]:
         lines.append("")
-        lines.append("Next steps: run `cairn init -y`, then `cairn sync --fake`.")
+        lines.append(
+            "Next steps: run `docsgraph init -y`, then `docsgraph sync --fake` "
+            "(or use the compatible `cairn` alias)."
+        )
     return "\n".join(lines)
 
 
@@ -721,6 +852,123 @@ def _format_mcp_config(client: McpClient, *, command: str, args: list[str]) -> s
             yaml_args,
         ]
     )
+
+
+def _default_mcp_config_path(client: McpClient) -> Path:
+    home = Path.home()
+    if client == "codex":
+        return home / ".codex" / "config.toml"
+    if client == "cursor":
+        return home / ".cursor" / "mcp.json"
+    if client == "claude":
+        if sys.platform == "darwin":
+            return (
+                home
+                / "Library"
+                / "Application Support"
+                / "Claude"
+                / "claude_desktop_config.json"
+            )
+        if sys.platform == "win32":
+            appdata = Path(os.environ.get("APPDATA", home / "AppData" / "Roaming"))
+            return appdata / "Claude" / "claude_desktop_config.json"
+        return home / ".config" / "Claude" / "claude_desktop_config.json"
+    return home / ".config" / "goose" / "config.yaml"
+
+
+def _write_mcp_config(
+    client: McpClient,
+    path: Path,
+    *,
+    command: str,
+    args: list[str],
+    force: bool,
+) -> None:
+    path = path.expanduser()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if client in {"claude", "cursor"}:
+        _write_json_mcp_config(path, command=command, args=args)
+        return
+    if client == "codex":
+        _write_managed_text_config(
+            path,
+            _format_mcp_config(client, command=command, args=args),
+            conflict="[mcp_servers.cairn]",
+            force=force,
+        )
+        return
+    _write_managed_text_config(
+        path,
+        _format_mcp_config(client, command=command, args=args),
+        conflict="  cairn:",
+        force=force,
+    )
+
+
+def _write_json_mcp_config(path: Path, *, command: str, args: list[str]) -> None:
+    if path.exists() and path.read_text(encoding="utf-8").strip():
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            msg = f"invalid JSON config: {path}"
+            raise ValueError(msg) from exc
+        if not isinstance(data, dict):
+            msg = f"JSON config root must be an object: {path}"
+            raise ValueError(msg)
+    else:
+        data = {}
+
+    servers = data.get("mcpServers")
+    if servers is None:
+        servers = {}
+    if not isinstance(servers, dict):
+        msg = f"`mcpServers` must be an object in {path}"
+        raise ValueError(msg)
+    servers["cairn"] = {"command": command, "args": args}
+    data["mcpServers"] = servers
+    path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+
+
+def _write_managed_text_config(
+    path: Path,
+    content: str,
+    *,
+    conflict: str,
+    force: bool,
+) -> None:
+    block = f"{_MANAGED_MCP_START}\n{content.rstrip()}\n{_MANAGED_MCP_END}\n"
+    text = path.read_text(encoding="utf-8") if path.exists() else ""
+    if _MANAGED_MCP_START in text and _MANAGED_MCP_END in text:
+        before, rest = text.split(_MANAGED_MCP_START, 1)
+        _, after = rest.split(_MANAGED_MCP_END, 1)
+        path.write_text(before.rstrip() + "\n\n" + block + after.lstrip(), encoding="utf-8")
+        return
+    if conflict in text:
+        if not force:
+            msg = (
+                f"{path} already contains an unmanaged Cairn MCP config. "
+                "Pass --force to replace it."
+            )
+            raise ValueError(msg)
+        text = _remove_toml_table(text, conflict) if conflict == "[mcp_servers.cairn]" else ""
+    separator = "\n" if text.strip() else ""
+    path.write_text(text.rstrip() + separator + block, encoding="utf-8")
+
+
+def _remove_toml_table(text: str, header: str) -> str:
+    lines = text.splitlines()
+    kept: list[str] = []
+    skipping = False
+    for line in lines:
+        stripped = line.strip()
+        if stripped == header:
+            skipping = True
+            continue
+        if skipping and stripped.startswith("[") and stripped.endswith("]"):
+            skipping = False
+        if not skipping:
+            kept.append(line)
+    return "\n".join(kept).rstrip() + ("\n" if kept else "")
 
 
 if __name__ == "__main__":

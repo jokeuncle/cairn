@@ -15,6 +15,7 @@ import json
 import shutil
 import statistics
 import subprocess
+import sys
 import time
 from pathlib import Path
 from typing import Any, Literal
@@ -291,6 +292,43 @@ def parse_args() -> argparse.Namespace:
         help="Rebuild indexes even when source and provider fingerprints match.",
     )
     parser.add_argument(
+        "--strict",
+        action="store_true",
+        help=(
+            "Exit non-zero unless repo syncs are clean, top-k thresholds pass, "
+            "and every drilldown succeeds."
+        ),
+    )
+    parser.add_argument(
+        "--min-top1-rate",
+        type=float,
+        default=None,
+        help="Minimum aggregate top1 hit rate required before exiting 0.",
+    )
+    parser.add_argument(
+        "--min-top3-rate",
+        type=float,
+        default=None,
+        help="Minimum aggregate top3 hit rate required before exiting 0.",
+    )
+    parser.add_argument(
+        "--min-top5-rate",
+        type=float,
+        default=None,
+        help="Minimum aggregate top5 hit rate required before exiting 0.",
+    )
+    parser.add_argument(
+        "--min-drilldown-rate",
+        type=float,
+        default=None,
+        help="Minimum aggregate drilldown success rate required before exiting 0.",
+    )
+    parser.add_argument(
+        "--allow-sync-failures",
+        action="store_true",
+        help="Do not fail the strict gate on sync/status failures.",
+    )
+    parser.add_argument(
         "--clone-retries",
         type=int,
         default=2,
@@ -466,6 +504,13 @@ async def evaluate_repo(
         "top3": f"{top3}/{total}",
         "top5": f"{top5}/{total}",
         "drilldown": f"{drilldown}/{total}",
+        "metrics": {
+            "total": total,
+            "top1": top1,
+            "top3": top3,
+            "top5": top5,
+            "drilldown": drilldown,
+        },
         "latency_ms": latency_summary(latencies),
         "rows": rows,
     }
@@ -480,6 +525,90 @@ async def run() -> None:
         for name, spec in selected.items()
     ]
     print(json.dumps(report, ensure_ascii=False, indent=2))
+    failures = eval_gate_failures(
+        report,
+        strict=bool(args.strict),
+        min_top1_rate=args.min_top1_rate,
+        min_top3_rate=args.min_top3_rate,
+        min_top5_rate=args.min_top5_rate,
+        min_drilldown_rate=args.min_drilldown_rate,
+        allow_sync_failures=bool(args.allow_sync_failures),
+    )
+    if failures:
+        print("strict eval gate failed:", file=sys.stderr)
+        for failure in failures:
+            print(f"- {failure}", file=sys.stderr)
+        raise SystemExit(1)
+
+
+def eval_gate_failures(
+    report: list[dict[str, Any]],
+    *,
+    strict: bool,
+    min_top1_rate: float | None = None,
+    min_top3_rate: float | None = None,
+    min_top5_rate: float | None = None,
+    min_drilldown_rate: float | None = None,
+    allow_sync_failures: bool = False,
+) -> list[str]:
+    """Return unmet labeled-eval thresholds for CI/release gating."""
+    default_top1 = 0.90 if strict and min_top1_rate is None else min_top1_rate
+    default_top3 = 1.0 if strict and min_top3_rate is None else min_top3_rate
+    default_top5 = 1.0 if strict and min_top5_rate is None else min_top5_rate
+    default_drilldown = (
+        1.0 if strict and min_drilldown_rate is None else min_drilldown_rate
+    )
+
+    failures: list[str] = []
+    total = 0
+    top1 = 0
+    top3 = 0
+    top5 = 0
+    drilldown = 0
+    sync_failures = 0
+    unhealthy_status = 0
+    for repo in report:
+        metrics = repo.get("metrics", {})
+        repo_total = int(metrics.get("total", repo.get("cases", 0)))
+        total += repo_total
+        top1 += int(metrics.get("top1", 0))
+        top3 += int(metrics.get("top3", 0))
+        top5 += int(metrics.get("top5", 0))
+        drilldown += int(metrics.get("drilldown", 0))
+        sync = repo.get("sync", {})
+        status = repo.get("status", {})
+        sync_failures += int(sync.get("failed", 0))
+        unhealthy_status += (
+            int(status.get("stale", 0))
+            + int(status.get("missing", 0))
+            + int(status.get("errors", 0))
+        )
+
+    if total <= 0:
+        failures.append("no eval cases ran")
+        return failures
+
+    if strict and not allow_sync_failures:
+        if sync_failures:
+            failures.append(f"sync failures {sync_failures} > allowed 0")
+        if unhealthy_status:
+            failures.append(f"unhealthy status rows {unhealthy_status} > allowed 0")
+
+    thresholds = (
+        ("top1", top1, default_top1),
+        ("top3", top3, default_top3),
+        ("top5", top5, default_top5),
+        ("drilldown", drilldown, default_drilldown),
+    )
+    for name, count, threshold in thresholds:
+        if threshold is None:
+            continue
+        rate = count / total
+        if rate < threshold:
+            failures.append(
+                f"{name} rate {rate:.3f} < required {threshold:.3f} ({count}/{total})"
+            )
+    return failures
 
 
 if __name__ == "__main__":
