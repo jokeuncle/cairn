@@ -78,7 +78,7 @@ docsgraph = "cairn.cli.app:app"
 cairn = "cairn.cli.app:app"
 
 [project.urls]
-Homepage = "https://github.com/jokeuncle/cairn"
+Homepage = "https://jokeuncle.github.io/cairn/"
 Documentation = "https://github.com/jokeuncle/cairn/tree/main/docs"
 Repository = "https://github.com/jokeuncle/cairn"
 Issues = "https://github.com/jokeuncle/cairn/issues"

@@ -7,6 +7,7 @@
 [![CI](https://github.com/jokeuncle/cairn/actions/workflows/ci.yml/badge.svg)](https://github.com/jokeuncle/cairn/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache_2.0-blue.svg)](LICENSE)
 [![PyPI](https://img.shields.io/pypi/v/docsgraph?include_prereleases&label=PyPI)](https://pypi.org/project/docsgraph/)
+[![Website](https://img.shields.io/badge/website-cairn-48c7ba.svg)](https://jokeuncle.github.io/cairn/)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
 [![MCP](https://img.shields.io/badge/MCP-native-7c3aed.svg)](https://modelcontextprotocol.io/)
 
@@ -54,6 +55,7 @@ For the in-depth motivation, see [`PRODUCT.md`](PRODUCT.md).
 For the technical design, see [`ARCHITECTURE.md`](ARCHITECTURE.md).
 For the public documentation quality contract Cairn optimizes for, see
 [`docs/golden-docs-standard.md`](docs/golden-docs-standard.md).
+The product website is published at <https://jokeuncle.github.io/cairn/>.
 
 ---
 

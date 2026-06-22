@@ -132,6 +132,27 @@ export CAIRN_EMBED_MODEL=doubao-embedding-vision-251215
 The corresponding API key variables must be set locally, but real values must
 never appear in git, shell history snippets, benchmark reports, or CI logs.
 
+## Website Publishing
+
+The product website lives in `docs/index.html` and static assets under
+`docs/assets/`. GitHub Pages deploys the whole `docs/` directory on every
+`main` push. It also redeploys after every successful Release workflow, so each
+version tag refreshes the product site after PyPI publishing and release
+artifact attachment succeed.
+
+Repository homepage URL:
+
+```text
+https://jokeuncle.github.io/cairn/
+```
+
+Keep the GitHub repository "Website" field pointed at that URL so visitors can
+open the product site from the repository sidebar.
+
+Before a release, verify the Pages workflow exists and the site renders locally
+from `docs/index.html`; the release workflow will republish the same site
+artifact after it succeeds.
+
 ## Trusted Publishing
 
 Public PyPI publishing must use GitHub OIDC Trusted Publishing, not a long-lived

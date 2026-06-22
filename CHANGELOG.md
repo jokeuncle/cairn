@@ -6,7 +6,15 @@ All notable changes to Cairn. Format follows
 
 ## Unreleased
 
-No unreleased changes yet.
+### Added
+
+- Product website under `docs/index.html`, deployed to GitHub Pages on `main`
+  pushes and after successful release workflows.
+
+### Changed
+
+- PyPI project metadata and README now point the project homepage to the
+  GitHub Pages site.
 
 ## [0.1.0a3] — 2026-06-22
 
