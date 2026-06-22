@@ -373,7 +373,7 @@
           <g filter="url(#soft-shadow)">
             <rect x="372" y="48" width="330" height="98" rx="14" fill="#171d2a" stroke="#d4a574"/>
             <text x="398" y="84" fill="#e7bd8b" font-family="ui-monospace" font-size="15" font-weight="700">1. init</text>
-            <text x="398" y="114" fill="#edf0f6" font-family="ui-monospace" font-size="17" font-weight="700">cairn init -y</text>
+            <text x="398" y="114" fill="#edf0f6" font-family="ui-monospace" font-size="17" font-weight="700">docsgraph init -y</text>
             <text x="398" y="135" fill="#99a3b7" font-family="ui-monospace" font-size="12">writes .cairn/config.toml</text>
           </g>
 
@@ -382,7 +382,7 @@
           <g filter="url(#soft-shadow)">
             <rect x="372" y="194" width="330" height="118" rx="14" fill="#171d2a" stroke="#57c7bd"/>
             <text x="398" y="230" fill="#57c7bd" font-family="ui-monospace" font-size="15" font-weight="700">2. discover + sync</text>
-            <text x="398" y="260" fill="#edf0f6" font-family="ui-monospace" font-size="17" font-weight="700">cairn sync</text>
+            <text x="398" y="260" fill="#edf0f6" font-family="ui-monospace" font-size="17" font-weight="700">docsgraph sync</text>
             <text x="398" y="284" fill="#99a3b7" font-family="ui-monospace" font-size="12">include/exclude policy selects docs</text>
             <text x="398" y="304" fill="#99a3b7" font-family="ui-monospace" font-size="12">parse, summarize, embed, extract graph</text>
           </g>
@@ -424,10 +424,10 @@
           <g filter="url(#soft-shadow)">
             <rect x="792" y="74" width="300" height="186" rx="14" fill="#171d2a" stroke="#a98cff"/>
             <text x="818" y="110" fill="#a98cff" font-family="ui-monospace" font-size="15" font-weight="700">4. local surfaces</text>
-            <text x="818" y="142" fill="#edf0f6" font-family="ui-monospace" font-size="14" font-weight="700">cairn status / doctor</text>
-            <text x="818" y="170" fill="#edf0f6" font-family="ui-monospace" font-size="14" font-weight="700">cairn query repo "..."</text>
-            <text x="818" y="198" fill="#edf0f6" font-family="ui-monospace" font-size="14" font-weight="700">cairn inspect</text>
-            <text x="818" y="226" fill="#edf0f6" font-family="ui-monospace" font-size="14" font-weight="700">cairn serve</text>
+            <text x="818" y="142" fill="#edf0f6" font-family="ui-monospace" font-size="14" font-weight="700">docsgraph status / doctor</text>
+            <text x="818" y="170" fill="#edf0f6" font-family="ui-monospace" font-size="14" font-weight="700">docsgraph query repo "..."</text>
+            <text x="818" y="198" fill="#edf0f6" font-family="ui-monospace" font-size="14" font-weight="700">docsgraph inspect</text>
+            <text x="818" y="226" fill="#edf0f6" font-family="ui-monospace" font-size="14" font-weight="700">docsgraph serve</text>
           </g>
 
           <path d="M702 253 C744 253 750 166 792 166" fill="none" stroke="#a98cff" stroke-width="2.2" marker-end="url(#arrow)"/>
@@ -555,27 +555,27 @@
         <div class="step">
           <div class="num">01</div>
           <h3>Bootstrap</h3>
-          <p><code>cairn init -y</code> creates a conservative repo docs policy.</p>
+          <p><code>docsgraph init -y</code> creates a conservative repo docs policy.</p>
         </div>
         <div class="step">
           <div class="num">02</div>
           <h3>Build</h3>
-          <p><code>cairn sync --fake</code> indexes every discovered document with deterministic local providers.</p>
+          <p><code>docsgraph sync --fake</code> indexes every discovered document with deterministic local providers.</p>
         </div>
         <div class="step">
           <div class="num">03</div>
           <h3>Check</h3>
-          <p><code>cairn status</code> and <code>cairn doctor</code> show freshness, routing, and provider health.</p>
+          <p><code>docsgraph status</code> and <code>docsgraph doctor</code> show freshness, routing, and provider health.</p>
         </div>
         <div class="step">
           <div class="num">04</div>
           <h3>Search</h3>
-          <p><code>cairn query repo "..."</code> mirrors the hybrid ranker; MCP clients can call <code>repo_context</code> for a full context pack.</p>
+          <p><code>docsgraph query repo "..."</code> mirrors the hybrid ranker; MCP clients can call <code>repo_context</code> for a full context pack.</p>
         </div>
         <div class="step">
           <div class="num">05</div>
           <h3>Serve</h3>
-          <p><code>cairn serve --fake</code> starts a repo-scoped MCP server with structured envelopes.</p>
+          <p><code>docsgraph serve --fake</code> starts a repo-scoped MCP server with structured envelopes.</p>
         </div>
         <div class="step">
           <div class="num">06</div>
@@ -639,8 +639,8 @@
   </section>
 
   <div class="container footer">
-    docs/repo-lifecycle-canvas.html - generated as a repository-oriented Cairn
-    lifecycle map. Pair it with docs/canvas.html for positioning and
+    docs/repo-docs-workflow-canvas.html - generated as a repository-oriented Cairn
+    lifecycle map. Pair it with docs/retrieval-architecture-canvas.html for positioning and
     docs/inspector-principle.html for index-inspection mechanics.
   </div>
 </body>

@@ -53,7 +53,7 @@ body:
     id: actual
     attributes:
       label: Actual behavior
-      description: Include any error output. If `cairn serve` is involved, the JSON-line log is very helpful.
+      description: Include any error output. If `docsgraph serve` is involved, the JSON-line log is very helpful.
       render: shell
     validations:
       required: true

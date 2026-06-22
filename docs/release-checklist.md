@@ -29,11 +29,26 @@ tagged alpha release.
 
 ## Local Pre-Push Gate
 
+For release metadata, prefer the automated GitHub workflow:
+
+```bash
+gh workflow run prepare-release.yml -f version=0.1.0aN
+```
+
+That workflow updates `pyproject.toml`, `src/cairn/__init__.py`, README release
+text, and `CHANGELOG.md`, then commits the release-prep change to `main`.
+Locally, the equivalent command is:
+
+```bash
+python scripts/prepare_release.py 0.1.0aN
+python scripts/prepare_release.py 0.1.0aN --check
+```
+
 Run from the repository root:
 
 ```bash
 UV_PROJECT_ENVIRONMENT=/tmp/cairn-test-venv-py313 uv run --python 3.13 --extra dev ruff check .
-UV_PROJECT_ENVIRONMENT=/tmp/cairn-test-venv-py313 uv run --python 3.13 --extra dev mypy src tests
+UV_PROJECT_ENVIRONMENT=/tmp/cairn-test-venv-py313 uv run --python 3.13 --extra dev mypy --python-version 3.13 src tests
 UV_PROJECT_ENVIRONMENT=/tmp/cairn-test-venv-py313 uv run --python 3.13 --extra dev pytest
 
 rm -rf /tmp/cairn-dist
@@ -44,7 +59,7 @@ uv publish --dry-run /tmp/cairn-dist/*
 Expected current gate:
 
 - `ruff check .`: pass
-- `mypy src tests`: pass
+- `mypy --python-version 3.13 src tests`: pass
 - `pytest`: 440 passing
 - `uv publish --dry-run`: wheel and sdist pass upload validation
 
@@ -58,7 +73,7 @@ docsgraph bench benchmarks/architecture.toml --fake
 
 Expected current dogfood:
 
-- Cairn repo: 14/14 docs indexed, 0 errors.
+- Cairn repo: 15/15 docs indexed, 0 errors.
 - Starter benchmark: Cairn recall@8 equals naive with 37.8% of naive tokens
   under the deterministic fake embedder.
 

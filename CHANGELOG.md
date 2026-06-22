@@ -6,12 +6,16 @@ All notable changes to Cairn. Format follows
 
 ## Unreleased
 
+No unreleased changes yet.
+
+## [0.1.0a3] — 2026-06-22
+
 ### Added
 
 - **Doubao multimodal embeddings.** `CAIRN_EMBED_PROVIDER=doubao-vision`
   targets Volcengine ARK's `/embeddings/multimodal` shape and defaults to
   `doubao-embedding-vision-251215` with 2048-dimensional vectors.
-- **Static graph inspector.** `cairn inspect <doc-dir> --out inspector.html`
+- **Static graph inspector.** `docsgraph inspect <doc-dir> --out inspector.html`
   writes a standalone HTML relationship explorer for sections, entities,
   tree edges, mentions, and cross-references.
 - **Semantic hit evidence.** `search_semantic` now returns an explanatory
@@ -22,8 +26,9 @@ All notable changes to Cairn. Format follows
 - **Benchmark/index progress output.** CLI indexing and benchmark runs now
   emit stage progress so hosted-model runs do not sit silently during long
   summary-generation phases.
-- **Repository documentation workflow.** `cairn init -y`, `cairn sync`,
-  `cairn status`, repo-scoped `cairn serve`, and repo-scoped `cairn inspect`
+- **Repository documentation workflow.** `docsgraph init -y`, `docsgraph sync`,
+  `docsgraph status`, repo-scoped `docsgraph serve`, and repo-scoped
+  `docsgraph inspect`
   turn a project directory into a multi-document MCP knowledge layer. Repo MCP
   adds `list_documents`, cross-document `search_documents`, `repo_context`,
   `repo_graph`, `repo_impact`, and routes normal tools by optional `doc`.
@@ -37,10 +42,10 @@ All notable changes to Cairn. Format follows
   `node_modules/**`, `dist/**`, and `.pytest_cache/**` now apply at any depth,
   so broad include globs do not accidentally index frontend dependencies,
   caches, or generated build output.
-- **Open-source DX commands.** `cairn doctor` validates repo setup and index
-  freshness; `cairn mcp config` prints MCP snippets for Claude, Cursor, Codex,
-  and Goose. `cairn serve --repo <path>` makes generated configs independent
-  from the client's working directory.
+- **Open-source DX commands.** `docsgraph doctor` validates repo setup and index
+  freshness; `docsgraph mcp config` prints MCP snippets for Claude, Cursor,
+  Codex, and Goose. `docsgraph serve --repo <path>` makes generated configs
+  independent from the client's working directory.
 - **Agent self-install command.** `docsgraph install` writes the Cairn MCP
   server config for Codex, Claude, Cursor, or Goose, while
   `docsgraph install --dry-run` prints the target path and config without
@@ -215,8 +220,8 @@ naive vector-RAG baseline.
 - `PRODUCT.md`, `ARCHITECTURE.md`, `CLAUDE.md`, `ROADMAP.md`,
   `CONTRIBUTING.md`, `LICENSE` (Apache-2.0).
 - `docs/specs/mcp-tools.md`: authoritative tool schemas.
-- `docs/canvas.html`: single-file visual explainer comparing Naive RAG,
-  RAPTOR, BookRAG, A-RAG, and Cairn.
+- `docs/retrieval-architecture-canvas.html`: single-file visual explainer
+  comparing Naive RAG, RAPTOR, BookRAG, A-RAG, and Cairn.
 - `docs/decisions/0001-foundation.md`: founding ADR.
 - `examples/hero-demo.md`: self-referential reproducible demo (Cairn
   navigates its own architecture document).

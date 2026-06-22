@@ -1,0 +1,52 @@
+name: Prepare release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version without leading v, e.g. 0.1.0a4"
+        required: true
+        type: string
+      date:
+        description: "Release date in YYYY-MM-DD format. Defaults to the runner UTC date."
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    name: Update release metadata
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Prepare changelog and version metadata
+        run: |
+          args=("${{ inputs.version }}")
+          if [ -n "${{ inputs.date }}" ]; then
+            args+=("--date" "${{ inputs.date }}")
+          fi
+          python scripts/prepare_release.py "${args[@]}"
+          python scripts/prepare_release.py "${{ inputs.version }}" --check
+          git diff --check
+
+      - name: Commit release metadata
+        run: |
+          if git diff --quiet; then
+            echo "No release metadata changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pyproject.toml src/cairn/__init__.py README.md CHANGELOG.md docs/release-checklist.md docs/retrieval-architecture-canvas.html
+          git commit -m "Prepare release ${{ inputs.version }}"
+          git push origin HEAD:main

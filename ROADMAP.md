@@ -51,7 +51,8 @@ graph, no cross-refs yet.**
   - ☐ Single-document mode
   - ☐ JSON-lines audit log
 - **CLI**
-  - ☐ `cairn init`, `cairn index`, `cairn serve`, `cairn outline`, `cairn query`
+  - ☐ `docsgraph init`, `docsgraph index`, `docsgraph serve`,
+    `docsgraph outline`, `docsgraph query`
 - **Plug-ins**
   - ☐ Default Summarizer: OpenAI-compatible HTTP (works with Ollama)
   - ☐ Default Embedder: `sentence-transformers/all-MiniLM-L6-v2`

@@ -93,8 +93,9 @@ All tools accept these optional parameters:
 |---|---|---|---|
 | `doc` | `string` | server primary | Document namespace (`doc_id`). Required only when the server hosts multiple documents and no primary is configured. |
 
-In single-document mode (`cairn serve <doc-dir>`), clients should omit `doc`.
-In repository mode (`cairn serve` from a repo initialized with `cairn init -y`),
+In single-document mode (`docsgraph serve <doc-dir>`), clients should omit `doc`.
+In repository mode (`docsgraph serve` from a repo initialized with
+`docsgraph init -y`),
 clients should call `list_documents` first, use `search_documents` for global
 repo discovery, then pass `doc` to route normal retrieval tools to a specific
 indexed document.
@@ -232,8 +233,8 @@ Semantics:
   `get_section(doc=..., id=...)`.
 - `stale_documents` lists indexed documents whose source file fingerprint no
   longer matches the last synced fingerprint. Search still returns the existing
-  index for continuity, but clients should run `cairn sync` before relying on it
-  for final answers.
+  index for continuity, but clients should run `docsgraph sync` before relying
+  on it for final answers.
 - Documents with incompatible embedding dimensions or load errors are reported
   in `skipped_documents` instead of failing the whole call.
 

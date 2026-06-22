@@ -6,11 +6,11 @@
 
 [![CI](https://github.com/jokeuncle/cairn/actions/workflows/ci.yml/badge.svg)](https://github.com/jokeuncle/cairn/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache_2.0-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.1.0a3-blue.svg)](CHANGELOG.md)
+[![PyPI](https://img.shields.io/pypi/v/docsgraph?include_prereleases&label=PyPI)](https://pypi.org/project/docsgraph/)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
 [![MCP](https://img.shields.io/badge/MCP-native-7c3aed.svg)](https://modelcontextprotocol.io/)
 
-![Cairn demo: repository documentation graph and MCP tools](docs/assets/cairn-demo.svg)
+![Cairn demo: repository documentation graph and MCP tools](docs/assets/docsgraph-repo-demo.svg)
 
 Cairn is a **local-first, MCP-native DocsGraph** for software
 repositories and large structured documents. It turns README files, specs,
@@ -28,9 +28,9 @@ The result: better retrieval accuracy, lower token spend, and a practical MCP
 tool layer between your project documentation and every AI coding agent you
 use. Local-first. Vendor-neutral. Designed for open-source repos.
 
-> 🚀 **Alpha — `0.1.0a3`.** Markdown + PDF ingest, all eight MCP tools,
+> 🚀 **Alpha — `0.1.0a3`.** Markdown + PDF ingest, the core MCP tool set,
 > the full structure-aware index (tree + summaries + entities + xrefs +
-> vectors), repo-level `init/sync/status`, repo-scoped MCP with
+> vectors), repo-level `init/sync/status`, repo-scoped MCP tools with
 > `list_documents`, `search_documents`, `repo_context`, `repo_graph`, and
 > `repo_impact`, failure-isolated sync, static graph inspector, Doubao
 > multimodal embeddings, and a benchmark harness with headline numbers. See
@@ -75,7 +75,11 @@ For the public documentation quality contract Cairn optimizes for, see
    result carries stable anchors for verification.
 
 A visual explainer comparing Cairn's approach to RAPTOR, BookRAG, and A-RAG
-lives at [`docs/canvas.html`](docs/canvas.html). Open it in any browser.
+lives at
+[`docs/retrieval-architecture-canvas.html`](docs/retrieval-architecture-canvas.html).
+The repository workflow map lives at
+[`docs/repo-docs-workflow-canvas.html`](docs/repo-docs-workflow-canvas.html).
+Open either file in any browser.
 
 ---
 
