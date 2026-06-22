@@ -509,7 +509,7 @@ def _repo_vector_scores(
     indices = cache.vector_record_indices.get(query_dim)
     if matrix is None or indices is None:
         return scores
-    query_array = np.asarray(query, dtype=np.float32)
+    query_array: Any = np.asarray(query, dtype=np.float32)
     raw_scores = matrix @ query_array
     clipped = np.clip(raw_scores, 0.0, 1.0)
     for record_index, score in zip(indices, clipped.tolist(), strict=True):
