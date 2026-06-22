@@ -38,7 +38,7 @@ jobs:
         run: ruff check .
 
       - name: mypy --strict
-        run: mypy src tests
+        run: mypy --python-version "${{ matrix.python-version }}" src tests
 
       - name: pytest
         run: pytest
