@@ -5,10 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Cairn - DocsGraph for AI agents</title>
   <meta name="description" content="Cairn is a local-first DocsGraph and MCP server that helps AI agents navigate repository documentation. Install it as docsgraph.">
+  <meta name="theme-color" content="#080b0f">
+  <link rel="canonical" href="https://jokeuncle.github.io/cairn/">
   <meta property="og:title" content="Cairn - DocsGraph for AI agents">
   <meta property="og:description" content="CodeGraph helps agents navigate code. Cairn helps them navigate docs.">
-  <meta property="og:image" content="assets/docsgraph-hero.png">
+  <meta property="og:url" content="https://jokeuncle.github.io/cairn/">
+  <meta property="og:image" content="https://jokeuncle.github.io/cairn/assets/docsgraph-hero.png">
   <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Cairn - DocsGraph for AI agents">
+  <meta name="twitter:description" content="A local-first DocsGraph and MCP server for repository documentation.">
+  <meta name="twitter:image" content="https://jokeuncle.github.io/cairn/assets/docsgraph-hero.png">
   <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="%23080b0f"/><path d="M18 46V18h28v7H26v14h20v7H18z" fill="%2348c7ba"/></svg>'>
   <style>
     :root {
@@ -42,6 +49,24 @@
       background: var(--bg);
       color: var(--ink);
       line-height: 1.55;
+    }
+
+    .skip-link {
+      position: fixed;
+      z-index: 100;
+      top: 12px;
+      left: 12px;
+      padding: 10px 14px;
+      transform: translateY(-150%);
+      background: var(--teal);
+      color: #061112;
+      font-weight: 800;
+    }
+
+    .skip-link:focus {
+      transform: translateY(0);
+      outline: 2px solid var(--ink);
+      outline-offset: 2px;
     }
 
     a {
@@ -414,6 +439,44 @@
       font-size: 0.95rem;
     }
 
+    .support-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 280px;
+      gap: 28px;
+      align-items: center;
+    }
+
+    .support-copy {
+      max-width: 720px;
+      color: var(--muted);
+      font-size: 1.05rem;
+    }
+
+    .support-copy p {
+      margin: 0 0 18px;
+    }
+
+    .reward-panel {
+      margin: 0;
+      padding: 14px;
+      border: 1px solid rgba(213, 164, 93, 0.34);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .reward-panel img {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: #fff;
+    }
+
+    .reward-panel figcaption {
+      margin-top: 12px;
+      color: var(--quiet);
+      font-size: 0.86rem;
+      text-align: center;
+    }
+
     .site-footer {
       padding: 42px 0;
       color: var(--quiet);
@@ -460,6 +523,7 @@
 
       .section-head,
       .workflow,
+      .support-layout,
       .footer-inner {
         display: block;
       }
@@ -481,10 +545,16 @@
       .tool-row {
         grid-template-columns: 1fr;
       }
+
+      .reward-panel {
+        width: min(260px, 100%);
+        margin-top: 22px;
+      }
     }
   </style>
 </head>
 <body>
+  <a class="skip-link" href="#install">Skip to install</a>
   <header class="site-header">
     <nav class="nav" aria-label="Primary">
       <a class="brand" href="#top" aria-label="Cairn home">
@@ -495,6 +565,7 @@
         <a href="#why">Why</a>
         <a href="#workflow">Workflow</a>
         <a href="#tools">MCP tools</a>
+        <a href="#support">Support</a>
         <a href="https://pypi.org/project/docsgraph/">PyPI</a>
         <a href="https://github.com/jokeuncle/cairn">GitHub</a>
         <a class="nav-cta" href="#install">Install</a>
@@ -520,8 +591,8 @@
           <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
           <pre><code>pip install docsgraph
 docsgraph init -y
-docsgraph sync
-docsgraph install --client codex --yes</code></pre>
+docsgraph sync --fake
+docsgraph install --client codex --yes --fake</code></pre>
         </div>
       </div>
     </section>
@@ -540,16 +611,17 @@ docsgraph install --client codex --yes</code></pre>
             <div class="label">01 / REPO MAP</div>
             <h3>Find the right document first.</h3>
             <p>
-              Use `list_documents` and `search_documents` before drilling into a
-              section. Agents stop guessing from README fragments.
+              Use <code>list_documents</code> and <code>search_documents</code>
+              before drilling into a section. Agents stop guessing from README
+              fragments.
             </p>
           </article>
           <article class="feature">
             <div class="label">02 / STRUCTURE</div>
             <h3>Retrieve at section granularity.</h3>
             <p>
-              Headings, hierarchy, summaries, and stable `cairn://` anchors make
-              answers easier to verify and cheaper to quote.
+              Headings, hierarchy, summaries, and stable <code>cairn://</code>
+              anchors make answers easier to verify and cheaper to quote.
             </p>
           </article>
           <article class="feature">
@@ -578,16 +650,16 @@ docsgraph install --client codex --yes</code></pre>
             <article class="step">
               <div class="label">BOOTSTRAP</div>
               <h3><code>docsgraph init -y</code></h3>
-              <p>Writes a conservative `.cairn/config.toml` documentation policy.</p>
+              <p>Writes a conservative <code>.cairn/config.toml</code> documentation policy.</p>
             </article>
             <article class="step">
               <div class="label">INDEX</div>
-              <h3><code>docsgraph sync</code></h3>
+              <h3><code>docsgraph sync --fake</code></h3>
               <p>Builds one structured index per source document with isolated failures.</p>
             </article>
             <article class="step">
               <div class="label">WIRE AGENTS</div>
-              <h3><code>docsgraph install --client codex</code></h3>
+              <h3><code>docsgraph install --client codex --fake</code></h3>
               <p>Writes the MCP server config so your agent can query the repo docs.</p>
             </article>
           </div>
@@ -637,8 +709,8 @@ Cairn doctor: ok</code></pre>
         <div class="metrics">
           <div class="metric"><strong>15/15</strong><span>Current Cairn repo docs indexed in dogfood.</span></div>
           <div class="metric"><strong>0</strong><span>Failed documents in the published-package smoke test.</span></div>
-          <div class="metric"><strong>440</strong><span>Unit tests passing in the release gate.</span></div>
-          <div class="metric"><strong>PyPI</strong><span>Published as `docsgraph`, with `cairn` as a CLI alias.</span></div>
+          <div class="metric"><strong>3.11-3.13</strong><span>CI runs ruff, mypy, pytest, and package builds across supported Python versions.</span></div>
+          <div class="metric"><strong>PyPI</strong><span>Published as <code>docsgraph</code>, with <code>cairn</code> as a CLI alias.</span></div>
         </div>
       </div>
     </section>
@@ -660,6 +732,35 @@ Cairn doctor: ok</code></pre>
         </div>
       </div>
     </section>
+
+    <section class="section" id="support">
+      <div class="container">
+        <div class="section-head">
+          <h2>Support maintenance.</h2>
+          <p>
+            Cairn is Apache-2.0. Sponsorship is optional, but it helps keep the
+            docs graph, release automation, and agent integrations moving.
+          </p>
+        </div>
+        <div class="support-layout">
+          <div class="support-copy">
+            <p>
+              If Cairn saves you time, use the GitHub Sponsor button or scan the
+              WeChat reward code. For bugs, security reports, and usage help,
+              start with the support policy in the repository.
+            </p>
+            <div class="hero-actions">
+              <a class="button primary" href="https://github.com/jokeuncle/cairn/blob/main/SUPPORT.md">Support policy</a>
+              <a class="button" href="https://github.com/jokeuncle/cairn/issues">Report an issue</a>
+            </div>
+          </div>
+          <figure class="reward-panel">
+            <img src="assets/wechat-reward.jpg" alt="WeChat reward code for supporting Cairn maintenance">
+            <figcaption>WeChat reward code</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
   </main>
 
   <footer class="site-footer">
@@ -667,6 +768,7 @@ Cairn doctor: ok</code></pre>
       <div>Cairn is Apache-2.0. Install the package as <code>docsgraph</code>.</div>
       <div class="footer-links">
         <a href="https://github.com/jokeuncle/cairn/blob/main/CHANGELOG.md">Changelog</a>
+        <a href="#support">Support</a>
         <a href="https://github.com/jokeuncle/cairn/blob/main/docs/release-checklist.md">Release checklist</a>
         <a href="https://github.com/jokeuncle/cairn/blob/main/docs/golden-docs-standard.md">Golden docs standard</a>
       </div>

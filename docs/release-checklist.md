@@ -60,7 +60,7 @@ Expected current gate:
 
 - `ruff check .`: pass
 - `mypy --python-version 3.13 src tests`: pass
-- `pytest`: 440 passing
+- `pytest`: pass
 - `uv publish --dry-run`: wheel and sdist pass upload validation
 
 ## Dogfood Checks

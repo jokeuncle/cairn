@@ -23,7 +23,7 @@ python3.11 -m venv .venv
 ## Step 1 — Index the document
 
 ```bash
-.venv/bin/cairn index ARCHITECTURE.md --out /tmp/cairn-arch --fake
+.venv/bin/docsgraph index ARCHITECTURE.md --out /tmp/cairn-arch --fake
 ```
 
 Expected output (≤ 1 second on an M-series MacBook):
@@ -56,7 +56,7 @@ Get the document outline. This is the cheapest tool — agents should call it
 first when they meet an unfamiliar document.
 
 ```bash
-.venv/bin/cairn outline /tmp/cairn-arch --depth 2
+.venv/bin/docsgraph outline /tmp/cairn-arch --depth 2
 ```
 
 Output (excerpt):
@@ -84,7 +84,7 @@ Output (excerpt):
 Drill into Layer 2:
 
 ```bash
-.venv/bin/cairn outline /tmp/cairn-arch \
+.venv/bin/docsgraph outline /tmp/cairn-arch \
   --depth 3 \
   --focus cairn-technical-architecture/2-layered-architecture
 ```
@@ -114,7 +114,7 @@ the five sub-indexes (T, S, E, X, V):
 Find every mention of `LanceDB`:
 
 ```bash
-.venv/bin/cairn query keyword /tmp/cairn-arch LanceDB
+.venv/bin/docsgraph query keyword /tmp/cairn-arch LanceDB
 ```
 
 ```
@@ -131,7 +131,7 @@ with stable anchors back into the source.
 Multi-term search, `mode=all` (every term must appear):
 
 ```bash
-.venv/bin/cairn query keyword /tmp/cairn-arch progressive disclosure --mode all
+.venv/bin/docsgraph query keyword /tmp/cairn-arch progressive disclosure --mode all
 ```
 
 ```
@@ -147,7 +147,7 @@ summed across terms, sorted descending — see `docs/specs/mcp-tools.md` §5.
 ## Step 4 — Semantic search
 
 ```bash
-.venv/bin/cairn query semantic /tmp/cairn-arch "how do plug-ins work" --k 3 --fake
+.venv/bin/docsgraph query semantic /tmp/cairn-arch "how do plug-ins work" --k 3 --fake
 ```
 
 With `--fake`, the `FakeEmbedder` is a deterministic bag-of-words hash —
@@ -196,7 +196,7 @@ get `raw_text`. No agent ever has to swallow the whole 18k-word document.
 ## Step 6 — Serve over MCP
 
 ```bash
-.venv/bin/cairn serve /tmp/cairn-arch --fake
+.venv/bin/docsgraph serve /tmp/cairn-arch --fake
 ```
 
 This starts the stdio MCP server. Point any compliant client at it
@@ -210,7 +210,7 @@ For Claude Code, in your `claude_desktop_config.json`:
 {
   "mcpServers": {
     "cairn-architecture": {
-      "command": "/absolute/path/to/.venv/bin/cairn",
+      "command": "/absolute/path/to/.venv/bin/docsgraph",
       "args": ["serve", "/tmp/cairn-arch", "--fake"]
     }
   }
@@ -236,7 +236,7 @@ ollama pull llama3.2:3b
 ollama pull nomic-embed-text
 
 # re-index without --fake
-.venv/bin/cairn index ARCHITECTURE.md --out /tmp/cairn-arch
+.venv/bin/docsgraph index ARCHITECTURE.md --out /tmp/cairn-arch
 ```
 
 Now summaries are written by `llama3.2:3b` and embeddings by
@@ -254,7 +254,7 @@ export CAIRN_EMBED_MODEL=text-embedding-3-small
 export CAIRN_EMBED_DIM=1536
 export CAIRN_EMBED_API_KEY=sk-...
 
-.venv/bin/cairn index ARCHITECTURE.md --out /tmp/cairn-arch
+.venv/bin/docsgraph index ARCHITECTURE.md --out /tmp/cairn-arch
 ```
 
 The wire shape (`/v1/chat/completions` and `/v1/embeddings`) is universal —
@@ -272,5 +272,5 @@ export CAIRN_LLM_API_KEY=...
 export CAIRN_EMBED_PROVIDER=doubao-vision
 export CAIRN_EMBED_API_KEY=...
 
-.venv/bin/cairn index ARCHITECTURE.md --out /tmp/cairn-arch
+.venv/bin/docsgraph index ARCHITECTURE.md --out /tmp/cairn-arch
 ```

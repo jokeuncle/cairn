@@ -12,8 +12,8 @@ body:
     id: version
     attributes:
       label: Cairn version
-      description: Output of `cairn version` (or your installed package version).
-      placeholder: "0.1.0a1"
+      description: Output of `docsgraph version` (or your installed package version).
+      placeholder: "0.1.0a3"
     validations:
       required: true
 

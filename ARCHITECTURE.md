@@ -302,20 +302,20 @@ configured primary when omitted.
 
 ### Layer 5: Tooling (CLI / inspector / extensions)
 
-CLI (`cairn`, typer-based):
+CLI (`docsgraph`, typer-based; `cairn` remains a compatibility alias):
 
 ```
-cairn init                  # scaffold a .cairn/ in cwd
-cairn index <path>          # index a document
-cairn serve [--http]        # start MCP server
-cairn inspect <doc-id>      # print index stats
-cairn outline <doc-id>      # print tree
-cairn query <doc-id> ...    # exercise tools from terminal
-cairn migrate               # bump index format versions
+docsgraph init                  # scaffold a .cairn/ in cwd
+docsgraph index <path>          # index a document
+docsgraph serve [--http]        # start MCP server
+docsgraph inspect <doc-id>      # print index stats
+docsgraph outline <doc-id>      # print tree
+docsgraph query <doc-id> ...    # exercise tools from terminal
+docsgraph migrate               # bump index format versions
 ```
 
 Future (v0.3+):
-- `cairn web` — local inspector UI (read-only).
+- `docsgraph web` — local inspector UI (read-only).
 - VSCode extension surfacing the same inspector.
 
 ---

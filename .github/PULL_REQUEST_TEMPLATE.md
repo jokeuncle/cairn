@@ -31,9 +31,9 @@
 -->
 
 ```
-ruff check src tests
-mypy src/cairn
-pytest tests/unit -q
+ruff check .
+mypy src tests
+pytest
 ```
 
 - [ ] Unit tests added / updated

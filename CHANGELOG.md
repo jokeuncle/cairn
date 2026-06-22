@@ -15,6 +15,13 @@ All notable changes to Cairn. Format follows
 
 - PyPI project metadata and README now point the project homepage to the
   GitHub Pages site.
+- GitHub Actions workflows now use current major versions to avoid deprecated
+  Node runtime warnings.
+- First-run website and contributor docs now prefer the `docsgraph` command and
+  deterministic `--fake` smoke-test path.
+- Added support and editor-configuration metadata for contributor onboarding.
+- Added a GitHub Sponsor entry plus website and support-page links for optional
+  project sponsorship.
 
 ## [0.1.0a3] — 2026-06-22
 

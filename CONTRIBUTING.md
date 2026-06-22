@@ -139,10 +139,10 @@ A good test:
 
 Please file an issue with:
 
-- Cairn version (`cairn --version`) and Python version.
+- Cairn version (`docsgraph version`) and Python version.
 - A minimal reproducer (ideally a small document and a command).
 - Expected vs. actual behavior.
-- Any error log lines (JSON-lines from `cairn serve` are very helpful).
+- Any error log lines (JSON-lines from `docsgraph serve` are very helpful).
 
 ---
 

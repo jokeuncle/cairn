@@ -425,10 +425,12 @@ choices we adopted, modified, or declined.
 | 4 — v0.4 polish for production | ☐ | DOCX/RTF/EPUB, VSCode extension, security review |
 | v1.0 GA | ☐ | All `PRODUCT.md` §7 success criteria met |
 
-Full plan: [`ROADMAP.md`](ROADMAP.md). Current test suite: **440 passing**,
-mypy strict clean, ruff clean.
+Full plan: [`ROADMAP.md`](ROADMAP.md). CI runs ruff, strict mypy, pytest, and
+package build checks across Python 3.11, 3.12, and 3.13.
 
 Maintainer release gate: [`docs/release-checklist.md`](docs/release-checklist.md).
+
+Support and sponsorship options live in [`SUPPORT.md`](SUPPORT.md).
 
 ---
 
