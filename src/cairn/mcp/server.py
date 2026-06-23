@@ -6,17 +6,21 @@ without spawning a stdio transport.
 
 from __future__ import annotations
 
+from datetime import timedelta
 from pathlib import Path
 from typing import Any
+from urllib.parse import unquote, urlparse
 
+from mcp import types
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from mcp.types import Tool
 
-from cairn.core.errors import CairnError, ToolError
+from cairn.core.errors import CairnError, ConfigError, ToolError
 from cairn.embed.base import Embedder
 from cairn.mcp.schemas import CAIRN_TOOLS, REPO_TOOLS
 from cairn.repo import (
+    find_repo_root,
     load_repo_document_index,
     repo_context,
     repo_graph,
@@ -35,6 +39,7 @@ from cairn.tools.search_keyword import search_keyword as search_keyword_tool
 from cairn.tools.search_semantic import search_semantic as search_semantic_tool
 
 SERVER_NAME = "cairn"
+ROOTS_LIST_TIMEOUT = timedelta(seconds=5)
 
 
 def _new_trace(
@@ -186,10 +191,13 @@ async def dispatch_repo_tool(
     arguments: dict[str, Any] | None,
     repo_root: Path,
     embedder: Embedder,
+    *,
+    trace: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Run a tool against one document from a repo-scoped Cairn index."""
     args: dict[str, Any] = dict(arguments or {})
-    trace = _new_trace(name, args, mode="repo", repo_root=repo_root)
+    trace = trace or _new_trace(name, args, mode="repo", repo_root=repo_root)
+    trace["repo_root"] = str(repo_root)
     try:
         _trace_step(trace, "select_tool", tool=name)
         if name == "list_documents":
@@ -327,9 +335,166 @@ async def dispatch_repo_tool(
         )
 
 
-def build_repo_server(repo_root: Path, embedder: Embedder) -> Server:
+def _path_from_uri(uri: object) -> Path | None:
+    if not isinstance(uri, str) or not uri:
+        return None
+    parsed = urlparse(uri)
+    if parsed.scheme == "file":
+        path = unquote(parsed.path)
+        if parsed.netloc:
+            path = f"//{parsed.netloc}{path}"
+        return Path(path).resolve()
+    if parsed.scheme:
+        return None
+    return Path(uri).expanduser().resolve()
+
+
+def _first_workspace_uri(params: Any) -> object | None:
+    root_uri: object | None = getattr(params, "rootUri", None)
+    if root_uri is not None:
+        return root_uri
+    extras = getattr(params, "model_extra", None)
+    if isinstance(extras, dict) and extras.get("rootUri") is not None:
+        extra_root_uri: object = extras["rootUri"]
+        return extra_root_uri
+
+    folders = getattr(params, "workspaceFolders", None)
+    if folders is None and isinstance(extras, dict):
+        folders = extras.get("workspaceFolders")
+    if not isinstance(folders, list) or not folders:
+        return None
+    first = folders[0]
+    if isinstance(first, dict):
+        folder_uri: object = first.get("uri")
+        return folder_uri
+    return getattr(first, "uri", None)
+
+
+class RepoRootResolver:
+    """Resolve the repo root for a repo-scoped MCP tool call."""
+
+    def __init__(
+        self,
+        *,
+        fixed_root: Path | None = None,
+        server: Server | None = None,
+        workspace_hint: Path | None = None,
+    ) -> None:
+        self.fixed_root = fixed_root
+        self.server = server
+        self.workspace_hint = workspace_hint
+
+    async def resolve(
+        self, args: dict[str, Any], trace: dict[str, Any]
+    ) -> Path:
+        project_path = args.pop("projectPath", None)
+        if project_path is not None:
+            if not isinstance(project_path, str) or not project_path:
+                msg = "`projectPath` must be a non-empty string when provided"
+                raise ToolError(msg, details={"projectPath": project_path})
+            try:
+                root = find_repo_root(Path(project_path))
+            except ConfigError as exc:
+                details = dict(exc.details)
+                details["projectPath"] = project_path
+                details["source"] = "projectPath"
+                msg = (
+                    "Cairn repo config not found for `projectPath`. "
+                    "Run `docsgraph init -y` and `docsgraph sync` in that repo."
+                )
+                raise ConfigError(msg, details=details) from exc
+            _trace_step(trace, "resolve_repo_root", source="projectPath", root=str(root))
+            return root
+
+        if self.fixed_root is not None:
+            _trace_step(trace, "resolve_repo_root", source="fixed", root=str(self.fixed_root))
+            return self.fixed_root
+
+        workspace = self.workspace_hint
+        source = "workspace_hint"
+        if workspace is None:
+            workspace, source = self._workspace_from_initialize()
+        if workspace is None:
+            workspace, source = await self._workspace_from_roots_list()
+        if workspace is None:
+            workspace = Path.cwd()
+            source = "cwd"
+
+        try:
+            root = find_repo_root(workspace)
+        except ConfigError as exc:
+            details = dict(exc.details)
+            details["workspace"] = str(workspace)
+            details["source"] = source
+            msg = (
+                "Cairn repo config not found for this MCP workspace. "
+                "Run `docsgraph init -y` and `docsgraph sync` in the current "
+                "project, or pass `projectPath` to query another initialized repo."
+            )
+            raise ConfigError(msg, details=details) from exc
+        _trace_step(trace, "resolve_repo_root", source=source, root=str(root))
+        return root
+
+    def _workspace_from_initialize(self) -> tuple[Path | None, str]:
+        if self.server is None:
+            return None, "initialize"
+        try:
+            params = self.server.request_context.session.client_params
+        except LookupError:
+            return None, "initialize"
+        if params is None:
+            return None, "initialize"
+        path = _path_from_uri(_first_workspace_uri(params))
+        return path, "initialize"
+
+    async def _workspace_from_roots_list(self) -> tuple[Path | None, str]:
+        if self.server is None:
+            return None, "roots/list"
+        try:
+            context = self.server.request_context
+        except LookupError:
+            return None, "roots/list"
+        params = context.session.client_params
+        roots_capability = (
+            params.capabilities.roots if params is not None else None
+        )
+        if roots_capability is None:
+            return None, "roots/list"
+        try:
+            result = await context.session.send_request(
+                types.ServerRequest(types.ListRootsRequest()),
+                types.ListRootsResult,
+                request_read_timeout_seconds=ROOTS_LIST_TIMEOUT,
+            )
+        except Exception:
+            return None, "roots/list"
+        if not result.roots:
+            return None, "roots/list"
+        return _path_from_uri(str(result.roots[0].uri)), "roots/list"
+
+
+async def dispatch_workspace_repo_tool(
+    name: str,
+    arguments: dict[str, Any] | None,
+    resolver: RepoRootResolver,
+    embedder: Embedder,
+) -> dict[str, Any]:
+    """Resolve the current workspace repo, then run a repo-scoped tool."""
+    args: dict[str, Any] = dict(arguments or {})
+    trace = _new_trace(name, args, mode="repo")
+    try:
+        repo_root = await resolver.resolve(args, trace)
+        return await dispatch_repo_tool(
+            name, args, repo_root, embedder, trace=trace
+        )
+    except CairnError as exc:
+        return _error_envelope(error=exc.to_envelope(), trace=trace)
+
+
+def build_repo_server(repo_root: Path | None, embedder: Embedder) -> Server:
     """Construct an MCP Server for a repo-scoped Cairn documentation index."""
     server: Server = Server(SERVER_NAME)
+    resolver = RepoRootResolver(fixed_root=repo_root, server=server)
 
     @server.list_tools()  # type: ignore[no-untyped-call, untyped-decorator]
     async def _list_tools() -> list[Tool]:
@@ -339,7 +504,9 @@ def build_repo_server(repo_root: Path, embedder: Embedder) -> Server:
     async def _call_tool(
         name: str, arguments: dict[str, Any] | None
     ) -> dict[str, Any]:
-        return await dispatch_repo_tool(name, arguments, repo_root, embedder)
+        return await dispatch_workspace_repo_tool(
+            name, arguments, resolver, embedder
+        )
 
     return server
 
@@ -354,7 +521,7 @@ async def serve_stdio(doc_dir: Path, *, embedder: Embedder) -> None:
         )
 
 
-async def serve_repo_stdio(repo_root: Path, *, embedder: Embedder) -> None:
+async def serve_repo_stdio(repo_root: Path | None, *, embedder: Embedder) -> None:
     """Serve a repo-scoped Cairn document index over MCP stdio."""
     server = build_repo_server(repo_root, embedder)
     async with stdio_server() as (read_stream, write_stream):

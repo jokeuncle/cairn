@@ -29,7 +29,7 @@ The result: better retrieval accuracy, lower token spend, and a practical MCP
 tool layer between your project documentation and every AI coding agent you
 use. Local-first. Vendor-neutral. Designed for open-source repos.
 
-> 🚀 **Alpha — `0.1.0a3`.** Markdown + PDF ingest, the core MCP tool set,
+> 🚀 **Alpha — `0.1.0a4`.** Markdown + PDF ingest, the core MCP tool set,
 > the full structure-aware index (tree + summaries + entities + xrefs +
 > vectors), repo-level `init/sync/status`, repo-scoped MCP tools with
 > `list_documents`, `search_documents`, `repo_context`, `repo_graph`, and
@@ -118,7 +118,10 @@ uvx docsgraph install --client codex --yes --fake
 Use `--client claude`, `--client cursor`, or `--client goose` for other MCP
 clients. `docsgraph install` writes the same server config that
 `docsgraph mcp config` prints, with `command = "docsgraph"` and
-`args = ["serve", "--repo", "..."]`.
+`args = ["serve"]`. The server resolves the current MCP workspace at call time,
+so a global agent config does not stay pinned to the repo where it was installed.
+Pass `--repo /path/to/repo` to `docsgraph install` or `docsgraph mcp config`
+only when you intentionally want a fixed-repo MCP server.
 
 ### Repository Workflow
 

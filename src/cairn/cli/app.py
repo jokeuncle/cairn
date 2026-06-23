@@ -298,7 +298,7 @@ def serve(
         asyncio.run(serve_repo_stdio(find_repo_root(repo), embedder=_make_embedder(fake)))
         return
     if doc_dir is None:
-        asyncio.run(serve_repo_stdio(find_repo_root(), embedder=_make_embedder(fake)))
+        asyncio.run(serve_repo_stdio(None, embedder=_make_embedder(fake)))
         return
     if not doc_dir.exists() or not doc_dir.is_dir():
         typer.echo(f"error: document directory not found: {doc_dir}", err=True)
@@ -323,7 +323,10 @@ def mcp_config(
             file_okay=False,
             dir_okay=True,
             readable=True,
-            help="Repository root. Defaults to the nearest .cairn/config.toml.",
+            help=(
+                "Repository root for a fixed-repo server. Omit for dynamic "
+                "workspace resolution."
+            ),
         ),
     ] = None,
     command: Annotated[
@@ -342,8 +345,7 @@ def mcp_config(
     ] = False,
 ) -> None:
     """Print a copy-pasteable MCP stdio configuration snippet."""
-    root = find_repo_root(repo)
-    args = ["serve", "--repo", str(root)]
+    args = _mcp_server_args(repo=repo)
     if fake:
         args.append("--fake")
     typer.echo(_format_mcp_config(client, command=command, args=args))
@@ -366,7 +368,10 @@ def install(
             file_okay=False,
             dir_okay=True,
             readable=True,
-            help="Repository root. Defaults to the nearest .cairn/config.toml.",
+            help=(
+                "Repository root for a fixed-repo server. Omit for dynamic "
+                "workspace resolution."
+            ),
         ),
     ] = None,
     command: Annotated[
@@ -404,8 +409,7 @@ def install(
     ] = False,
 ) -> None:
     """Install the Cairn MCP server config into an agent config file."""
-    root = find_repo_root(repo)
-    args = ["serve", "--repo", str(root)]
+    args = _mcp_server_args(repo=repo)
     if fake:
         args.append("--fake")
     target = output or _default_mcp_config_path(client)
@@ -826,6 +830,14 @@ def _format_doctor(payload: dict[str, object]) -> str:
             "(or use the compatible `cairn` alias)."
         )
     return "\n".join(lines)
+
+
+def _mcp_server_args(*, repo: Path | None) -> list[str]:
+    args = ["serve"]
+    if repo is not None:
+        root = find_repo_root(repo)
+        args.extend(["--repo", str(root)])
+    return args
 
 
 def _format_mcp_config(client: McpClient, *, command: str, args: list[str]) -> str:

@@ -239,16 +239,20 @@ class TestRepoCommands:
         assert mcp_result.exit_code == 0, mcp_result.output
         mcp_payload = json.loads(mcp_result.output)
         assert mcp_payload["mcpServers"]["cairn"]["command"] == "docsgraph"
-        assert mcp_payload["mcpServers"]["cairn"]["args"][:2] == [
-            "serve",
-            "--repo",
-        ]
-        assert str(tmp_path) in mcp_payload["mcpServers"]["cairn"]["args"]
+        assert mcp_payload["mcpServers"]["cairn"]["args"] == ["serve"]
 
         codex_result = runner.invoke(app, ["mcp", "config", "--client", "codex"])
         assert codex_result.exit_code == 0, codex_result.output
         assert "[mcp_servers.cairn]" in codex_result.output
-        assert "--repo" in codex_result.output
+        assert 'args = ["serve"]' in codex_result.output
+
+        fixed_result = runner.invoke(
+            app,
+            ["mcp", "config", "--client", "codex", "--repo", str(tmp_path)],
+        )
+        assert fixed_result.exit_code == 0, fixed_result.output
+        assert "--repo" in fixed_result.output
+        assert str(tmp_path) in fixed_result.output
 
         inspect_result = runner.invoke(
             app, ["inspect", "--out", "repo-inspector.html"]
@@ -275,6 +279,8 @@ class TestRepoCommands:
         assert "# target:" in result.output
         assert "[mcp_servers.cairn]" in result.output
         assert 'command = "docsgraph"' in result.output
+        assert 'args = ["serve", "--fake"]' in result.output
+        assert "--repo" not in result.output
         assert not (home / ".codex" / "config.toml").exists()
 
     def test_install_codex_writes_managed_block(
@@ -295,12 +301,14 @@ class TestRepoCommands:
         assert "[mcp_servers.cairn]" in text
         assert 'command = "docsgraph"' in text
         assert "--fake" in text
+        assert "--repo" not in text
 
         second = runner.invoke(app, ["install", "--client", "codex", "--yes"])
         assert second.exit_code == 0, second.output
         updated = config.read_text(encoding="utf-8")
         assert updated.count("BEGIN DOCSGRAPH MCP") == 1
         assert "--fake" not in updated
+        assert 'args = ["serve"]' in updated
 
     def test_install_cursor_merges_json_config(
         self, tmp_path: Path, monkeypatch: MonkeyPatch, runner: CliRunner
@@ -330,7 +338,38 @@ class TestRepoCommands:
         assert payload["other"] is True
         assert "existing" in payload["mcpServers"]
         assert payload["mcpServers"]["cairn"]["command"] == "docsgraph"
-        assert payload["mcpServers"]["cairn"]["args"][:2] == ["serve", "--repo"]
+        assert payload["mcpServers"]["cairn"]["args"] == ["serve"]
+
+    def test_install_with_repo_writes_fixed_repo_config(
+        self, tmp_path: Path, monkeypatch: MonkeyPatch, runner: CliRunner
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / "README.md").write_text("# Readme\n", encoding="utf-8")
+        init_result = runner.invoke(app, ["init", "-y"])
+        assert init_result.exit_code == 0, init_result.output
+
+        output = tmp_path / "mcp.json"
+        result = runner.invoke(
+            app,
+            [
+                "install",
+                "--client",
+                "cursor",
+                "--output",
+                str(output),
+                "--repo",
+                str(tmp_path),
+                "--yes",
+            ],
+        )
+
+        assert result.exit_code == 0, result.output
+        payload = json.loads(output.read_text(encoding="utf-8"))
+        assert payload["mcpServers"]["cairn"]["args"] == [
+            "serve",
+            "--repo",
+            str(tmp_path),
+        ]
 
     def test_doctor_reports_missing_repo_config(
         self, tmp_path: Path, monkeypatch: MonkeyPatch, runner: CliRunner

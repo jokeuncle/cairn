@@ -6,6 +6,10 @@ All notable changes to Cairn. Format follows
 
 ## Unreleased
 
+No unreleased changes yet.
+
+## [0.1.0a4] — 2026-06-23
+
 ### Added
 
 - Product website under `docs/index.html`, deployed to GitHub Pages on `main`
@@ -13,6 +17,10 @@ All notable changes to Cairn. Format follows
 
 ### Changed
 
+- Repo-scoped MCP config now defaults to dynamic workspace resolution
+  (`args = ["serve"]`) instead of pinning the repo where `docsgraph install` ran.
+  Use `--repo` for a fixed-repo server, or per-call `projectPath` for explicit
+  cross-repo queries.
 - PyPI project metadata and README now point the project homepage to the
   GitHub Pages site.
 - GitHub Actions workflows now use current major versions to avoid deprecated

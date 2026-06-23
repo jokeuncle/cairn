@@ -88,6 +88,16 @@ _ENVELOPE_OUTPUT_SCHEMA: Final[dict[str, Any]] = {
 def _read_only(title: str) -> ToolAnnotations:
     return ToolAnnotations(title=title, readOnlyHint=True)
 
+
+_PROJECT_PATH_PROPERTY: Final[dict[str, Any]] = {
+    "type": ["string", "null"],
+    "default": None,
+    "description": (
+        "Path to a different repo containing .cairn/config.toml. "
+        "Omit to use the current MCP workspace."
+    ),
+}
+
 _OUTLINE_SCHEMA: Final[dict[str, Any]] = {
     "type": "object",
     "additionalProperties": False,
@@ -316,8 +326,15 @@ CAIRN_TOOLS: Final[list[Tool]] = [
 ]
 
 
-def _with_doc(schema: dict[str, Any]) -> dict[str, Any]:
+def _with_project_path(schema: dict[str, Any]) -> dict[str, Any]:
     out = copy.deepcopy(schema)
+    properties = out.setdefault("properties", {})
+    properties["projectPath"] = copy.deepcopy(_PROJECT_PATH_PROPERTY)
+    return out
+
+
+def _with_doc(schema: dict[str, Any]) -> dict[str, Any]:
+    out = _with_project_path(schema)
     properties = out.setdefault("properties", {})
     properties["doc"] = {
         "type": ["string", "null"],
@@ -497,7 +514,7 @@ REPO_TOOLS: Final[list[Tool]] = [
             "List repository documents known to Cairn and their index status. "
             "Use this first when serving a repo-scoped Cairn index."
         ),
-        inputSchema=_LIST_DOCUMENTS_SCHEMA,
+        inputSchema=_with_project_path(_LIST_DOCUMENTS_SCHEMA),
         outputSchema=_ENVELOPE_OUTPUT_SCHEMA,
     ),
     Tool(
@@ -508,7 +525,7 @@ REPO_TOOLS: Final[list[Tool]] = [
             "ranked section hits with doc ids. Use this before drilling into a "
             "specific document."
         ),
-        inputSchema=_SEARCH_DOCUMENTS_SCHEMA,
+        inputSchema=_with_project_path(_SEARCH_DOCUMENTS_SCHEMA),
         outputSchema=_ENVELOPE_OUTPUT_SCHEMA,
     ),
     Tool(
@@ -519,7 +536,7 @@ REPO_TOOLS: Final[list[Tool]] = [
             "section content, explanations, related sections, and a relationship "
             "map in one call. Use this when an agent needs ready-to-read context."
         ),
-        inputSchema=_REPO_CONTEXT_SCHEMA,
+        inputSchema=_with_project_path(_REPO_CONTEXT_SCHEMA),
         outputSchema=_ENVELOPE_OUTPUT_SCHEMA,
     ),
     Tool(
@@ -530,7 +547,7 @@ REPO_TOOLS: Final[list[Tool]] = [
             "section, entity, contains, xref, and mention edges. This is docs-only; "
             "use CodeGraph for source-code AST graphs."
         ),
-        inputSchema=_REPO_GRAPH_SCHEMA,
+        inputSchema=_with_project_path(_REPO_GRAPH_SCHEMA),
         outputSchema=_ENVELOPE_OUTPUT_SCHEMA,
     ),
     Tool(
@@ -540,7 +557,7 @@ REPO_TOOLS: Final[list[Tool]] = [
             "Estimate documentation surfaces affected by a document or section "
             "change. This is docs graph impact, not code symbol impact."
         ),
-        inputSchema=_REPO_IMPACT_SCHEMA,
+        inputSchema=_with_project_path(_REPO_IMPACT_SCHEMA),
         outputSchema=_ENVELOPE_OUTPUT_SCHEMA,
     ),
     *[_repo_doc_tool(tool) for tool in CAIRN_TOOLS],

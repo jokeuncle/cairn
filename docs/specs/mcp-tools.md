@@ -85,20 +85,23 @@ Tools that may return more than fits in a single response include `cursor` in
 the result. Passing it back as `cursor` in the next call resumes from where the
 previous call stopped.
 
-### Common parameters
+### Repository-mode common parameters
 
-All tools accept these optional parameters:
+Repository-scoped MCP tools accept these optional parameters:
 
 | Param | Type | Default | Description |
 |---|---|---|---|
-| `doc` | `string` | server primary | Document namespace (`doc_id`). Required only when the server hosts multiple documents and no primary is configured. |
+| `doc` | `string` | server primary | Document namespace (`doc_id`). Used by document retrieval tools in repo mode. Required only when the server hosts multiple documents and no primary is configured. |
+| `projectPath` | `string` | current MCP workspace | Path to a different repo containing `.cairn/config.toml`. Omit for normal current-workspace use; provide only for explicit cross-repo queries. |
 
 In single-document mode (`docsgraph serve <doc-dir>`), clients should omit `doc`.
-In repository mode (`docsgraph serve` from a repo initialized with
-`docsgraph init -y`),
-clients should call `list_documents` first, use `search_documents` for global
-repo discovery, then pass `doc` to route normal retrieval tools to a specific
-indexed document.
+In repository mode, `docsgraph serve` resolves the current MCP workspace from
+the client's `rootUri` / `workspaceFolders` / `roots/list` signal, then walks up
+to the nearest `.cairn/config.toml`. If no config is found, the call returns an
+`INVALID_CONFIG` envelope rather than falling back to another repo. Clients
+should call `list_documents` first, use `search_documents` for global repo
+discovery, then pass `doc` to route normal retrieval tools to a specific indexed
+document.
 
 ### Repository-only tool: `list_documents`
 

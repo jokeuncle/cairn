@@ -12,7 +12,12 @@ from pathlib import Path
 from cairn.cli.config import IndexConfig
 from cairn.embed.fake import FakeEmbedder
 from cairn.mcp.schemas import CAIRN_TOOLS, REPO_TOOLS
-from cairn.mcp.server import dispatch_repo_tool, dispatch_tool
+from cairn.mcp.server import (
+    RepoRootResolver,
+    dispatch_repo_tool,
+    dispatch_tool,
+    dispatch_workspace_repo_tool,
+)
 from cairn.repo import sync_repo, write_default_config
 from cairn.summarize.fake import FakeSummarizer
 from cairn.tools.base import DocumentIndex
@@ -58,6 +63,10 @@ class TestSchemas:
         assert "repo_graph" in names
         assert "repo_impact" in names
         assert "outline" in names
+
+    def test_repo_tools_accept_project_path(self) -> None:
+        for tool in REPO_TOOLS:
+            assert "projectPath" in tool.inputSchema["properties"]
 
     def test_sections_per_doc_is_only_on_repo_search_schema(self) -> None:
         semantic = next(t for t in CAIRN_TOOLS if t.name == "search_semantic")
@@ -186,6 +195,102 @@ class TestEnvelopeShape:
 
 
 class TestRepoDispatch:
+    async def test_workspace_dispatch_resolves_nearest_repo(
+        self, tmp_path: Path, fake_embedder: FakeEmbedder
+    ) -> None:
+        repo = tmp_path / "repo"
+        nested = repo / "docs" / "nested"
+        nested.mkdir(parents=True)
+        (repo / "README.md").write_text(
+            "# Readme\n\nProject overview.\n", encoding="utf-8"
+        )
+        write_default_config(repo)
+        await sync_repo(
+            repo,
+            summarizer=FakeSummarizer(),
+            embedder=fake_embedder,
+            index_config=IndexConfig(),
+        )
+
+        resolver = RepoRootResolver(workspace_hint=nested)
+        env = await dispatch_workspace_repo_tool(
+            "list_documents", {}, resolver, fake_embedder
+        )
+
+        assert env["ok"] is True
+        assert env["data"]["root"] == str(repo)
+        assert env["trace"]["repo_root"] == str(repo)
+        assert any(
+            step["name"] == "resolve_repo_root"
+            and step["source"] == "workspace_hint"
+            for step in env["trace"]["steps"]
+        )
+
+    async def test_workspace_dispatch_project_path_overrides_workspace(
+        self, tmp_path: Path, fake_embedder: FakeEmbedder
+    ) -> None:
+        repo = tmp_path / "repo"
+        repo.mkdir()
+        (repo / "README.md").write_text(
+            "# Readme\n\nProject overview.\n", encoding="utf-8"
+        )
+        write_default_config(repo)
+        await sync_repo(
+            repo,
+            summarizer=FakeSummarizer(),
+            embedder=fake_embedder,
+            index_config=IndexConfig(),
+        )
+
+        resolver = RepoRootResolver(workspace_hint=tmp_path / "unindexed")
+        env = await dispatch_workspace_repo_tool(
+            "list_documents",
+            {"projectPath": str(repo / "docs")},
+            resolver,
+            fake_embedder,
+        )
+
+        assert env["ok"] is True
+        assert env["data"]["root"] == str(repo)
+        assert env["trace"]["arguments"]["projectPath"] == str(repo / "docs")
+        assert any(
+            step["name"] == "resolve_repo_root"
+            and step["source"] == "projectPath"
+            for step in env["trace"]["steps"]
+        )
+
+    async def test_workspace_dispatch_without_config_fails_closed(
+        self, tmp_path: Path, fake_embedder: FakeEmbedder
+    ) -> None:
+        resolver = RepoRootResolver(workspace_hint=tmp_path)
+
+        env = await dispatch_workspace_repo_tool(
+            "list_documents", {}, resolver, fake_embedder
+        )
+
+        assert env["ok"] is False
+        assert env["error"]["code"] == "INVALID_CONFIG"
+        assert env["error"]["details"]["workspace"] == str(tmp_path)
+        assert "projectPath" in env["error"]["message"]
+
+    async def test_workspace_dispatch_bad_project_path_fails_closed(
+        self, tmp_path: Path, fake_embedder: FakeEmbedder
+    ) -> None:
+        resolver = RepoRootResolver(workspace_hint=Path("/unused"))
+        project_path = tmp_path / "unindexed"
+
+        env = await dispatch_workspace_repo_tool(
+            "list_documents",
+            {"projectPath": str(project_path)},
+            resolver,
+            fake_embedder,
+        )
+
+        assert env["ok"] is False
+        assert env["error"]["code"] == "INVALID_CONFIG"
+        assert env["error"]["details"]["source"] == "projectPath"
+        assert env["error"]["details"]["projectPath"] == str(project_path)
+
     async def test_list_documents_and_route_tool(
         self, tmp_path: Path, fake_embedder: FakeEmbedder
     ) -> None:
