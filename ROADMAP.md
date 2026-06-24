@@ -96,13 +96,27 @@ Goal: deliver the full structural advantage over naive RAG. Adds entity index,
 cross-references, and the navigation tools that depend on them. **This is the
 release that proves the thesis.**
 
+ADR-0002 adds an explicit production-readiness bar for this phase: the release
+should prove that Cairn can index, update, retrieve from, and measure realistic
+large documents without falling back to naive chunk-RAG behavior.
+
 ### In scope
 
 - **Index additions**
-  - ☐ Entity index (E): glossary + LLM extraction + canonicalization
+  - ☐ Section-level incremental rebuild with per-section fingerprints,
+    per-builder state, resumable writes, and atomic artifact replacement
+  - ☐ Entity index (E): glossary + heuristic extraction + optional
+    model-assisted extraction + canonicalization
   - ☐ Cross-reference graph (X): explicit links, textual refs, entity-mediated
+    edges, and optional model-assisted verification
   - ☐ Summaries: add `digest` level
-  - ☐ Vectors: chunk-level (sentence-aligned ~512 tokens)
+  - ☐ Vectors: chunk-level (sentence-aligned ~512 tokens), plus section and
+    summary embeddings where they improve ranking
+- **Retrieval quality**
+  - ☐ Hybrid ranking across structure, BM25/FTS, dense vectors, headings,
+    breadcrumbs, summaries, entities, and cross-references
+  - ☐ Result snippets and spans for keyword/lexical hits
+  - ☐ Optional reranker provider behind an explicit configuration flag
 - **Retrieval tools** (full v1.0 catalog)
   - ☐ `find_mentions`
   - ☐ `get_related`
@@ -111,18 +125,32 @@ release that proves the thesis.**
   - ☐ SSE / Streamable HTTP transport
 - **CLI**
   - ☐ `cairn inspect` reports index health
-  - ☐ Incremental rebuild (`cairn index` detects unchanged sections)
+  - ☐ `cairn doctor` validates provider configuration, endpoint reachability,
+    embedding dimensions, and local-first defaults
+  - ☐ Incremental rebuild (`cairn index` detects unchanged sections and reports
+    which sub-indexes were touched)
+- **Plug-ins**
+  - ☐ Provider adapter registry for summarizers and embedders
+  - ☐ Capability probing for batching, dimensions, rate limits, retry behavior,
+    and redacted manifest metadata
 - **Parsers**
   - ☐ PDF (via `pymupdf` baseline; `marker` opt-in)
+  - ☐ Canonical AST preserves preambles, front matter metadata, tables, code
+    blocks, block quotes, figures, page numbers, and parser coordinates where
+    available
 - **Benchmarks**
   - ☐ `cairn-bench` v0: 5 curated documents, 200 questions
   - ☐ Published comparison vs. naive vector RAG
+  - ☐ Report recall, citation accuracy, tokens returned, latency, index size,
+    and reindex cost across at least one multilingual document set
 
 ### Exit criteria
 
 - [ ] On `cairn-bench`, ≥ 90% retrieval recall@5, ≥ 80% LLM-judged QA accuracy.
 - [ ] Token usage ≤ 50% of naive vector RAG baseline for comparable accuracy.
 - [ ] Incremental rebuild on a 1-section change touches only that subtree.
+- [ ] Provider diagnostics catch misconfigured embedding dimensions and
+      unsupported endpoints before indexing begins.
 - [ ] First external contributor PR merged.
 
 **Estimated effort:** 4–6 weeks after v0.1.
