@@ -248,8 +248,9 @@ CAIRN_TOOLS: Final[list[Tool]] = [
         name="outline",
         annotations=_read_only("Cairn Outline"),
         description=(
-            "Get a structural map of the document. The cheapest tool; "
-            "agents should call it first."
+            "Use first to see the document's structure before reading. Returns "
+            "a cheap heading tree with one-line gists and stable section ids to "
+            "navigate from."
         ),
         inputSchema=_OUTLINE_SCHEMA,
         outputSchema=_ENVELOPE_OUTPUT_SCHEMA,
@@ -258,7 +259,9 @@ CAIRN_TOOLS: Final[list[Tool]] = [
         name="get_section",
         annotations=_read_only("Cairn Get Section"),
         description=(
-            "Fetch one section at a chosen summary level (gist/synopsis/full)."
+            "Read one known section at the level you need: gist (one line), "
+            "synopsis (default), or full text. Use after outline/search to "
+            "drill in; request full only when exact wording matters."
         ),
         inputSchema=_GET_SECTION_SCHEMA,
         outputSchema=_ENVELOPE_OUTPUT_SCHEMA,
@@ -267,8 +270,9 @@ CAIRN_TOOLS: Final[list[Tool]] = [
         name="expand",
         annotations=_read_only("Cairn Expand Section"),
         description=(
-            "Move from a shallower summary to a deeper one for a known section. "
-            "Equivalent to get_section(id, level=to)."
+            "Go deeper on a section you've already seen (synopsis -> full). Use "
+            "when a summary isn't enough and you need more detail for that exact "
+            "section."
         ),
         inputSchema=_EXPAND_SCHEMA,
         outputSchema=_ENVELOPE_OUTPUT_SCHEMA,
@@ -277,8 +281,9 @@ CAIRN_TOOLS: Final[list[Tool]] = [
         name="search_semantic",
         annotations=_read_only("Cairn Semantic Search"),
         description=(
-            "Dense vector search. Use for conceptual queries where exact "
-            "wording is unknown."
+            "Use when the user asks about a concept or topic and you don't know "
+            "the exact wording. Returns ranked, cited sections from the "
+            "structured index -- prefer this over grepping prose."
         ),
         inputSchema=_SEARCH_SEMANTIC_SCHEMA,
         outputSchema=_ENVELOPE_OUTPUT_SCHEMA,
@@ -287,8 +292,9 @@ CAIRN_TOOLS: Final[list[Tool]] = [
         name="search_keyword",
         annotations=_read_only("Cairn Keyword Search"),
         description=(
-            "Exact (case-insensitive) lexical search. Use for known entities, "
-            "code symbols, technical terms."
+            "Use when you know the exact term, symbol, or phrase to find in the "
+            "docs. Returns cited sections -- prefer this over grep for indexed "
+            "documents."
         ),
         inputSchema=_SEARCH_KEYWORD_SCHEMA,
         outputSchema=_ENVELOPE_OUTPUT_SCHEMA,
@@ -297,8 +303,9 @@ CAIRN_TOOLS: Final[list[Tool]] = [
         name="find_mentions",
         annotations=_read_only("Cairn Find Mentions"),
         description=(
-            "Locate every section where a named entity is mentioned. Requires "
-            "the entities sub-index (v0.2+)."
+            "Find every section that mentions a named entity (term, code "
+            "symbol, proper noun). Use to trace where a concept is discussed "
+            "across the document."
         ),
         inputSchema=_FIND_MENTIONS_SCHEMA,
         outputSchema=_ENVELOPE_OUTPUT_SCHEMA,
@@ -307,8 +314,9 @@ CAIRN_TOOLS: Final[list[Tool]] = [
         name="get_related",
         annotations=_read_only("Cairn Get Related"),
         description=(
-            "Return neighbors of a section across the cross-reference graph "
-            "and the structural tree (xref/sibling/parent/child)."
+            "Use after landing on a relevant section to find connected "
+            "sections -- cross-references, siblings, parent, children. Good for "
+            "following a thread without re-searching."
         ),
         inputSchema=_GET_RELATED_SCHEMA,
         outputSchema=_ENVELOPE_OUTPUT_SCHEMA,
@@ -317,8 +325,9 @@ CAIRN_TOOLS: Final[list[Tool]] = [
         name="read_range",
         annotations=_read_only("Cairn Read Range"),
         description=(
-            "Read continuous content across consecutive sections from "
-            "start_id through end_id, truncating at max_tokens."
+            "Read a continuous span across consecutive sections (start_id -> "
+            "end_id) when you need the surrounding context, not just one "
+            "section. Capped at max_tokens."
         ),
         inputSchema=_READ_RANGE_SCHEMA,
         outputSchema=_ENVELOPE_OUTPUT_SCHEMA,
@@ -356,8 +365,8 @@ def _repo_doc_tool(tool: Tool) -> Tool:
         name=tool.name,
         annotations=_read_only(f"Cairn Repo {title.removeprefix('Cairn ')}"),
         description=(
-            f"{tool.description} Accepts optional `doc` in repo mode. "
-            "Returns a structured envelope with `trace.steps` for AI clients."
+            f"{tool.description} Pass optional `doc` to target a specific "
+            "repository document."
         ),
         inputSchema=_with_doc(tool.inputSchema),
         outputSchema=_ENVELOPE_OUTPUT_SCHEMA,
@@ -521,9 +530,9 @@ REPO_TOOLS: Final[list[Tool]] = [
         name="search_documents",
         annotations=_read_only("Cairn Search Documents"),
         description=(
-            "Search across every indexed repository document and return globally "
-            "ranked section hits with doc ids. Use this before drilling into a "
-            "specific document."
+            "Use to find which docs and sections are relevant to a query across "
+            "the whole repo. Returns globally ranked, cited hits with doc ids; "
+            "follow up with get_section on the winners."
         ),
         inputSchema=_with_project_path(_SEARCH_DOCUMENTS_SCHEMA),
         outputSchema=_ENVELOPE_OUTPUT_SCHEMA,
@@ -532,9 +541,10 @@ REPO_TOOLS: Final[list[Tool]] = [
         name="repo_context",
         annotations=_read_only("Cairn Repo Context"),
         description=(
-            "Composite repo retrieval: search across documents, attach compact "
-            "section content, explanations, related sections, and a relationship "
-            "map in one call. Use this when an agent needs ready-to-read context."
+            "START HERE for a question about this repo's docs. One call returns "
+            "ranked hits, ready-to-read section content, related sections, and a "
+            "relationship map -- enough to answer without further drilling in "
+            "most cases."
         ),
         inputSchema=_with_project_path(_REPO_CONTEXT_SCHEMA),
         outputSchema=_ENVELOPE_OUTPUT_SCHEMA,

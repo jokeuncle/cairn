@@ -41,6 +41,31 @@ from cairn.tools.search_semantic import search_semantic as search_semantic_tool
 SERVER_NAME = "cairn"
 ROOTS_LIST_TIMEOUT = timedelta(seconds=5)
 
+# Server-level guidance injected into the client's system prompt (when the
+# client surfaces MCP `instructions`). This is the highest-leverage place to
+# shape *when* an agent reaches for Cairn instead of grepping raw text. See
+# ADR-0002.
+DOCUMENT_INSTRUCTIONS = (
+    "Cairn is a structure-aware navigation map for this document. Prefer it "
+    "over dumping or grepping raw text. Start with `outline` to see the "
+    "structure, then `search_semantic`/`search_keyword` to locate relevant "
+    "sections, then `get_section` to read at the right level (gist -> "
+    "synopsis -> full). Every result carries stable section ids -- cite them. "
+    "Cairn returns summaries by default; request `full` only when you need the "
+    "exact text."
+)
+REPO_INSTRUCTIONS = (
+    "Cairn indexes this repository's documentation (specs, design docs, "
+    "READMEs) as a navigable map. For any question about what the docs/specs/"
+    "design say, prefer Cairn over grepping the repo. Start with "
+    "`repo_context` (one call: ranked hits + ready-to-read sections + "
+    "relationship map) or `search_documents` (cross-document ranked hits), "
+    "then drill into a specific doc with `get_section`/`get_related`. Cairn is "
+    "documentation navigation -- it does not replace source-code search; use "
+    "your code tools for source files. Results are summaries with stable, "
+    "citable section ids by default; request `full` text only when needed."
+)
+
 
 def _new_trace(
     tool: str,
@@ -169,7 +194,7 @@ async def dispatch_tool(
 
 def build_server(index: DocumentIndex, embedder: Embedder) -> Server:
     """Construct an MCP Server with handlers bound to this index + embedder."""
-    server: Server = Server(SERVER_NAME)
+    server: Server = Server(SERVER_NAME, instructions=DOCUMENT_INSTRUCTIONS)
 
     # The MCP SDK's decorator helpers are not fully typed; the ignores keep
     # mypy strict happy without polluting the rest of the file.
@@ -493,7 +518,7 @@ async def dispatch_workspace_repo_tool(
 
 def build_repo_server(repo_root: Path | None, embedder: Embedder) -> Server:
     """Construct an MCP Server for a repo-scoped Cairn documentation index."""
-    server: Server = Server(SERVER_NAME)
+    server: Server = Server(SERVER_NAME, instructions=REPO_INSTRUCTIONS)
     resolver = RepoRootResolver(fixed_root=repo_root, server=server)
 
     @server.list_tools()  # type: ignore[no-untyped-call, untyped-decorator]

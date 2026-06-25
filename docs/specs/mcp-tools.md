@@ -52,6 +52,27 @@ Common trace shape:
 Tool-specific examples below may elide `trace` for readability; the real MCP
 response includes it.
 
+### Server instructions
+
+The MCP server declares an `instructions` string (MCP `initialize` result) that
+clients may inject into the model's system prompt. It is the only server-level
+place to shape *when* an agent reaches for Cairn rather than grepping raw text,
+and is therefore part of the public surface (changes require an ADR — see
+ADR-0002). Two variants are served:
+
+- **Document mode** (`docsgraph serve <doc-dir>`): directs the agent to start
+  with `outline`, locate via `search_semantic`/`search_keyword`, then read with
+  `get_section` at an explicit level, citing stable section ids.
+- **Repository mode** (`docsgraph serve` in a repo): directs the agent to
+  prefer Cairn over grepping the repo for documentation questions, to start with
+  `repo_context` or `search_documents`, and explicitly states that Cairn does
+  **not** replace source-code search.
+
+The instruction text lives beside the server in `src/cairn/mcp/server.py`
+(`DOCUMENT_INSTRUCTIONS`, `REPO_INSTRUCTIONS`). Per-tool `description` strings
+are intent-first ("Use when …") for the same reason: tool selection is driven by
+intent-to-description matching.
+
 ### Errors
 
 Tools never raise to the MCP transport. They return a structured envelope:
