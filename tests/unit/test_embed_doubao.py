@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from typing import Any
 
 import httpx
@@ -66,23 +67,68 @@ class TestHappyPath:
     async def test_returns_vectors_in_input_order(
         self, client: DoubaoVisionEmbedder
     ) -> None:
+        # Requests run concurrently, so match the response to the request body
+        # rather than to arrival order — the contract is input-ordered results.
+        vectors = {
+            "a": [1.0, 0.0, 0.0, 0.0],
+            "b": [0.0, 1.0, 0.0, 0.0],
+            "c": [0.0, 0.0, 1.0, 0.0],
+        }
+
+        def _by_text(request: httpx.Request) -> httpx.Response:
+            body = request.content.decode()
+            for text, vector in vectors.items():
+                if f'"text":"{text}"' in body:
+                    return httpx.Response(200, json=_response(vector))
+            return httpx.Response(400, text="unexpected text")
+
         route = respx.post(
             "http://test.local/api/v3/embeddings/multimodal"
-        ).mock(
-            side_effect=[
-                httpx.Response(200, json=_response([1.0, 0.0, 0.0, 0.0])),
-                httpx.Response(200, json=_response([0.0, 1.0, 0.0, 0.0])),
-            ]
+        ).mock(side_effect=_by_text)
+
+        out = await client.embed(["a", "b", "c"])
+
+        assert out == [vectors["a"], vectors["b"], vectors["c"]]
+        assert route.call_count == 3
+
+    async def test_embed_runs_requests_concurrently(self) -> None:
+        # With concurrency=3, all three requests must be in flight before any
+        # response is released — proves embed() is not serial.
+        client = DoubaoVisionEmbedder(
+            base_url="http://test.local/api/v3",
+            dim=4,
+            max_retries=0,
+            concurrency=3,
         )
+        in_flight = 0
+        peak = 0
+        release = asyncio.Event()
 
-        out = await client.embed(["a", "b"])
+        async def _gate(request: httpx.Request) -> httpx.Response:
+            nonlocal in_flight, peak
+            in_flight += 1
+            peak = max(peak, in_flight)
+            await release.wait()
+            in_flight -= 1
+            return httpx.Response(200, json=_response([1.0, 0.0, 0.0, 0.0]))
 
-        assert out == [[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0]]
-        assert route.call_count == 2
-        first_payload = route.calls[0].request.content.decode()
-        second_payload = route.calls[1].request.content.decode()
-        assert '"text":"a"' in first_payload
-        assert '"text":"b"' in second_payload
+        with respx.mock:
+            respx.post(
+                "http://test.local/api/v3/embeddings/multimodal"
+            ).mock(side_effect=_gate)
+            task = asyncio.ensure_future(client.embed(["a", "b", "c"]))
+            # Let all three coroutines reach the gate, then release them.
+            while peak < 3:
+                await asyncio.sleep(0)
+            release.set()
+            out = await task
+
+        assert peak == 3
+        assert len(out) == 3
+
+    async def test_concurrency_must_be_positive(self) -> None:
+        with pytest.raises(ValueError):
+            DoubaoVisionEmbedder(dim=4, concurrency=0)
 
     @respx.mock
     async def test_authorization_header_when_api_key_set(

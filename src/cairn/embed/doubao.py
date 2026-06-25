@@ -17,7 +17,8 @@ class DoubaoVisionEmbedder:
     ``/embeddings`` wire shape. They are served at
     ``/embeddings/multimodal`` and return ``{"data": {"embedding": ...}}``
     for a single multimodal input. Cairn's embedder protocol expects one
-    vector per text, so this adapter issues one request per input text.
+    vector per text, so this adapter issues one request per input text and
+    runs up to ``concurrency`` of them in flight at once (order preserved).
     """
 
     def __init__(
@@ -30,6 +31,7 @@ class DoubaoVisionEmbedder:
         timeout: float = 60.0,
         max_retries: int = 2,
         retry_base_delay: float = 0.5,
+        concurrency: int = 8,
     ) -> None:
         if dim < 1:
             msg = f"dim must be >= 1; got {dim}"
@@ -40,6 +42,9 @@ class DoubaoVisionEmbedder:
         if retry_base_delay < 0:
             msg = f"retry_base_delay must be >= 0; got {retry_base_delay}"
             raise ValueError(msg)
+        if concurrency < 1:
+            msg = f"concurrency must be >= 1; got {concurrency}"
+            raise ValueError(msg)
         self.base_url = base_url.rstrip("/")
         self.model = model
         self.dim = dim
@@ -47,10 +52,15 @@ class DoubaoVisionEmbedder:
         self.timeout = timeout
         self.max_retries = max_retries
         self.retry_base_delay = retry_base_delay
+        self.concurrency = concurrency
         self.name = f"doubao-vision:{model}"
 
     async def embed(self, texts: list[str]) -> list[list[float]]:
-        """Embed each text through Doubao's multimodal vectorization API."""
+        """Embed each text through Doubao's multimodal vectorization API.
+
+        Requests run concurrently (bounded by ``concurrency``); results are
+        returned in input order regardless of completion order.
+        """
         if not texts:
             return []
 
@@ -58,17 +68,19 @@ class DoubaoVisionEmbedder:
         if self.api_key:
             headers["Authorization"] = f"Bearer {self.api_key}"
 
-        vectors: list[list[float]] = []
+        semaphore = asyncio.Semaphore(self.concurrency)
+
         async with httpx.AsyncClient(timeout=self.timeout) as client:
-            for index, text in enumerate(texts):
+
+            async def embed_one(index: int, text: str) -> list[float]:
                 payload: dict[str, Any] = {
                     "model": self.model,
                     "input": [{"type": "text", "text": text}],
                 }
-                response = await self._post_with_retries(
-                    client, payload, headers, index=index
-                )
-
+                async with semaphore:
+                    response = await self._post_with_retries(
+                        client, payload, headers, index=index
+                    )
                 vector = _extract_vector(response.json(), index=index)
                 if len(vector) != self.dim:
                     msg = (
@@ -77,9 +89,23 @@ class DoubaoVisionEmbedder:
                         f"(model {self.model!r}, index {index})"
                     )
                     raise IndexBuildError(msg)
-                vectors.append(vector)
+                return vector
 
-        return vectors
+            tasks = [
+                asyncio.ensure_future(embed_one(index, text))
+                for index, text in enumerate(texts)
+            ]
+            try:
+                vectors: list[list[float]] = await asyncio.gather(*tasks)
+            except BaseException:
+                # On the first failure, cancel siblings still in flight and let
+                # them settle before the AsyncClient closes, so no orphaned
+                # request outlives the client. The original error re-raises.
+                for task in tasks:
+                    task.cancel()
+                await asyncio.gather(*tasks, return_exceptions=True)
+                raise
+            return vectors
 
     async def _post_with_retries(
         self,
