@@ -12,7 +12,7 @@ from typing import Annotated, Literal
 import typer
 
 from cairn import __version__
-from cairn.cli.config import load_embed_config, load_index_config, load_llm_config
+from cairn.core.config import load_embed_config, load_index_config, load_llm_config
 from cairn.embed.base import Embedder
 from cairn.engine.indexer import Indexer
 from cairn.entity.heuristic import HeuristicExtractor

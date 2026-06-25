@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from cairn.cli.config import load_embed_config, load_llm_config
+from cairn.core.config import load_embed_config, load_llm_config
 from cairn.embed.base import Embedder
 from cairn.embed.doubao import DoubaoVisionEmbedder
 from cairn.embed.fake import FakeEmbedder
