@@ -8,6 +8,38 @@ All notable changes to Cairn. Format follows
 
 No unreleased changes yet.
 
+## [0.1.0a5] — 2026-06-26
+
+### Added
+
+- **MCP server instructions.** The stdio server now advertises an MCP
+  `instructions` string — a document-mode and a repository-mode variant — so
+  clients can inject "when to reach for Cairn" guidance into the agent's system
+  prompt. This is the highest-leverage lever for getting agents to choose Cairn
+  over ad-hoc grepping. See ADR-0002.
+
+### Changed
+
+- **Intent-first MCP tool descriptions.** Every tool description was rewritten
+  from a capability statement ("Dense vector search.") to an intent trigger
+  ("Use when the user asks about a concept…"). `repo_context` is now flagged as
+  the repository entry point, stale "v0.2+"/reserved wording was removed from
+  tools that work today, and envelope/`trace.steps` plumbing was dropped from
+  the repo-document tool descriptions. Tool names and schemas are unchanged
+  (the frozen catalog is untouched). See ADR-0002 and `docs/specs/mcp-tools.md`.
+- **Concurrent Doubao embeddings.** `DoubaoVisionEmbedder` now issues up to
+  `concurrency` (default 8) `/embeddings/multimodal` requests in flight instead
+  of strictly serial, preserving input order and cancelling in-flight siblings
+  cleanly when one request fails.
+
+### Fixed
+
+- **Circular import between `cairn.providers` and the CLI layer.** Runtime
+  configuration moved from `cairn.cli.config` to `cairn.core.config` so lower
+  layers can read it without importing the CLI package (CLAUDE.md P6).
+  `cairn.providers` (and evaluation scripts) can now be imported standalone.
+  `cairn.cli.config` remains as a backward-compatible re-export.
+
 ## [0.1.0a4] — 2026-06-23
 
 ### Added
