@@ -53,7 +53,7 @@ class TestCodeExtraction:
             "```python\n"
             "import os\n"
             "from x import Y\n"
-            "def foo(): return None\n"
+            "def fetch_user(): return None\n"
             "```\n"
         )
         doc = parser.parse(md, doc_id="d")
@@ -65,8 +65,19 @@ class TestCodeExtraction:
         assert "def" not in names
         assert "return" not in names
         assert "None" not in names
-        # But real identifiers preserved:
-        assert "foo" in names
+        # But real identifiers preserved (the underscore marks it as a symbol,
+        # not a plain English word):
+        assert "fetch_user" in names
+
+    async def test_bare_lowercase_word_not_a_code_entity(
+        self, parser: MarkdownParser, extractor: HeuristicExtractor
+    ) -> None:
+        # A lowercase token that reads as an ordinary English word (here `event`)
+        # must NOT become a code entity, or it floods prose with false mentions.
+        md = "# S\n\n```\nevent = 1\n```\n\nLater, an event occurs in prose.\n"
+        doc = parser.parse(md, doc_id="d")
+        hits = _all_hits(await extractor.extract(doc))
+        assert "event" not in {h.canonical for h in hits}
 
     async def test_inline_code_extracted(
         self, parser: MarkdownParser, extractor: HeuristicExtractor

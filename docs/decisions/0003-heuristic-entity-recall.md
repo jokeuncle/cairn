@@ -68,6 +68,17 @@ Matching precision:
   collide).
 - Longest-match-wins when one term is a prefix of another (`Auth Service`
   beats `Auth`).
+- **`code` mentions are code occurrences, not prose words.** A code identifier
+  (e.g. `index`) is counted only where it appears *inside a code span*, never as
+  an English word in surrounding prose. Without this, every code block leaks its
+  identifiers into the prose match set and floods `find_mentions`.
+- **Single-token `code`/`defined` terms must read as a symbol/name** — they must
+  carry an uppercase letter, underscore, or digit. A bare lowercase token
+  (`src`, `true`, `not`, `event`) is rejected as a plain English word.
+  Multi-word phrases and Title-Case proper nouns are exempt. This was the
+  decisive precision gate: on the Cairn `ARCHITECTURE.md` fixture it cut the
+  entity count from 302 to 114, leaving real symbols (`SectionNode`,
+  `tokens_returned`, `get_section`) while dropping the noise.
 
 The `Entity` schema, `entities.json` `format_version`, and the MCP tool catalog
 are all unchanged. Only the extractor `name` bumps (`heuristic:regex-v2`), which
@@ -85,9 +96,16 @@ is recorded in `entities.json` so a re-index is observable.
 - **Recall < an LLM NER.** Single-word common-noun concepts not capitalized or
   defined (e.g. lowercase "event") are deliberately not matched, to protect
   precision. The LLM extractor (opt-in, v0.2.1) is the recall upgrade.
+- **Vocabulary is document-local.** A term defined by a heading in one document
+  (a glossary `### Tenant`) is recognized only *within that document*. In a repo
+  index, `find_mentions("Tenant", doc="ingestion")` will not surface it unless
+  the ingestion doc itself defines or capitalizes it. Repo-wide shared
+  vocabulary is a separate, repo-layer concern and a future ADR — not folded in
+  here.
 - **More entities per document** → larger `entities.json`. Bounded by the
   precision gates and stoplists; measured on the Cairn repo and aurora-handbook
-  fixtures.
+  fixtures (e.g. ARCHITECTURE.md settles at 114 entities, dominated by genuine
+  code symbols).
 - **Re-index required** to pick up the new entities (source-hash no-op means
   existing indexes keep v1 output until rebuilt with `--force`). Expected and
   observable via the `extractor` field.

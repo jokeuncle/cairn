@@ -172,12 +172,23 @@ def _add_term(vocab: dict[str, _Term], name: str, kind: EntityKind) -> None:
     if not name:
         return
     multi_word = bool(re.search(r"\s", name))
+    # Single lowercase common words (e.g. `src`, `true`, `not`, `event`) are
+    # rejected for code/defined: they flood prose with false mentions. A term
+    # must look like a symbol or name — carry an uppercase letter, underscore,
+    # or digit — or be a multi-word phrase. proper nouns are already Title-Case.
+    if not multi_word and kind in ("code", "defined") and not _looks_like_term(name):
+        return
     case_sensitive = not multi_word
     key = name if case_sensitive else _normalize(name)
     existing = vocab.get(key)
     if existing is not None and _KIND_PRIORITY[existing.kind] >= _KIND_PRIORITY[kind]:
         return
     vocab[key] = _Term(canonical=name, kind=kind, case_sensitive=case_sensitive)
+
+
+def _looks_like_term(word: str) -> bool:
+    """True if a single token reads as a symbol/name, not a plain English word."""
+    return any(c.isupper() or c == "_" or c.isdigit() for c in word)
 
 
 def _scan_code_terms(text: str, fence_ranges: list[tuple[int, int]]) -> Iterator[str]:
