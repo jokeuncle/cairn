@@ -45,7 +45,7 @@ class TestEntityBuilder:
         await EntityBuilder(HeuristicExtractor()).build(doc, out_dir=out)
         payload = json.loads((out / ENTITIES_FILENAME).read_text())
         assert payload["format_version"] == ENTITIES_FORMAT_VERSION
-        assert payload["extractor"] == "heuristic:regex-v1"
+        assert payload["extractor"] == "heuristic:regex-v2"
 
     async def test_aggregation_dedupes_by_canonical_kind(
         self, tmp_path: Path, parser: MarkdownParser
@@ -114,7 +114,7 @@ class TestEntitiesReader:
         _, ents = await self._built(tmp_path, parser)
         assert len(ents) > 0
         assert ents.doc_id == "d"
-        assert ents.extractor == "heuristic:regex-v1"
+        assert ents.extractor == "heuristic:regex-v2"
 
     async def test_load_missing_raises(self, tmp_path: Path) -> None:
         with pytest.raises(IndexNotFoundError):

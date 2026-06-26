@@ -5,6 +5,8 @@ from __future__ import annotations
 from collections.abc import Iterable
 
 import pytest
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
 from cairn.entity.base import ExtractionHit
 from cairn.entity.heuristic import HeuristicExtractor
@@ -166,3 +168,162 @@ class TestSpanAndSection:
         assert widget.span.end <= len(section.raw_text)
         # And the span actually points at the identifier.
         assert section.raw_text[widget.span.start : widget.span.end] == "Widget"
+
+
+class TestHeadingDefined:
+    async def test_glossary_heading_defines_a_term(
+        self, parser: MarkdownParser, extractor: HeuristicExtractor
+    ) -> None:
+        md = (
+            "# Glossary\n\n"
+            "## Tenant\n\nAn isolated workspace. Every request names a Tenant.\n\n"
+            "## Idempotency Key\n\nA client string. Pass an Idempotency Key once.\n"
+        )
+        doc = parser.parse(md, doc_id="d")
+        hits = _all_hits(await extractor.extract(doc))
+        kinds = {(h.canonical, h.kind) for h in hits}
+        assert ("Tenant", "defined") in kinds
+        assert ("Idempotency Key", "defined") in kinds
+
+    async def test_structural_headings_not_entities(
+        self, parser: MarkdownParser, extractor: HeuristicExtractor
+    ) -> None:
+        md = (
+            "# Overview\n\nProse.\n\n"
+            "## Inputs\n\nMore prose.\n\n"
+            "## Open Questions\n\nDeferred items.\n"
+        )
+        doc = parser.parse(md, doc_id="d")
+        hits = _all_hits(await extractor.extract(doc))
+        names = {h.canonical for h in hits}
+        assert "Overview" not in names
+        assert "Inputs" not in names
+        assert "Open Questions" not in names
+
+    async def test_heading_term_found_across_sections(
+        self, parser: MarkdownParser, extractor: HeuristicExtractor
+    ) -> None:
+        # "Tenant" is defined by a heading in one section and referenced in two
+        # others — every body occurrence must be a mention.
+        md = (
+            "# Glossary\n\n## Tenant\n\nDefines the Tenant concept.\n\n"
+            "# Billing\n\nBilling charges each Tenant monthly.\n\n"
+            "# Ingestion\n\nIngestion rate-limits per Tenant.\n"
+        )
+        doc = parser.parse(md, doc_id="d")
+        hits = _all_hits(await extractor.extract(doc))
+        tenant_sections = {
+            h.section_id for h in hits if h.canonical == "Tenant"
+        }
+        assert tenant_sections == {"glossary/tenant", "billing", "ingestion"}
+
+
+class TestProperNouns:
+    async def test_multiword_proper_noun_in_prose(
+        self, parser: MarkdownParser, extractor: HeuristicExtractor
+    ) -> None:
+        md = "# Doc\n\nThe Aurora Platform routes events through Auth Service.\n"
+        doc = parser.parse(md, doc_id="d")
+        hits = _all_hits(await extractor.extract(doc))
+        proper = {h.canonical for h in hits if h.kind == "proper"}
+        assert "Aurora Platform" in proper
+        assert "Auth Service" in proper
+
+    async def test_leading_function_word_trimmed(
+        self, parser: MarkdownParser, extractor: HeuristicExtractor
+    ) -> None:
+        # "The Aurora Platform" must register as "Aurora Platform", and a
+        # capitalized sentence start with one real token is not a proper noun.
+        md = "# Doc\n\nThe Aurora Platform ships. When Billing fails, retry.\n"
+        doc = parser.parse(md, doc_id="d")
+        hits = _all_hits(await extractor.extract(doc))
+        proper = {h.canonical for h in hits if h.kind == "proper"}
+        assert "Aurora Platform" in proper
+        assert "The Aurora Platform" not in proper
+        assert "When Billing" not in proper
+
+
+class TestMatchingPrecision:
+    async def test_whole_word_only(
+        self, parser: MarkdownParser, extractor: HeuristicExtractor
+    ) -> None:
+        # `Event` (code) must not match inside "Eventually".
+        md = "# S\n\nUse `Event` now. Eventually it resolves.\n"
+        doc = parser.parse(md, doc_id="d")
+        hits = _all_hits(await extractor.extract(doc))
+        events = [h for h in hits if h.canonical == "Event"]
+        assert len(events) == 1
+        section = doc.sections[0]
+        s = events[0].span
+        assert section.raw_text[s.start : s.end] == "Event"
+
+    async def test_case_sensitive_single_word_code(
+        self, parser: MarkdownParser, extractor: HeuristicExtractor
+    ) -> None:
+        # The symbol `Event` should not match the common word "event".
+        md = "# S\n\nUse `Event`. An event happened in the event loop.\n"
+        doc = parser.parse(md, doc_id="d")
+        hits = _all_hits(await extractor.extract(doc))
+        matched = [
+            doc.sections[0].raw_text[h.span.start : h.span.end]
+            for h in hits
+            if h.canonical == "Event"
+        ]
+        assert matched == ["Event"]
+
+    async def test_longest_match_wins(
+        self, parser: MarkdownParser, extractor: HeuristicExtractor
+    ) -> None:
+        # With both "Auth" and "Auth Service" in the vocabulary, an occurrence
+        # of "Auth Service" yields one proper hit, not a nested "Auth" hit.
+        md = (
+            "# Auth\n\n## Auth Service\n\n"
+            "The Auth Service issues tokens for Auth Service callers.\n"
+        )
+        doc = parser.parse(md, doc_id="d")
+        hits = _all_hits(await extractor.extract(doc))
+        spans = [
+            (h.span.start, h.span.end)
+            for h in hits
+            if h.canonical == "Auth Service"
+        ]
+        section = next(s for s in doc.sections if s.id == "auth/auth-service")
+        for start, end in spans:
+            assert section.raw_text[start:end].replace("\n", " ") == "Auth Service"
+        # No hit should be a strict sub-span of an "Auth Service" hit.
+        for h in hits:
+            if h.canonical == "Auth Service":
+                continue
+            for start, end in spans:
+                if h.section_id == section.id:
+                    assert not (start <= h.span.start and h.span.end <= end)
+
+
+class TestInvariants:
+    @settings(max_examples=200)
+    @given(
+        body=st.text(
+            alphabet=st.characters(
+                whitelist_categories=("Lu", "Ll", "Nd", "Zs", "Po"),
+                max_codepoint=0x2FF,
+            ),
+            max_size=200,
+        )
+    )
+    async def test_span_integrity_and_determinism(self, body: str) -> None:
+        # Construct a document whose section body is arbitrary text; every hit's
+        # span must slice back to exactly its surface form, and extraction must
+        # be deterministic.
+        parser = MarkdownParser()
+        extractor = HeuristicExtractor()
+        md = f"# Term One\n\n{body}\n"
+        doc = parser.parse(md, doc_id="d")
+        hits_a = _all_hits(await extractor.extract(doc))
+        hits_b = _all_hits(await extractor.extract(doc))
+        assert hits_a == hits_b  # deterministic
+        by_section = {s.id: s.raw_text for s in doc.sections}
+        for h in hits_a:
+            assert h.canonical
+            raw = by_section[h.section_id]
+            assert 0 <= h.span.start <= h.span.end <= len(raw)
+            assert raw[h.span.start : h.span.end] == h.surface_form

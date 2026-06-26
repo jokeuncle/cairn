@@ -646,6 +646,17 @@ Locate every place an entity appears.
 - Returns at most 64 mentions per call; further reads via `cursor`.
 - Resolution: if `entity` matches a registered surface form, the index returns
   mentions of the canonical entity.
+- **Recall model (default offline extractor `heuristic:regex-v2`, ADR-0003).**
+  The entity vocabulary is built per document from four signals: code
+  identifiers (in code spans), `**bold**` terms, definitional headings (a
+  section title that reads as a term, not a structural name), and multi-word
+  Title-Case proper nouns. Every body occurrence of a vocabulary term — across
+  *all* sections of that document — is returned, not only the defining site.
+  Matching is whole-word; single-word `code`/`defined`/`proper` terms match
+  case-sensitively, multi-word terms case-insensitively. Vocabulary is
+  document-local: a term defined in one document is not auto-recognized in
+  another. Richer cross-document, lowercase, and morphological recall is the
+  opt-in LLM extractor (ROADMAP v0.2.1).
 
 ---
 
