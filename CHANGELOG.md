@@ -8,6 +8,23 @@ All notable changes to Cairn. Format follows
 
 No unreleased changes yet.
 
+## [0.1.0a6] — 2026-06-26
+
+### Changed
+
+- **`find_mentions` now returns every section a term occurs in, not just the
+  defining site.** The offline entity extractor was rewritten as a two-pass,
+  deterministic pipeline (`heuristic:regex-v2`, ADR-0003): pass 1 builds a
+  per-document vocabulary from code identifiers, `**bold**` terms, definitional
+  section headings, and multi-word Title-Case proper nouns; pass 2 scans every
+  section body for whole-word occurrences. Precision gates keep the result
+  clean — `code` terms count only inside code spans, and single lowercase
+  English words are rejected as entities — cutting noise roughly 3× on
+  documentation-heavy files while surfacing real symbols and glossary terms.
+  Re-index (`cairn sync --force`) to upgrade existing indexes; the new
+  extractor name is recorded in `entities.json`. Entity schema and the MCP tool
+  catalog are unchanged.
+
 ## [0.1.0a5] — 2026-06-26
 
 ### Added

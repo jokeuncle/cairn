@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "docsgraph"
-version = "0.1.0a5"
+version = "0.1.0a6"
 description = "Local-first documentation graph for AI agents. CodeGraph for docs, exposed through MCP."
 readme = "README.md"
 license = { file = "LICENSE" }
