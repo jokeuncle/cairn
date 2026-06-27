@@ -11,7 +11,7 @@ from typer import Typer
 from typer.testing import CliRunner
 
 from cairn import __version__
-from cairn.cli.app import app
+from cairn.cli.app import _mcp_env, app
 
 
 @pytest.fixture
@@ -359,7 +359,11 @@ class TestRepoCommands:
         )
 
         assert result.exit_code == 2, result.output
-        assert "invalid --env name" in result.output
+        assert "Invalid value" in result.output
+
+    def test_mcp_env_rejects_invalid_env_name_directly(self) -> None:
+        with pytest.raises(Exception, match="invalid --env name"):
+            _mcp_env(explicit=("CAIRN.EMBED_DIM=2048",), from_current=False)
 
     def test_install_codex_writes_managed_block(
         self, tmp_path: Path, monkeypatch: MonkeyPatch, runner: CliRunner
