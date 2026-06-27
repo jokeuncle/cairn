@@ -44,6 +44,20 @@ qualitative result review.
 
 ## What Cairn Rewards
 
+### 0. Clear Agent Routing Boundaries
+
+Cairn should help agents recover durable project context, not replace source-code
+or shell tools. A mature repository benefits most when agents prefer Cairn for
+documentation, product requirements, architecture, setup, naming, protocols,
+business workflows, and decision records, then use CodeGraph, native search,
+build, and test tools for symbol tracing, known-file edits, exact literals, and
+runtime output.
+
+This boundary is product behavior, not project customization: MCP tool
+descriptions and `list_documents.usage_guidance` should communicate it
+generically. Do not hardcode a repository's commercial domain, workflow names,
+or internal document paths to make one dogfood run pass.
+
 ### 1. Canonical entry points
 
 A repository should have a small number of obvious entry points:

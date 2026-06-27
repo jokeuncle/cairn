@@ -1,0 +1,7 @@
+interface:
+  display_name: "Release Cairn"
+  short_description: "Run the Cairn release workflow"
+  default_prompt: "Use $release-cairn to prepare, validate, and publish the next Cairn/docsgraph release."
+
+policy:
+  allow_implicit_invocation: true

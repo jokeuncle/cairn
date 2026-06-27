@@ -238,6 +238,15 @@ async def search_repo_index(
                 "reason": f"query embedding dim {query_dim} != index dim {cache.doc_dims[doc_id]}",
             }
         )
+    embedding_mismatch: dict[str, Any] | None = None
+    if incompatible_docs:
+        embedding_mismatch = {
+            "query_dim": query_dim,
+            "index_dims": sorted(
+                {cache.doc_dims[doc_id] for doc_id in incompatible_docs}
+            ),
+            "documents": sorted(incompatible_docs),
+        }
     normalized_query = l2_normalize(query_vec)
     vector_scores = _repo_vector_scores(cache, normalized_query, query_dim)
     candidate_indices, ranker_mode, compatible_count = _repo_candidate_indices(
@@ -290,6 +299,7 @@ async def search_repo_index(
             doc.id for doc in candidates if doc.state == "stale"
         ],
         "skipped_documents": skipped,
+        "embedding_mismatch": embedding_mismatch,
         "cursor": None,
     }
 

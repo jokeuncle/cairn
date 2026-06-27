@@ -29,7 +29,7 @@ The result: better retrieval accuracy, lower token spend, and a practical MCP
 tool layer between your project documentation and every AI coding agent you
 use. Local-first. Vendor-neutral. Designed for open-source repos.
 
-> 🚀 **Alpha — `0.1.0a6`.** Markdown + PDF ingest, the core MCP tool set,
+> 🚀 **Alpha — `0.1.0a7`.** Markdown + PDF ingest, the core MCP tool set,
 > the full structure-aware index (tree + summaries + entities + xrefs +
 > vectors), repo-level `init/sync/status`, repo-scoped MCP tools with
 > `list_documents`, `search_documents`, `repo_context`, `repo_graph`, and
@@ -67,7 +67,10 @@ The product website is published at <https://jokeuncle.github.io/cairn/>.
 2. **Index.** Each document becomes a normal Cairn index: structural tree (T),
    multi-level summaries (S), entity index (E), cross-reference graph (X), and
    vector overlay (V). A bad source file is isolated instead of breaking the
-   whole repo sync.
+   whole repo sync. Sync is incremental by default: unchanged source hashes and
+   producer fingerprints are skipped unless `--force` is passed. Concurrent
+   syncs for the same repo are serialized by `.cairn/sync.lock`, so parallel
+   agent sessions wait instead of rebuilding the same documents.
 3. **Serve.** `docsgraph serve` exposes repo-scoped MCP tools:
    `list_documents`, `search_documents`, plus `outline`, `get_section`,
    `expand`, `search_semantic`, `search_keyword`, `find_mentions`,
@@ -132,20 +135,27 @@ docsgraph init -y
 docsgraph sync --fake
 docsgraph status
 docsgraph query repo "where are docs indexed?" --fake
-docsgraph doctor
+docsgraph doctor --fake
 docsgraph mcp config --client claude --fake
 docsgraph serve --fake
+docsgraph client --fake
 ```
 
 `docsgraph doctor` checks repo config, index freshness, primary-doc routing,
-and model settings. `docsgraph mcp config` prints copy-pasteable stdio snippets for
-Claude, Cursor, Codex, and Goose:
+model settings, and whether the query embedder dimension matches the indexed
+vectors. `docsgraph mcp config` prints copy-pasteable stdio snippets for
+Claude, Cursor, Codex, and Goose. For hosted providers, pass explicit MCP
+environment variables with repeated `--env KEY=VALUE`, or use
+`--env-from-current` to copy the current `CAIRN_*` environment into the
+generated config. `docsgraph client` opens a local browser UI for init, sync,
+status, `repo_context` previews, and MCP config install flows:
 
 ```bash
 docsgraph mcp config --client claude
 docsgraph mcp config --client cursor
 docsgraph mcp config --client codex
 docsgraph mcp config --client goose
+docsgraph mcp config --client codex --repo . --env-from-current
 ```
 
 For local development from source:
@@ -189,12 +199,20 @@ Repo-scoped MCP adds:
 
 | Tool | Use it for |
 |---|---|
-| `list_documents` | See every indexed doc, its source path, freshness, and section count. |
+| `list_documents` | See every indexed doc, its source path, freshness, section count, and structured agent usage guidance. |
 | `search_documents` | Search across all indexed docs and get globally ranked, explainable section hits with `doc` ids, skipped docs, and stale-doc warnings. |
 | `repo_context` | Get a ready-to-read context pack: ranked hits, selected section text, hit explanations, and a relationship map. |
 | `repo_graph` | Inspect the repo documentation graph: document, section, entity, contains, xref, and mention edges. Cross-document links are exposed through shared entity nodes. |
 | `repo_impact` | Estimate documentation surfaces affected by a document or section change. |
 | normal Cairn tools + `doc` | Drill into a chosen document with `outline`, `get_section`, `search_semantic`, `get_related`, etc. |
+
+Cairn is intentionally a docs graph, not a universal first step. Prefer
+`repo_context` / `search_documents` for documentation, product, architecture,
+setup, naming, protocols, business workflows, and durable decision records.
+Prefer CodeGraph or native project tools for source-code symbol tracing, small
+known-file edits, test output, build logs, and exact literal search.
+`list_documents` returns the same usage boundary as structured
+`usage_guidance` so MCP clients can route tasks without parsing README prose.
 
 Repo behavior is intentionally configurable in `.cairn/config.toml`:
 
@@ -267,7 +285,7 @@ docsgraph bench benchmarks/architecture.toml --fake
 | metric | naive vector RAG | Cairn |
 |---|---:|---:|
 | mean recall@8 | 25% | 25% |
-| mean tokens returned | 3,670 | **1,388 (37.8% of naive)** |
+| mean tokens returned | 3,677 | **1,386 (37.7% of naive)** |
 
 Caveat — these numbers come from the deterministic `FakeEmbedder` (a
 bag-of-words hash with no semantic understanding). Recall ties because
@@ -365,6 +383,18 @@ export CAIRN_EMBED_API_KEY=...
 docsgraph index ARCHITECTURE.md --out /tmp/cairn-arch
 ```
 
+When installing an MCP server for an agent, make the query-side provider
+explicit too. Agent clients do not reliably inherit your interactive shell
+state, and Cairn does not implicitly load private dotenv files:
+
+```bash
+docsgraph install --client codex --repo . --env-from-current --yes
+docsgraph doctor
+```
+
+If `doctor` reports `query_embedding_dim` mismatch, rebuild or restart the MCP
+server with the same `CAIRN_EMBED_*` provider and dimension used for indexing.
+
 To run the public-repo eval with the real provider configured by your
 environment instead of the deterministic fake plugins:
 
@@ -390,7 +420,9 @@ Useful operational knobs when running against hosted APIs:
 | `CAIRN_EMBED_TIMEOUT` | `60` | per-request embedding timeout in seconds |
 | `CAIRN_EMBED_MAX_RETRIES` | `2` | retries for embedding 429/5xx and transport errors |
 | `CAIRN_SUMMARY_CONCURRENCY` | `4` | concurrent summary calls during indexing and benchmarks |
+| `CAIRN_SUMMARY_BATCH_SIZE` | `1` | optional prompt-packed section summaries per chat request for batch-capable summarizers |
 | `CAIRN_EMBED_BATCH_SIZE` | `32` | sections/chunks per embedding batch |
+| `CAIRN_EMBED_CONCURRENCY` | `8` | concurrent per-item Doubao vision embedding requests within a batch |
 
 ---
 

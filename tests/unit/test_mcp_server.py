@@ -75,6 +75,20 @@ class TestSchemas:
         assert "sections_per_doc" not in semantic.inputSchema["properties"]
         assert "sections_per_doc" in repo_search.inputSchema["properties"]
 
+    def test_repo_tool_descriptions_set_usage_boundaries(self) -> None:
+        repo_context = next(t for t in REPO_TOOLS if t.name == "repo_context")
+        repo_search = next(t for t in REPO_TOOLS if t.name == "search_documents")
+        repo_context_description = repo_context.description
+        repo_search_description = repo_search.description
+
+        assert repo_context_description is not None
+        assert repo_search_description is not None
+
+        assert "product" in repo_context_description
+        assert "architecture" in repo_search_description
+        assert "exact literal search" in repo_context_description
+        assert "source-code symbol" in repo_search_description
+
 
 class TestDispatchHappyPath:
     async def test_outline(
@@ -117,6 +131,12 @@ class TestDispatchHappyPath:
         )
         assert env["ok"] is True
         assert "hits" in env["data"]
+        assert any(
+            step["name"] == "embed_query"
+            and step["embedder"] == fake_embedder.name
+            and step["dim"] == fake_embedder.dim
+            for step in env["trace"]["steps"]
+        )
 
     async def test_search_keyword(
         self, index: DocumentIndex, fake_embedder: FakeEmbedder
@@ -310,6 +330,11 @@ class TestRepoDispatch:
         )
         assert listed["ok"] is True
         assert listed["data"]["documents"][0]["id"] == "readme"
+        assert "documentation" in listed["data"]["usage_guidance"]["prefer_cairn_for"][0]
+        assert (
+            "source-code symbol"
+            in listed["data"]["usage_guidance"]["prefer_other_tools_for"][0]
+        )
 
         outlined = await dispatch_repo_tool(
             "outline",

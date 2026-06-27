@@ -98,9 +98,7 @@ class DoubaoVisionEmbedder:
             try:
                 vectors: list[list[float]] = await asyncio.gather(*tasks)
             except BaseException:
-                # On the first failure, cancel siblings still in flight and let
-                # them settle before the AsyncClient closes, so no orphaned
-                # request outlives the client. The original error re-raises.
+                # Cancel siblings still in flight before the AsyncClient closes.
                 for task in tasks:
                     task.cancel()
                 await asyncio.gather(*tasks, return_exceptions=True)

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from pathlib import Path
 from typing import Any, cast
 
@@ -10,6 +11,7 @@ import pytest
 from cairn import repo_search as repo_search_module
 from cairn.cli.config import IndexConfig
 from cairn.embed.fake import FakeEmbedder
+from cairn.engine.manifest import read_manifest
 from cairn.repo import (
     DEFAULT_EXCLUDE,
     RepoConfig,
@@ -21,9 +23,11 @@ from cairn.repo import (
     repo_impact,
     repo_status,
     search_repo_documents,
+    sync_lock_path,
     sync_repo,
     write_default_config,
 )
+from cairn.summarize.base import SummaryLevel
 from cairn.summarize.fake import FakeSummarizer
 
 
@@ -33,6 +37,26 @@ def _write_repo_docs(root: Path) -> None:
     (root / "docs" / "guide.md").write_text(
         "# Guide\n\nDetailed docs.\n", encoding="utf-8"
     )
+
+
+class _BlockingSummarizer:
+    name = FakeSummarizer.name
+
+    def __init__(self, started: asyncio.Event, release: asyncio.Event) -> None:
+        self.started = started
+        self.release = release
+        self.fake = FakeSummarizer()
+
+    async def summarize(
+        self,
+        *,
+        title: str,
+        body: str,
+        level: SummaryLevel,
+    ) -> str:
+        self.started.set()
+        await self.release.wait()
+        return await self.fake.summarize(title=title, body=body, level=level)
 
 
 def _write_complex_repo_docs(root: Path) -> None:
@@ -200,6 +224,80 @@ class TestRepoSync:
         assert status.missing_count == 0
         assert (tmp_path / ".cairn" / "manifest.json").exists()
         assert load_repo_document_index(tmp_path).doc_id == "readme"
+
+    async def test_sync_skips_unchanged_documents(self, tmp_path: Path) -> None:
+        _write_repo_docs(tmp_path)
+        write_default_config(tmp_path)
+        first = await sync_repo(
+            tmp_path,
+            summarizer=FakeSummarizer(),
+            embedder=FakeEmbedder(dim=32),
+            index_config=IndexConfig(),
+        )
+        indexed_at = {
+            result.id: read_manifest(result.manifest_path.parent).indexed_at
+            for result in first
+            if result.manifest_path is not None
+        }
+
+        second = await sync_repo(
+            tmp_path,
+            summarizer=FakeSummarizer(),
+            embedder=FakeEmbedder(dim=32),
+            index_config=IndexConfig(),
+        )
+
+        assert {result.id for result in second} == {"readme", "docs-guide"}
+        assert all(result.ok for result in second)
+        assert all(not result.rebuilt for result in second)
+        assert {
+            result.id: read_manifest(result.manifest_path.parent).indexed_at
+            for result in second
+            if result.manifest_path is not None
+        } == indexed_at
+
+    async def test_concurrent_sync_waits_for_repo_lock(self, tmp_path: Path) -> None:
+        _write_repo_docs(tmp_path)
+        write_default_config(tmp_path)
+        started = asyncio.Event()
+        release = asyncio.Event()
+        second_progress: list[str] = []
+
+        first_task = asyncio.create_task(
+            sync_repo(
+                tmp_path,
+                summarizer=_BlockingSummarizer(started, release),
+                embedder=FakeEmbedder(dim=32),
+                index_config=IndexConfig(),
+            )
+        )
+        await asyncio.wait_for(started.wait(), timeout=2)
+
+        second_task = asyncio.create_task(
+            sync_repo(
+                tmp_path,
+                summarizer=FakeSummarizer(),
+                embedder=FakeEmbedder(dim=32),
+                index_config=IndexConfig(),
+                progress=second_progress.append,
+            )
+        )
+        for _ in range(20):
+            if any(message.startswith("sync: waiting") for message in second_progress):
+                break
+            await asyncio.sleep(0.01)
+
+        assert any(message.startswith("sync: waiting") for message in second_progress)
+        release.set()
+        first = await asyncio.wait_for(first_task, timeout=5)
+        second = await asyncio.wait_for(second_task, timeout=5)
+
+        assert all(result.rebuilt for result in first)
+        assert all(result.ok for result in second)
+        assert all(not result.rebuilt for result in second)
+        assert "sync: acquired sync lock" in second_progress
+        assert sync_lock_path(tmp_path).exists()
+        assert sync_lock_path(tmp_path).read_text(encoding="utf-8") == ""
 
     async def test_status_marks_changed_docs_stale(self, tmp_path: Path) -> None:
         _write_repo_docs(tmp_path)
@@ -554,6 +652,11 @@ class TestRepoSearch:
         assert {item["doc"] for item in result["data"]["skipped_documents"]} == {
             "readme",
             "docs-guide",
+        }
+        assert result["data"]["embedding_mismatch"] == {
+            "query_dim": 64,
+            "index_dims": [32],
+            "documents": ["docs-guide", "readme"],
         }
 
     async def test_search_repo_documents_diversifies_docs_by_default(

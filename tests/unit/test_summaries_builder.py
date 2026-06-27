@@ -17,7 +17,7 @@ from cairn.index.summaries import (
     section_hash,
 )
 from cairn.ingest.markdown import MarkdownParser
-from cairn.summarize.base import SummaryLevel
+from cairn.summarize.base import SummaryLevel, SummaryRequest
 from cairn.summarize.cache import SummaryCache
 from cairn.summarize.fake import FakeSummarizer
 
@@ -47,6 +47,21 @@ class CountingSummarizer:
     ) -> str:
         self.calls += 1
         return await self._inner.summarize(title=title, body=body, level=level)
+
+
+class BatchCountingSummarizer(CountingSummarizer):
+    """Counting summarizer that supports prompt-level batching."""
+
+    async def summarize_many(self, requests: list[SummaryRequest]) -> list[str]:
+        self.calls += 1
+        return [
+            await self._inner.summarize(
+                title=request.title,
+                body=request.body,
+                level=request.level,
+            )
+            for request in requests
+        ]
 
 
 # -- Build ------------------------------------------------------------------
@@ -137,6 +152,22 @@ class TestSummaryBuilder:
     def test_concurrency_zero_rejected(self) -> None:
         with pytest.raises(IndexBuildError):
             SummaryBuilder(FakeSummarizer(), concurrency=0)
+
+    def test_batch_size_zero_rejected(self) -> None:
+        with pytest.raises(IndexBuildError):
+            SummaryBuilder(FakeSummarizer(), batch_size=0)
+
+    async def test_batch_capable_summarizer_packs_cache_misses(
+        self, tmp_path: Path, parsed_simple: Document
+    ) -> None:
+        summarizer = BatchCountingSummarizer()
+        await SummaryBuilder(summarizer, batch_size=3).build(
+            parsed_simple,
+            out_dir=tmp_path / "doc",
+            levels=(SummaryLevel.GIST,),
+        )
+
+        assert summarizer.calls == 2
 
 
 # -- Cache integration ------------------------------------------------------

@@ -39,6 +39,7 @@ def make_embedder(use_fake: bool) -> Embedder:
             api_key=cfg.api_key,
             timeout=cfg.timeout,
             max_retries=cfg.max_retries,
+            concurrency=cfg.concurrency,
         )
     return OpenAICompatibleEmbedder(
         base_url=cfg.base_url,
