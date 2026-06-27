@@ -43,6 +43,7 @@ class EmbedConfig(BaseModel):
     api_key: str | None = None
     timeout: float = 60.0
     max_retries: int = 2
+    concurrency: int = 8
 
 
 class IndexConfig(BaseModel):
@@ -51,6 +52,7 @@ class IndexConfig(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     summary_concurrency: int = 4
+    summary_batch_size: int = 1
     embed_batch_size: int = 32
 
 
@@ -85,6 +87,7 @@ def load_embed_config() -> EmbedConfig:
         api_key=os.environ.get("CAIRN_EMBED_API_KEY") or None,
         timeout=_float_env("CAIRN_EMBED_TIMEOUT", 60.0),
         max_retries=_int_env("CAIRN_EMBED_MAX_RETRIES", 2),
+        concurrency=_int_env("CAIRN_EMBED_CONCURRENCY", 8),
     )
 
 
@@ -92,6 +95,7 @@ def load_index_config() -> IndexConfig:
     """Read index-build performance config from environment variables."""
     return IndexConfig(
         summary_concurrency=_int_env("CAIRN_SUMMARY_CONCURRENCY", 4),
+        summary_batch_size=_int_env("CAIRN_SUMMARY_BATCH_SIZE", 1),
         embed_batch_size=_int_env("CAIRN_EMBED_BATCH_SIZE", 32),
     )
 

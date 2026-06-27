@@ -120,9 +120,14 @@ In repository mode, `docsgraph serve` resolves the current MCP workspace from
 the client's `rootUri` / `workspaceFolders` / `roots/list` signal, then walks up
 to the nearest `.cairn/config.toml`. If no config is found, the call returns an
 `INVALID_CONFIG` envelope rather than falling back to another repo. Clients
-should call `list_documents` first, use `search_documents` for global repo
-discovery, then pass `doc` to route normal retrieval tools to a specific indexed
-document.
+should use repo tools for documentation, product, architecture, setup, naming,
+protocol, business workflow, and decision-record questions. For source-code
+symbol tracing, known-file edits, test output, build logs, and exact literal
+search, clients should prefer CodeGraph, shell, or native project tools. For
+documentation tasks, call `repo_context` for ready-to-read context, call
+`search_documents` for ranked discovery, or call `list_documents` to inspect
+the indexed surface and usage guidance before routing normal retrieval tools
+to a specific indexed document.
 
 ### Repository-only tool: `list_documents`
 
@@ -139,7 +144,7 @@ Output:
 ```json
 {
   "ok": true,
-  "tokens_returned": 0,
+  "tokens_returned": 96,
   "data": {
     "root": "/repo",
     "primary_doc": "readme",
@@ -151,7 +156,18 @@ Output:
         "state": "indexed",
         "section_count": 32
       }
-    ]
+    ],
+    "usage_guidance": {
+      "prefer_cairn_for": [
+        "repository documentation, product requirements, architecture, setup, naming, protocols, business workflows, and durable decision records"
+      ],
+      "prefer_other_tools_for": [
+        "source-code symbol lookup, callers/callees, and code impact analysis"
+      ],
+      "recommended_flow": [
+        "Use repo_context first for conceptual documentation or project-knowledge questions."
+      ]
+    }
   }
 }
 ```
@@ -261,6 +277,10 @@ Semantics:
   on it for final answers.
 - Documents with incompatible embedding dimensions or load errors are reported
   in `skipped_documents` instead of failing the whole call.
+- When query/index embedding dimensions differ, `embedding_mismatch` is a
+  structured object with `query_dim`, `index_dims`, and affected `documents`.
+  This usually means the MCP server was started with different `CAIRN_EMBED_*`
+  settings than the process that ran `docsgraph sync`.
 
 ---
 
@@ -315,7 +335,8 @@ Output shape:
 
 Semantics:
 
-- This is the preferred one-call context builder for MCP clients.
+- This is the preferred one-call context builder for documentation and
+  project-knowledge questions.
 - It propagates `stale_documents` and `skipped_documents` from
   `search_documents`.
 - The relationship map covers documentation nodes only. For source-code symbols,

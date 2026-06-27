@@ -15,18 +15,26 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import json
-from collections.abc import Awaitable, Callable, Iterator, Sequence
+from collections.abc import Callable, Iterator, Sequence
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Final
 
 from cairn.core.errors import IndexBuildError, IndexNotFoundError
 from cairn.core.types import Document, SectionNode, SummarySet
-from cairn.summarize.base import Summarizer, SummaryLevel
+from cairn.summarize.base import BatchSummarizer, Summarizer, SummaryLevel, SummaryRequest
 from cairn.summarize.cache import SummaryCache
 
 SUMMARIES_FILENAME: Final = "summaries.json"
 SUMMARIES_FORMAT_VERSION: Final = 1
+
+
+@dataclass(frozen=True)
+class _PendingSummary:
+    node: SectionNode
+    level: SummaryLevel
+    cache_key: str | None
 
 
 def section_hash(node: SectionNode) -> str:
@@ -51,14 +59,19 @@ class SummaryBuilder:
         *,
         cache: SummaryCache | None = None,
         concurrency: int = 4,
+        batch_size: int = 1,
         progress: Callable[[int, int], None] | None = None,
     ) -> None:
         if concurrency < 1:
             msg = f"concurrency must be ≥1; got {concurrency}"
             raise IndexBuildError(msg)
+        if batch_size < 1:
+            msg = f"batch_size must be ≥1; got {batch_size}"
+            raise IndexBuildError(msg)
         self.summarizer = summarizer
         self.cache = cache
         self.concurrency = concurrency
+        self.batch_size = batch_size
         self.progress = progress
 
     async def build(
@@ -96,6 +109,10 @@ class SummaryBuilder:
         progress_lock = asyncio.Lock()
         completed = 0
         total = len(document.sections) * len(ordered_levels)
+        section_hashes = {node.id: section_hash(node) for node in document.sections}
+        results: dict[str, dict[str, str]] = {
+            node.id: {} for node in document.sections
+        }
 
         async def mark_progress() -> None:
             nonlocal completed
@@ -108,18 +125,53 @@ class SummaryBuilder:
                     return
                 self.progress(completed, total)
 
-        async def for_section(node: SectionNode) -> dict[str, Any]:
-            return await self._summarize_section(
-                node,
-                ordered_levels,
-                semaphore,
-                now,
-                mark_progress=mark_progress,
-            )
+        for level in ordered_levels:
+            pending: list[_PendingSummary] = []
+            for node in document.sections:
+                cache_key: str | None = None
+                cached: str | None = None
+                if self.cache is not None:
+                    cache_key = SummaryCache.key(
+                        model=self.summarizer.name,
+                        level=level.value,
+                        section_hash=section_hashes[node.id],
+                    )
+                    cached = self.cache.get(cache_key)
 
-        records = await asyncio.gather(
-            *(for_section(s) for s in document.sections)
-        )
+                if cached is not None:
+                    results[node.id][level.value] = cached
+                    await mark_progress()
+                    continue
+                pending.append(_PendingSummary(node=node, level=level, cache_key=cache_key))
+
+            chunks = [
+                pending[i : i + self.batch_size]
+                for i in range(0, len(pending), self.batch_size)
+            ]
+
+            async def process_chunk(chunk: list[_PendingSummary]) -> None:
+                async with semaphore:
+                    texts = await self._summarize_uncached_batch(chunk)
+                for item, text in zip(chunk, texts, strict=True):
+                    results[item.node.id][item.level.value] = text
+                    if self.cache is not None and item.cache_key is not None:
+                        self.cache.put(item.cache_key, text)
+                    await mark_progress()
+
+            await asyncio.gather(*(process_chunk(chunk) for chunk in chunks))
+
+        records = [
+            {
+                "section_id": node.id,
+                "section_hash": section_hashes[node.id],
+                "gist": results[node.id].get(SummaryLevel.GIST.value, ""),
+                "synopsis": results[node.id].get(SummaryLevel.SYNOPSIS.value, ""),
+                "digest": results[node.id].get(SummaryLevel.DIGEST.value),
+                "model": self.summarizer.name,
+                "generated_at": now.isoformat(),
+            }
+            for node in document.sections
+        ]
 
         payload: dict[str, Any] = {
             "format_version": SUMMARIES_FORMAT_VERSION,
@@ -135,53 +187,37 @@ class SummaryBuilder:
             fh.write("\n")
         return path
 
-    async def _summarize_section(
+    async def _summarize_uncached_batch(
         self,
-        node: SectionNode,
-        levels: Sequence[SummaryLevel],
-        semaphore: asyncio.Semaphore,
-        now: datetime,
-        mark_progress: Callable[[], Awaitable[None]],
-    ) -> dict[str, Any]:
-        sh = section_hash(node)
-        results: dict[str, str] = {}
-
-        for level in levels:
-            cache_key: str | None = None
-            cached: str | None = None
-            if self.cache is not None:
-                cache_key = SummaryCache.key(
-                    model=self.summarizer.name,
-                    level=level.value,
-                    section_hash=sh,
+        chunk: Sequence[_PendingSummary],
+    ) -> list[str]:
+        if not chunk:
+            return []
+        if len(chunk) > 1 and isinstance(self.summarizer, BatchSummarizer):
+            requests = [
+                SummaryRequest(
+                    title=item.node.title,
+                    body=item.node.raw_text,
+                    level=item.level,
                 )
-                cached = self.cache.get(cache_key)
-
-            if cached is not None:
-                results[level.value] = cached
-                await mark_progress()
-                continue
-
-            async with semaphore:
-                text = await self.summarizer.summarize(
-                    title=node.title,
-                    body=node.raw_text,
-                    level=level,
+                for item in chunk
+            ]
+            texts = await self.summarizer.summarize_many(requests)
+            if len(texts) != len(chunk):
+                msg = (
+                    f"batch summarizer returned {len(texts)} summaries for "
+                    f"{len(chunk)} requests"
                 )
-            results[level.value] = text
-            await mark_progress()
-            if self.cache is not None and cache_key is not None:
-                self.cache.put(cache_key, text)
-
-        return {
-            "section_id": node.id,
-            "section_hash": sh,
-            "gist": results.get(SummaryLevel.GIST.value, ""),
-            "synopsis": results.get(SummaryLevel.SYNOPSIS.value, ""),
-            "digest": results.get(SummaryLevel.DIGEST.value),
-            "model": self.summarizer.name,
-            "generated_at": now.isoformat(),
-        }
+                raise IndexBuildError(msg)
+            return texts
+        return [
+            await self.summarizer.summarize(
+                title=item.node.title,
+                body=item.node.raw_text,
+                level=item.level,
+            )
+            for item in chunk
+        ]
 
 
 class Summaries:

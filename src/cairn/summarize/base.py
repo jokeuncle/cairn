@@ -6,6 +6,8 @@ granularity level. Pre-computed during indexing; never invoked at query time.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
+from dataclasses import dataclass
 from enum import StrEnum
 from typing import Protocol, runtime_checkable
 
@@ -21,6 +23,19 @@ class SummaryLevel(StrEnum):
     GIST = "gist"
     SYNOPSIS = "synopsis"
     DIGEST = "digest"
+
+
+@dataclass(frozen=True)
+class SummaryRequest:
+    """One section summary request.
+
+    Batch-capable summarizers receive a sequence of these requests and must
+    return one summary per item in the same order.
+    """
+
+    title: str
+    body: str
+    level: SummaryLevel
 
 
 @runtime_checkable
@@ -53,4 +68,16 @@ class Summarizer(Protocol):
         Implementations must enforce the level's word budget on the output
         (see ``cairn.summarize.prompts.WORD_BUDGETS``).
         """
+        ...
+
+
+@runtime_checkable
+class BatchSummarizer(Summarizer, Protocol):
+    """Optional summarizer extension for prompt-level request batching."""
+
+    async def summarize_many(
+        self,
+        requests: Sequence[SummaryRequest],
+    ) -> list[str]:
+        """Produce summaries for ``requests`` in order."""
         ...

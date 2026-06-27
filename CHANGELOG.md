@@ -8,6 +8,44 @@ All notable changes to Cairn. Format follows
 
 No unreleased changes yet.
 
+## [0.1.0a7] — 2026-06-27
+
+### Added
+
+- **Repo sync locking.** `docsgraph sync` now uses a repo-level
+  `.cairn/sync.lock` OS file lock so concurrent agent sessions serialize sync
+  work instead of rebuilding the same repository at the same time.
+- **Prompt-level summary batching.** OpenAI-compatible summarizers can pack
+  multiple section summary requests into one strict JSON chat completion when
+  `CAIRN_SUMMARY_BATCH_SIZE` is greater than 1, with validated fallback to the
+  single-section path.
+- **MCP environment configuration.** `docsgraph mcp config` and
+  `docsgraph install` support explicit `--env KEY=VALUE` and
+  `--env-from-current` for `CAIRN_*` settings without implicitly loading private
+  dotenv files.
+- **Agent usage guidance.** Repo MCP tools and `list_documents` now expose a
+  generic boundary for when agents should prefer Cairn versus CodeGraph, shell,
+  tests, or literal search.
+- **Internal release skill.** `skills/release-cairn` captures the project
+  release workflow, stale-branch guard, validation gates, and post-publish
+  verification.
+- **Local web client.** `docsgraph client --fake` starts a browser-based local
+  control surface for initializing, syncing, inspecting repo status, previewing
+  `repo_context`, and installing MCP configs.
+
+### Changed
+
+- `docsgraph doctor` now verifies query embedding dimensions against indexed
+  repo vector dimensions and reports `query_embedding_dim` mismatches before
+  MCP semantic search silently skips incompatible indexes.
+- Doubao vision embedding concurrency is configurable through
+  `CAIRN_EMBED_CONCURRENCY`.
+
+### Fixed
+
+- Repo search now returns a structured `embedding_mismatch` object when query
+  embeddings and indexed vectors use incompatible dimensions.
+
 ## [0.1.0a6] — 2026-06-26
 
 ### Changed

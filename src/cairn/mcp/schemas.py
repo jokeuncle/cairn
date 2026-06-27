@@ -12,6 +12,11 @@ from typing import Any, Final
 
 from mcp.types import Tool, ToolAnnotations
 
+from cairn.agent_guidance import DEFAULT_AGENT_USAGE_GUIDANCE
+
+_PREFER_CAIRN = "; ".join(DEFAULT_AGENT_USAGE_GUIDANCE["prefer_cairn_for"])
+_PREFER_OTHER = "; ".join(DEFAULT_AGENT_USAGE_GUIDANCE["prefer_other_tools_for"])
+
 _TRACE_SCHEMA: Final[dict[str, Any]] = {
     "type": "object",
     "additionalProperties": True,
@@ -521,7 +526,8 @@ REPO_TOOLS: Final[list[Tool]] = [
         annotations=_read_only("Cairn List Documents"),
         description=(
             "List repository documents known to Cairn and their index status. "
-            "Use this first when serving a repo-scoped Cairn index."
+            "Use this to inspect the indexed documentation surface, freshness, "
+            "and Cairn usage guidance."
         ),
         inputSchema=_with_project_path(_LIST_DOCUMENTS_SCHEMA),
         outputSchema=_ENVELOPE_OUTPUT_SCHEMA,
@@ -532,7 +538,10 @@ REPO_TOOLS: Final[list[Tool]] = [
         description=(
             "Use to find which docs and sections are relevant to a query across "
             "the whole repo. Returns globally ranked, cited hits with doc ids; "
-            "follow up with get_section on the winners."
+            "follow up with get_section on the winners. Prefer for documentation, "
+            "product, architecture, setup, naming, protocols, business workflows, "
+            "and decisions. "
+            f"Prefer other tools for {_PREFER_OTHER}."
         ),
         inputSchema=_with_project_path(_SEARCH_DOCUMENTS_SCHEMA),
         outputSchema=_ENVELOPE_OUTPUT_SCHEMA,
@@ -544,7 +553,9 @@ REPO_TOOLS: Final[list[Tool]] = [
             "START HERE for a question about this repo's docs. One call returns "
             "ranked hits, ready-to-read section content, related sections, and a "
             "relationship map -- enough to answer without further drilling in "
-            "most cases."
+            f"most cases. Use first when an agent needs context for {_PREFER_CAIRN}. "
+            "Do not use as a mandatory pre-step "
+            "for small code edits, tests, or exact literal search."
         ),
         inputSchema=_with_project_path(_REPO_CONTEXT_SCHEMA),
         outputSchema=_ENVELOPE_OUTPUT_SCHEMA,

@@ -28,6 +28,7 @@ class BenchOptions(BaseModel):
     k: int = Field(default=8, ge=1, le=32)
     naive_chunk_size_words: int = Field(default=512, ge=1)
     summary_concurrency: int = Field(default=4, ge=1)
+    summary_batch_size: int = Field(default=1, ge=1)
     embed_batch_size: int = Field(default=32, ge=1)
 
 
@@ -85,6 +86,7 @@ class BenchRunner:
             entity_extractor=HeuristicExtractor(),
             xref_extractor=HeuristicXRefExtractor(),
             summary_concurrency=self.options.summary_concurrency,
+            summary_batch_size=self.options.summary_batch_size,
             embed_batch_size=self.options.embed_batch_size,
             progress=lambda message: self._emit(f"cairn index: {message}"),
         )

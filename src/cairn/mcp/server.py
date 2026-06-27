@@ -16,6 +16,7 @@ from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from mcp.types import Tool
 
+from cairn.agent_guidance import agent_usage_guidance
 from cairn.core.errors import CairnError, ConfigError, ToolError
 from cairn.embed.base import Embedder
 from cairn.mcp.schemas import CAIRN_TOOLS, REPO_TOOLS
@@ -28,7 +29,7 @@ from cairn.repo import (
     repo_status,
     search_repo_documents,
 )
-from cairn.tools.base import DocumentIndex
+from cairn.tools.base import DocumentIndex, estimate_tokens_of_payload
 from cairn.tools.find_mentions import find_mentions as find_mentions_tool
 from cairn.tools.get_related import get_related as get_related_tool
 from cairn.tools.get_section import expand as expand_tool
@@ -56,14 +57,16 @@ DOCUMENT_INSTRUCTIONS = (
 )
 REPO_INSTRUCTIONS = (
     "Cairn indexes this repository's documentation (specs, design docs, "
-    "READMEs) as a navigable map. For any question about what the docs/specs/"
-    "design say, prefer Cairn over grepping the repo. Start with "
-    "`repo_context` (one call: ranked hits + ready-to-read sections + "
-    "relationship map) or `search_documents` (cross-document ranked hits), "
-    "then drill into a specific doc with `get_section`/`get_related`. Cairn is "
-    "documentation navigation -- it does not replace source-code search; use "
-    "your code tools for source files. Results are summaries with stable, "
-    "citable section ids by default; request `full` text only when needed."
+    "READMEs) as a navigable map. Prefer Cairn for documentation, product, "
+    "architecture, setup, naming, protocol, business workflow, and durable "
+    "decision-record questions. Start with `repo_context` (one call: ranked "
+    "hits + ready-to-read sections + relationship map) or `search_documents` "
+    "(cross-document ranked hits), then drill into a specific doc with "
+    "`get_section`/`get_related`. Do not use Cairn as a mandatory pre-step for "
+    "small known-file code edits, source-code symbol tracing, tests, build logs, "
+    "or exact literal search; use code/search/shell tools for those. Results are "
+    "summaries with stable, citable section ids by default; request `full` text "
+    "only when needed."
 )
 
 
@@ -153,6 +156,12 @@ async def dispatch_tool(
         elif name == "expand":
             resp = await expand_tool(index, **args)
         elif name == "search_semantic":
+            _trace_step(
+                trace,
+                "embed_query",
+                embedder=embedder.name,
+                dim=embedder.dim,
+            )
             resp = await search_semantic_tool(index, embedder=embedder, **args)
         elif name == "search_keyword":
             resp = await search_keyword_tool(index, **args)
@@ -237,6 +246,7 @@ async def dispatch_repo_tool(
                 "root": str(status.root),
                 "primary_doc": status.primary_doc,
                 "documents": docs,
+                "usage_guidance": agent_usage_guidance(),
             }
             _trace_step(
                 trace,
@@ -249,11 +259,17 @@ async def dispatch_repo_tool(
             )
             _trace_step(trace, "filter_documents", state=state, returned=len(docs))
             return _success_envelope(
-                tokens_returned=0,
+                tokens_returned=estimate_tokens_of_payload(data),
                 data=data,
                 trace=trace,
             )
         if name == "search_documents":
+            _trace_step(
+                trace,
+                "embed_query",
+                embedder=embedder.name,
+                dim=embedder.dim,
+            )
             result = await search_repo_documents(repo_root, embedder=embedder, **args)
             data = result["data"]
             _trace_step(
@@ -271,6 +287,12 @@ async def dispatch_repo_tool(
                 trace=trace,
             )
         if name == "repo_context":
+            _trace_step(
+                trace,
+                "embed_query",
+                embedder=embedder.name,
+                dim=embedder.dim,
+            )
             result = await repo_context(repo_root, embedder=embedder, **args)
             data = result["data"]
             relationship_map = data.get("relationship_map", {})

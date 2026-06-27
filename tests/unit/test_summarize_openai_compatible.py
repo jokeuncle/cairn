@@ -5,6 +5,7 @@ HTTP traffic is mocked with respx — no real network.
 
 from __future__ import annotations
 
+import json
 from typing import Any
 
 import httpx
@@ -12,7 +13,7 @@ import pytest
 import respx
 
 from cairn.core.errors import IndexBuildError
-from cairn.summarize.base import SummaryLevel
+from cairn.summarize.base import SummaryLevel, SummaryRequest
 from cairn.summarize.openai_compatible import OpenAICompatibleSummarizer
 
 
@@ -103,6 +104,54 @@ class TestHappyPath:
             title="T", body="body", level=SummaryLevel.GIST
         )
         assert out.endswith("…")
+
+    @respx.mock
+    async def test_summarize_many_packs_requests(
+        self, client: OpenAICompatibleSummarizer
+    ) -> None:
+        route = respx.post("http://test.local/v1/chat/completions").mock(
+            return_value=httpx.Response(
+                200,
+                json=_completion(
+                    '{"items":[{"id":"0","summary":"first"},'
+                    '{"id":"1","summary":"second"}]}'
+                ),
+            )
+        )
+
+        out = await client.summarize_many(
+            [
+                SummaryRequest("A", "body a", SummaryLevel.GIST),
+                SummaryRequest("B", "body b", SummaryLevel.GIST),
+            ]
+        )
+
+        assert out == ["first", "second"]
+        assert route.call_count == 1
+        payload = json.loads(route.calls.last.request.content)
+        assert "ITEMS:" in payload["messages"][1]["content"]
+
+    @respx.mock
+    async def test_summarize_many_falls_back_on_malformed_json(
+        self, client: OpenAICompatibleSummarizer
+    ) -> None:
+        route = respx.post("http://test.local/v1/chat/completions").mock(
+            side_effect=[
+                httpx.Response(200, json=_completion("not json")),
+                httpx.Response(200, json=_completion("first")),
+                httpx.Response(200, json=_completion("second")),
+            ]
+        )
+
+        out = await client.summarize_many(
+            [
+                SummaryRequest("A", "body a", SummaryLevel.GIST),
+                SummaryRequest("B", "body b", SummaryLevel.GIST),
+            ]
+        )
+
+        assert out == ["first", "second"]
+        assert route.call_count == 3
 
 
 class TestErrors:

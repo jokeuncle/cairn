@@ -5,7 +5,9 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import re
 import sys
+from collections.abc import Iterable
 from pathlib import Path
 from typing import Annotated, Literal
 
@@ -51,6 +53,7 @@ app.add_typer(mcp_app, name="mcp")
 McpClient = Literal["claude", "cursor", "codex", "goose"]
 _MANAGED_MCP_START = "# BEGIN DOCSGRAPH MCP: cairn"
 _MANAGED_MCP_END = "# END DOCSGRAPH MCP: cairn"
+_MCP_ENV_NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 
 
 # ---------------------------------------------------------------------------
@@ -168,9 +171,16 @@ def doctor(
         bool,
         typer.Option("--json", help="Print machine-readable JSON."),
     ] = False,
+    fake: Annotated[
+        bool,
+        typer.Option(
+            "--fake",
+            help="Check query embedding compatibility with FakeEmbedder.",
+        ),
+    ] = False,
 ) -> None:
     """Check repo setup, index freshness, and model configuration."""
-    checks = _doctor_checks()
+    checks = _doctor_checks(use_fake=fake)
     ok = all(item["ok"] for item in checks)
     payload = {
         "ok": ok,
@@ -244,6 +254,7 @@ async def _run_index(
         entity_extractor=HeuristicExtractor(),
         xref_extractor=HeuristicXRefExtractor(),
         summary_concurrency=index_cfg.summary_concurrency,
+        summary_batch_size=index_cfg.summary_batch_size,
         embed_batch_size=index_cfg.embed_batch_size,
         progress=lambda message: typer.echo(message, err=True),
     )
@@ -306,6 +317,53 @@ def serve(
     asyncio.run(serve_stdio(doc_dir, embedder=_make_embedder(fake)))
 
 
+@app.command()
+def client(
+    repo: Annotated[
+        Path | None,
+        typer.Option(
+            "--repo",
+            file_okay=False,
+            dir_okay=True,
+            readable=True,
+            help=(
+                "Repository root or child path to operate. Defaults to the "
+                "current working directory."
+            ),
+        ),
+    ] = None,
+    host: Annotated[
+        str,
+        typer.Option(help="Host for the local web client."),
+    ] = "127.0.0.1",
+    port: Annotated[
+        int,
+        typer.Option(min=0, max=65535, help="Port for the local web client."),
+    ] = 8765,
+    fake: Annotated[
+        bool,
+        typer.Option(
+            "--fake/--real",
+            help="Use deterministic local plugins unless --real is selected.",
+        ),
+    ] = True,
+    open_browser: Annotated[
+        bool,
+        typer.Option("--open/--no-open", help="Open the client in a browser."),
+    ] = True,
+) -> None:
+    """Start the local AI.Knowledge client backed by Cairn."""
+    from cairn.client import serve_client
+
+    serve_client(
+        repo=repo,
+        host=host,
+        port=port,
+        fake=fake,
+        open_browser=open_browser,
+    )
+
+
 @mcp_app.command("config")
 def mcp_config(
     client: Annotated[
@@ -343,12 +401,27 @@ def mcp_config(
             help="Include --fake for deterministic local smoke tests.",
         ),
     ] = False,
+    env: Annotated[
+        list[str] | None,
+        typer.Option(
+            "--env",
+            help="Add an MCP server environment variable as KEY=VALUE.",
+        ),
+    ] = None,
+    env_from_current: Annotated[
+        bool,
+        typer.Option(
+            "--env-from-current",
+            help="Copy current CAIRN_* environment variables into the snippet.",
+        ),
+    ] = False,
 ) -> None:
     """Print a copy-pasteable MCP stdio configuration snippet."""
     args = _mcp_server_args(repo=repo)
     if fake:
         args.append("--fake")
-    typer.echo(_format_mcp_config(client, command=command, args=args))
+    env_map = _mcp_env(explicit=env or (), from_current=env_from_current)
+    typer.echo(_format_mcp_config(client, command=command, args=args, env=env_map))
 
 
 @app.command()
@@ -385,6 +458,20 @@ def install(
             help="Include --fake for deterministic local smoke tests.",
         ),
     ] = False,
+    env: Annotated[
+        list[str] | None,
+        typer.Option(
+            "--env",
+            help="Add an MCP server environment variable as KEY=VALUE.",
+        ),
+    ] = None,
+    env_from_current: Annotated[
+        bool,
+        typer.Option(
+            "--env-from-current",
+            help="Copy current CAIRN_* environment variables into the installed config.",
+        ),
+    ] = False,
     output: Annotated[
         Path | None,
         typer.Option(
@@ -413,7 +500,8 @@ def install(
     if fake:
         args.append("--fake")
     target = output or _default_mcp_config_path(client)
-    rendered = _format_mcp_config(client, command=command, args=args)
+    env_map = _mcp_env(explicit=env or (), from_current=env_from_current)
+    rendered = _format_mcp_config(client, command=command, args=args, env=env_map)
 
     if dry_run:
         typer.echo(f"# target: {target}")
@@ -424,7 +512,14 @@ def install(
         raise typer.Exit(code=1)
 
     try:
-        _write_mcp_config(client, target, command=command, args=args, force=force)
+        _write_mcp_config(
+            client,
+            target,
+            command=command,
+            args=args,
+            env=env_map,
+            force=force,
+        )
     except ValueError as exc:
         typer.echo(f"error: {exc}", err=True)
         raise typer.Exit(code=1) from exc
@@ -697,6 +792,7 @@ async def _run_bench(
         options=BenchOptions(
             k=k,
             summary_concurrency=index_cfg.summary_concurrency,
+            summary_batch_size=index_cfg.summary_batch_size,
             embed_batch_size=index_cfg.embed_batch_size,
         ),
         progress=lambda message: typer.echo(message, err=True),
@@ -736,8 +832,9 @@ def _format_repo_status(status_obj: RepoStatus) -> str:
     return "\n".join(lines)
 
 
-def _doctor_checks() -> list[dict[str, object]]:
+def _doctor_checks(*, use_fake: bool = False) -> list[dict[str, object]]:
     checks: list[dict[str, object]] = []
+    status_obj: RepoStatus | None = None
     try:
         root = find_repo_root()
     except Exception as exc:
@@ -796,23 +893,67 @@ def _doctor_checks() -> list[dict[str, object]]:
             }
         )
 
-    llm = load_llm_config()
-    embed = load_embed_config()
-    checks.append(
-        {
-            "name": "summarizer",
-            "ok": bool(llm.model and llm.base_url),
-            "message": f"{llm.model} at {llm.base_url}",
-        }
-    )
-    checks.append(
-        {
-            "name": "embedder",
-            "ok": bool(embed.model and embed.base_url and embed.dim > 0),
-            "message": f"{embed.provider}:{embed.model} dim={embed.dim}",
-        }
-    )
+    if use_fake:
+        embedder = _make_embedder(True)
+        checks.append(
+            {
+                "name": "summarizer",
+                "ok": True,
+                "message": "fake:words",
+            }
+        )
+        checks.append(
+            {
+                "name": "embedder",
+                "ok": True,
+                "message": f"{embedder.name} dim={embedder.dim}",
+            }
+        )
+        query_dim = embedder.dim
+    else:
+        llm = load_llm_config()
+        embed = load_embed_config()
+        checks.append(
+            {
+                "name": "summarizer",
+                "ok": bool(llm.model and llm.base_url),
+                "message": f"{llm.model} at {llm.base_url}",
+            }
+        )
+        checks.append(
+            {
+                "name": "embedder",
+                "ok": bool(embed.model and embed.base_url and embed.dim > 0),
+                "message": f"{embed.provider}:{embed.model} dim={embed.dim}",
+            }
+        )
+        query_dim = embed.dim
+    if status_obj is not None:
+        dims = _indexed_vector_dims(root, status_obj)
+        if dims:
+            compatible = set(dims) == {query_dim}
+            checks.append(
+                {
+                    "name": "query_embedding_dim",
+                    "ok": compatible,
+                    "message": (
+                        f"query dim={query_dim}, indexed dims={sorted(set(dims))}"
+                    ),
+                }
+            )
     return checks
+
+
+def _indexed_vector_dims(root: Path, status_obj: RepoStatus) -> list[int]:
+    dims: list[int] = []
+    for doc in status_obj.documents:
+        if doc.state not in {"indexed", "stale"}:
+            continue
+        try:
+            dims.append(DocumentIndex.load(root / doc.doc_dir).vectors.dim)
+        except Exception:
+            continue
+    return dims
 
 
 def _format_doctor(payload: dict[str, object]) -> str:
@@ -840,30 +981,70 @@ def _mcp_server_args(*, repo: Path | None) -> list[str]:
     return args
 
 
-def _format_mcp_config(client: McpClient, *, command: str, args: list[str]) -> str:
-    server = {"command": command, "args": args}
+def _mcp_env(*, explicit: Iterable[str], from_current: bool) -> dict[str, str]:
+    env: dict[str, str] = {}
+    if from_current:
+        env.update(
+            {
+                key: value
+                for key, value in sorted(os.environ.items())
+                if key.startswith("CAIRN_") and _MCP_ENV_NAME.fullmatch(key)
+            }
+        )
+    for item in explicit:
+        key, sep, value = item.partition("=")
+        key = key.strip()
+        if not sep or not key:
+            msg = f"invalid --env value {item!r}; expected KEY=VALUE"
+            raise typer.BadParameter(msg)
+        if _MCP_ENV_NAME.fullmatch(key) is None:
+            msg = (
+                f"invalid --env name {key!r}; expected a portable environment "
+                "variable name like CAIRN_EMBED_PROVIDER"
+            )
+            raise typer.BadParameter(msg)
+        env[key] = value
+    return env
+
+
+def _format_mcp_config(
+    client: McpClient,
+    *,
+    command: str,
+    args: list[str],
+    env: dict[str, str] | None = None,
+) -> str:
+    env = env or {}
+    server: dict[str, object] = {"command": command, "args": args}
+    if env:
+        server["env"] = env
     if client in {"claude", "cursor"}:
         return json.dumps({"mcpServers": {"cairn": server}}, indent=2)
     if client == "codex":
         quoted_args = ", ".join(json.dumps(arg) for arg in args)
-        return "\n".join(
-            [
-                "[mcp_servers.cairn]",
-                f"command = {json.dumps(command)}",
-                f"args = [{quoted_args}]",
-            ]
-        )
-    yaml_args = "\n".join(f"      - {json.dumps(arg)}" for arg in args)
-    return "\n".join(
-        [
-            "extensions:",
-            "  cairn:",
-            "    type: stdio",
-            f"    command: {json.dumps(command)}",
-            "    args:",
-            yaml_args,
+        lines = [
+            "[mcp_servers.cairn]",
+            f"command = {json.dumps(command)}",
+            f"args = [{quoted_args}]",
         ]
-    )
+        if env:
+            lines.append("")
+            lines.append("[mcp_servers.cairn.env]")
+            lines.extend(f"{key} = {json.dumps(value)}" for key, value in sorted(env.items()))
+        return "\n".join(lines)
+    yaml_args = "\n".join(f"      - {json.dumps(arg)}" for arg in args)
+    lines = [
+        "extensions:",
+        "  cairn:",
+        "    type: stdio",
+        f"    command: {json.dumps(command)}",
+        "    args:",
+        yaml_args,
+    ]
+    if env:
+        lines.append("    env:")
+        lines.extend(f"      {key}: {json.dumps(value)}" for key, value in sorted(env.items()))
+    return "\n".join(lines)
 
 
 def _default_mcp_config_path(client: McpClient) -> Path:
@@ -894,30 +1075,38 @@ def _write_mcp_config(
     *,
     command: str,
     args: list[str],
-    force: bool,
+    env: dict[str, str] | None = None,
+    force: bool = False,
 ) -> None:
+    env = env or {}
     path = path.expanduser()
     path.parent.mkdir(parents=True, exist_ok=True)
     if client in {"claude", "cursor"}:
-        _write_json_mcp_config(path, command=command, args=args)
+        _write_json_mcp_config(path, command=command, args=args, env=env)
         return
     if client == "codex":
         _write_managed_text_config(
             path,
-            _format_mcp_config(client, command=command, args=args),
+            _format_mcp_config(client, command=command, args=args, env=env),
             conflict="[mcp_servers.cairn]",
             force=force,
         )
         return
     _write_managed_text_config(
         path,
-        _format_mcp_config(client, command=command, args=args),
+        _format_mcp_config(client, command=command, args=args, env=env),
         conflict="  cairn:",
         force=force,
     )
 
 
-def _write_json_mcp_config(path: Path, *, command: str, args: list[str]) -> None:
+def _write_json_mcp_config(
+    path: Path,
+    *,
+    command: str,
+    args: list[str],
+    env: dict[str, str],
+) -> None:
     if path.exists() and path.read_text(encoding="utf-8").strip():
         try:
             data = json.loads(path.read_text(encoding="utf-8"))
@@ -936,7 +1125,10 @@ def _write_json_mcp_config(path: Path, *, command: str, args: list[str]) -> None
     if not isinstance(servers, dict):
         msg = f"`mcpServers` must be an object in {path}"
         raise ValueError(msg)
-    servers["cairn"] = {"command": command, "args": args}
+    server: dict[str, object] = {"command": command, "args": args}
+    if env:
+        server["env"] = env
+    servers["cairn"] = server
     data["mcpServers"] = servers
     path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
 

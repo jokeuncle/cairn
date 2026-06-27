@@ -50,6 +50,10 @@ class TestConfig:
         with pytest.raises(ValueError):
             DoubaoVisionEmbedder(max_retries=-1)
 
+    def test_zero_concurrency_rejected(self) -> None:
+        with pytest.raises(ValueError):
+            DoubaoVisionEmbedder(concurrency=0)
+
 
 class TestHappyPath:
     async def test_empty_input_short_circuits(
@@ -145,6 +149,35 @@ class TestHappyPath:
         await client.embed(["a"])
 
         assert route.calls.last.request.headers["Authorization"] == "Bearer sk-test"
+
+    @respx.mock
+    async def test_requests_are_concurrent_with_limit(self) -> None:
+        active = 0
+        max_active = 0
+
+        async def handler(request: httpx.Request) -> httpx.Response:
+            nonlocal active, max_active
+            active += 1
+            max_active = max(max_active, active)
+            await asyncio.sleep(0.01)
+            active -= 1
+            return httpx.Response(200, json=_response([1.0, 0.0, 0.0, 0.0]))
+
+        respx.post("http://test.local/api/v3/embeddings/multimodal").mock(
+            side_effect=handler
+        )
+        c = DoubaoVisionEmbedder(
+            base_url="http://test.local/api/v3",
+            model="doubao-embedding-vision-test",
+            dim=4,
+            concurrency=2,
+            max_retries=0,
+        )
+
+        out = await c.embed(["a", "b", "c", "d"])
+
+        assert len(out) == 4
+        assert max_active == 2
 
 
 class TestErrors:

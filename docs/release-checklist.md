@@ -3,6 +3,11 @@
 This checklist is for maintainers preparing a public open-source push or a
 tagged alpha release.
 
+Agents should invoke the internal `release-cairn` skill first. The skill
+enforces the release workflow order, stale-branch guard, unrelated-change
+isolation, and post-publish verification; this checklist remains the detailed
+command reference.
+
 ## Repository Surface
 
 - README explains the product in the first screen and includes a working
@@ -68,13 +73,15 @@ Expected current gate:
 ```bash
 docsgraph sync --fake
 docsgraph status --json
+docsgraph doctor --fake
+docsgraph mcp config --client codex --fake
 docsgraph bench benchmarks/architecture.toml --fake
 ```
 
 Expected current dogfood:
 
-- Cairn repo: 15/15 docs indexed, 0 errors.
-- Starter benchmark: Cairn recall@8 equals naive with 37.8% of naive tokens
+- Cairn repo: 18/18 docs indexed, 0 errors.
+- Starter benchmark: Cairn recall@8 equals naive with 37.7% of naive tokens
   under the deterministic fake embedder.
 
 ## External Repository Smoke Tests
@@ -131,6 +138,15 @@ export CAIRN_EMBED_MODEL=doubao-embedding-vision-251215
 
 The corresponding API key variables must be set locally, but real values must
 never appear in git, shell history snippets, benchmark reports, or CI logs.
+When dogfooding MCP against a real provider, install or print the server config
+with explicit environment variables rather than relying on a shell startup file:
+
+```bash
+docsgraph mcp config --client codex --repo . --env-from-current
+docsgraph doctor
+```
+
+`doctor` must not report `query_embedding_dim` mismatch before release.
 
 ## Website Publishing
 

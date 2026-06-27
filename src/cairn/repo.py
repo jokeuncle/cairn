@@ -8,8 +8,11 @@ document index per discovered source file under ``.cairn/documents/<doc_id>/``.
 
 from __future__ import annotations
 
+import asyncio
+import errno
 import hashlib
 import json
+import os
 import re
 import tomllib
 from collections import Counter, defaultdict
@@ -17,7 +20,8 @@ from collections.abc import Callable, Collection, Iterable
 from datetime import UTC, datetime
 from fnmatch import fnmatchcase
 from pathlib import Path
-from typing import Any, Final, Literal, Protocol
+from types import ModuleType
+from typing import Any, Final, Literal, Protocol, TextIO
 
 from pydantic import BaseModel, ConfigDict, Field
 from slugify import slugify
@@ -35,10 +39,24 @@ from cairn.tools.base import DocumentIndex, estimate_tokens_of_payload
 from cairn.tools.search_semantic import IncludeField
 from cairn.xref.heuristic import HeuristicXRefExtractor
 
+_fcntl: ModuleType | None
+try:
+    import fcntl as _fcntl
+except ImportError:  # pragma: no cover - Windows fallback
+    _fcntl = None
+
+_msvcrt: ModuleType | None
+try:
+    import msvcrt as _msvcrt
+except ImportError:  # pragma: no cover - POSIX fallback
+    _msvcrt = None
+
 CAIRN_DIR: Final = ".cairn"
 CONFIG_FILENAME: Final = "config.toml"
 REPO_MANIFEST_FILENAME: Final = "manifest.json"
 REPO_MANIFEST_VERSION: Final = 1
+SYNC_LOCK_FILENAME: Final = "sync.lock"
+SYNC_LOCK_POLL_SECONDS: Final = 0.2
 
 DEFAULT_INCLUDE: Final[tuple[str, ...]] = (
     "*.md",
@@ -100,6 +118,7 @@ class IndexSettings(Protocol):
     """Indexing knobs needed by repo sync without importing the CLI layer."""
 
     summary_concurrency: int
+    summary_batch_size: int
     embed_batch_size: int
 
 
@@ -196,6 +215,10 @@ def config_path(root: Path) -> Path:
 
 def repo_manifest_path(root: Path) -> Path:
     return cairn_dir(root) / REPO_MANIFEST_FILENAME
+
+
+def sync_lock_path(root: Path) -> Path:
+    return cairn_dir(root) / SYNC_LOCK_FILENAME
 
 
 def find_repo_root(start: Path | None = None) -> Path:
@@ -317,58 +340,211 @@ async def sync_repo(
     progress: Callable[[str], None] | None = None,
 ) -> tuple[RepoSyncResult, ...]:
     """Index every configured repo document, reusing per-document no-op checks."""
-    config = load_repo_config(root)
-    docs = discover_documents(root, config)
-    if not docs:
-        msg = "no documents matched .cairn/config.toml include patterns"
-        raise ConfigError(msg, details={"root": str(root)})
+    lock = _RepoSyncLock(root, progress=progress)
+    await lock.acquire()
+    try:
+        config = load_repo_config(root)
+        docs = discover_documents(root, config)
+        if not docs:
+            msg = "no documents matched .cairn/config.toml include patterns"
+            raise ConfigError(msg, details={"root": str(root)})
 
-    results: list[RepoSyncResult] = []
-    for number, doc in enumerate(docs, start=1):
-        _emit(progress, f"doc {number}/{len(docs)} {doc.id}: {doc.relative_source}")
+        results: list[RepoSyncResult] = []
+        for number, doc in enumerate(docs, start=1):
+            _emit(progress, f"doc {number}/{len(docs)} {doc.id}: {doc.relative_source}")
 
-        def doc_progress(message: str, doc_id: str = doc.id) -> None:
-            _emit(progress, f"{doc_id}: {message}")
+            def doc_progress(message: str, doc_id: str = doc.id) -> None:
+                _emit(progress, f"{doc_id}: {message}")
 
-        indexer = Indexer(
-            parser=parser_for_path(doc.source),
-            summarizer=summarizer,
-            embedder=embedder,
-            entity_extractor=HeuristicExtractor(),
-            xref_extractor=HeuristicXRefExtractor(),
-            summary_concurrency=index_config.summary_concurrency,
-            embed_batch_size=index_config.embed_batch_size,
-            progress=doc_progress,
-        )
+            indexer = Indexer(
+                parser=parser_for_path(doc.source),
+                summarizer=summarizer,
+                embedder=embedder,
+                entity_extractor=HeuristicExtractor(),
+                xref_extractor=HeuristicXRefExtractor(),
+                summary_concurrency=index_config.summary_concurrency,
+                summary_batch_size=index_config.summary_batch_size,
+                embed_batch_size=index_config.embed_batch_size,
+                progress=doc_progress,
+            )
+            try:
+                result = await indexer.index_path(
+                    doc.source,
+                    out_dir=doc.out_dir,
+                    doc_id=doc.id,
+                    force=force,
+                )
+                results.append(
+                    RepoSyncResult(
+                        id=doc.id,
+                        source=doc.relative_source,
+                        manifest_path=result.manifest_path,
+                        rebuilt=result.rebuilt,
+                    )
+                )
+            except Exception as exc:
+                _emit(progress, f"{doc.id}: failed: {exc}")
+                results.append(
+                    RepoSyncResult(
+                        id=doc.id,
+                        source=doc.relative_source,
+                        rebuilt=False,
+                        ok=False,
+                        error=str(exc),
+                    )
+                )
+
+        write_repo_manifest(root, repo_status(root, config=config))
+        return tuple(results)
+    finally:
+        lock.release()
+
+
+class _RepoSyncLock:
+    """Repo-wide sync lock backed by an OS file lock.
+
+    The lock file remains on disk for metadata, but the kernel lock is what
+    serializes syncs. If a process exits, the OS releases the lock.
+    """
+
+    def __init__(
+        self,
+        root: Path,
+        *,
+        progress: Callable[[str], None] | None,
+        poll_seconds: float = SYNC_LOCK_POLL_SECONDS,
+    ) -> None:
+        self.root = root
+        self.path = sync_lock_path(root)
+        self.progress = progress
+        self.poll_seconds = poll_seconds
+        self.acquired = False
+        self.handle: TextIO | None = None
+
+    async def acquire(self) -> None:
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        self.handle = self.path.open("a+", encoding="utf-8")
         try:
-            result = await indexer.index_path(
-                doc.source,
-                out_dir=doc.out_dir,
-                doc_id=doc.id,
-                force=force,
-            )
-            results.append(
-                RepoSyncResult(
-                    id=doc.id,
-                    source=doc.relative_source,
-                    manifest_path=result.manifest_path,
-                    rebuilt=result.rebuilt,
-                )
-            )
-        except Exception as exc:
-            _emit(progress, f"{doc.id}: failed: {exc}")
-            results.append(
-                RepoSyncResult(
-                    id=doc.id,
-                    source=doc.relative_source,
-                    rebuilt=False,
-                    ok=False,
-                    error=str(exc),
-                )
-            )
+            waited = False
+            while True:
+                try:
+                    _try_lock_sync_file(self.handle)
+                except BlockingIOError:
+                    if not waited:
+                        _emit(
+                            self.progress,
+                            f"sync: waiting for existing sync lock"
+                            f"{_sync_lock_owner_suffix(self.path)}",
+                        )
+                        waited = True
+                    await asyncio.sleep(self.poll_seconds)
+                else:
+                    self.acquired = True
+                    _write_sync_lock_payload(self.handle, _sync_lock_payload(self.root))
+                    if waited:
+                        _emit(self.progress, "sync: acquired sync lock")
+                    return
+        except BaseException:
+            self.handle.close()
+            self.handle = None
+            raise
 
-    write_repo_manifest(root, repo_status(root, config=config))
-    return tuple(results)
+    def release(self) -> None:
+        if self.handle is None:
+            return
+        try:
+            if self.acquired:
+                try:
+                    _clear_sync_lock_payload(self.handle)
+                finally:
+                    _unlock_sync_file(self.handle)
+        finally:
+            self.acquired = False
+            self.handle.close()
+            self.handle = None
+
+
+def _sync_lock_payload(root: Path) -> dict[str, Any]:
+    return {
+        "pid": os.getpid(),
+        "root": str(root.resolve()),
+        "started_at": datetime.now(UTC).isoformat(),
+    }
+
+
+def _try_lock_sync_file(handle: TextIO) -> None:
+    if _fcntl is not None:
+        try:
+            _fcntl.flock(handle.fileno(), _fcntl.LOCK_EX | _fcntl.LOCK_NB)
+        except OSError as exc:
+            if exc.errno in {errno.EACCES, errno.EAGAIN}:
+                raise BlockingIOError from exc
+            raise
+        return
+    if _msvcrt is not None:  # pragma: no cover - Windows-only fallback
+        handle.seek(0)
+        try:
+            _msvcrt.locking(handle.fileno(), _msvcrt.LK_NBLCK, 1)
+        except OSError as exc:
+            raise BlockingIOError from exc
+        return
+    msg = "no supported file locking backend available"
+    raise RuntimeError(msg)
+
+
+def _unlock_sync_file(handle: TextIO) -> None:
+    if _fcntl is not None:
+        _fcntl.flock(handle.fileno(), _fcntl.LOCK_UN)
+        return
+    if _msvcrt is not None:  # pragma: no cover - Windows-only fallback
+        handle.seek(0)
+        _msvcrt.locking(handle.fileno(), _msvcrt.LK_UNLCK, 1)
+        return
+    msg = "no supported file locking backend available"
+    raise RuntimeError(msg)
+
+
+def _write_sync_lock_payload(handle: TextIO, payload: dict[str, Any]) -> None:
+    handle.seek(0)
+    handle.truncate()
+    json.dump(payload, handle, sort_keys=True)
+    handle.write("\n")
+    handle.flush()
+    os.fsync(handle.fileno())
+
+
+def _clear_sync_lock_payload(handle: TextIO) -> None:
+    handle.seek(0)
+    handle.truncate()
+    handle.flush()
+    os.fsync(handle.fileno())
+
+
+def _read_sync_lock_payload(path: Path) -> dict[str, Any] | None:
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    if not isinstance(payload, dict):
+        return None
+    return payload
+
+
+def _sync_lock_owner_suffix(path: Path) -> str:
+    payload = _read_sync_lock_payload(path)
+    if payload is None:
+        return ""
+
+    parts: list[str] = []
+    pid = payload.get("pid")
+    started_at = payload.get("started_at")
+    if isinstance(pid, int):
+        parts.append(f"pid={pid}")
+    if isinstance(started_at, str) and started_at:
+        parts.append(f"started={started_at}")
+    if not parts:
+        return ""
+    return f" ({', '.join(parts)})"
 
 
 async def search_repo_documents(

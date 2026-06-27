@@ -85,6 +85,7 @@ class Indexer:
         xref_extractor: XRefExtractor | None = None,
         summary_cache: SummaryCache | None = None,
         summary_concurrency: int = 4,
+        summary_batch_size: int = 1,
         embed_batch_size: int = 32,
         progress: Callable[[str], None] | None = None,
     ) -> None:
@@ -95,6 +96,7 @@ class Indexer:
         self.xref_extractor = xref_extractor
         self.summary_cache = summary_cache
         self.summary_concurrency = summary_concurrency
+        self.summary_batch_size = summary_batch_size
         self.embed_batch_size = embed_batch_size
         self.progress = progress
 
@@ -164,6 +166,7 @@ class Indexer:
             self.summarizer,
             cache=self.summary_cache,
             concurrency=self.summary_concurrency,
+            batch_size=self.summary_batch_size,
             progress=lambda done, total: self._emit(f"summaries: {done}/{total}"),
         ).build(document, out_dir=out_dir, levels=summary_levels)
         self._emit("summaries: done")

@@ -47,6 +47,11 @@ class TestVersion:
         assert result.exit_code == 0
         assert __version__ in result.output
 
+    def test_client_command_is_discoverable(self, runner: CliRunner) -> None:
+        result = runner.invoke(app, ["client", "--help"])
+        assert result.exit_code == 0
+        assert "local AI.Knowledge client" in result.output
+
 
 class TestIndex:
     def test_index_writes_manifest(
@@ -224,7 +229,7 @@ class TestRepoCommands:
         assert "`readme`" in status_result.output
         assert "`docs-guide`" in status_result.output
 
-        doctor_result = runner.invoke(app, ["doctor"])
+        doctor_result = runner.invoke(app, ["doctor", "--fake"])
         assert doctor_result.exit_code == 0, doctor_result.output
         assert "Cairn doctor: ok" in doctor_result.output
 
@@ -245,6 +250,24 @@ class TestRepoCommands:
         assert codex_result.exit_code == 0, codex_result.output
         assert "[mcp_servers.cairn]" in codex_result.output
         assert 'args = ["serve"]' in codex_result.output
+
+        env_result = runner.invoke(
+            app,
+            [
+                "mcp",
+                "config",
+                "--client",
+                "codex",
+                "--env",
+                "CAIRN_EMBED_PROVIDER=doubao-vision",
+                "--env",
+                "CAIRN_EMBED_DIM=2048",
+            ],
+        )
+        assert env_result.exit_code == 0, env_result.output
+        assert "[mcp_servers.cairn.env]" in env_result.output
+        assert 'CAIRN_EMBED_PROVIDER = "doubao-vision"' in env_result.output
+        assert 'CAIRN_EMBED_DIM = "2048"' in env_result.output
 
         fixed_result = runner.invoke(
             app,
@@ -282,6 +305,61 @@ class TestRepoCommands:
         assert 'args = ["serve", "--fake"]' in result.output
         assert "--repo" not in result.output
         assert not (home / ".codex" / "config.toml").exists()
+
+    def test_doctor_reports_query_embedding_dim_mismatch(
+        self, tmp_path: Path, monkeypatch: MonkeyPatch, runner: CliRunner
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / "README.md").write_text("# Readme\n\nProject overview.\n", encoding="utf-8")
+        assert runner.invoke(app, ["init", "-y"]).exit_code == 0
+        sync_result = runner.invoke(app, ["sync", "--fake"])
+        assert sync_result.exit_code == 0, sync_result.output
+        monkeypatch.setenv("CAIRN_EMBED_PROVIDER", "doubao-vision")
+        monkeypatch.setenv("CAIRN_EMBED_DIM", "2048")
+
+        result = runner.invoke(app, ["doctor"])
+
+        assert result.exit_code == 1, result.output
+        assert "[!!] query_embedding_dim: query dim=2048, indexed dims=[64]" in result.output
+
+    def test_mcp_config_env_from_current(
+        self, tmp_path: Path, monkeypatch: MonkeyPatch, runner: CliRunner
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / "README.md").write_text("# Readme\n", encoding="utf-8")
+        init_result = runner.invoke(app, ["init", "-y"])
+        assert init_result.exit_code == 0, init_result.output
+        monkeypatch.setenv("CAIRN_EMBED_PROVIDER", "doubao-vision")
+        monkeypatch.setenv("CAIRN_EMBED_DIM", "2048")
+        monkeypatch.setenv("OTHER_TOOL_ENV", "ignored")
+
+        result = runner.invoke(
+            app,
+            ["mcp", "config", "--client", "claude", "--env-from-current"],
+        )
+
+        assert result.exit_code == 0, result.output
+        payload = json.loads(result.output)
+        env = payload["mcpServers"]["cairn"]["env"]
+        assert env["CAIRN_EMBED_PROVIDER"] == "doubao-vision"
+        assert env["CAIRN_EMBED_DIM"] == "2048"
+        assert "OTHER_TOOL_ENV" not in env
+
+    def test_mcp_config_rejects_invalid_env_name(
+        self, tmp_path: Path, monkeypatch: MonkeyPatch, runner: CliRunner
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / "README.md").write_text("# Readme\n", encoding="utf-8")
+        init_result = runner.invoke(app, ["init", "-y"])
+        assert init_result.exit_code == 0, init_result.output
+
+        result = runner.invoke(
+            app,
+            ["mcp", "config", "--client", "codex", "--env", "CAIRN.EMBED_DIM=2048"],
+        )
+
+        assert result.exit_code == 2, result.output
+        assert "invalid --env name" in result.output
 
     def test_install_codex_writes_managed_block(
         self, tmp_path: Path, monkeypatch: MonkeyPatch, runner: CliRunner
