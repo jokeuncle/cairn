@@ -22,12 +22,19 @@ from cairn.ingest import parser_for_path
 from cairn.inspection import write_inspector
 from cairn.providers import make_embedder, make_summarizer
 from cairn.repo import (
+    DiscoveryReport,
+    DiscoveryReportItem,
     RepoStatus,
+    discover_document_surface,
     find_repo_root,
+    load_repo_config,
     load_repo_document_index,
+    repo_embedder_mismatch_message,
+    repo_index_embedder_infos,
     repo_status,
     search_repo_documents,
     sync_repo,
+    validate_repo_embedder_compatibility,
     write_default_config,
 )
 from cairn.summarize.base import Summarizer
@@ -121,13 +128,21 @@ def sync(
         bool,
         typer.Option("--force", help="Rebuild every configured document."),
     ] = False,
+    dry_run: Annotated[
+        bool,
+        typer.Option("--dry-run", help="Show discovery results without indexing."),
+    ] = False,
 ) -> None:
     """Index every configured repository document under .cairn/documents/."""
-    asyncio.run(_run_sync(fake, force))
+    asyncio.run(_run_sync(fake, force, dry_run))
 
 
-async def _run_sync(use_fake: bool, force: bool) -> None:
+async def _run_sync(use_fake: bool, force: bool, dry_run: bool = False) -> None:
     root = find_repo_root()
+    if dry_run:
+        report = discover_document_surface(root, load_repo_config(root))
+        typer.echo(_format_discovery_report(report))
+        return
     results = await sync_repo(
         root,
         summarizer=_make_summarizer(use_fake),
@@ -147,6 +162,22 @@ async def _run_sync(use_fake: bool, force: bool) -> None:
     )
     if failed:
         raise typer.Exit(code=1)
+
+
+@app.command()
+def discover(
+    json_output: Annotated[
+        bool,
+        typer.Option("--json", help="Print machine-readable JSON."),
+    ] = False,
+) -> None:
+    """Explain which repository documents are included, skipped, or unsupported."""
+    root = find_repo_root()
+    report = discover_document_surface(root, load_repo_config(root))
+    if json_output:
+        typer.echo(report.model_dump_json(indent=2))
+    else:
+        typer.echo(_format_discovery_report(report))
 
 
 @app.command()
@@ -258,9 +289,7 @@ async def _run_index(
         embed_batch_size=index_cfg.embed_batch_size,
         progress=lambda message: typer.echo(message, err=True),
     )
-    result = await indexer.index_path(
-        source, out_dir=out_dir, doc_id=doc_id, force=force
-    )
+    result = await indexer.index_path(source, out_dir=out_dir, doc_id=doc_id, force=force)
     if result.rebuilt:
         typer.echo(f"indexed: {result.manifest_path}")
     else:
@@ -275,10 +304,7 @@ def serve(
             file_okay=False,
             dir_okay=True,
             readable=True,
-            help=(
-                "Built document directory. Omit to serve the current repo's "
-                ".cairn documents."
-            ),
+            help=("Built document directory. Omit to serve the current repo's .cairn documents."),
         ),
     ] = None,
     fake: Annotated[
@@ -306,7 +332,14 @@ def serve(
         typer.echo("error: pass either a document directory or --repo, not both", err=True)
         raise typer.Exit(code=2)
     if repo is not None:
-        asyncio.run(serve_repo_stdio(find_repo_root(repo), embedder=_make_embedder(fake)))
+        root = find_repo_root(repo)
+        embedder = _make_embedder(fake)
+        try:
+            validate_repo_embedder_compatibility(root, embedder)
+        except Exception as exc:
+            typer.echo(str(exc), err=True)
+            raise typer.Exit(code=1) from exc
+        asyncio.run(serve_repo_stdio(root, embedder=embedder))
         return
     if doc_dir is None:
         asyncio.run(serve_repo_stdio(None, embedder=_make_embedder(fake)))
@@ -382,8 +415,7 @@ def mcp_config(
             dir_okay=True,
             readable=True,
             help=(
-                "Repository root for a fixed-repo server. Omit for dynamic "
-                "workspace resolution."
+                "Repository root for a fixed-repo server. Omit for dynamic workspace resolution."
             ),
         ),
     ] = None,
@@ -442,8 +474,7 @@ def install(
             dir_okay=True,
             readable=True,
             help=(
-                "Repository root for a fixed-repo server. Omit for dynamic "
-                "workspace resolution."
+                "Repository root for a fixed-repo server. Omit for dynamic workspace resolution."
             ),
         ),
     ] = None,
@@ -533,9 +564,7 @@ def outline(
         typer.Argument(exists=True, file_okay=False, dir_okay=True, readable=True),
     ],
     depth: Annotated[int, typer.Option(min=1, max=6)] = 2,
-    focus: Annotated[
-        str | None, typer.Option(help="Restrict to a subtree.")
-    ] = None,
+    focus: Annotated[str | None, typer.Option(help="Restrict to a subtree.")] = None,
 ) -> None:
     """Print the document outline as JSON."""
     asyncio.run(_run_outline(doc_dir, depth, focus))
@@ -561,9 +590,7 @@ def query_semantic(
     asyncio.run(_run_search_semantic(doc_dir, query, k, fake))
 
 
-async def _run_search_semantic(
-    doc_dir: Path, query: str, k: int, use_fake: bool
-) -> None:
+async def _run_search_semantic(doc_dir: Path, query: str, k: int, use_fake: bool) -> None:
     idx = DocumentIndex.load(doc_dir)
     embedder = _make_embedder(use_fake)
     resp = await search_semantic_tool(idx, embedder=embedder, query=query, k=k)
@@ -629,9 +656,7 @@ def query_keyword(
     asyncio.run(_run_search_keyword(doc_dir, terms, k, mode))
 
 
-async def _run_search_keyword(
-    doc_dir: Path, terms: list[str], k: int, mode: str
-) -> None:
+async def _run_search_keyword(doc_dir: Path, terms: list[str], k: int, mode: str) -> None:
     if mode not in ("any", "all"):
         typer.echo(f"error: mode must be 'any' or 'all'; got {mode!r}", err=True)
         raise typer.Exit(code=2)
@@ -657,9 +682,7 @@ def query_mentions(
     asyncio.run(_run_find_mentions(doc_dir, entity, scope))
 
 
-async def _run_find_mentions(
-    doc_dir: Path, entity: str, scope: str | None
-) -> None:
+async def _run_find_mentions(doc_dir: Path, entity: str, scope: str | None) -> None:
     idx = DocumentIndex.load(doc_dir)
     resp = await find_mentions_tool(idx, entity=entity, scope=scope)
     typer.echo(json.dumps(resp.data, ensure_ascii=False, indent=2))
@@ -683,9 +706,7 @@ def query_related(
     asyncio.run(_run_get_related(doc_dir, section_id, parsed, k))
 
 
-async def _run_get_related(
-    doc_dir: Path, section_id: str, kinds: tuple[str, ...], k: int
-) -> None:
+async def _run_get_related(doc_dir: Path, section_id: str, kinds: tuple[str, ...], k: int) -> None:
     idx = DocumentIndex.load(doc_dir)
     resp = await get_related_tool(idx, id=section_id, kinds=kinds, k=k)  # type: ignore[arg-type]
     typer.echo(json.dumps(resp.data, ensure_ascii=False, indent=2))
@@ -832,6 +853,30 @@ def _format_repo_status(status_obj: RepoStatus) -> str:
     return "\n".join(lines)
 
 
+def _format_discovery_report(report: DiscoveryReport) -> str:
+    lines = [f"Cairn discover: {report.root}"]
+    _append_discovery_group(lines, "Indexed:", report.included)
+    _append_discovery_group(lines, "Candidate but not included:", report.candidate_not_included)
+    _append_discovery_group(lines, "Unsupported:", report.unsupported)
+    _append_discovery_group(lines, "Excluded:", report.excluded)
+    return "\n".join(lines)
+
+
+def _append_discovery_group(
+    lines: list[str],
+    title: str,
+    items: Iterable[DiscoveryReportItem],
+) -> None:
+    lines.append("")
+    lines.append(title)
+    any_item = False
+    for item in items:
+        any_item = True
+        lines.append(f"  {item.path}  reason: {item.reason}")
+    if not any_item:
+        lines.append("  (none)")
+
+
 def _doctor_checks(*, use_fake: bool = False) -> list[dict[str, object]]:
     checks: list[dict[str, object]] = []
     status_obj: RepoStatus | None = None
@@ -855,11 +900,7 @@ def _doctor_checks(*, use_fake: bool = False) -> list[dict[str, object]]:
     )
     try:
         status_obj = repo_status(root)
-        unhealthy = (
-            status_obj.missing_count
-            + status_obj.stale_count
-            + status_obj.error_count
-        )
+        unhealthy = status_obj.missing_count + status_obj.stale_count + status_obj.error_count
         checks.append(
             {
                 "name": "repo_index",
@@ -894,7 +935,7 @@ def _doctor_checks(*, use_fake: bool = False) -> list[dict[str, object]]:
         )
 
     if use_fake:
-        embedder = _make_embedder(True)
+        query_embedder = _make_embedder(True)
         checks.append(
             {
                 "name": "summarizer",
@@ -906,13 +947,14 @@ def _doctor_checks(*, use_fake: bool = False) -> list[dict[str, object]]:
             {
                 "name": "embedder",
                 "ok": True,
-                "message": f"{embedder.name} dim={embedder.dim}",
+                "message": f"{query_embedder.name} dim={query_embedder.dim}",
             }
         )
-        query_dim = embedder.dim
+        query_dim = query_embedder.dim
     else:
         llm = load_llm_config()
         embed = load_embed_config()
+        query_embedder = _make_embedder(False)
         checks.append(
             {
                 "name": "summarizer",
@@ -929,19 +971,86 @@ def _doctor_checks(*, use_fake: bool = False) -> list[dict[str, object]]:
         )
         query_dim = embed.dim
     if status_obj is not None:
-        dims = _indexed_vector_dims(root, status_obj)
-        if dims:
-            compatible = set(dims) == {query_dim}
+        index_infos = repo_index_embedder_infos(root, status_obj)
+        if index_infos:
+            legacy = [info for info in index_infos if info.get("legacy")]
+            checks.append(
+                {
+                    "name": "index_embedder",
+                    "ok": not legacy,
+                    "message": _format_index_embedder_infos(index_infos),
+                }
+            )
+            incompatible = [
+                info
+                for info in index_infos
+                if info.get("embedder") != query_embedder.name or info.get("dim") != query_dim
+            ]
             checks.append(
                 {
                     "name": "query_embedding_dim",
-                    "ok": compatible,
-                    "message": (
-                        f"query dim={query_dim}, indexed dims={sorted(set(dims))}"
+                    "ok": not incompatible,
+                    "message": _format_query_embedder_check(
+                        root,
+                        query_dim=query_dim,
+                        query_embedder=query_embedder,
+                        index_infos=index_infos,
+                        incompatible=incompatible,
                     ),
                 }
             )
+        checks.append(
+            {
+                "name": "mcp_query_embedder",
+                "ok": True,
+                "message": (
+                    "running MCP processes are not introspectable from CLI; "
+                    "check the generated docsgraph serve command/env."
+                ),
+            }
+        )
     return checks
+
+
+def _format_query_embedder_check(
+    root: Path,
+    *,
+    query_dim: int,
+    query_embedder: Embedder,
+    index_infos: list[dict[str, object]],
+    incompatible: list[dict[str, object]],
+) -> str:
+    if incompatible:
+        return repo_embedder_mismatch_message(
+            root,
+            index_infos=incompatible,
+            query_embedder=query_embedder,
+        )
+    indexed_dims = sorted(
+        {
+            dim
+            for info in index_infos
+            if isinstance((dim := info.get("dim")), int)
+        }
+    )
+    return f"query dim={query_dim}, indexed dims={indexed_dims}"
+
+
+def _format_index_embedder_infos(infos: list[dict[str, object]]) -> str:
+    unique = sorted(
+        {
+            (
+                str(info.get("embedder") or "unknown"),
+                str(info.get("mode") or "unknown"),
+                str(info.get("dim") or "unknown"),
+            )
+            for info in infos
+        }
+    )
+    details = ", ".join(f"{embedder} mode={mode} dim={dim}" for embedder, mode, dim in unique)
+    if any(info.get("legacy") for info in infos):
+        return f"{details}; legacy manifest lacks full embedder provenance"
+    return details
 
 
 def _indexed_vector_dims(root: Path, status_obj: RepoStatus) -> list[int]:
@@ -1056,11 +1165,7 @@ def _default_mcp_config_path(client: McpClient) -> Path:
     if client == "claude":
         if sys.platform == "darwin":
             return (
-                home
-                / "Library"
-                / "Application Support"
-                / "Claude"
-                / "claude_desktop_config.json"
+                home / "Library" / "Application Support" / "Claude" / "claude_desktop_config.json"
             )
         if sys.platform == "win32":
             appdata = Path(os.environ.get("APPDATA", home / "AppData" / "Roaming"))

@@ -36,6 +36,7 @@ from cairn.ingest import parser_for_path, supported_extensions
 from cairn.repo_search import search_repo_index
 from cairn.summarize.base import Summarizer
 from cairn.tools.base import DocumentIndex, estimate_tokens_of_payload
+from cairn.tools.search_keyword import Mode, search_keyword
 from cairn.tools.search_semantic import IncludeField
 from cairn.xref.heuristic import HeuristicXRefExtractor
 
@@ -218,6 +219,30 @@ class DiscoveredDocument(BaseModel):
     out_dir: Path
 
 
+class DiscoveryReportItem(BaseModel):
+    """One file classification in a repository discovery report."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    path: str
+    reason: str
+    doc_id: str | None = None
+    matched_rule: str | None = None
+    extension: str | None = None
+
+
+class DiscoveryReport(BaseModel):
+    """Transparent include/exclude diagnosis for repository documents."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    root: Path
+    included: tuple[DiscoveryReportItem, ...]
+    candidate_not_included: tuple[DiscoveryReportItem, ...]
+    excluded: tuple[DiscoveryReportItem, ...]
+    unsupported: tuple[DiscoveryReportItem, ...]
+
+
 class RepoDocumentStatus(BaseModel):
     """Status for one repo document index."""
 
@@ -304,9 +329,8 @@ def repo_config_guidance(status: RepoStatus) -> dict[str, Any] | None:
             "globs for project docs and keep generated/dependency directories "
             "in exclude before running docsgraph sync."
         )
-    elif (
-        len(status.documents) == 1
-        and Path(status.documents[0].source).name.lower().startswith("readme")
+    elif len(status.documents) == 1 and Path(status.documents[0].source).name.lower().startswith(
+        "readme"
     ):
         state = "narrow"
         message = (
@@ -379,14 +403,123 @@ def repo_embedding_mismatch_next_steps(root: Path) -> list[dict[str, str]]:
             ),
         },
         {
-            "command": f"docsgraph mcp config --client codex --repo {repo_arg} --fake",
+            "command": f"docsgraph serve --repo {repo_arg} --fake",
             "reason": (
                 "Alternative for deterministic smoke-test indexes built with "
-                "`docsgraph sync --fake`: make the MCP server query with the "
-                "same fake embedder."
+                "`docsgraph sync --fake`: serve queries with the same fake embedder."
             ),
         },
     ]
+
+
+def repo_index_embedder_infos(
+    root: Path,
+    status: RepoStatus,
+) -> list[dict[str, Any]]:
+    """Return embedder provenance from indexed document manifests."""
+    infos: list[dict[str, Any]] = []
+    for doc in status.documents:
+        if doc.state not in {"indexed", "stale"}:
+            continue
+        try:
+            manifest = read_manifest(root / doc.doc_dir)
+        except Exception:
+            continue
+        vectors = manifest.subindexes.get("vectors")
+        embedder = manifest.embedder or (vectors.embedder if vectors else None)
+        dim = manifest.embedding_dim or (vectors.dim if vectors else None)
+        infos.append(
+            {
+                "doc": doc.id,
+                "source": doc.source,
+                "embedder": embedder,
+                "mode": manifest.embedder_mode or _embedder_mode_from_name(embedder),
+                "model": manifest.embedder_model or _embedder_model_from_name(embedder),
+                "dim": dim,
+                "legacy": manifest.embedder is None or manifest.embedding_dim is None,
+            }
+        )
+    return infos
+
+
+def validate_repo_embedder_compatibility(root: Path, embedder: Embedder) -> None:
+    """Raise a user-facing config error when a repo index cannot be queried."""
+    status = repo_status(root)
+    infos = repo_index_embedder_infos(root, status)
+    incompatible = [
+        info
+        for info in infos
+        if info.get("embedder") != embedder.name or info.get("dim") != embedder.dim
+    ]
+    if incompatible:
+        msg = repo_embedder_mismatch_message(
+            root,
+            index_infos=incompatible,
+            query_embedder=embedder,
+        )
+        raise ConfigError(
+            msg,
+            details={
+                "root": str(root),
+                "query_embedder": embedder.name,
+                "query_dim": embedder.dim,
+                "index_embedders": incompatible,
+                "next_steps": repo_embedding_mismatch_next_steps(root),
+            },
+        )
+
+
+def repo_embedder_mismatch_message(
+    root: Path,
+    *,
+    index_infos: list[dict[str, Any]],
+    query_embedder: Embedder,
+) -> str:
+    """Format a direct, actionable query/index embedder mismatch message."""
+    unique = sorted(
+        {
+            (
+                str(info.get("embedder") or "unknown"),
+                info.get("dim"),
+                str(info.get("mode") or "unknown"),
+            )
+            for info in index_infos
+        }
+    )
+    if len(unique) == 1:
+        index_embedder, index_dim, mode = unique[0]
+        built = f"This index was built with {index_embedder} dim={index_dim}."
+        fake_fix = (
+            f"  docsgraph serve --repo {root} --fake"
+            if mode == "fake"
+            else f"  docsgraph serve --repo {root}"
+        )
+    else:
+        built = "This repo contains mixed index embedders: " + ", ".join(
+            f"{name} dim={dim}" for name, dim, _mode in unique
+        )
+        fake_fix = f"  docsgraph serve --repo {root} --fake"
+    return "\n".join(
+        [
+            built,
+            f"Current query embedder is {query_embedder.name} dim={query_embedder.dim}.",
+            "Fix one of:",
+            fake_fix,
+            "  docsgraph sync --force",
+        ]
+    )
+
+
+def _embedder_mode_from_name(name: str | None) -> str | None:
+    if name is None:
+        return None
+    return "fake" if name.startswith("fake:") else "real"
+
+
+def _embedder_model_from_name(name: str | None) -> str | None:
+    if name is None or ":" not in name:
+        return None
+    return name.split(":", 1)[1] or None
 
 
 def _repo_setup_details(
@@ -555,6 +688,75 @@ def discover_documents(root: Path, config: RepoConfig) -> tuple[DiscoveredDocume
     return tuple(docs)
 
 
+def discover_document_surface(root: Path, config: RepoConfig) -> DiscoveryReport:
+    """Classify repository document-like files against include/exclude config."""
+    docs = discover_documents(root, config)
+    included_by_path = {doc.relative_source: doc for doc in docs}
+    allowed_suffixes = SUPPORTED_SUFFIXES if config.enable_markitdown else NATIVE_SUFFIXES
+    doc_like_suffixes = SUPPORTED_SUFFIXES
+
+    included = tuple(
+        DiscoveryReportItem(
+            path=doc.relative_source,
+            reason="included by config",
+            doc_id=doc.id,
+            matched_rule=_matching_include(doc.relative_source, config.include),
+            extension=doc.source.suffix.lower(),
+        )
+        for doc in docs
+    )
+    candidate_not_included: list[DiscoveryReportItem] = []
+    excluded: list[DiscoveryReportItem] = []
+    unsupported: list[DiscoveryReportItem] = []
+
+    for path in sorted(
+        (item for item in root.rglob("*") if item.is_file()),
+        key=lambda p: _relative_posix(root, p),
+    ):
+        rel = _relative_posix(root, path)
+        if rel in included_by_path:
+            continue
+        suffix = path.suffix.lower()
+        if suffix not in doc_like_suffixes:
+            continue
+        excluded_rule = _matching_exclude(rel, config.exclude)
+        if excluded_rule is not None:
+            excluded.append(
+                DiscoveryReportItem(
+                    path=rel,
+                    reason=f"excluded by {excluded_rule}",
+                    matched_rule=excluded_rule,
+                    extension=suffix,
+                )
+            )
+            continue
+        if suffix not in allowed_suffixes:
+            unsupported.append(
+                DiscoveryReportItem(
+                    path=rel,
+                    reason="extension not enabled",
+                    extension=suffix,
+                )
+            )
+            continue
+        matched_include = _matching_include(rel, config.include)
+        if matched_include is None:
+            candidate_not_included.append(
+                DiscoveryReportItem(
+                    path=rel,
+                    reason="no include rule matched",
+                    extension=suffix,
+                )
+            )
+    return DiscoveryReport(
+        root=root,
+        included=included,
+        candidate_not_included=tuple(candidate_not_included),
+        excluded=tuple(excluded),
+        unsupported=tuple(unsupported),
+    )
+
+
 def document_dir(root: Path, config: RepoConfig, doc_id: str) -> Path:
     return cairn_dir(root) / config.documents_dir / doc_id
 
@@ -570,9 +772,7 @@ def load_repo_document_index(
     selected = doc_id or _choose_primary_doc(status)
     if selected is None:
         msg = "no indexed Cairn documents found. Run `docsgraph sync` first."
-        raise IndexNotFoundError(
-            msg, details=_repo_setup_details(root, status=status)
-        )
+        raise IndexNotFoundError(msg, details=_repo_setup_details(root, status=status))
     doc = next((item for item in status.documents if item.id == selected), None)
     if doc is None:
         msg = f"repo document is not configured: {selected!r}"
@@ -829,9 +1029,7 @@ async def search_repo_documents(
 
     config = load_repo_config(root)
     effective_sections_per_doc = (
-        config.search_sections_per_doc
-        if sections_per_doc is None
-        else sections_per_doc
+        config.search_sections_per_doc if sections_per_doc is None else sections_per_doc
     )
     if effective_sections_per_doc < 1 or effective_sections_per_doc > 8:
         msg = f"sections_per_doc must be in [1, 8]; got {sections_per_doc}"
@@ -844,17 +1042,10 @@ async def search_repo_documents(
         raise ToolError(msg, details={"invalid": sorted(bad)})
 
     status = repo_status(root, config=config)
-    candidates = tuple(
-        doc for doc in status.documents if doc.state in {"indexed", "stale"}
-    )
+    candidates = tuple(doc for doc in status.documents if doc.state in {"indexed", "stale"})
     if not candidates:
-        msg = (
-            "no searchable Cairn documents found for this repo. "
-            "Run `docsgraph sync` first."
-        )
-        raise IndexNotFoundError(
-            msg, details=_repo_setup_details(root, status=status)
-        )
+        msg = "no searchable Cairn documents found for this repo. Run `docsgraph sync` first."
+        raise IndexNotFoundError(msg, details=_repo_setup_details(root, status=status))
 
     vectors = await embedder.embed([query])
     if not vectors:
@@ -874,6 +1065,46 @@ async def search_repo_documents(
     )
     if payload.get("embedding_mismatch") is not None:
         payload["next_steps"] = repo_embedding_mismatch_next_steps(root)
+    return {
+        "tokens_returned": estimate_tokens_of_payload(payload),
+        "data": payload,
+    }
+
+
+async def search_repo_keyword(
+    root: Path,
+    *,
+    terms: list[str],
+    scope: str | None = None,
+    k: int = 12,
+    mode: Mode = "any",
+) -> dict[str, Any]:
+    """Exact lexical search across every indexed/stale document in a repo."""
+    status = repo_status(root)
+    candidates = [doc for doc in status.documents if doc.state in {"indexed", "stale"}]
+    if not candidates:
+        msg = "no searchable Cairn documents found for this repo. Run `docsgraph sync` first."
+        raise IndexNotFoundError(msg, details=_repo_setup_details(root, status=status))
+
+    hits: list[dict[str, Any]] = []
+    for doc in candidates:
+        index = DocumentIndex.load(root / doc.doc_dir)
+        response = await search_keyword(
+            index,
+            terms=terms,
+            scope=scope,
+            k=k,
+            mode=mode,
+        )
+        for hit in response.data["hits"]:
+            hits.append({"doc": doc.id, "source": doc.source, **hit})
+    hits.sort(key=lambda item: (-int(item["score"]), str(item["doc"]), str(item["id"])))
+    payload = {
+        "terms": terms,
+        "mode": mode,
+        "hits": hits[:k],
+        "searched_documents": len(candidates),
+    }
     return {
         "tokens_returned": estimate_tokens_of_payload(payload),
         "data": payload,
@@ -1397,9 +1628,7 @@ def _related_documents_by_entities(
         except Exception:
             continue
         if index.entities is not None:
-            target_keys.update(
-                (entity.kind, entity.canonical) for entity in index.entities
-            )
+            target_keys.update((entity.kind, entity.canonical) for entity in index.entities)
         break
     if not target_keys:
         return []
@@ -1642,8 +1871,7 @@ def _read_repo_manifest_status(root: Path) -> tuple[RepoDocumentStatus, ...] | N
         if payload.get("format_version") != REPO_MANIFEST_VERSION:
             return None
         return tuple(
-            RepoDocumentStatus.model_validate(item)
-            for item in payload.get("documents", [])
+            RepoDocumentStatus.model_validate(item) for item in payload.get("documents", [])
         )
     except (OSError, ValueError, TypeError):
         return None
@@ -1653,9 +1881,7 @@ def repo_status(root: Path, *, config: RepoConfig | None = None) -> RepoStatus:
     """Compute indexed/stale/missing status for configured repo docs."""
     cfg = config or load_repo_config(root)
     docs = discover_documents(root, cfg)
-    previous = {
-        doc.id: doc for doc in (_read_repo_manifest_status(root) or ())
-    }
+    previous = {doc.id: doc for doc in (_read_repo_manifest_status(root) or ())}
     statuses: list[RepoDocumentStatus] = [
         _document_status(root, doc, previous=previous.get(doc.id)) for doc in docs
     ]
@@ -1738,26 +1964,20 @@ def _document_status(
             error=str(exc),
         )
 
-    previous_indexed_file_hash = (
-        previous.indexed_source_file_hash if previous is not None else None
-    )
+    previous_indexed_file_hash = previous.indexed_source_file_hash if previous is not None else None
     if (
         previous is not None
         and previous.indexed_hash == manifest.source_hash
         and previous_indexed_file_hash is not None
     ):
-        state: DocState = (
-            "indexed" if previous_indexed_file_hash == source_file_hash else "stale"
-        )
+        state: DocState = "indexed" if previous_indexed_file_hash == source_file_hash else "stale"
         return RepoDocumentStatus(
             id=doc.id,
             source=doc.relative_source,
             doc_dir=_relative_posix(root, doc.out_dir),
             state=state,
             section_count=previous.section_count,
-            source_hash=(
-                manifest.source_hash if state == "indexed" else previous.source_hash
-            ),
+            source_hash=(manifest.source_hash if state == "indexed" else previous.source_hash),
             indexed_hash=manifest.source_hash,
             source_file_hash=source_file_hash,
             indexed_source_file_hash=previous_indexed_file_hash,
@@ -1792,11 +2012,7 @@ def _document_status(
         indexed_source_file_hash=(
             source_file_hash
             if state == "indexed"
-            else (
-                previous.indexed_source_file_hash
-                if previous is not None
-                else None
-            )
+            else (previous.indexed_source_file_hash if previous is not None else None)
         ),
         indexed_at=manifest.indexed_at,
     )
@@ -1819,9 +2035,7 @@ def _orphaned_statuses(
             index = DocumentIndex.load(child)
             manifest_source = Path(manifest.source_path)
             source_path = (
-                manifest_source
-                if manifest_source.is_absolute()
-                else root / manifest_source
+                manifest_source if manifest_source.is_absolute() else root / manifest_source
             )
             out.append(
                 RepoDocumentStatus(
@@ -1832,9 +2046,7 @@ def _orphaned_statuses(
                     section_count=len(index.tree),
                     indexed_hash=manifest.source_hash,
                     indexed_source_file_hash=(
-                        _file_hash(source_path)
-                        if source_path.exists()
-                        else None
+                        _file_hash(source_path) if source_path.exists() else None
                     ),
                     indexed_at=manifest.indexed_at,
                 )
@@ -1899,14 +2111,27 @@ def _relative_posix(root: Path, path: Path) -> str:
 
 
 def _is_excluded(relative_path: str, patterns: tuple[str, ...]) -> bool:
+    return _matching_exclude(relative_path, patterns) is not None
+
+
+def _matching_include(relative_path: str, patterns: tuple[str, ...]) -> str | None:
     rel = Path(relative_path)
     rel_posix = rel.as_posix()
     for pattern in patterns:
         if rel.match(pattern) or fnmatchcase(rel_posix, pattern):
-            return True
+            return pattern
+    return None
+
+
+def _matching_exclude(relative_path: str, patterns: tuple[str, ...]) -> str | None:
+    rel = Path(relative_path)
+    rel_posix = rel.as_posix()
+    for pattern in patterns:
+        if rel.match(pattern) or fnmatchcase(rel_posix, pattern):
+            return pattern
         if _matches_excluded_dir(rel, pattern):
-            return True
-    return False
+            return pattern
+    return None
 
 
 def _matches_excluded_dir(relative_path: Path, pattern: str) -> bool:

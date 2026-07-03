@@ -171,9 +171,9 @@ class Indexer:
         ).build(document, out_dir=out_dir, levels=summary_levels)
         self._emit("summaries: done")
         self._emit("vectors: starting")
-        await VectorBuilder(
-            self.embedder, batch_size=self.embed_batch_size
-        ).build(document, out_dir=out_dir)
+        await VectorBuilder(self.embedder, batch_size=self.embed_batch_size).build(
+            document, out_dir=out_dir
+        )
         self._emit("vectors: done")
 
         subindexes: dict[str, SubIndexEntry] = {
@@ -198,9 +198,7 @@ class Indexer:
         entities_reader: Entities | None = None
         if self.entity_extractor is not None:
             self._emit("entities: starting")
-            await EntityBuilder(self.entity_extractor).build(
-                document, out_dir=out_dir
-            )
+            await EntityBuilder(self.entity_extractor).build(document, out_dir=out_dir)
             self._emit("entities: done")
             subindexes["entities"] = SubIndexEntry(
                 path=ENTITIES_FILENAME,
@@ -231,6 +229,10 @@ class Indexer:
             source_hash=document.source_hash,
             indexed_at=datetime.now(UTC),
             subindexes=subindexes,
+            embedder=self.embedder.name,
+            embedder_mode=_embedder_mode(self.embedder.name),
+            embedder_model=_embedder_model(self.embedder.name),
+            embedding_dim=self.embedder.dim,
         )
         self._emit("manifest: writing")
         path = write_manifest(out_dir, manifest)
@@ -299,3 +301,13 @@ def _existing_matches(
         ):
             return False
     return True
+
+
+def _embedder_mode(name: str) -> str:
+    return "fake" if name.startswith("fake:") else "real"
+
+
+def _embedder_model(name: str) -> str | None:
+    if ":" not in name:
+        return None
+    return name.split(":", 1)[1] or None

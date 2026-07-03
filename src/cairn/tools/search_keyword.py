@@ -48,13 +48,26 @@ async def search_keyword(
         if scope is not None and not _matches_scope(node.id, scope):
             continue
 
-        text_lc = (node.title + "\n" + node.raw_text).lower()
+        sources = {
+            "title": node.title,
+            "body": node.raw_text,
+            "metadata": _metadata_text(node.metadata),
+        }
+        text_lc = "\n".join(sources.values()).lower()
         matches: list[dict[str, Any]] = []
         total_score = 0
         for orig, lc in zip(terms, lc_terms, strict=True):
             count = text_lc.count(lc)
             if count > 0:
-                matches.append({"term": orig, "count": count})
+                matches.append(
+                    {
+                        "term": orig,
+                        "count": count,
+                        "sources": [
+                            source for source, text in sources.items() if lc in text.lower()
+                        ],
+                    }
+                )
                 total_score += count * len(orig)
 
         if not matches:
@@ -71,6 +84,10 @@ async def search_keyword(
                     "score": total_score,
                     "anchor": index.anchor(node.id),
                     "matches": matches,
+                    "match_sources": sorted(
+                        {source for match in matches for source in match["sources"]}
+                    ),
+                    "metadata": node.metadata,
                     "head": node.raw_text[:_HEAD_CHARS],
                 },
             )
@@ -92,3 +109,18 @@ async def search_keyword(
 
 def _matches_scope(section_id: str, scope: str) -> bool:
     return section_id == scope or section_id.startswith(scope + "/")
+
+
+def _metadata_text(metadata: dict[str, Any]) -> str:
+    parts: list[str] = []
+    for key in ("title", "description", "tags", "date", "draft"):
+        value = metadata.get(key)
+        if value is None:
+            continue
+        if isinstance(value, list | tuple):
+            text = " ".join(str(item) for item in value)
+        else:
+            text = str(value)
+        if text.strip():
+            parts.append(text.strip())
+    return "\n".join(parts)

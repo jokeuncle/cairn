@@ -231,15 +231,22 @@ Use this scorecard for repository docs reviews.
 
 When a mature repository exposes a bad result, fix Cairn in this order:
 
-1. Improve documentation discovery defaults when the indexed surface is wrong.
-2. Improve evidence blending when the right page is indexed but under-ranked.
-3. Improve `repo_context` composition when search is correct but the returned
+1. Improve discovery diagnostics when users cannot see which documents matched,
+   were excluded, or were skipped for unsupported extensions.
+2. Improve documentation discovery defaults only when a broadly useful
+   repository documentation pattern is consistently missing.
+3. Improve evidence blending when the right page is indexed but under-ranked.
+4. Improve metadata handling when important Markdown frontmatter is invisible
+   to retrieval explanations.
+5. Improve empty-heading handling when navigation nodes are promoted as answer
+   evidence ahead of useful child sections.
+6. Improve `repo_context` composition when search is correct but the returned
    context is not agent-ready.
-4. Improve performance through cache layout, batched scoring, or general
+7. Improve performance through cache layout, batched scoring, or general
    candidate stages only when recall gates keep passing.
-5. Add a regression test that models the documentation pattern, not the
+8. Add a regression test that models the documentation pattern, not the
    repository.
-6. Update this standard if the rule changes what repositories should expect.
+9. Update this standard if the rule changes what repositories should expect.
 
 Do not hardcode a repository, a benchmark answer, or a specific external file
 path. Cairn's credibility comes from stable public rules.

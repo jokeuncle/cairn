@@ -38,9 +38,7 @@ class TestSourceDispatch:
         doc = parser.parse(b"# hi", doc_id="hi")
         assert len(doc.sections) == 1
 
-    def test_source_hash_is_sha256_of_bytes(
-        self, parser: MarkdownParser, simple_md: str
-    ) -> None:
+    def test_source_hash_is_sha256_of_bytes(self, parser: MarkdownParser, simple_md: str) -> None:
         doc = parser.parse(simple_md, doc_id="simple")
         expected = hashlib.sha256(simple_md.encode("utf-8")).hexdigest()
         assert doc.source_hash == expected
@@ -50,9 +48,7 @@ class TestSourceDispatch:
 
 
 class TestSectionStructure:
-    def test_simple_document_section_count(
-        self, parser: MarkdownParser, simple_md: str
-    ) -> None:
+    def test_simple_document_section_count(self, parser: MarkdownParser, simple_md: str) -> None:
         doc = parser.parse(simple_md, doc_id="simple")
         # H1 Intro + H2 Quickstart + H2 Config + H1 Reference + H2 API = 5
         assert len(doc.sections) == 5
@@ -70,16 +66,12 @@ class TestSectionStructure:
             "reference/api",
         ]
 
-    def test_section_levels(
-        self, parser: MarkdownParser, simple_md: str
-    ) -> None:
+    def test_section_levels(self, parser: MarkdownParser, simple_md: str) -> None:
         doc = parser.parse(simple_md, doc_id="simple")
         levels = [s.level for s in doc.sections]
         assert levels == [1, 2, 2, 1, 2]
 
-    def test_section_parent_child_links(
-        self, parser: MarkdownParser, simple_md: str
-    ) -> None:
+    def test_section_parent_child_links(self, parser: MarkdownParser, simple_md: str) -> None:
         doc = parser.parse(simple_md, doc_id="simple")
         by_id = {s.id: s for s in doc.sections}
 
@@ -146,9 +138,7 @@ class TestRawTextAndSpans:
         # The body of the Quickstart child must not leak into Intro's raw_text.
         assert "Install with pip" not in intro_body
 
-    def test_raw_text_of_leaf_section(
-        self, parser: MarkdownParser, simple_md: str
-    ) -> None:
+    def test_raw_text_of_leaf_section(self, parser: MarkdownParser, simple_md: str) -> None:
         doc = parser.parse(simple_md, doc_id="simple")
         by_id = {s.id: s for s in doc.sections}
         api_text = by_id["reference/api"].raw_text
@@ -187,6 +177,35 @@ class TestEdgeCases:
         doc = parser.parse(with_frontmatter_md, doc_id="fm")
         assert len(doc.sections) == 1
         assert doc.sections[0].title == "After Front Matter"
+
+    def test_front_matter_metadata_is_preserved(self, parser: MarkdownParser) -> None:
+        text = "\n".join(
+            [
+                "---",
+                "title: Metadata Title",
+                "description: Metadata description for search.",
+                "tags:",
+                "  - cairo",
+                "  - retrieval",
+                "date: 2026-07-04",
+                "draft: false",
+                "---",
+                "# Body Title",
+                "",
+                "Body text.",
+            ]
+        )
+
+        doc = parser.parse(text, doc_id="fm")
+
+        assert doc.metadata == {
+            "title": "Metadata Title",
+            "description": "Metadata description for search.",
+            "tags": ["cairo", "retrieval"],
+            "date": "2026-07-04",
+            "draft": False,
+        }
+        assert doc.sections[0].metadata["title"] == "Metadata Title"
 
     def test_inline_markup_stripped_from_title(self, parser: MarkdownParser) -> None:
         text = "# **Bold** and *italic* `code`\n\nBody."

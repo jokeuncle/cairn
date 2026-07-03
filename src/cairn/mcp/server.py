@@ -30,6 +30,7 @@ from cairn.repo import (
     repo_setup_next_steps,
     repo_status,
     search_repo_documents,
+    search_repo_keyword,
 )
 from cairn.tools.base import DocumentIndex, estimate_tokens_of_payload
 from cairn.tools.find_mentions import find_mentions as find_mentions_tool
@@ -218,9 +219,7 @@ def build_server(index: DocumentIndex, embedder: Embedder) -> Server:
         return CAIRN_TOOLS
 
     @server.call_tool()  # type: ignore[untyped-decorator]
-    async def _call_tool(
-        name: str, arguments: dict[str, Any] | None
-    ) -> dict[str, Any]:
+    async def _call_tool(name: str, arguments: dict[str, Any] | None) -> dict[str, Any]:
         return await dispatch_tool(name, arguments, index, embedder)
 
     return server
@@ -360,6 +359,21 @@ async def dispatch_repo_tool(
                 data=data,
                 trace=trace,
             )
+        if name == "search_keyword" and args.get("doc") is None:
+            args.pop("doc", None)
+            result = await search_repo_keyword(repo_root, **args)
+            data = result["data"]
+            _trace_step(
+                trace,
+                "search_repo_keyword",
+                returned=len(data.get("hits", [])),
+                searched_documents=data.get("searched_documents"),
+            )
+            return _success_envelope(
+                tokens_returned=result["tokens_returned"],
+                data=data,
+                trace=trace,
+            )
 
         doc_id = args.pop("doc", None)
         if doc_id is not None and not isinstance(doc_id, str):
@@ -442,9 +456,7 @@ class RepoRootResolver:
         self.server = server
         self.workspace_hint = workspace_hint
 
-    async def resolve(
-        self, args: dict[str, Any], trace: dict[str, Any]
-    ) -> Path:
+    async def resolve(self, args: dict[str, Any], trace: dict[str, Any]) -> Path:
         project_path = args.pop("projectPath", None)
         if project_path is not None:
             if not isinstance(project_path, str) or not project_path:
@@ -515,9 +527,7 @@ class RepoRootResolver:
         except LookupError:
             return None, "roots/list"
         params = context.session.client_params
-        roots_capability = (
-            params.capabilities.roots if params is not None else None
-        )
+        roots_capability = params.capabilities.roots if params is not None else None
         if roots_capability is None:
             return None, "roots/list"
         try:
@@ -544,9 +554,7 @@ async def dispatch_workspace_repo_tool(
     trace = _new_trace(name, args, mode="repo")
     try:
         repo_root = await resolver.resolve(args, trace)
-        return await dispatch_repo_tool(
-            name, args, repo_root, embedder, trace=trace
-        )
+        return await dispatch_repo_tool(name, args, repo_root, embedder, trace=trace)
     except CairnError as exc:
         return _error_envelope(error=exc.to_envelope(), trace=trace)
 
@@ -561,12 +569,8 @@ def build_repo_server(repo_root: Path | None, embedder: Embedder) -> Server:
         return REPO_TOOLS
 
     @server.call_tool()  # type: ignore[untyped-decorator]
-    async def _call_tool(
-        name: str, arguments: dict[str, Any] | None
-    ) -> dict[str, Any]:
-        return await dispatch_workspace_repo_tool(
-            name, arguments, resolver, embedder
-        )
+    async def _call_tool(name: str, arguments: dict[str, Any] | None) -> dict[str, Any]:
+        return await dispatch_workspace_repo_tool(name, arguments, resolver, embedder)
 
     return server
 
@@ -576,15 +580,11 @@ async def serve_stdio(doc_dir: Path, *, embedder: Embedder) -> None:
     index = DocumentIndex.load(doc_dir)
     server = build_server(index, embedder)
     async with stdio_server() as (read_stream, write_stream):
-        await server.run(
-            read_stream, write_stream, server.create_initialization_options()
-        )
+        await server.run(read_stream, write_stream, server.create_initialization_options())
 
 
 async def serve_repo_stdio(repo_root: Path | None, *, embedder: Embedder) -> None:
     """Serve a repo-scoped Cairn document index over MCP stdio."""
     server = build_repo_server(repo_root, embedder)
     async with stdio_server() as (read_stream, write_stream):
-        await server.run(
-            read_stream, write_stream, server.create_initialization_options()
-        )
+        await server.run(read_stream, write_stream, server.create_initialization_options())

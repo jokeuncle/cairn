@@ -103,26 +103,18 @@ class TestSchemas:
 
 
 class TestDispatchHappyPath:
-    async def test_outline(
-        self, index: DocumentIndex, fake_embedder: FakeEmbedder
-    ) -> None:
+    async def test_outline(self, index: DocumentIndex, fake_embedder: FakeEmbedder) -> None:
         env = await dispatch_tool("outline", {"depth": 2}, index, fake_embedder)
         assert env["ok"] is True
         assert env["tokens_returned"] > 0
         assert "tree" in env["data"]
 
-    async def test_get_section(
-        self, index: DocumentIndex, fake_embedder: FakeEmbedder
-    ) -> None:
-        env = await dispatch_tool(
-            "get_section", {"id": "introduction"}, index, fake_embedder
-        )
+    async def test_get_section(self, index: DocumentIndex, fake_embedder: FakeEmbedder) -> None:
+        env = await dispatch_tool("get_section", {"id": "introduction"}, index, fake_embedder)
         assert env["ok"] is True
         assert env["data"]["id"] == "introduction"
 
-    async def test_expand(
-        self, index: DocumentIndex, fake_embedder: FakeEmbedder
-    ) -> None:
+    async def test_expand(self, index: DocumentIndex, fake_embedder: FakeEmbedder) -> None:
         env = await dispatch_tool(
             "expand",
             {"id": "introduction", "to": "full"},
@@ -132,9 +124,7 @@ class TestDispatchHappyPath:
         assert env["ok"] is True
         assert "This is the intro body" in env["data"]["content"]
 
-    async def test_search_semantic(
-        self, index: DocumentIndex, fake_embedder: FakeEmbedder
-    ) -> None:
+    async def test_search_semantic(self, index: DocumentIndex, fake_embedder: FakeEmbedder) -> None:
         env = await dispatch_tool(
             "search_semantic",
             {"query": "intro body lines", "k": 3},
@@ -150,9 +140,7 @@ class TestDispatchHappyPath:
             for step in env["trace"]["steps"]
         )
 
-    async def test_search_keyword(
-        self, index: DocumentIndex, fake_embedder: FakeEmbedder
-    ) -> None:
+    async def test_search_keyword(self, index: DocumentIndex, fake_embedder: FakeEmbedder) -> None:
         env = await dispatch_tool(
             "search_keyword",
             {"terms": ["pip"]},
@@ -168,9 +156,7 @@ class TestDispatchErrors:
     async def test_unknown_tool_returns_error_envelope(
         self, index: DocumentIndex, fake_embedder: FakeEmbedder
     ) -> None:
-        env = await dispatch_tool(
-            "nonexistent_tool", {}, index, fake_embedder
-        )
+        env = await dispatch_tool("nonexistent_tool", {}, index, fake_embedder)
         assert env["ok"] is False
         assert env["error"]["code"] == "INVALID_INPUT"
 
@@ -186,9 +172,7 @@ class TestDispatchErrors:
         self, index: DocumentIndex, fake_embedder: FakeEmbedder
     ) -> None:
         # outline with invalid depth → ToolError → envelope
-        env = await dispatch_tool(
-            "outline", {"depth": 99}, index, fake_embedder
-        )
+        env = await dispatch_tool("outline", {"depth": 99}, index, fake_embedder)
         assert env["ok"] is False
         assert env["error"]["code"] == "INVALID_INPUT"
         assert "depth" in env["error"]["message"].lower()
@@ -196,9 +180,7 @@ class TestDispatchErrors:
     async def test_unknown_section_returns_not_found(
         self, index: DocumentIndex, fake_embedder: FakeEmbedder
     ) -> None:
-        env = await dispatch_tool(
-            "get_section", {"id": "ghost"}, index, fake_embedder
-        )
+        env = await dispatch_tool("get_section", {"id": "ghost"}, index, fake_embedder)
         assert env["ok"] is False
         assert env["error"]["code"] == "NOT_FOUND"
 
@@ -233,9 +215,7 @@ class TestRepoDispatch:
         repo = tmp_path / "repo"
         nested = repo / "docs" / "nested"
         nested.mkdir(parents=True)
-        (repo / "README.md").write_text(
-            "# Readme\n\nProject overview.\n", encoding="utf-8"
-        )
+        (repo / "README.md").write_text("# Readme\n\nProject overview.\n", encoding="utf-8")
         write_default_config(repo)
         await sync_repo(
             repo,
@@ -245,16 +225,13 @@ class TestRepoDispatch:
         )
 
         resolver = RepoRootResolver(workspace_hint=nested)
-        env = await dispatch_workspace_repo_tool(
-            "list_documents", {}, resolver, fake_embedder
-        )
+        env = await dispatch_workspace_repo_tool("list_documents", {}, resolver, fake_embedder)
 
         assert env["ok"] is True
         assert env["data"]["root"] == str(repo)
         assert env["trace"]["repo_root"] == str(repo)
         assert any(
-            step["name"] == "resolve_repo_root"
-            and step["source"] == "workspace_hint"
+            step["name"] == "resolve_repo_root" and step["source"] == "workspace_hint"
             for step in env["trace"]["steps"]
         )
 
@@ -263,9 +240,7 @@ class TestRepoDispatch:
     ) -> None:
         repo = tmp_path / "repo"
         repo.mkdir()
-        (repo / "README.md").write_text(
-            "# Readme\n\nProject overview.\n", encoding="utf-8"
-        )
+        (repo / "README.md").write_text("# Readme\n\nProject overview.\n", encoding="utf-8")
         write_default_config(repo)
         await sync_repo(
             repo,
@@ -286,8 +261,7 @@ class TestRepoDispatch:
         assert env["data"]["root"] == str(repo)
         assert env["trace"]["arguments"]["projectPath"] == str(repo / "docs")
         assert any(
-            step["name"] == "resolve_repo_root"
-            and step["source"] == "projectPath"
+            step["name"] == "resolve_repo_root" and step["source"] == "projectPath"
             for step in env["trace"]["steps"]
         )
 
@@ -296,9 +270,7 @@ class TestRepoDispatch:
     ) -> None:
         resolver = RepoRootResolver(workspace_hint=tmp_path)
 
-        env = await dispatch_workspace_repo_tool(
-            "list_documents", {}, resolver, fake_embedder
-        )
+        env = await dispatch_workspace_repo_tool("list_documents", {}, resolver, fake_embedder)
 
         assert env["ok"] is False
         assert env["error"]["code"] == "INVALID_CONFIG"
@@ -330,9 +302,7 @@ class TestRepoDispatch:
     async def test_list_documents_and_route_tool(
         self, tmp_path: Path, fake_embedder: FakeEmbedder
     ) -> None:
-        (tmp_path / "README.md").write_text(
-            "# Readme\n\nProject overview.\n", encoding="utf-8"
-        )
+        (tmp_path / "README.md").write_text("# Readme\n\nProject overview.\n", encoding="utf-8")
         write_default_config(tmp_path)
         await sync_repo(
             tmp_path,
@@ -341,16 +311,11 @@ class TestRepoDispatch:
             index_config=IndexConfig(),
         )
 
-        listed = await dispatch_repo_tool(
-            "list_documents", {}, tmp_path, fake_embedder
-        )
+        listed = await dispatch_repo_tool("list_documents", {}, tmp_path, fake_embedder)
         assert listed["ok"] is True
         assert listed["data"]["documents"][0]["id"] == "readme"
         assert "documentation" in listed["data"]["usage_guidance"]["prefer_cairn_for"][0]
-        assert (
-            "source-code symbol"
-            in listed["data"]["usage_guidance"]["prefer_other_tools_for"][0]
-        )
+        assert "source-code symbol" in listed["data"]["usage_guidance"]["prefer_other_tools_for"][0]
 
         outlined = await dispatch_repo_tool(
             "outline",
@@ -364,9 +329,7 @@ class TestRepoDispatch:
     async def test_list_documents_readme_only_returns_config_guidance(
         self, tmp_path: Path, fake_embedder: FakeEmbedder
     ) -> None:
-        (tmp_path / "README.md").write_text(
-            "# Readme\n\nProject overview.\n", encoding="utf-8"
-        )
+        (tmp_path / "README.md").write_text("# Readme\n\nProject overview.\n", encoding="utf-8")
         write_default_config(tmp_path)
         await sync_repo(
             tmp_path,
@@ -375,9 +338,7 @@ class TestRepoDispatch:
             index_config=IndexConfig(),
         )
 
-        listed = await dispatch_repo_tool(
-            "list_documents", {}, tmp_path, fake_embedder
-        )
+        listed = await dispatch_repo_tool("list_documents", {}, tmp_path, fake_embedder)
 
         assert listed["ok"] is True
         guidance = listed["data"]["config_guidance"]
@@ -389,30 +350,20 @@ class TestRepoDispatch:
     async def test_list_documents_without_sync_returns_next_steps(
         self, tmp_path: Path, fake_embedder: FakeEmbedder
     ) -> None:
-        (tmp_path / "README.md").write_text(
-            "# Readme\n\nProject overview.\n", encoding="utf-8"
-        )
+        (tmp_path / "README.md").write_text("# Readme\n\nProject overview.\n", encoding="utf-8")
         write_default_config(tmp_path)
 
-        listed = await dispatch_repo_tool(
-            "list_documents", {}, tmp_path, fake_embedder
-        )
+        listed = await dispatch_repo_tool("list_documents", {}, tmp_path, fake_embedder)
 
         assert listed["ok"] is True
         assert listed["data"]["documents"][0]["state"] == "missing"
         commands = [step["command"] for step in listed["data"]["next_steps"]]
         assert commands[:2] == ["docsgraph sync", "docsgraph status"]
 
-    async def test_search_documents(
-        self, tmp_path: Path, fake_embedder: FakeEmbedder
-    ) -> None:
-        (tmp_path / "README.md").write_text(
-            "# Readme\n\nProject overview.\n", encoding="utf-8"
-        )
+    async def test_search_documents(self, tmp_path: Path, fake_embedder: FakeEmbedder) -> None:
+        (tmp_path / "README.md").write_text("# Readme\n\nProject overview.\n", encoding="utf-8")
         (tmp_path / "docs").mkdir()
-        (tmp_path / "docs" / "guide.md").write_text(
-            "# Guide\n\nDetailed docs.\n", encoding="utf-8"
-        )
+        (tmp_path / "docs" / "guide.md").write_text("# Guide\n\nDetailed docs.\n", encoding="utf-8")
         write_default_config(tmp_path)
         await sync_repo(
             tmp_path,
@@ -432,12 +383,37 @@ class TestRepoDispatch:
         assert env["tokens_returned"] > 0
         assert any(hit["doc"] == "docs-guide" for hit in env["data"]["hits"])
 
+    async def test_search_keyword_without_doc_searches_all_repo_documents(
+        self, tmp_path: Path, fake_embedder: FakeEmbedder
+    ) -> None:
+        (tmp_path / "README.md").write_text("# Readme\n\nRoot overview.\n", encoding="utf-8")
+        (tmp_path / "docs").mkdir()
+        (tmp_path / "docs" / "guide.md").write_text(
+            "# Guide\n\nThe cross repo needle appears here.\n", encoding="utf-8"
+        )
+        write_default_config(tmp_path)
+        await sync_repo(
+            tmp_path,
+            summarizer=FakeSummarizer(),
+            embedder=fake_embedder,
+            index_config=IndexConfig(),
+        )
+
+        env = await dispatch_repo_tool(
+            "search_keyword",
+            {"terms": ["needle"]},
+            tmp_path,
+            fake_embedder,
+        )
+
+        assert env["ok"] is True
+        assert any(hit["doc"] == "docs-guide" for hit in env["data"]["hits"])
+        assert all("source" in hit for hit in env["data"]["hits"])
+
     async def test_search_documents_without_sync_returns_setup_steps(
         self, tmp_path: Path, fake_embedder: FakeEmbedder
     ) -> None:
-        (tmp_path / "README.md").write_text(
-            "# Readme\n\nProject overview.\n", encoding="utf-8"
-        )
+        (tmp_path / "README.md").write_text("# Readme\n\nProject overview.\n", encoding="utf-8")
         write_default_config(tmp_path)
 
         env = await dispatch_repo_tool(
@@ -457,9 +433,7 @@ class TestRepoDispatch:
     async def test_repo_document_tool_without_sync_returns_setup_steps(
         self, tmp_path: Path, fake_embedder: FakeEmbedder
     ) -> None:
-        (tmp_path / "README.md").write_text(
-            "# Readme\n\nProject overview.\n", encoding="utf-8"
-        )
+        (tmp_path / "README.md").write_text("# Readme\n\nProject overview.\n", encoding="utf-8")
         write_default_config(tmp_path)
 
         env = await dispatch_repo_tool(
@@ -547,9 +521,7 @@ class TestRepoDispatch:
     async def test_repo_tool_bad_arguments_return_error_envelope(
         self, tmp_path: Path, fake_embedder: FakeEmbedder
     ) -> None:
-        (tmp_path / "README.md").write_text(
-            "# Readme\n\nProject overview.\n", encoding="utf-8"
-        )
+        (tmp_path / "README.md").write_text("# Readme\n\nProject overview.\n", encoding="utf-8")
         write_default_config(tmp_path)
         await sync_repo(
             tmp_path,

@@ -48,6 +48,10 @@ class Manifest(BaseModel):
     source_hash: str
     indexed_at: datetime
     subindexes: dict[str, SubIndexEntry]
+    embedder: str | None = None
+    embedder_mode: str | None = None
+    embedder_model: str | None = None
+    embedding_dim: int | None = None
 
 
 def write_manifest(out_dir: Path, manifest: Manifest) -> Path:
@@ -75,8 +79,7 @@ def read_manifest(doc_dir: Path) -> Manifest:
     version = payload.get("format_version")
     if version != MANIFEST_FORMAT_VERSION:
         msg = (
-            f"unsupported manifest format version: {version!r} "
-            f"(expected {MANIFEST_FORMAT_VERSION})"
+            f"unsupported manifest format version: {version!r} (expected {MANIFEST_FORMAT_VERSION})"
         )
         raise IndexNotFoundError(msg, details={"path": str(path)})
 

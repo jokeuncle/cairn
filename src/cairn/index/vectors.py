@@ -57,16 +57,31 @@ class VectorEntry(BaseModel):
     vector: list[float]
 
 
-def embedding_text(node: SectionNode) -> str:
+def embedding_text(node: SectionNode, *, metadata: dict[str, Any] | None = None) -> str:
     """Compose the text we embed for a section.
 
     Includes the title so heading information enters the embedding, and falls
     back to title alone for sections with empty bodies.
     """
+    metadata_part = _metadata_text(metadata or node.metadata)
     body = node.raw_text.strip()
-    if not body:
-        return node.title
-    return f"{node.title}\n\n{body}"
+    parts = [part for part in (metadata_part, node.title, body) if part]
+    return "\n\n".join(parts)
+
+
+def _metadata_text(metadata: dict[str, Any]) -> str:
+    parts: list[str] = []
+    for key in ("title", "description", "tags", "date", "draft"):
+        value = metadata.get(key)
+        if value is None:
+            continue
+        if isinstance(value, list | tuple):
+            text = " ".join(str(item) for item in value if str(item).strip())
+        else:
+            text = str(value)
+        if text.strip():
+            parts.append(f"{key}: {text.strip()}")
+    return "\n".join(parts)
 
 
 def l2_normalize(vec: list[float]) -> list[float]:
@@ -102,24 +117,18 @@ class VectorBuilder:
         manifest_path = out_dir / VECTORS_MANIFEST_FILENAME
 
         ids = [s.id for s in document.sections]
-        texts = [embedding_text(s) for s in document.sections]
+        texts = [embedding_text(s, metadata=document.metadata) for s in document.sections]
 
         vectors: list[list[float]] = []
         for i in range(0, len(texts), self.batch_size):
             batch = texts[i : i + self.batch_size]
             raw = await self.embedder.embed(batch)
             if len(raw) != len(batch):
-                msg = (
-                    f"embedder returned {len(raw)} vectors for batch of "
-                    f"{len(batch)}"
-                )
+                msg = f"embedder returned {len(raw)} vectors for batch of {len(batch)}"
                 raise IndexBuildError(msg)
             for vec in raw:
                 if len(vec) != self.embedder.dim:
-                    msg = (
-                        f"embedder returned dim={len(vec)} but expected "
-                        f"dim={self.embedder.dim}"
-                    )
+                    msg = f"embedder returned dim={len(vec)} but expected dim={self.embedder.dim}"
                     raise IndexBuildError(msg)
                 vectors.append(l2_normalize(vec))
 
@@ -130,6 +139,10 @@ class VectorBuilder:
             "format_version": VECTORS_FORMAT_VERSION,
             "doc_id": document.id,
             "embedder": self.embedder.name,
+            "embedder_mode": "fake" if self.embedder.name.startswith("fake:") else "real",
+            "embedder_model": self.embedder.name.split(":", 1)[1]
+            if ":" in self.embedder.name
+            else None,
             "dim": self.embedder.dim,
             "section_count": len(ids),
             "generated_at": now.isoformat(),
@@ -158,9 +171,7 @@ class VectorBuilder:
         )
         table = db.create_table(VECTORS_TABLE_NAME, schema=schema)
         if ids:
-            records = [
-                {"id": sid, "vector": vec} for sid, vec in zip(ids, vectors, strict=True)
-            ]
+            records = [{"id": sid, "vector": vec} for sid, vec in zip(ids, vectors, strict=True)]
             table.add(records)
 
 
@@ -238,9 +249,7 @@ class Vectors:
             raise IndexBuildError(msg)
 
         normalized = l2_normalize(query)
-        return await asyncio.to_thread(
-            self._sync_search, normalized, k, scope_prefix
-        )
+        return await asyncio.to_thread(self._sync_search, normalized, k, scope_prefix)
 
     def _sync_search(
         self,
@@ -250,9 +259,7 @@ class Vectors:
     ) -> list[VectorHit]:
         q = self._table.search(vec).distance_type("cosine")
         if scope_prefix is not None:
-            predicate = (
-                f"id = '{scope_prefix}' OR id LIKE '{scope_prefix}/%'"
-            )
+            predicate = f"id = '{scope_prefix}' OR id LIKE '{scope_prefix}/%'"
             q = q.where(predicate, prefilter=True)
         rows = q.limit(k).to_list()
 

@@ -16,6 +16,7 @@ from cairn.engine.manifest import read_manifest
 from cairn.repo import (
     DEFAULT_EXCLUDE,
     RepoConfig,
+    discover_document_surface,
     discover_documents,
     find_repo_root,
     load_repo_config,
@@ -36,9 +37,7 @@ from cairn.summarize.fake import FakeSummarizer
 def _write_repo_docs(root: Path) -> None:
     (root / "README.md").write_text("# Readme\n\nProject overview.\n", encoding="utf-8")
     (root / "docs").mkdir()
-    (root / "docs" / "guide.md").write_text(
-        "# Guide\n\nDetailed docs.\n", encoding="utf-8"
-    )
+    (root / "docs" / "guide.md").write_text("# Guide\n\nDetailed docs.\n", encoding="utf-8")
 
 
 class _BlockingSummarizer:
@@ -106,9 +105,7 @@ def _write_complex_repo_docs(root: Path) -> None:
 
 
 class TestRepoConfig:
-    def test_missing_config_errors_use_docsgraph_next_steps(
-        self, tmp_path: Path
-    ) -> None:
+    def test_missing_config_errors_use_docsgraph_next_steps(self, tmp_path: Path) -> None:
         with pytest.raises(ConfigError) as exc_info:
             load_repo_config(tmp_path)
 
@@ -118,9 +115,7 @@ class TestRepoConfig:
             "docsgraph sync",
         ]
 
-    def test_find_repo_root_missing_config_uses_docsgraph_next_steps(
-        self, tmp_path: Path
-    ) -> None:
+    def test_find_repo_root_missing_config_uses_docsgraph_next_steps(self, tmp_path: Path) -> None:
         with pytest.raises(ConfigError) as exc_info:
             load_repo_config(find_repo_root(tmp_path))
 
@@ -132,9 +127,7 @@ class TestRepoConfig:
 
     def test_default_config_discovers_repo_docs(self, tmp_path: Path) -> None:
         _write_repo_docs(tmp_path)
-        (tmp_path / "docs" / "page.html").write_text(
-            "<h1>HTML doc</h1>", encoding="utf-8"
-        )
+        (tmp_path / "docs" / "page.html").write_text("<h1>HTML doc</h1>", encoding="utf-8")
         write_default_config(tmp_path)
         cfg = load_repo_config(tmp_path)
 
@@ -144,9 +137,7 @@ class TestRepoConfig:
         assert docs[0].relative_source == "README.md"
         assert docs[1].relative_source == "docs/guide.md"
 
-    def test_default_config_discovers_common_project_doc_dirs(
-        self, tmp_path: Path
-    ) -> None:
+    def test_default_config_discovers_common_project_doc_dirs(self, tmp_path: Path) -> None:
         (tmp_path / "README.md").write_text("# Root\n\nOverview.\n", encoding="utf-8")
         for rel in [
             "guides/usage.md",
@@ -186,9 +177,7 @@ class TestRepoConfig:
         }.issubset(rels)
         assert all("generated" not in rel for rel in rels)
 
-    def test_default_config_discovers_one_level_nested_readmes(
-        self, tmp_path: Path
-    ) -> None:
+    def test_default_config_discovers_one_level_nested_readmes(self, tmp_path: Path) -> None:
         (tmp_path / "README.md").write_text("# Root\n\nOverview.\n", encoding="utf-8")
         (tmp_path / "backend").mkdir()
         (tmp_path / "backend" / "README.md").write_text(
@@ -213,9 +202,7 @@ class TestRepoConfig:
         assert "examples-demo-readme" not in ids
         assert "pytest-cache-readme" not in ids
 
-    def test_default_excludes_skip_nested_dependency_and_build_dirs(
-        self, tmp_path: Path
-    ) -> None:
+    def test_default_excludes_skip_nested_dependency_and_build_dirs(self, tmp_path: Path) -> None:
         (tmp_path / "apps" / "web").mkdir(parents=True)
         (tmp_path / "apps" / "web" / "README.md").write_text(
             "# Web app\n\nFrontend docs.\n", encoding="utf-8"
@@ -238,9 +225,7 @@ class TestRepoConfig:
 
     def test_markitdown_config_discovers_extra_formats(self, tmp_path: Path) -> None:
         _write_repo_docs(tmp_path)
-        (tmp_path / "docs" / "page.html").write_text(
-            "<h1>HTML doc</h1>", encoding="utf-8"
-        )
+        (tmp_path / "docs" / "page.html").write_text("<h1>HTML doc</h1>", encoding="utf-8")
         write_default_config(tmp_path, enable_markitdown=True)
         cfg = load_repo_config(tmp_path)
 
@@ -249,9 +234,7 @@ class TestRepoConfig:
         assert "docs-page" in {doc.id for doc in docs}
         assert cfg.enable_markitdown is True
 
-    def test_complex_discovery_handles_excludes_and_duplicate_ids(
-        self, tmp_path: Path
-    ) -> None:
+    def test_complex_discovery_handles_excludes_and_duplicate_ids(self, tmp_path: Path) -> None:
         _write_complex_repo_docs(tmp_path)
         write_default_config(tmp_path)
         (tmp_path / ".cairn" / "config.toml").write_text(
@@ -276,6 +259,39 @@ class TestRepoConfig:
         assert "docs-a-b" in ids
         assert "docs-a-b-2" in ids
 
+    def test_discovery_report_explains_unindexed_candidates(self, tmp_path: Path) -> None:
+        (tmp_path / "README.md").write_text("# Readme\n", encoding="utf-8")
+        (tmp_path / "src" / "content" / "blog").mkdir(parents=True)
+        (tmp_path / "src" / "content" / "blog" / "post.md").write_text("# Post\n", encoding="utf-8")
+        (tmp_path / "docs").mkdir()
+        (tmp_path / "docs" / "page.html").write_text("<h1>Page</h1>", encoding="utf-8")
+        (tmp_path / "dist-astro").mkdir()
+        (tmp_path / "dist-astro" / "generated.html").write_text(
+            "<h1>Generated</h1>", encoding="utf-8"
+        )
+        cfg = RepoConfig(
+            include=("README.md",),
+            exclude=("dist-astro/**",),
+            enable_markitdown=False,
+        )
+
+        report = discover_document_surface(tmp_path, cfg)
+
+        assert [item.path for item in report.included] == ["README.md"]
+        blog = next(
+            item
+            for item in report.candidate_not_included
+            if item.path == "src/content/blog/post.md"
+        )
+        assert blog.reason == "no include rule matched"
+        html = next(item for item in report.unsupported if item.path == "docs/page.html")
+        assert html.reason == "extension not enabled"
+        assert html.extension == ".html"
+        generated = next(
+            item for item in report.excluded if item.path == "dist-astro/generated.html"
+        )
+        assert generated.reason == "excluded by dist-astro/**"
+
 
 class TestRepoSync:
     async def test_sync_indexes_discovered_documents(self, tmp_path: Path) -> None:
@@ -296,6 +312,10 @@ class TestRepoSync:
         assert status.missing_count == 0
         assert (tmp_path / ".cairn" / "manifest.json").exists()
         assert load_repo_document_index(tmp_path).doc_id == "readme"
+        manifest = read_manifest(tmp_path / ".cairn" / "documents" / "readme")
+        assert manifest.embedder_mode == "fake"
+        assert manifest.embedding_dim == 32
+        assert manifest.embedder == "fake:bow-hash"
 
     async def test_sync_skips_unchanged_documents(self, tmp_path: Path) -> None:
         _write_repo_docs(tmp_path)
@@ -402,9 +422,7 @@ class TestRepoSync:
             index_config=IndexConfig(),
         )
         indexed = repo_status(tmp_path)
-        readme_hash = next(
-            doc for doc in indexed.documents if doc.id == "readme"
-        ).source_file_hash
+        readme_hash = next(doc for doc in indexed.documents if doc.id == "readme").source_file_hash
         (tmp_path / ".cairn" / "config.toml").write_text(
             "\n".join(
                 [
@@ -424,9 +442,7 @@ class TestRepoSync:
         assert orphaned.state == "orphaned"
         assert orphaned.indexed_source_file_hash == readme_hash
 
-    async def test_search_repo_documents_reports_stale_sources(
-        self, tmp_path: Path
-    ) -> None:
+    async def test_search_repo_documents_reports_stale_sources(self, tmp_path: Path) -> None:
         _write_repo_docs(tmp_path)
         write_default_config(tmp_path)
         embedder = FakeEmbedder(dim=32)
@@ -450,12 +466,8 @@ class TestRepoSync:
 
         assert "readme" in result["data"]["stale_documents"]
 
-    async def test_sync_continues_when_one_document_fails(
-        self, tmp_path: Path
-    ) -> None:
-        (tmp_path / "README.md").write_text(
-            "# Readme\n\nProject overview.\n", encoding="utf-8"
-        )
+    async def test_sync_continues_when_one_document_fails(self, tmp_path: Path) -> None:
+        (tmp_path / "README.md").write_text("# Readme\n\nProject overview.\n", encoding="utf-8")
         (tmp_path / "broken.pdf").write_bytes(b"not a real pdf")
         write_default_config(tmp_path)
         (tmp_path / ".cairn" / "config.toml").write_text(
@@ -464,7 +476,7 @@ class TestRepoSync:
                     'documents_dir = "documents"',
                     'primary_doc = "readme"',
                     'include = ["README.md", "broken.pdf"]',
-                    'exclude = []',
+                    "exclude = []",
                     "",
                 ]
             ),
@@ -619,14 +631,10 @@ class TestRepoSearch:
             "sparse",
             "graph",
         }
-        assert {"vector", "lexical", "sparse", "graph"} <= set(
-            explanation["signals"]
-        )
+        assert {"vector", "lexical", "sparse", "graph"} <= set(explanation["signals"])
         assert isinstance(explanation["matched_terms"], list)
 
-    async def test_search_repo_documents_handles_complex_repo(
-        self, tmp_path: Path
-    ) -> None:
+    async def test_search_repo_documents_handles_complex_repo(self, tmp_path: Path) -> None:
         _write_complex_repo_docs(tmp_path)
         write_default_config(tmp_path)
         embedder = FakeEmbedder(dim=32)
@@ -656,9 +664,85 @@ class TestRepoSearch:
         }
         assert "vector" in hits[0]["explanation"]["signals"]
 
-    async def test_repo_context_returns_composite_context(
+    async def test_search_repo_documents_prefers_non_empty_child_evidence(
         self, tmp_path: Path
     ) -> None:
+        (tmp_path / "README.md").write_text(
+            "\n".join(
+                [
+                    "# Today First",
+                    "",
+                    "## Reading",
+                    "",
+                    "semantic needle details live in this child section.",
+                ]
+            ),
+            encoding="utf-8",
+        )
+        write_default_config(tmp_path)
+        embedder = FakeEmbedder(dim=32)
+        await sync_repo(
+            tmp_path,
+            summarizer=FakeSummarizer(),
+            embedder=embedder,
+            index_config=IndexConfig(),
+        )
+
+        result = await search_repo_documents(
+            tmp_path,
+            embedder=embedder,
+            query="today first semantic needle details",
+            k=2,
+            sections_per_doc=2,
+        )
+
+        hits = result["data"]["hits"]
+        assert hits[0]["id"] == "today-first/reading"
+        assert hits[0].get("navigation_only") is not True
+        parent = next((hit for hit in hits if hit["id"] == "today-first"), None)
+        if parent is not None:
+            assert parent["navigation_only"] is True
+
+    async def test_search_repo_documents_uses_frontmatter_metadata(self, tmp_path: Path) -> None:
+        (tmp_path / "README.md").write_text(
+            "\n".join(
+                [
+                    "---",
+                    "title: Metadata Search Title",
+                    "description: alpha metadata-only phrase",
+                    "tags: [metadata, retrieval]",
+                    "date: 2026-07-04",
+                    "draft: false",
+                    "---",
+                    "# Body",
+                    "",
+                    "Ordinary body text.",
+                ]
+            ),
+            encoding="utf-8",
+        )
+        write_default_config(tmp_path)
+        embedder = FakeEmbedder(dim=32)
+        await sync_repo(
+            tmp_path,
+            summarizer=FakeSummarizer(),
+            embedder=embedder,
+            index_config=IndexConfig(),
+        )
+
+        result = await search_repo_documents(
+            tmp_path,
+            embedder=embedder,
+            query="alpha metadata-only phrase",
+            k=2,
+        )
+
+        hit = result["data"]["hits"][0]
+        assert hit["doc"] == "readme"
+        assert "metadata" in hit["match_sources"]
+        assert hit["metadata"]["title"] == "Metadata Search Title"
+
+    async def test_repo_context_returns_composite_context(self, tmp_path: Path) -> None:
         _write_complex_repo_docs(tmp_path)
         write_default_config(tmp_path)
         embedder = FakeEmbedder(dim=32)
@@ -724,9 +808,7 @@ class TestRepoSearch:
         assert "repo_context" in data["affected_surfaces"]
         assert any("CodeGraph" in note for note in data["notes"])
 
-    async def test_search_repo_documents_skips_incompatible_indexes(
-        self, tmp_path: Path
-    ) -> None:
+    async def test_search_repo_documents_skips_incompatible_indexes(self, tmp_path: Path) -> None:
         _write_repo_docs(tmp_path)
         write_default_config(tmp_path)
         await sync_repo(
@@ -827,9 +909,7 @@ class TestRepoSearch:
         assert second["data"]["hits"]
         assert second["data"]["embedding_mismatch"] is None
 
-    async def test_search_repo_documents_diversifies_docs_by_default(
-        self, tmp_path: Path
-    ) -> None:
+    async def test_search_repo_documents_diversifies_docs_by_default(self, tmp_path: Path) -> None:
         (tmp_path / "README.md").write_text(
             "# Alpha Root\n\nalpha topic overview.\n\n## Alpha Details\n\nalpha details.\n",
             encoding="utf-8",
@@ -940,9 +1020,7 @@ class TestRepoSearch:
         assert result["data"]["sections_per_doc"] == 2
         assert [hit["doc"] for hit in hits].count("readme") >= 2
 
-    async def test_search_repo_documents_boosts_command_phrases(
-        self, tmp_path: Path
-    ) -> None:
+    async def test_search_repo_documents_boosts_command_phrases(self, tmp_path: Path) -> None:
         (tmp_path / "README.md").write_text("# Root\n\nOverview.\n", encoding="utf-8")
         (tmp_path / "docs").mkdir()
         (tmp_path / "docs" / "auth-cli.md").write_text(
@@ -983,9 +1061,7 @@ class TestRepoSearch:
 
         assert result["data"]["hits"][0]["doc"] == "docs-auth-cli"
 
-    async def test_search_repo_documents_boosts_eval_variants(
-        self, tmp_path: Path
-    ) -> None:
+    async def test_search_repo_documents_boosts_eval_variants(self, tmp_path: Path) -> None:
         (tmp_path / "AGENTS.md").write_text(
             "\n".join(
                 [
@@ -1304,9 +1380,7 @@ class TestRepoSearch:
         assert generic["data"]["hits"][0]["doc"] == "docs-authentication"
         assert history["data"]["hits"][0]["doc"] == "changelog"
 
-    async def test_search_repo_documents_prefers_query_locale(
-        self, tmp_path: Path
-    ) -> None:
+    async def test_search_repo_documents_prefers_query_locale(self, tmp_path: Path) -> None:
         (tmp_path / "README.md").write_text("# Root\n\nOverview.\n", encoding="utf-8")
         (tmp_path / "docs" / "en").mkdir(parents=True)
         (tmp_path / "docs" / "de").mkdir(parents=True)

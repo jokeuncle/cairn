@@ -48,6 +48,7 @@ class TreeBuilder:
             "source_hash": document.source_hash,
             "indexed_at": document.indexed_at.isoformat(),
             "cairn_version": document.cairn_version,
+            "metadata": document.metadata,
             "sections": [_section_to_dict(s) for s in document.sections],
         }
 
@@ -67,20 +68,14 @@ class TreeBuilder:
 
         for section in document.sections:
             if section.parent is not None and section.parent not in seen_ids:
-                msg = (
-                    f"section {section.id!r} references unknown parent "
-                    f"{section.parent!r}"
-                )
+                msg = f"section {section.id!r} references unknown parent {section.parent!r}"
                 raise IndexBuildError(
                     msg,
                     details={"section_id": section.id, "parent": section.parent},
                 )
             for child in section.children:
                 if child not in seen_ids:
-                    msg = (
-                        f"section {section.id!r} references unknown child "
-                        f"{child!r}"
-                    )
+                    msg = f"section {section.id!r} references unknown child {child!r}"
                     raise IndexBuildError(
                         msg,
                         details={"section_id": section.id, "child": child},
@@ -100,9 +95,7 @@ class Tree:
     ) -> None:
         self._sections = sections
         self._by_id: dict[str, SectionNode] = {s.id: s for s in sections}
-        self._roots: tuple[SectionNode, ...] = tuple(
-            s for s in sections if s.parent is None
-        )
+        self._roots: tuple[SectionNode, ...] = tuple(s for s in sections if s.parent is None)
         self.doc_id = doc_id
         self.source_hash = source_hash
         self.indexed_at = indexed_at
@@ -257,6 +250,7 @@ def _section_to_dict(s: SectionNode) -> dict[str, Any]:
         "span": {"start": s.span.start, "end": s.span.end},
         "path": list(s.path),
         "raw_text": s.raw_text,
+        "metadata": s.metadata,
     }
 
 
@@ -271,4 +265,5 @@ def _section_from_dict(d: dict[str, Any]) -> SectionNode:
         span=Span(start=span["start"], end=span["end"]),
         path=tuple(d["path"]),
         raw_text=d["raw_text"],
+        metadata=dict(d.get("metadata", {})),
     )

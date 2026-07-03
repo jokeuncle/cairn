@@ -74,6 +74,9 @@ class _RepoSectionRecord:
     haystacks: tuple[str, str, str, str, str]
     token_counts: dict[str, int]
     token_count: int
+    metadata: dict[str, Any] | None = None
+    metadata_text: str = ""
+    navigation_only: bool = False
 
 
 @dataclass(slots=True)
@@ -229,9 +232,7 @@ async def search_repo_index(
     hits_by_key: dict[tuple[str, str], _RepoScoredHit] = {}
     skipped: list[dict[str, str]] = list(cache.skipped)
     query_dim = len(query_vec)
-    incompatible_docs = {
-        doc_id for doc_id, dim in cache.doc_dims.items() if dim != query_dim
-    }
+    incompatible_docs = {doc_id for doc_id, dim in cache.doc_dims.items() if dim != query_dim}
     for doc_id in sorted(incompatible_docs):
         skipped.append(
             {
@@ -243,9 +244,7 @@ async def search_repo_index(
     if incompatible_docs:
         embedding_mismatch = {
             "query_dim": query_dim,
-            "index_dims": sorted(
-                {cache.doc_dims[doc_id] for doc_id in incompatible_docs}
-            ),
+            "index_dims": sorted({cache.doc_dims[doc_id] for doc_id in incompatible_docs}),
             "documents": sorted(incompatible_docs),
         }
     normalized_query = l2_normalize(query_vec)
@@ -296,9 +295,7 @@ async def search_repo_index(
             "compatible_sections": compatible_count,
             "scored_sections": len(candidate_indices),
         },
-        "stale_documents": [
-            doc.id for doc in candidates if doc.state == "stale"
-        ],
+        "stale_documents": [doc.id for doc in candidates if doc.state == "stale"],
         "skipped_documents": skipped,
         "embedding_mismatch": embedding_mismatch,
         "cursor": None,
@@ -357,17 +354,11 @@ async def _get_repo_search_cache(
         doc_dims=doc_dims,
         df=dict(df_counter),
         avg_token_count=(
-            sum(record.token_count for record in records) / len(records)
-            if records
-            else 0.0
+            sum(record.token_count for record in records) / len(records) if records else 0.0
         ),
-        graph_neighbors={
-            key: tuple(neighbors.items())
-            for key, neighbors in graph_weights.items()
-        },
+        graph_neighbors={key: tuple(neighbors.items()) for key, neighbors in graph_weights.items()},
         record_index_by_key={
-            (record.doc_id, record.section_id): index
-            for index, record in enumerate(records)
+            (record.doc_id, record.section_id): index for index, record in enumerate(records)
         },
         vector_matrices=vector_matrices,
         vector_record_indices=vector_record_indices,
@@ -392,10 +383,7 @@ async def _load_repo_search_document(
     entity_sections: dict[str, set[tuple[str, str]]] = defaultdict(set)
     try:
         index = DocumentIndex.load(root / doc.doc_dir)
-        vectors = {
-            entry.id: tuple(entry.vector)
-            for entry in await index.vectors.entries()
-        }
+        vectors = {entry.id: tuple(entry.vector) for entry in await index.vectors.entries()}
     except Exception as exc:
         return _RepoSearchDocumentChunk(
             doc_id=None,
@@ -414,11 +402,13 @@ async def _load_repo_search_document(
             continue
         summary = index.summaries.get(node.id)
         synopsis = summary.synopsis if summary is not None else ""
+        metadata_text = _metadata_text(node.metadata)
+        searchable_synopsis = "\n".join(part for part in (metadata_text, synopsis) if part)
         token_counts = _section_token_counts(
             doc_id=doc.id,
             source=doc.source,
             title=node.title,
-            synopsis=synopsis,
+            synopsis=searchable_synopsis,
             body=node.raw_text,
         )
         df_counter.update(token_counts.keys())
@@ -436,11 +426,14 @@ async def _load_repo_search_document(
                     _normalize_field_text(doc.id),
                     _normalize_field_text(doc.source),
                     _normalize_field_text(node.title),
-                    _normalize_field_text(synopsis),
+                    _normalize_field_text(searchable_synopsis),
                     _normalize_field_text(node.raw_text[:2000]),
                 ),
                 token_counts=dict(token_counts),
                 token_count=sum(token_counts.values()),
+                metadata=dict(node.metadata),
+                metadata_text=metadata_text,
+                navigation_only=not node.raw_text.strip() and bool(node.children),
             )
         )
 
@@ -656,8 +649,7 @@ def _repo_quick_recall_score(
         variants = query.variants.get(term, ())
         token_variants = tuple(variant for variant in variants if " " not in variant)
         if any(
-            variant in doc_id or variant in source or variant in title
-            for variant in token_variants
+            variant in doc_id or variant in source or variant in title for variant in token_variants
         ):
             score += weight * 6.0
         elif any(variant in synopsis for variant in token_variants):
@@ -665,10 +657,7 @@ def _repo_quick_recall_score(
         elif any(variant in body for variant in token_variants):
             score += weight
         term_frequency = max(
-            (
-                record.token_counts.get(variant, 0)
-                for variant in token_variants
-            ),
+            (record.token_counts.get(variant, 0) for variant in token_variants),
             default=0,
         )
         if term_frequency:
@@ -680,10 +669,15 @@ def _repo_quick_recall_score(
                 score += _repo_phrase_weight(phrase)
     score += _doc_identity_bonus(query, record.haystacks) * 8.0
     score += _overview_intent_bonus(query, record) * 4.0
-    return score * _root_meta_doc_factor(query, record) * _history_doc_factor(
-        query,
-        record,
-    ) * _locale_doc_factor(query, record)
+    return (
+        score
+        * _root_meta_doc_factor(query, record)
+        * _history_doc_factor(
+            query,
+            record,
+        )
+        * _locale_doc_factor(query, record)
+    )
 
 
 def _section_token_counts(
@@ -726,9 +720,7 @@ def _bm25_sparse_score(
     b = 0.75
     raw = 0.0
     max_raw = 0.0
-    length_norm = k1 * (
-        (1.0 - b) + b * (record.token_count / cache.avg_token_count)
-    )
+    length_norm = k1 * ((1.0 - b) + b * (record.token_count / cache.avg_token_count))
     for term in query.terms:
         tf = max(
             (
@@ -739,11 +731,7 @@ def _bm25_sparse_score(
             default=0,
         )
         df = max(
-            (
-                cache.df.get(variant, 0)
-                for variant in query.variants[term]
-                if " " not in variant
-            ),
+            (cache.df.get(variant, 0) for variant in query.variants[term] if " " not in variant),
             default=0,
         )
         if tf <= 0 or df <= 0:
@@ -789,21 +777,30 @@ def _score_repo_record(
         + _overview_intent_bonus(query, record),
     )
     sparse_score = _bm25_sparse_score(query, record, cache)
-    rank_factor = _root_meta_doc_factor(query, record) * _history_doc_factor(
-        query,
-        record,
-    ) * _locale_doc_factor(query, record)
-    identity_bonus = _doc_identity_bonus(query, record.haystacks)
-    base_score = min(
-        1.0,
-        _combine_repo_scores(
-            vector_score,
-            lexical_score,
-            sparse_score=sparse_score,
-            graph_score=0.0,
+    rank_factor = (
+        _root_meta_doc_factor(query, record)
+        * _history_doc_factor(
+            query,
+            record,
         )
-        + identity_bonus,
-    ) * rank_factor
+        * _locale_doc_factor(query, record)
+    )
+    identity_bonus = _doc_identity_bonus(query, record.haystacks)
+    base_score = (
+        min(
+            1.0,
+            _combine_repo_scores(
+                vector_score,
+                lexical_score,
+                sparse_score=sparse_score,
+                graph_score=0.0,
+            )
+            + identity_bonus,
+        )
+        * rank_factor
+    )
+    if record.navigation_only:
+        base_score *= 0.35
     return _RepoScoredHit(
         record=record,
         score=base_score,
@@ -821,10 +818,7 @@ def _apply_graph_scores(
     hits: list[_RepoScoredHit],
     cache: _RepoSearchCache,
 ) -> None:
-    by_key = {
-        (hit.record.doc_id, hit.record.section_id): hit
-        for hit in hits
-    }
+    by_key = {(hit.record.doc_id, hit.record.section_id): hit for hit in hits}
     for hit in hits:
         key = (hit.record.doc_id, hit.record.section_id)
         neighbors = cache.graph_neighbors.get(key, ())
@@ -838,17 +832,22 @@ def _apply_graph_scores(
             total += neighbor.base_score * weight
         graph_score = total / weight_sum if weight_sum else 0.0
         hit.graph_score = graph_score
-        hit.score = min(
-            1.0,
-            _combine_repo_scores(
-                hit.vector_score,
-                hit.lexical_score,
-                sparse_score=hit.sparse_score,
-                graph_score=graph_score,
-                graph_present=bool(neighbors),
+        hit.score = (
+            min(
+                1.0,
+                _combine_repo_scores(
+                    hit.vector_score,
+                    hit.lexical_score,
+                    sparse_score=hit.sparse_score,
+                    graph_score=graph_score,
+                    graph_present=bool(neighbors),
+                )
+                + hit.identity_bonus,
             )
-            + hit.identity_bonus,
-        ) * hit.rank_factor
+            * hit.rank_factor
+        )
+        if hit.record.navigation_only:
+            hit.score *= 0.35
 
 
 def _repo_scored_payload(
@@ -871,7 +870,12 @@ def _repo_scored_payload(
         "graph_score": hit.graph_score,
         "anchor": record.index.anchor(record.section_id),
         "explanation": _repo_hit_explanation(hit, lexical_query),
+        "match_sources": _repo_match_sources(lexical_query, record),
     }
+    if record.metadata:
+        result["metadata"] = record.metadata
+    if record.navigation_only:
+        result["navigation_only"] = True
     if "synopsis" in include_set and record.synopsis:
         result["synopsis"] = record.synopsis
     if "head" in include_set:
@@ -909,6 +913,10 @@ def _repo_hit_explanation(
         notes.append("document or path identity matched the query")
     if hit.rank_factor != 1.0:
         notes.append("rank factor adjusted broad root-document placement")
+    if hit.record.metadata_text and "metadata" in _repo_match_sources(query, hit.record):
+        notes.append("frontmatter metadata matched the query")
+    if hit.record.navigation_only:
+        notes.append("section is navigation-only and was down-ranked as evidence")
 
     return {
         "dominant_signal": dominant_signal,
@@ -945,10 +953,46 @@ def _repo_matched_terms(
         return []
     haystack = " ".join(record.haystacks)
     return [
-        term
-        for term in query.terms
-        if any(variant in haystack for variant in query.variants[term])
+        term for term in query.terms if any(variant in haystack for variant in query.variants[term])
     ]
+
+
+def _repo_match_sources(
+    query: _RepoLexicalQuery,
+    record: _RepoSectionRecord,
+) -> list[str]:
+    if not query.terms:
+        return []
+    fields = {
+        "doc": record.haystacks[0],
+        "source": record.haystacks[1],
+        "title": record.haystacks[2],
+        "summary": _normalize_field_text(record.synopsis),
+        "metadata": _normalize_field_text(record.metadata_text),
+        "body": record.haystacks[4],
+    }
+    sources: set[str] = set()
+    for term in query.terms:
+        variants = query.variants[term]
+        for source, text in fields.items():
+            if any(variant in text for variant in variants):
+                sources.add(source)
+    return sorted(sources)
+
+
+def _metadata_text(metadata: dict[str, Any]) -> str:
+    parts: list[str] = []
+    for key in ("title", "description", "tags", "date", "draft"):
+        value = metadata.get(key)
+        if value is None:
+            continue
+        if isinstance(value, list | tuple):
+            text = " ".join(str(item) for item in value)
+        else:
+            text = str(value)
+        if text.strip():
+            parts.append(f"{key}: {text.strip()}")
+    return "\n".join(parts)
 
 
 def _round_score(value: float) -> float:
@@ -1009,8 +1053,7 @@ def _build_repo_lexical_query(
     field_weights = _DEFAULT_RANK_PROFILE.field_weights
     variants = {term: _term_variants(term) for term in terms}
     weights = {
-        term: _repo_term_weight(term)
-        * _repo_corpus_term_weight(variants[term], cache)
+        term: _repo_term_weight(term) * _repo_corpus_term_weight(variants[term], cache)
         for term in terms
     }
     max_score = sum(weights[term] * sum(field_weights) for term in terms)
@@ -1155,11 +1198,7 @@ def _overview_intent_bonus(
     title = _normalize_search_text(record.title)
     profile = _DEFAULT_RANK_PROFILE
     bonus = 0.0
-    variants = {
-        variant
-        for variant in query.variants.get(focus_term, ())
-        if " " not in variant
-    }
+    variants = {variant for variant in query.variants.get(focus_term, ()) if " " not in variant}
     if not variants:
         return 0.0
     if any(doc_tokens in {(variant,), ("docs", variant)} for variant in variants):
@@ -1180,9 +1219,7 @@ def _focus_field_support(
         return 1.0
     doc_id, source, title, synopsis, body = haystacks
     profile = _DEFAULT_RANK_PROFILE
-    focus_terms = tuple(
-        term for term in query.terms if query.weights.get(term, 0.0) > 0
-    )[:2]
+    focus_terms = tuple(term for term in query.terms if query.weights.get(term, 0.0) > 0)[:2]
     if not focus_terms:
         return 1.0
     total = sum(query.weights[term] for term in focus_terms)
@@ -1190,17 +1227,10 @@ def _focus_field_support(
         return 1.0
     support = 0.0
     for term in focus_terms:
-        variants = {
-            variant
-            for variant in query.variants.get(term, ())
-            if " " not in variant
-        }
+        variants = {variant for variant in query.variants.get(term, ()) if " " not in variant}
         if not variants:
             continue
-        if any(
-            variant in doc_id or variant in source or variant in title
-            for variant in variants
-        ):
+        if any(variant in doc_id or variant in source or variant in title for variant in variants):
             support += query.weights[term]
         elif any(variant in synopsis for variant in variants):
             support += query.weights[term] * profile.focus_synopsis_support
@@ -1239,9 +1269,7 @@ def _weighted_term_coverage(
 
 def _coverage_factor(coverage: float) -> float:
     profile = _DEFAULT_RANK_PROFILE
-    return profile.coverage_floor + (
-        profile.coverage_weight * max(0.0, min(1.0, coverage))
-    )
+    return profile.coverage_floor + (profile.coverage_weight * max(0.0, min(1.0, coverage)))
 
 
 def _doc_identity_bonus(
@@ -1251,19 +1279,13 @@ def _doc_identity_bonus(
     if not query.terms:
         return 0.0
     doc_id, source, _, _, _ = haystacks
-    focus_terms = tuple(
-        term for term in query.terms if query.weights.get(term, 0.0) > 0
-    )[:3]
+    focus_terms = tuple(term for term in query.terms if query.weights.get(term, 0.0) > 0)[:3]
     total = sum(query.weights[term] for term in focus_terms)
     if total <= 0:
         return 0.0
     matched = 0.0
     for term in focus_terms:
-        variants = {
-            variant
-            for variant in query.variants.get(term, ())
-            if " " not in variant
-        }
+        variants = {variant for variant in query.variants.get(term, ()) if " " not in variant}
         if any(variant in doc_id or variant in source for variant in variants):
             matched += query.weights[term]
     support = matched / total
@@ -1349,14 +1371,10 @@ def _normalized_preferred_locales(
     fallback: str | None,
 ) -> tuple[str, ...]:
     normalized = tuple(
-        locale.lower().replace("_", "-").split("-", 1)[0]
-        for locale in locales
-        if locale.strip()
+        locale.lower().replace("_", "-").split("-", 1)[0] for locale in locales if locale.strip()
     )
     if normalized:
-        return tuple(
-            locale for locale in normalized if locale in _KNOWN_LOCALES
-        )
+        return tuple(locale for locale in normalized if locale in _KNOWN_LOCALES)
     if fallback is None:
         return ()
     return (fallback,)
@@ -1368,18 +1386,11 @@ def _first_term_has_structural_support(
 ) -> bool:
     if not query.terms:
         return True
-    variants = {
-        variant
-        for variant in query.variants.get(query.terms[0], ())
-        if " " not in variant
-    }
+    variants = {variant for variant in query.variants.get(query.terms[0], ()) if " " not in variant}
     if not variants:
         return True
     doc_id, source, title, _, _ = haystacks
-    return any(
-        variant in doc_id or variant in source or variant in title
-        for variant in variants
-    )
+    return any(variant in doc_id or variant in source or variant in title for variant in variants)
 
 
 def _term_variants(term: str) -> tuple[str, ...]:
@@ -1433,9 +1444,7 @@ def _term_variants(term: str) -> tuple[str, ...]:
             }
         )
     if term.startswith("config"):
-        variants.update(
-            {"config", "configs", "configure", "configured", "configuration"}
-        )
+        variants.update({"config", "configs", "configure", "configured", "configuration"})
     if term.startswith("auth"):
         variants.update({"auth", "authenticate", "authentication", "authorization"})
     if term.startswith("install"):

@@ -15,6 +15,7 @@ import hashlib
 from collections import defaultdict
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 from markdown_it import MarkdownIt
 from markdown_it.token import Token
@@ -50,7 +51,13 @@ class MarkdownParser:
         line_offsets = _compute_line_offsets(text_bytes)
         tokens = self._md.parse(text)
         headings = _extract_headings(tokens)
-        sections = _build_sections(headings, text_bytes, line_offsets)
+        metadata = _frontmatter_metadata(text)
+        sections = _build_sections(
+            headings,
+            text_bytes,
+            line_offsets,
+            document_metadata=metadata,
+        )
 
         return Document(
             id=derived_doc_id,
@@ -59,6 +66,7 @@ class MarkdownParser:
             sections=tuple(sections),
             indexed_at=datetime.now(UTC),
             cairn_version=__version__,
+            metadata=metadata,
         )
 
     @staticmethod
@@ -151,6 +159,8 @@ def _build_sections(
     headings: list[tuple[int, str, int, int]],
     text_bytes: bytes,
     line_offsets: list[int],
+    *,
+    document_metadata: dict[str, Any] | None = None,
 ) -> list[SectionNode]:
     """Assemble SectionNode objects from heading metadata."""
     if not headings:
@@ -229,10 +239,84 @@ def _build_sections(
                 span=span,
                 path=path,
                 raw_text=raw_text,
+                metadata=dict(document_metadata or {}),
             )
         )
 
     return sections
+
+
+def _frontmatter_metadata(text: str) -> dict[str, Any]:
+    """Extract common Markdown frontmatter fields without adding a YAML dependency."""
+    lines = text.splitlines()
+    if not lines or lines[0].strip() != "---":
+        return {}
+
+    end = None
+    for index, line in enumerate(lines[1:], start=1):
+        if line.strip() == "---":
+            end = index
+            break
+    if end is None:
+        return {}
+
+    raw = lines[1:end]
+    metadata: dict[str, Any] = {}
+    allowed = {"title", "description", "tags", "date", "draft"}
+    i = 0
+    while i < len(raw):
+        line = raw[i]
+        if not line.strip() or line.lstrip().startswith("#") or ":" not in line:
+            i += 1
+            continue
+        key, value = line.split(":", 1)
+        key = key.strip()
+        if key not in allowed:
+            i += 1
+            continue
+        value = value.strip()
+        if key == "tags":
+            if value:
+                metadata[key] = _parse_tags_value(value)
+                i += 1
+                continue
+            tags: list[str] = []
+            i += 1
+            while i < len(raw):
+                child = raw[i]
+                stripped = child.strip()
+                if not child.startswith((" ", "\t")) or not stripped.startswith("- "):
+                    break
+                tag = _strip_scalar(stripped[2:].strip())
+                if tag:
+                    tags.append(tag)
+                i += 1
+            metadata[key] = tags
+            continue
+        if key == "draft":
+            metadata[key] = value.lower() == "true"
+        else:
+            metadata[key] = _strip_scalar(value)
+        i += 1
+    return metadata
+
+
+def _parse_tags_value(value: str) -> list[str]:
+    value = value.strip()
+    if value.startswith("[") and value.endswith("]"):
+        inner = value[1:-1].strip()
+        if not inner:
+            return []
+        return [tag for tag in (_strip_scalar(part.strip()) for part in inner.split(",")) if tag]
+    scalar = _strip_scalar(value)
+    return [scalar] if scalar else []
+
+
+def _strip_scalar(value: str) -> str:
+    value = value.strip()
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
+        return value[1:-1]
+    return value
 
 
 def _line_to_byte(line_offsets: list[int], line: int, total_bytes: int) -> int:

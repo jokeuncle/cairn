@@ -54,9 +54,7 @@ class TestVersion:
 
 
 class TestIndex:
-    def test_index_writes_manifest(
-        self, indexed_dir: Path
-    ) -> None:
+    def test_index_writes_manifest(self, indexed_dir: Path) -> None:
         assert (indexed_dir / "manifest.json").exists()
         assert (indexed_dir / "tree.json").exists()
         assert (indexed_dir / "summaries.json").exists()
@@ -107,18 +105,14 @@ class TestIndex:
 
 
 class TestOutline:
-    def test_outline_prints_json(
-        self, indexed_dir: Path, runner: CliRunner
-    ) -> None:
+    def test_outline_prints_json(self, indexed_dir: Path, runner: CliRunner) -> None:
         result = runner.invoke(app, ["outline", str(indexed_dir)])
         assert result.exit_code == 0, result.output
         payload = json.loads(result.output)
         assert payload["doc"] == "simple"
         assert "tree" in payload
 
-    def test_outline_respects_focus(
-        self, indexed_dir: Path, runner: CliRunner
-    ) -> None:
+    def test_outline_respects_focus(self, indexed_dir: Path, runner: CliRunner) -> None:
         result = runner.invoke(
             app,
             ["outline", str(indexed_dir), "--focus", "introduction"],
@@ -129,9 +123,7 @@ class TestOutline:
 
 
 class TestQuery:
-    def test_semantic_query_runs_with_fake(
-        self, indexed_dir: Path, runner: CliRunner
-    ) -> None:
+    def test_semantic_query_runs_with_fake(self, indexed_dir: Path, runner: CliRunner) -> None:
         result = runner.invoke(
             app,
             [
@@ -146,9 +138,7 @@ class TestQuery:
         payload = json.loads(result.output)
         assert "hits" in payload
 
-    def test_keyword_query(
-        self, indexed_dir: Path, runner: CliRunner
-    ) -> None:
+    def test_keyword_query(self, indexed_dir: Path, runner: CliRunner) -> None:
         result = runner.invoke(
             app,
             ["query", "keyword", str(indexed_dir), "pip"],
@@ -158,9 +148,7 @@ class TestQuery:
         ids = [h["id"] for h in payload["hits"]]
         assert "introduction/quickstart" in ids
 
-    def test_keyword_invalid_mode_rejected(
-        self, indexed_dir: Path, runner: CliRunner
-    ) -> None:
+    def test_keyword_invalid_mode_rejected(self, indexed_dir: Path, runner: CliRunner) -> None:
         result = runner.invoke(
             app,
             [
@@ -205,13 +193,9 @@ class TestRepoCommands:
         self, tmp_path: Path, monkeypatch: MonkeyPatch, runner: CliRunner
     ) -> None:
         monkeypatch.chdir(tmp_path)
-        (tmp_path / "README.md").write_text(
-            "# Readme\n\nProject overview.\n", encoding="utf-8"
-        )
+        (tmp_path / "README.md").write_text("# Readme\n\nProject overview.\n", encoding="utf-8")
         (tmp_path / "docs").mkdir()
-        (tmp_path / "docs" / "guide.md").write_text(
-            "# Guide\n\nDetailed docs.\n", encoding="utf-8"
-        )
+        (tmp_path / "docs" / "guide.md").write_text("# Guide\n\nDetailed docs.\n", encoding="utf-8")
 
         init_result = runner.invoke(app, ["init", "-y"])
         assert init_result.exit_code == 0, init_result.output
@@ -220,9 +204,7 @@ class TestRepoCommands:
         sync_result = runner.invoke(app, ["sync", "--fake"])
         assert sync_result.exit_code == 0, sync_result.output
         assert "synced: 2/2 documents" in sync_result.output
-        assert (
-            tmp_path / ".cairn" / "documents" / "readme" / "manifest.json"
-        ).exists()
+        assert (tmp_path / ".cairn" / "documents" / "readme" / "manifest.json").exists()
 
         status_result = runner.invoke(app, ["status"])
         assert status_result.exit_code == 0, status_result.output
@@ -277,9 +259,7 @@ class TestRepoCommands:
         assert "--repo" in fixed_result.output
         assert str(tmp_path) in fixed_result.output
 
-        inspect_result = runner.invoke(
-            app, ["inspect", "--out", "repo-inspector.html"]
-        )
+        inspect_result = runner.invoke(app, ["inspect", "--out", "repo-inspector.html"])
         assert inspect_result.exit_code == 0, inspect_result.output
         assert (tmp_path / "repo-inspector.html").exists()
 
@@ -294,9 +274,7 @@ class TestRepoCommands:
         home = tmp_path / "home"
         monkeypatch.setenv("HOME", str(home))
 
-        result = runner.invoke(
-            app, ["install", "--client", "codex", "--dry-run", "--fake"]
-        )
+        result = runner.invoke(app, ["install", "--client", "codex", "--dry-run", "--fake"])
 
         assert result.exit_code == 0, result.output
         assert "# target:" in result.output
@@ -320,7 +298,67 @@ class TestRepoCommands:
         result = runner.invoke(app, ["doctor"])
 
         assert result.exit_code == 1, result.output
-        assert "[!!] query_embedding_dim: query dim=2048, indexed dims=[64]" in result.output
+        assert "This index was built with fake:bow-hash dim=64" in result.output
+        assert "Current query embedder is doubao-vision:" in result.output
+        assert "docsgraph serve --repo" in result.output
+        assert "docsgraph sync --force" in result.output
+
+    def test_discover_json_and_sync_dry_run_do_not_write_indexes(
+        self, tmp_path: Path, monkeypatch: MonkeyPatch, runner: CliRunner
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / "README.md").write_text("# Readme\n", encoding="utf-8")
+        (tmp_path / "src" / "content" / "blog").mkdir(parents=True)
+        (tmp_path / "src" / "content" / "blog" / "post.md").write_text("# Post\n", encoding="utf-8")
+        (tmp_path / "docs").mkdir()
+        (tmp_path / "docs" / "page.html").write_text("<h1>Page</h1>", encoding="utf-8")
+        assert runner.invoke(app, ["init", "-y"]).exit_code == 0
+        config = tmp_path / ".cairn" / "config.toml"
+        config.write_text(
+            "\n".join(
+                [
+                    'documents_dir = "documents"',
+                    'primary_doc = "readme"',
+                    'include = ["README.md"]',
+                    "exclude = []",
+                    "",
+                ]
+            ),
+            encoding="utf-8",
+        )
+
+        discover = runner.invoke(app, ["discover", "--json"])
+        dry_run = runner.invoke(app, ["sync", "--dry-run"])
+
+        assert discover.exit_code == 0, discover.output
+        payload = json.loads(discover.output)
+        assert [item["path"] for item in payload["included"]] == ["README.md"]
+        assert any(
+            item["path"] == "src/content/blog/post.md"
+            and item["reason"] == "no include rule matched"
+            for item in payload["candidate_not_included"]
+        )
+        assert any(item["path"] == "docs/page.html" for item in payload["unsupported"])
+        assert dry_run.exit_code == 0, dry_run.output
+        assert "Candidate but not included:" in dry_run.output
+        assert not (tmp_path / ".cairn" / "documents").exists()
+
+    def test_serve_refuses_fixed_repo_embedder_mismatch(
+        self, tmp_path: Path, monkeypatch: MonkeyPatch, runner: CliRunner
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / "README.md").write_text("# Readme\n\nProject overview.\n", encoding="utf-8")
+        assert runner.invoke(app, ["init", "-y"]).exit_code == 0
+        sync_result = runner.invoke(app, ["sync", "--fake"])
+        assert sync_result.exit_code == 0, sync_result.output
+        monkeypatch.setenv("CAIRN_EMBED_PROVIDER", "doubao-vision")
+        monkeypatch.setenv("CAIRN_EMBED_DIM", "2048")
+
+        result = runner.invoke(app, ["serve", "--repo", str(tmp_path)])
+
+        assert result.exit_code == 1, result.output
+        assert "This index was built with fake:bow-hash dim=64" in result.output
+        assert "docsgraph serve --repo" in result.output
 
     def test_mcp_config_env_from_current(
         self, tmp_path: Path, monkeypatch: MonkeyPatch, runner: CliRunner

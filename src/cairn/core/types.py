@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator
 
@@ -69,6 +69,7 @@ class SectionNode(_Frozen):
     span: Span
     path: tuple[str, ...]
     raw_text: str
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
     @field_validator("id")
     @classmethod
@@ -145,3 +146,4 @@ class Document(_Frozen):
     sections: tuple[SectionNode, ...]
     indexed_at: datetime
     cairn_version: str
+    metadata: dict[str, Any] = Field(default_factory=dict)

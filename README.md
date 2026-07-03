@@ -132,6 +132,8 @@ Inside any repository:
 
 ```bash
 docsgraph init -y
+docsgraph discover
+docsgraph sync --dry-run
 docsgraph sync --fake
 docsgraph status
 docsgraph query repo "where are docs indexed?" --fake
@@ -141,14 +143,20 @@ docsgraph serve --fake
 docsgraph client --fake
 ```
 
-`docsgraph doctor` checks repo config, index freshness, primary-doc routing,
-model settings, and whether the query embedder dimension matches the indexed
-vectors. `docsgraph mcp config` prints copy-pasteable stdio snippets for
-Claude, Cursor, Codex, and Goose. For hosted providers, pass explicit MCP
-environment variables with repeated `--env KEY=VALUE`, or use
-`--env-from-current` to copy the current `CAIRN_*` environment into the
-generated config. `docsgraph client` opens a local browser UI for init, sync,
-status, `repo_context` previews, and MCP config install flows:
+`docsgraph discover` and `docsgraph sync --dry-run` explain what will be
+indexed before Cairn writes any document indexes: included docs, candidates
+that did not match include rules, unsupported extensions, and excluded files
+with their matching rule. `docsgraph doctor` checks repo config, index
+freshness, primary-doc routing, model settings, and whether the query embedder
+matches the indexed embedder mode and dimension. If an index was built with
+`--fake` but the MCP server is running a real embedder (or the reverse), doctor
+and fixed-repo `serve` print direct recovery commands. `docsgraph mcp config`
+prints copy-pasteable stdio snippets for Claude, Cursor, Codex, and Goose. For
+hosted providers, pass explicit MCP environment variables with repeated
+`--env KEY=VALUE`, or use `--env-from-current` to copy the current `CAIRN_*`
+environment into the generated config. `docsgraph client` opens a local browser
+UI for init, sync, status, `repo_context` previews, and MCP config install
+flows:
 
 ```bash
 docsgraph mcp config --client claude
@@ -204,6 +212,7 @@ Repo-scoped MCP adds:
 | `repo_context` | Get a ready-to-read context pack: ranked hits, selected section text, hit explanations, and a relationship map. |
 | `repo_graph` | Inspect the repo documentation graph: document, section, entity, contains, xref, and mention edges. Cross-document links are exposed through shared entity nodes. |
 | `repo_impact` | Estimate documentation surfaces affected by a document or section change. |
+| `search_keyword` | Search all indexed docs when `doc` is omitted, or one selected doc when `doc` is provided. |
 | normal Cairn tools + `doc` | Drill into a chosen document with `outline`, `get_section`, `search_semantic`, `get_related`, etc. |
 
 Cairn is intentionally a docs graph, not a universal first step. Prefer
@@ -224,6 +233,13 @@ Repo behavior is intentionally configurable in `.cairn/config.toml`:
 | `primary_doc` | `readme` | Chooses the default document for normal tools when `doc` is omitted in repo mode. |
 | `search_sections_per_doc` | `1` | Default diversity for `search_documents`. `1` helps agents find the right doc first; raise it when a repo has a few long docs and you want deeper hits from each doc by default. |
 | `preferred_locales` | `[]` | Optional locale preference for repo search, for example `["en"]` or `["zh"]`. When omitted, English queries prefer English or locale-neutral docs without hiding other languages. |
+
+Markdown frontmatter is treated as generic document metadata. Cairn indexes
+common fields such as `title`, `description`, `tags`, `date`, and `draft`, uses
+them in keyword and semantic evidence, and marks metadata matches in search
+explanations. Empty parent headings remain useful navigation nodes, but they
+are down-ranked as primary evidence when a non-empty child section better
+answers the query.
 
 MarkItDown integration is local-file only and optional. Cairn uses it as a
 conversion layer, then feeds the generated Markdown into the same canonical
