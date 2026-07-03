@@ -8,6 +8,12 @@ All notable changes to Cairn. Format follows
 
 No unreleased changes yet.
 
+## [0.1.0a11] — 2026-07-04
+
+### Changed
+
+- fix(repo): keep frontmatter metadata document-scoped
+
 ## [0.1.0a10] — 2026-07-04
 
 ### Added
