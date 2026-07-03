@@ -1,5 +1,5 @@
 """Cairn — structure-aware, MCP-native retrieval for large documents."""
 
-__version__ = "0.1.0a7"
+__version__ = "0.1.0a8"
 
 __all__ = ["__version__"]

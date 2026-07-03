@@ -8,6 +8,37 @@ All notable changes to Cairn. Format follows
 
 No unreleased changes yet.
 
+## [0.1.0a8] — 2026-07-03
+
+### Added
+
+- **Agent recovery next steps.** Repo MCP setup failures now include structured
+  `next_steps` with `docsgraph init -y`, `docsgraph sync`, and
+  `docsgraph status` commands so agents can recover instead of falling back to
+  raw README/docs reads.
+- **Config guidance for narrow repo indexes.** `list_documents` and repo setup
+  errors can now return `config_guidance` when the discovered documentation
+  surface is suspiciously narrow, such as README-only coverage.
+
+### Changed
+
+- **Broader conservative repo discovery defaults.** `docsgraph init -y` now
+  includes common project documentation directories such as `guides/`, `specs/`,
+  ADR/decision/design/product/requirements/RFC/proposal trees, while expanding
+  default excludes for generated, dependency, cache, coverage, and build
+  directories.
+- **Stronger MCP routing guidance.** Repo server instructions and tool
+  descriptions now tell agents to use Cairn before reading raw README/docs/spec
+  files for project-knowledge questions, make `repo_context`/`search_documents`
+  the obvious entry points, and state that each repository's `.cairn` index is
+  isolated unless `projectPath` is explicitly provided.
+
+### Fixed
+
+- `search_documents` now returns a recoverable `NOT_FOUND` envelope when no
+  indexed or stale repo documents are searchable, instead of a successful empty
+  hit list that agents could misinterpret as missing knowledge.
+
 ## [0.1.0a7] — 2026-06-27
 
 ### Added
