@@ -8,6 +8,12 @@ All notable changes to Cairn. Format follows
 
 No unreleased changes yet.
 
+## [0.1.0a9] — 2026-07-03
+
+### Changed
+
+- fix(repo): surface embedding mismatch recovery
+
 ## [0.1.0a8] — 2026-07-03
 
 ### Added
