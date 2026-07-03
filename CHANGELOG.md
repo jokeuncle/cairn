@@ -8,6 +8,27 @@ All notable changes to Cairn. Format follows
 
 No unreleased changes yet.
 
+## [0.1.0a10] — 2026-07-04
+
+### Added
+
+- `docsgraph discover` and `docsgraph sync --dry-run` now explain which
+  document-like files are included, skipped because no include rule matched,
+  unsupported by current config, or excluded by a matching rule.
+- Markdown frontmatter fields such as `title`, `description`, `tags`, `date`,
+  and `draft` are preserved as generic metadata and contribute to retrieval
+  evidence.
+
+### Changed
+
+- Document manifests now record embedder provenance (`mode`, model/name, and
+  dimension), and `docsgraph doctor` reports index/query embedder compatibility
+  with direct recovery commands.
+- Repo-scoped `search_keyword` searches all indexed documents when `doc` is
+  omitted and keeps single-document behavior when `doc` is provided.
+- Empty parent sections are treated as navigation-only evidence and down-ranked
+  when a non-empty child section is a better answer candidate.
+
 ## [0.1.0a9] — 2026-07-03
 
 ### Changed
