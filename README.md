@@ -218,8 +218,8 @@ Repo behavior is intentionally configurable in `.cairn/config.toml`:
 
 | Setting | Default | Impact |
 |---|---|---|
-| `include` | README, top-level Markdown/PDF, `docs/**` Markdown/PDF, one-level nested README | Expands or narrows what Cairn treats as repository documentation. Broader globs improve coverage but can index noisy generated files. |
-| `exclude` | `.git`, `.cairn`, `.codegraph`, caches, virtualenvs, build output, `node_modules` | Keeps generated or tool-owned docs out of search. Simple `name/**` directory excludes match at any depth, so `frontend/node_modules/...` and `apps/web/dist/...` are skipped. Add project-specific generated doc folders here. |
+| `include` | README, top-level Markdown/PDF, `docs/**`, `guides/**`, `specs/**`, ADR/decision/design/product/requirements/RFC/proposal dirs, one-level nested README | Expands or narrows what Cairn treats as repository documentation. Broader globs improve coverage but can index noisy generated files. |
+| `exclude` | `.git`, `.cairn`, `.codegraph`, caches, virtualenvs, package stores, build/site/coverage output, `node_modules` | Keeps generated or tool-owned docs out of search. Simple `name/**` directory excludes match at any depth, so `frontend/node_modules/...` and `apps/web/dist/...` are skipped. Add project-specific generated doc folders here. |
 | `enable_markitdown` | `false` | Enables non-Markdown/PDF conversion when the `markitdown` extra is installed. Useful for DOCX/PPTX/XLSX/HTML-heavy repos, slower and less deterministic than native Markdown/PDF parsing. |
 | `primary_doc` | `readme` | Chooses the default document for normal tools when `doc` is omitted in repo mode. |
 | `search_sections_per_doc` | `1` | Default diversity for `search_documents`. `1` helps agents find the right doc first; raise it when a repo has a few long docs and you want deeper hits from each doc by default. |

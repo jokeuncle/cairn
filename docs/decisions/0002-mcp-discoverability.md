@@ -118,6 +118,31 @@ envelope/`trace.steps` sentence.
   behavior. Covered by keeping them in `schemas.py`/`server.py` beside the tools
   and noting them in `docs/specs/mcp-tools.md`.
 
+## Amendment: Agent Recovery and Repo Isolation
+
+- **Date:** 2026-07-03
+- **Status:** Accepted
+
+Follow-up agent traces showed two remaining discoverability failures:
+
+1. When `.cairn/config.toml` existed but no document index had been synced,
+   repo search could look like a valid empty result. Agents then fell back to
+   raw README/docs reads instead of telling the user to run setup.
+2. Agents still treated raw README/docs reads as a cheap discovery step before
+   Cairn, and the repo boundary was implicit rather than explicit.
+
+We now treat missing/unusable repo indexes as recoverable setup errors with
+structured `next_steps` (`docsgraph sync`, `docsgraph status`, and, when
+needed, `docsgraph init -y`). `list_documents` can also return
+`config_guidance` when the discovered documentation surface is suspiciously
+narrow, such as README-only coverage, so agents can suggest `.cairn/config.toml`
+include/exclude edits without guessing.
+
+Repo instructions and tool descriptions now say to call Cairn before reading
+raw README/docs/spec files for project-knowledge questions. They also state that
+each repository is isolated by its own `.cairn/config.toml` and index; agents
+should pass `projectPath` only for an explicit cross-repo query.
+
 ## Alternatives Considered
 
 - **Rename tools to be less generic** (e.g. `cairn_outline`). Rejected for now:

@@ -23,9 +23,11 @@ from cairn.mcp.schemas import CAIRN_TOOLS, REPO_TOOLS
 from cairn.repo import (
     find_repo_root,
     load_repo_document_index,
+    repo_config_guidance,
     repo_context,
     repo_graph,
     repo_impact,
+    repo_setup_next_steps,
     repo_status,
     search_repo_documents,
 )
@@ -57,16 +59,20 @@ DOCUMENT_INSTRUCTIONS = (
 )
 REPO_INSTRUCTIONS = (
     "Cairn indexes this repository's documentation (specs, design docs, "
-    "READMEs) as a navigable map. Prefer Cairn for documentation, product, "
-    "architecture, setup, naming, protocol, business workflow, and durable "
-    "decision-record questions. Start with `repo_context` (one call: ranked "
-    "hits + ready-to-read sections + relationship map) or `search_documents` "
-    "(cross-document ranked hits), then drill into a specific doc with "
-    "`get_section`/`get_related`. Do not use Cairn as a mandatory pre-step for "
-    "small known-file code edits, source-code symbol tracing, tests, build logs, "
-    "or exact literal search; use code/search/shell tools for those. Results are "
-    "summaries with stable, citable section ids by default; request `full` text "
-    "only when needed."
+    "READMEs) as a navigable map. Before reading raw README, docs, specs, or "
+    "architecture files for project knowledge, call Cairn. Prefer Cairn for "
+    "documentation, product, architecture, setup, naming, protocol, business "
+    "workflow, and durable decision-record questions. Start with `repo_context` "
+    "(one call: ranked hits + ready-to-read sections + relationship map) or "
+    "`search_documents` (cross-document ranked hits), then drill into a specific "
+    "doc with `get_section`/`get_related`. If a repo tool reports setup next "
+    "steps, show or run those commands instead of falling back to raw file reads. "
+    "Each repository is isolated: use the current workspace's `.cairn` index, "
+    "or pass `projectPath` only when the user explicitly wants another repo. "
+    "Do not use Cairn as a mandatory pre-step for small known-file code edits, "
+    "source-code symbol tracing, tests, build logs, or exact literal search; use "
+    "code/search/shell tools for those. Results are summaries with stable, "
+    "citable section ids by default; request `full` text only when needed."
 )
 
 
@@ -248,6 +254,11 @@ async def dispatch_repo_tool(
                 "documents": docs,
                 "usage_guidance": agent_usage_guidance(),
             }
+            if not any(doc.state in {"indexed", "stale"} for doc in status.documents):
+                data["next_steps"] = repo_setup_next_steps()
+            guidance = repo_config_guidance(status)
+            if guidance is not None:
+                data["config_guidance"] = guidance
             _trace_step(
                 trace,
                 "load_repo_status",
@@ -445,6 +456,7 @@ class RepoRootResolver:
                 details = dict(exc.details)
                 details["projectPath"] = project_path
                 details["source"] = "projectPath"
+                details["next_steps"] = repo_setup_next_steps(config_missing=True)
                 msg = (
                     "Cairn repo config not found for `projectPath`. "
                     "Run `docsgraph init -y` and `docsgraph sync` in that repo."
@@ -473,6 +485,7 @@ class RepoRootResolver:
             details = dict(exc.details)
             details["workspace"] = str(workspace)
             details["source"] = source
+            details["next_steps"] = repo_setup_next_steps(config_missing=True)
             msg = (
                 "Cairn repo config not found for this MCP workspace. "
                 "Run `docsgraph init -y` and `docsgraph sync` in the current "

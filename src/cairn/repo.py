@@ -1,7 +1,7 @@
 """Repository-level documentation indexing workflow.
 
 This module powers the CodeGraph-like UX for project documents:
-``cairn init -y``, ``cairn sync``, ``cairn status``, and repo-scoped MCP
+``docsgraph init -y``, ``docsgraph sync``, ``docsgraph status``, and repo-scoped MCP
 serving. It keeps repository state in ``.cairn/`` and stores one normal Cairn
 document index per discovered source file under ``.cairn/documents/<doc_id>/``.
 """
@@ -71,6 +71,66 @@ DEFAULT_INCLUDE: Final[tuple[str, ...]] = (
     "docs/**/*.mdown",
     "docs/**/*.mkd",
     "docs/**/*.pdf",
+    "guides/**/*.md",
+    "guides/**/*.markdown",
+    "guides/**/*.mdown",
+    "guides/**/*.mkd",
+    "guides/**/*.pdf",
+    "specs/**/*.md",
+    "specs/**/*.markdown",
+    "specs/**/*.mdown",
+    "specs/**/*.mkd",
+    "specs/**/*.pdf",
+    "adr/**/*.md",
+    "adr/**/*.markdown",
+    "adr/**/*.mdown",
+    "adr/**/*.mkd",
+    "adr/**/*.pdf",
+    "adrs/**/*.md",
+    "adrs/**/*.markdown",
+    "adrs/**/*.mdown",
+    "adrs/**/*.mkd",
+    "adrs/**/*.pdf",
+    "decisions/**/*.md",
+    "decisions/**/*.markdown",
+    "decisions/**/*.mdown",
+    "decisions/**/*.mkd",
+    "decisions/**/*.pdf",
+    "architecture/**/*.md",
+    "architecture/**/*.markdown",
+    "architecture/**/*.mdown",
+    "architecture/**/*.mkd",
+    "architecture/**/*.pdf",
+    "design/**/*.md",
+    "design/**/*.markdown",
+    "design/**/*.mdown",
+    "design/**/*.mkd",
+    "design/**/*.pdf",
+    "designs/**/*.md",
+    "designs/**/*.markdown",
+    "designs/**/*.mdown",
+    "designs/**/*.mkd",
+    "designs/**/*.pdf",
+    "product/**/*.md",
+    "product/**/*.markdown",
+    "product/**/*.mdown",
+    "product/**/*.mkd",
+    "product/**/*.pdf",
+    "requirements/**/*.md",
+    "requirements/**/*.markdown",
+    "requirements/**/*.mdown",
+    "requirements/**/*.mkd",
+    "requirements/**/*.pdf",
+    "rfcs/**/*.md",
+    "rfcs/**/*.markdown",
+    "rfcs/**/*.mdown",
+    "rfcs/**/*.mkd",
+    "rfcs/**/*.pdf",
+    "proposals/**/*.md",
+    "proposals/**/*.markdown",
+    "proposals/**/*.mdown",
+    "proposals/**/*.mkd",
+    "proposals/**/*.pdf",
 )
 MARKITDOWN_INCLUDE: Final[tuple[str, ...]] = (
     "*.docx",
@@ -101,11 +161,22 @@ DEFAULT_EXCLUDE: Final[tuple[str, ...]] = (
     ".venv/**",
     ".tox/**",
     ".nox/**",
+    ".cache/**",
+    ".next/**",
+    ".nuxt/**",
+    ".pnpm-store/**",
+    ".svelte-kit/**",
+    ".turbo/**",
+    ".yarn/**",
     "venv/**",
     "node_modules/**",
+    "coverage/**",
     "dist/**",
     "build/**",
+    "out/**",
     "site/**",
+    "target/**",
+    "vendor/**",
     "__pycache__/**",
 )
 NATIVE_SUFFIXES: Final = frozenset({".md", ".markdown", ".mdown", ".mkd", ".pdf"})
@@ -192,8 +263,144 @@ class RepoStatus(BaseModel):
         return sum(1 for doc in self.documents if doc.state == "error")
 
 
+def repo_setup_next_steps(*, config_missing: bool = False) -> list[dict[str, str]]:
+    """Return agent-friendly remediation commands for repo setup problems."""
+    steps: list[dict[str, str]] = []
+    if config_missing:
+        steps.append(
+            {
+                "command": "docsgraph init -y",
+                "reason": "Create .cairn/config.toml for this repository.",
+            }
+        )
+    steps.extend(
+        [
+            {
+                "command": "docsgraph sync",
+                "reason": "Build or refresh .cairn/documents for configured docs.",
+            },
+            {
+                "command": "docsgraph status",
+                "reason": "Inspect document ids, states, and freshness.",
+            },
+        ]
+    )
+    if not config_missing:
+        steps.append(
+            {
+                "command": "docsgraph init -y",
+                "reason": "Run only if .cairn/config.toml is missing or wrong.",
+            }
+        )
+    return steps
+
+
+def repo_config_guidance(status: RepoStatus) -> dict[str, Any] | None:
+    """Suggest config edits when the discovered documentation surface is narrow."""
+    if not status.documents:
+        state = "empty"
+        message = (
+            "No repository documents matched .cairn/config.toml. Expand include "
+            "globs for project docs and keep generated/dependency directories "
+            "in exclude before running docsgraph sync."
+        )
+    elif (
+        len(status.documents) == 1
+        and Path(status.documents[0].source).name.lower().startswith("readme")
+    ):
+        state = "narrow"
+        message = (
+            "Only a README-like document is known. If this repo has docs in "
+            "guides, specs, architecture, decisions, product, requirements, or "
+            "RFC directories, add those globs to .cairn/config.toml include and "
+            "run docsgraph sync."
+        )
+    else:
+        return None
+
+    return {
+        "status": state,
+        "message": message,
+        "config_path": str(status.config_path),
+        "include_examples": [
+            "docs/**/*.md",
+            "guides/**/*.md",
+            "specs/**/*.md",
+            "architecture/**/*.md",
+            "decisions/**/*.md",
+            "product/**/*.md",
+            "requirements/**/*.md",
+            "rfcs/**/*.md",
+        ],
+        "exclude_examples": [
+            ".git/**",
+            ".cairn/**",
+            "node_modules/**",
+            "dist/**",
+            "build/**",
+            "coverage/**",
+            ".next/**",
+            "target/**",
+            "vendor/**",
+        ],
+        "next_steps": [
+            {
+                "command": "edit .cairn/config.toml include/exclude",
+                "reason": "Tune the document surface for this repository.",
+            },
+            {
+                "command": "docsgraph sync",
+                "reason": "Rebuild the repo documentation index after config changes.",
+            },
+            {
+                "command": "docsgraph status",
+                "reason": "Verify the documents now indexed for this repo.",
+            },
+        ],
+    }
+
+
+def _repo_setup_details(
+    root: Path,
+    *,
+    status: RepoStatus | None = None,
+    doc: str | None = None,
+    state: DocState | str | None = None,
+) -> dict[str, Any]:
+    details: dict[str, Any] = {
+        "root": str(root),
+        "next_steps": repo_setup_next_steps(),
+    }
+    if status is not None:
+        details.update(
+            {
+                "document_count": len(status.documents),
+                "indexed_count": status.indexed_count,
+                "stale_count": status.stale_count,
+                "missing_count": status.missing_count,
+                "error_count": status.error_count,
+                "documents": [
+                    {
+                        "id": item.id,
+                        "source": item.source,
+                        "state": item.state,
+                    }
+                    for item in status.documents
+                ],
+            }
+        )
+        guidance = repo_config_guidance(status)
+        if guidance is not None:
+            details["config_guidance"] = guidance
+    if doc is not None:
+        details["doc"] = doc
+    if state is not None:
+        details["state"] = state
+    return details
+
+
 class RepoSyncResult(BaseModel):
-    """Outcome for one document during ``cairn sync``."""
+    """Outcome for one document during ``docsgraph sync``."""
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
@@ -229,8 +436,14 @@ def find_repo_root(start: Path | None = None) -> Path:
     for candidate in (current, *current.parents):
         if config_path(candidate).exists():
             return candidate
-    msg = "Cairn repo config not found. Run `cairn init -y` first."
-    raise ConfigError(msg, details={"start": str(current)})
+    msg = "Cairn repo config not found. Run `docsgraph init -y` first."
+    raise ConfigError(
+        msg,
+        details={
+            "start": str(current),
+            "next_steps": repo_setup_next_steps(config_missing=True),
+        },
+    )
 
 
 def write_default_config(
@@ -259,8 +472,14 @@ def write_default_config(
 def load_repo_config(root: Path) -> RepoConfig:
     path = config_path(root)
     if not path.exists():
-        msg = "Cairn repo config not found. Run `cairn init -y` first."
-        raise ConfigError(msg, details={"path": str(path)})
+        msg = "Cairn repo config not found. Run `docsgraph init -y` first."
+        raise ConfigError(
+            msg,
+            details={
+                "path": str(path),
+                "next_steps": repo_setup_next_steps(config_missing=True),
+            },
+        )
     with path.open("rb") as fh:
         payload = tomllib.load(fh)
     try:
@@ -321,12 +540,27 @@ def load_repo_document_index(
     status = repo_status(root, config=config)
     selected = doc_id or _choose_primary_doc(status)
     if selected is None:
-        msg = "no indexed Cairn documents found. Run `cairn sync` first."
-        raise IndexNotFoundError(msg, details={"root": str(root)})
+        msg = "no indexed Cairn documents found. Run `docsgraph sync` first."
+        raise IndexNotFoundError(
+            msg, details=_repo_setup_details(root, status=status)
+        )
     doc = next((item for item in status.documents if item.id == selected), None)
-    if doc is None or doc.state == "missing":
+    if doc is None:
+        msg = f"repo document is not configured: {selected!r}"
+        raise IndexNotFoundError(
+            msg, details=_repo_setup_details(root, status=status, doc=selected)
+        )
+    if doc.state not in {"indexed", "stale"}:
         msg = f"repo document is not indexed: {selected!r}"
-        raise IndexNotFoundError(msg, details={"doc": selected})
+        raise IndexNotFoundError(
+            msg,
+            details=_repo_setup_details(
+                root,
+                status=status,
+                doc=selected,
+                state=doc.state,
+            ),
+        )
     return DocumentIndex.load(root / doc.doc_dir)
 
 
@@ -580,13 +814,25 @@ async def search_repo_documents(
         msg = f"invalid include values: {sorted(bad)}"
         raise ToolError(msg, details={"invalid": sorted(bad)})
 
+    status = repo_status(root, config=config)
+    candidates = tuple(
+        doc for doc in status.documents if doc.state in {"indexed", "stale"}
+    )
+    if not candidates:
+        msg = (
+            "no searchable Cairn documents found for this repo. "
+            "Run `docsgraph sync` first."
+        )
+        raise IndexNotFoundError(
+            msg, details=_repo_setup_details(root, status=status)
+        )
+
     vectors = await embedder.embed([query])
     if not vectors:
         msg = "embedder returned no vector for query"
         raise ToolError(msg)
     query_vec = vectors[0]
 
-    candidates = _repo_search_candidates(root, config)
     payload = await search_repo_index(
         root,
         candidates=candidates,

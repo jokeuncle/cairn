@@ -13,6 +13,7 @@ from cairn.cli.config import IndexConfig
 from cairn.embed.fake import FakeEmbedder
 from cairn.mcp.schemas import CAIRN_TOOLS, REPO_TOOLS
 from cairn.mcp.server import (
+    REPO_INSTRUCTIONS,
     RepoRootResolver,
     dispatch_repo_tool,
     dispatch_tool,
@@ -78,16 +79,27 @@ class TestSchemas:
     def test_repo_tool_descriptions_set_usage_boundaries(self) -> None:
         repo_context = next(t for t in REPO_TOOLS if t.name == "repo_context")
         repo_search = next(t for t in REPO_TOOLS if t.name == "search_documents")
+        repo_get_section = next(t for t in REPO_TOOLS if t.name == "get_section")
         repo_context_description = repo_context.description
         repo_search_description = repo_search.description
+        repo_get_section_description = repo_get_section.description
 
         assert repo_context_description is not None
         assert repo_search_description is not None
+        assert repo_get_section_description is not None
 
         assert "product" in repo_context_description
         assert "architecture" in repo_search_description
         assert "exact literal search" in repo_context_description
         assert "source-code symbol" in repo_search_description
+        assert "before reading raw README" in repo_context_description
+        assert "Start with `repo_context`" in repo_get_section_description
+
+    def test_repo_instructions_push_cairn_before_raw_docs(self) -> None:
+        assert "Before reading raw README" in REPO_INSTRUCTIONS
+        assert "If a repo tool reports setup next steps" in REPO_INSTRUCTIONS
+        assert "Each repository is isolated" in REPO_INSTRUCTIONS
+        assert "projectPath" in REPO_INSTRUCTIONS
 
 
 class TestDispatchHappyPath:
@@ -292,6 +304,8 @@ class TestRepoDispatch:
         assert env["error"]["code"] == "INVALID_CONFIG"
         assert env["error"]["details"]["workspace"] == str(tmp_path)
         assert "projectPath" in env["error"]["message"]
+        commands = [step["command"] for step in env["error"]["details"]["next_steps"]]
+        assert commands[:2] == ["docsgraph init -y", "docsgraph sync"]
 
     async def test_workspace_dispatch_bad_project_path_fails_closed(
         self, tmp_path: Path, fake_embedder: FakeEmbedder
@@ -310,6 +324,8 @@ class TestRepoDispatch:
         assert env["error"]["code"] == "INVALID_CONFIG"
         assert env["error"]["details"]["source"] == "projectPath"
         assert env["error"]["details"]["projectPath"] == str(project_path)
+        commands = [step["command"] for step in env["error"]["details"]["next_steps"]]
+        assert commands[:2] == ["docsgraph init -y", "docsgraph sync"]
 
     async def test_list_documents_and_route_tool(
         self, tmp_path: Path, fake_embedder: FakeEmbedder
@@ -345,6 +361,48 @@ class TestRepoDispatch:
         assert outlined["ok"] is True
         assert outlined["data"]["doc"] == "readme"
 
+    async def test_list_documents_readme_only_returns_config_guidance(
+        self, tmp_path: Path, fake_embedder: FakeEmbedder
+    ) -> None:
+        (tmp_path / "README.md").write_text(
+            "# Readme\n\nProject overview.\n", encoding="utf-8"
+        )
+        write_default_config(tmp_path)
+        await sync_repo(
+            tmp_path,
+            summarizer=FakeSummarizer(),
+            embedder=fake_embedder,
+            index_config=IndexConfig(),
+        )
+
+        listed = await dispatch_repo_tool(
+            "list_documents", {}, tmp_path, fake_embedder
+        )
+
+        assert listed["ok"] is True
+        guidance = listed["data"]["config_guidance"]
+        assert guidance["status"] == "narrow"
+        assert ".cairn/config.toml" in guidance["message"]
+        assert "guides/**/*.md" in guidance["include_examples"]
+        assert "node_modules/**" in guidance["exclude_examples"]
+
+    async def test_list_documents_without_sync_returns_next_steps(
+        self, tmp_path: Path, fake_embedder: FakeEmbedder
+    ) -> None:
+        (tmp_path / "README.md").write_text(
+            "# Readme\n\nProject overview.\n", encoding="utf-8"
+        )
+        write_default_config(tmp_path)
+
+        listed = await dispatch_repo_tool(
+            "list_documents", {}, tmp_path, fake_embedder
+        )
+
+        assert listed["ok"] is True
+        assert listed["data"]["documents"][0]["state"] == "missing"
+        commands = [step["command"] for step in listed["data"]["next_steps"]]
+        assert commands[:2] == ["docsgraph sync", "docsgraph status"]
+
     async def test_search_documents(
         self, tmp_path: Path, fake_embedder: FakeEmbedder
     ) -> None:
@@ -373,6 +431,50 @@ class TestRepoDispatch:
         assert env["ok"] is True
         assert env["tokens_returned"] > 0
         assert any(hit["doc"] == "docs-guide" for hit in env["data"]["hits"])
+
+    async def test_search_documents_without_sync_returns_setup_steps(
+        self, tmp_path: Path, fake_embedder: FakeEmbedder
+    ) -> None:
+        (tmp_path / "README.md").write_text(
+            "# Readme\n\nProject overview.\n", encoding="utf-8"
+        )
+        write_default_config(tmp_path)
+
+        env = await dispatch_repo_tool(
+            "search_documents",
+            {"query": "project overview", "k": 4},
+            tmp_path,
+            fake_embedder,
+        )
+
+        assert env["ok"] is False
+        assert env["error"]["code"] == "NOT_FOUND"
+        assert env["error"]["details"]["root"] == str(tmp_path)
+        assert env["error"]["details"]["indexed_count"] == 0
+        commands = [step["command"] for step in env["error"]["details"]["next_steps"]]
+        assert commands[:2] == ["docsgraph sync", "docsgraph status"]
+
+    async def test_repo_document_tool_without_sync_returns_setup_steps(
+        self, tmp_path: Path, fake_embedder: FakeEmbedder
+    ) -> None:
+        (tmp_path / "README.md").write_text(
+            "# Readme\n\nProject overview.\n", encoding="utf-8"
+        )
+        write_default_config(tmp_path)
+
+        env = await dispatch_repo_tool(
+            "outline",
+            {"doc": "readme", "depth": 1},
+            tmp_path,
+            fake_embedder,
+        )
+
+        assert env["ok"] is False
+        assert env["error"]["code"] == "NOT_FOUND"
+        assert env["error"]["details"]["doc"] == "readme"
+        assert env["error"]["details"]["state"] == "missing"
+        commands = [step["command"] for step in env["error"]["details"]["next_steps"]]
+        assert commands[:2] == ["docsgraph sync", "docsgraph status"]
 
     async def test_repo_context_graph_and_impact(
         self, tmp_path: Path, fake_embedder: FakeEmbedder

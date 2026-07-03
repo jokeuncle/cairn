@@ -10,12 +10,14 @@ import pytest
 
 from cairn import repo_search as repo_search_module
 from cairn.cli.config import IndexConfig
+from cairn.core.errors import ConfigError, IndexNotFoundError
 from cairn.embed.fake import FakeEmbedder
 from cairn.engine.manifest import read_manifest
 from cairn.repo import (
     DEFAULT_EXCLUDE,
     RepoConfig,
     discover_documents,
+    find_repo_root,
     load_repo_config,
     load_repo_document_index,
     repo_context,
@@ -59,6 +61,10 @@ class _BlockingSummarizer:
         return await self.fake.summarize(title=title, body=body, level=level)
 
 
+def _commands_from_details(details: dict[str, Any]) -> list[str]:
+    return [step["command"] for step in details["next_steps"]]
+
+
 def _write_complex_repo_docs(root: Path) -> None:
     (root / "README.md").write_text(
         "# Project Atlas\n\nRepository documentation graph for MCP agents.\n",
@@ -100,6 +106,30 @@ def _write_complex_repo_docs(root: Path) -> None:
 
 
 class TestRepoConfig:
+    def test_missing_config_errors_use_docsgraph_next_steps(
+        self, tmp_path: Path
+    ) -> None:
+        with pytest.raises(ConfigError) as exc_info:
+            load_repo_config(tmp_path)
+
+        assert "docsgraph init -y" in exc_info.value.message
+        assert _commands_from_details(exc_info.value.details)[:2] == [
+            "docsgraph init -y",
+            "docsgraph sync",
+        ]
+
+    def test_find_repo_root_missing_config_uses_docsgraph_next_steps(
+        self, tmp_path: Path
+    ) -> None:
+        with pytest.raises(ConfigError) as exc_info:
+            load_repo_config(find_repo_root(tmp_path))
+
+        assert "docsgraph init -y" in exc_info.value.message
+        assert _commands_from_details(exc_info.value.details)[:2] == [
+            "docsgraph init -y",
+            "docsgraph sync",
+        ]
+
     def test_default_config_discovers_repo_docs(self, tmp_path: Path) -> None:
         _write_repo_docs(tmp_path)
         (tmp_path / "docs" / "page.html").write_text(
@@ -113,6 +143,48 @@ class TestRepoConfig:
         assert [doc.id for doc in docs] == ["readme", "docs-guide"]
         assert docs[0].relative_source == "README.md"
         assert docs[1].relative_source == "docs/guide.md"
+
+    def test_default_config_discovers_common_project_doc_dirs(
+        self, tmp_path: Path
+    ) -> None:
+        (tmp_path / "README.md").write_text("# Root\n\nOverview.\n", encoding="utf-8")
+        for rel in [
+            "guides/usage.md",
+            "specs/api.md",
+            "decisions/adr-0001.md",
+            "architecture/overview.md",
+            "product/roadmap.md",
+            "rfcs/0001-cache.md",
+        ]:
+            path = tmp_path / rel
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(f"# {path.stem}\n\nProject docs.\n", encoding="utf-8")
+        for rel in [
+            "guides/node_modules/pkg/README.md",
+            "specs/dist/generated.md",
+            "architecture/.next/generated.md",
+            "product/coverage/report.md",
+            "rfcs/target/generated.md",
+        ]:
+            path = tmp_path / rel
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("# Generated\n\nDo not index.\n", encoding="utf-8")
+        write_default_config(tmp_path)
+        cfg = load_repo_config(tmp_path)
+
+        docs = discover_documents(tmp_path, cfg)
+        rels = {doc.relative_source for doc in docs}
+
+        assert {
+            "README.md",
+            "guides/usage.md",
+            "specs/api.md",
+            "decisions/adr-0001.md",
+            "architecture/overview.md",
+            "product/roadmap.md",
+            "rfcs/0001-cache.md",
+        }.issubset(rels)
+        assert all("generated" not in rel for rel in rels)
 
     def test_default_config_discovers_one_level_nested_readmes(
         self, tmp_path: Path
@@ -494,6 +566,29 @@ class TestRepoSearch:
         repo_search_module._apply_graph_scores(hits, cache)
 
         assert hits[0].graph_score == 0.5
+
+    async def test_search_repo_documents_without_sync_raises_next_steps(
+        self, tmp_path: Path
+    ) -> None:
+        _write_repo_docs(tmp_path)
+        write_default_config(tmp_path)
+
+        with pytest.raises(IndexNotFoundError) as exc_info:
+            await search_repo_documents(
+                tmp_path,
+                embedder=FakeEmbedder(dim=32),
+                query="detailed docs",
+                k=4,
+            )
+
+        details = exc_info.value.details
+        assert details["root"] == str(tmp_path)
+        assert details["indexed_count"] == 0
+        assert details["missing_count"] == 2
+        assert _commands_from_details(details)[:2] == [
+            "docsgraph sync",
+            "docsgraph status",
+        ]
 
     async def test_search_repo_documents_merges_hits(self, tmp_path: Path) -> None:
         _write_repo_docs(tmp_path)

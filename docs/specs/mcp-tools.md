@@ -63,10 +63,13 @@ ADR-0002). Two variants are served:
 - **Document mode** (`docsgraph serve <doc-dir>`): directs the agent to start
   with `outline`, locate via `search_semantic`/`search_keyword`, then read with
   `get_section` at an explicit level, citing stable section ids.
-- **Repository mode** (`docsgraph serve` in a repo): directs the agent to
-  prefer Cairn over grepping the repo for documentation questions, to start with
-  `repo_context` or `search_documents`, and explicitly states that Cairn does
-  **not** replace source-code search.
+- **Repository mode** (`docsgraph serve` in a repo): directs the agent to call
+  Cairn before reading raw README/docs/spec files for documentation questions,
+  to start with `repo_context` or `search_documents`, to follow structured setup
+  `next_steps` when the repo is not initialized or synced, and explicitly states
+  that Cairn does **not** replace source-code search. Repository indexes are
+  isolated per `.cairn/config.toml`; `projectPath` switches to another repo only
+  when explicitly provided.
 
 The instruction text lives beside the server in `src/cairn/mcp/server.py`
 (`DOCUMENT_INSTRUCTIONS`, `REPO_INSTRUCTIONS`). Per-tool `description` strings
@@ -88,6 +91,13 @@ Tools never raise to the MCP transport. They return a structured envelope:
   "trace": { ... }
 }
 ```
+
+Recoverable repo setup errors include `error.details.next_steps`, an ordered
+array of `{command, reason}` objects. Missing config starts with
+`docsgraph init -y`; missing or unusable document indexes start with
+`docsgraph sync`. When the discovered document surface is suspiciously narrow,
+`error.details.config_guidance` may also suggest `.cairn/config.toml` include
+and exclude edits.
 
 Successful responses:
 
@@ -113,21 +123,22 @@ Repository-scoped MCP tools accept these optional parameters:
 | Param | Type | Default | Description |
 |---|---|---|---|
 | `doc` | `string` | server primary | Document namespace (`doc_id`). Used by document retrieval tools in repo mode. Required only when the server hosts multiple documents and no primary is configured. |
-| `projectPath` | `string` | current MCP workspace | Path to a different repo containing `.cairn/config.toml`. Omit for normal current-workspace use; provide only for explicit cross-repo queries. |
+| `projectPath` | `string` | current MCP workspace | Path to a different repo containing `.cairn/config.toml`. Repos are isolated; omit for normal current-workspace use and provide only for explicit cross-repo queries. |
 
 In single-document mode (`docsgraph serve <doc-dir>`), clients should omit `doc`.
 In repository mode, `docsgraph serve` resolves the current MCP workspace from
 the client's `rootUri` / `workspaceFolders` / `roots/list` signal, then walks up
 to the nearest `.cairn/config.toml`. If no config is found, the call returns an
-`INVALID_CONFIG` envelope rather than falling back to another repo. Clients
-should use repo tools for documentation, product, architecture, setup, naming,
-protocol, business workflow, and decision-record questions. For source-code
-symbol tracing, known-file edits, test output, build logs, and exact literal
-search, clients should prefer CodeGraph, shell, or native project tools. For
-documentation tasks, call `repo_context` for ready-to-read context, call
-`search_documents` for ranked discovery, or call `list_documents` to inspect
-the indexed surface and usage guidance before routing normal retrieval tools
-to a specific indexed document.
+`INVALID_CONFIG` envelope with setup `next_steps` rather than falling back to
+another repo. Clients should use repo tools before raw file reads for
+documentation, product, architecture, setup, naming, protocol, business
+workflow, and decision-record questions. For source-code symbol tracing,
+known-file edits, test output, build logs, and exact literal search, clients
+should prefer CodeGraph, shell, or native project tools. For documentation tasks,
+call `repo_context` for ready-to-read context, call `search_documents` for
+ranked discovery, or call `list_documents` to inspect the indexed surface,
+freshness, usage guidance, and config guidance before routing normal retrieval
+tools to a specific indexed document.
 
 ### Repository-only tool: `list_documents`
 
@@ -171,6 +182,13 @@ Output:
   }
 }
 ```
+
+When no indexed/stale documents are available, `data.next_steps` tells clients
+to run `docsgraph sync` and inspect `docsgraph status`. When the document
+surface looks too narrow, for example only a README is known, optional
+`data.config_guidance` suggests `.cairn/config.toml` `include` examples such as
+`guides/**/*.md`, `specs/**/*.md`, and `decisions/**/*.md`, plus `exclude`
+examples such as `node_modules/**`, `dist/**`, `build/**`, and `coverage/**`.
 
 ### Repository-only tool: `search_documents`
 
@@ -271,6 +289,8 @@ Semantics:
   value, for deeper per-document recall.
 - Hits include `doc`, `source`, and section `id` for follow-up calls such as
   `get_section(doc=..., id=...)`.
+- If no indexed/stale documents are searchable, the tool returns a `NOT_FOUND`
+  envelope with setup `next_steps` instead of a successful empty `hits` list.
 - `stale_documents` lists indexed documents whose source file fingerprint no
   longer matches the last synced fingerprint. Search still returns the existing
   index for continuity, but clients should run `docsgraph sync` before relying

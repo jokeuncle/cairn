@@ -370,8 +370,9 @@ def _repo_doc_tool(tool: Tool) -> Tool:
         name=tool.name,
         annotations=_read_only(f"Cairn Repo {title.removeprefix('Cairn ')}"),
         description=(
-            f"{tool.description} Pass optional `doc` to target a specific "
-            "repository document."
+            "Start with `repo_context` or `search_documents` unless you already "
+            f"know the target repo document or section id. {tool.description} "
+            "Pass optional `doc` to target a specific repository document."
         ),
         inputSchema=_with_doc(tool.inputSchema),
         outputSchema=_ENVELOPE_OUTPUT_SCHEMA,
@@ -538,9 +539,10 @@ REPO_TOOLS: Final[list[Tool]] = [
         description=(
             "Use to find which docs and sections are relevant to a query across "
             "the whole repo. Returns globally ranked, cited hits with doc ids; "
-            "follow up with get_section on the winners. Prefer for documentation, "
-            "product, architecture, setup, naming, protocols, business workflows, "
-            "and decisions. "
+            "follow up with get_section on the winners. Use before reading raw "
+            "README/docs/spec files for project knowledge. Prefer for "
+            "documentation, product, architecture, setup, naming, protocols, "
+            "business workflows, and decisions. "
             f"Prefer other tools for {_PREFER_OTHER}."
         ),
         inputSchema=_with_project_path(_SEARCH_DOCUMENTS_SCHEMA),
@@ -553,7 +555,8 @@ REPO_TOOLS: Final[list[Tool]] = [
             "START HERE for a question about this repo's docs. One call returns "
             "ranked hits, ready-to-read section content, related sections, and a "
             "relationship map -- enough to answer without further drilling in "
-            f"most cases. Use first when an agent needs context for {_PREFER_CAIRN}. "
+            "most cases. Use before reading raw README/docs/spec files for "
+            f"project knowledge. Use first when an agent needs context for {_PREFER_CAIRN}. "
             "Do not use as a mandatory pre-step "
             "for small code edits, tests, or exact literal search."
         ),
