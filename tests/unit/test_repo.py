@@ -753,6 +753,79 @@ class TestRepoSearch:
             "index_dims": [32],
             "documents": ["docs-guide", "readme"],
         }
+        assert _commands_from_details(result["data"])[:2] == [
+            "docsgraph doctor",
+            "docsgraph sync --force",
+        ]
+
+    async def test_repo_context_surfaces_embedding_mismatch_next_steps(
+        self, tmp_path: Path
+    ) -> None:
+        _write_repo_docs(tmp_path)
+        write_default_config(tmp_path)
+        await sync_repo(
+            tmp_path,
+            summarizer=FakeSummarizer(),
+            embedder=FakeEmbedder(dim=32),
+            index_config=IndexConfig(),
+        )
+
+        result = await repo_context(
+            tmp_path,
+            embedder=FakeEmbedder(dim=64),
+            query="detailed docs",
+            k=4,
+        )
+
+        data = result["data"]
+        assert data["hits"] == []
+        assert data["context_sections"] == []
+        assert data["embedding_mismatch"] == {
+            "query_dim": 64,
+            "index_dims": [32],
+            "documents": ["docs-guide", "readme"],
+        }
+        assert _commands_from_details(data)[:2] == [
+            "docsgraph doctor",
+            "docsgraph sync --force",
+        ]
+
+    async def test_search_repo_documents_cache_tracks_vector_manifest_changes(
+        self, tmp_path: Path
+    ) -> None:
+        _write_repo_docs(tmp_path)
+        write_default_config(tmp_path)
+        await sync_repo(
+            tmp_path,
+            summarizer=FakeSummarizer(),
+            embedder=FakeEmbedder(dim=32),
+            index_config=IndexConfig(),
+        )
+
+        first = await search_repo_documents(
+            tmp_path,
+            embedder=FakeEmbedder(dim=32),
+            query="detailed docs",
+            k=4,
+        )
+        assert first["data"]["hits"]
+
+        await sync_repo(
+            tmp_path,
+            summarizer=FakeSummarizer(),
+            embedder=FakeEmbedder(dim=64),
+            index_config=IndexConfig(),
+        )
+
+        second = await search_repo_documents(
+            tmp_path,
+            embedder=FakeEmbedder(dim=64),
+            query="detailed docs",
+            k=4,
+        )
+
+        assert second["data"]["hits"]
+        assert second["data"]["embedding_mismatch"] is None
 
     async def test_search_repo_documents_diversifies_docs_by_default(
         self, tmp_path: Path

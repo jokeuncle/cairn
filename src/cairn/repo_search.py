@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import heapq
+import json
 import math
 import re
 from collections import Counter, defaultdict
@@ -19,7 +20,7 @@ from typing import Any, Final, Protocol
 
 import numpy as np
 
-from cairn.index.vectors import l2_normalize
+from cairn.index.vectors import VECTORS_MANIFEST_FILENAME, l2_normalize
 from cairn.tools.base import DocumentIndex
 from cairn.tools.search_semantic import IncludeField, _evidence_snippet, _query_terms
 
@@ -100,7 +101,7 @@ class _RepoScoredHit:
 
 @dataclass(slots=True)
 class _RepoSearchCache:
-    signature: tuple[tuple[str, str, str, str, str, str, int], ...]
+    signature: tuple[tuple[Any, ...], ...]
     records: tuple[_RepoSectionRecord, ...]
     skipped: tuple[dict[str, str], ...]
     doc_dims: dict[str, int]
@@ -309,7 +310,7 @@ async def _get_repo_search_cache(
     candidates: Collection[RepoSearchCandidate],
 ) -> _RepoSearchCache:
     resolved_root = root.resolve()
-    signature = _repo_search_signature(candidates)
+    signature = _repo_search_signature(root, candidates)
     cached = _REPO_SEARCH_CACHES.get(resolved_root)
     if cached is not None and cached.signature == signature:
         return cached
@@ -479,8 +480,9 @@ async def _load_repo_search_document(
 
 
 def _repo_search_signature(
+    root: Path,
     candidates: Collection[RepoSearchCandidate],
-) -> tuple[tuple[str, str, str, str, str, str, int], ...]:
+) -> tuple[tuple[Any, ...], ...]:
     return tuple(
         (
             doc.id,
@@ -490,8 +492,36 @@ def _repo_search_signature(
             doc.source_file_hash or "",
             doc.indexed_source_file_hash or "",
             doc.section_count or 0,
+            *_repo_vectors_manifest_signature(root, doc),
         )
         for doc in candidates
+    )
+
+
+def _repo_vectors_manifest_signature(
+    root: Path,
+    doc: RepoSearchCandidate,
+) -> tuple[str, int | None, int | None, int, int]:
+    path = root / doc.doc_dir / VECTORS_MANIFEST_FILENAME
+    try:
+        stat = path.stat()
+    except OSError:
+        return ("", None, None, 0, 0)
+
+    try:
+        manifest = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return ("<unreadable>", None, None, stat.st_mtime_ns, stat.st_size)
+
+    embedder = manifest.get("embedder")
+    dim = manifest.get("dim")
+    section_count = manifest.get("section_count")
+    return (
+        embedder if isinstance(embedder, str) else "",
+        dim if isinstance(dim, int) else None,
+        section_count if isinstance(section_count, int) else None,
+        stat.st_mtime_ns,
+        stat.st_size,
     )
 
 

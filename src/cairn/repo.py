@@ -360,6 +360,35 @@ def repo_config_guidance(status: RepoStatus) -> dict[str, Any] | None:
     }
 
 
+def repo_embedding_mismatch_next_steps(root: Path) -> list[dict[str, str]]:
+    """Return recovery commands for query/index embedding dimension mismatches."""
+    repo_arg = str(root)
+    return [
+        {
+            "command": "docsgraph doctor",
+            "reason": (
+                "Confirm the query embedder dimension and indexed vector "
+                "dimensions for this repository."
+            ),
+        },
+        {
+            "command": "docsgraph sync --force",
+            "reason": (
+                "Rebuild document vectors from the repo root with the same "
+                "CAIRN_EMBED_* environment used by the MCP server."
+            ),
+        },
+        {
+            "command": f"docsgraph mcp config --client codex --repo {repo_arg} --fake",
+            "reason": (
+                "Alternative for deterministic smoke-test indexes built with "
+                "`docsgraph sync --fake`: make the MCP server query with the "
+                "same fake embedder."
+            ),
+        },
+    ]
+
+
 def _repo_setup_details(
     root: Path,
     *,
@@ -843,6 +872,8 @@ async def search_repo_documents(
         sections_per_doc=effective_sections_per_doc,
         preferred_locales=config.preferred_locales,
     )
+    if payload.get("embedding_mismatch") is not None:
+        payload["next_steps"] = repo_embedding_mismatch_next_steps(root)
     return {
         "tokens_returned": estimate_tokens_of_payload(payload),
         "data": payload,
@@ -950,6 +981,9 @@ async def repo_context(
             ),
         },
     }
+    if search["data"].get("embedding_mismatch") is not None:
+        payload["embedding_mismatch"] = search["data"]["embedding_mismatch"]
+        payload["next_steps"] = repo_embedding_mismatch_next_steps(root)
     return {
         "tokens_returned": estimate_tokens_of_payload(payload),
         "data": payload,
