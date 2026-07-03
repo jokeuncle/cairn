@@ -44,14 +44,15 @@ async def search_keyword(
     lc_terms = [t.lower() for t in terms]
 
     scored: list[tuple[int, dict[str, Any]]] = []
-    for node in index.tree:
+    for position, node in enumerate(index.tree):
         if scope is not None and not _matches_scope(node.id, scope):
             continue
 
+        metadata = node.metadata if position == 0 else {}
         sources = {
             "title": node.title,
             "body": node.raw_text,
-            "metadata": _metadata_text(node.metadata),
+            "metadata": _metadata_text(metadata),
         }
         text_lc = "\n".join(sources.values()).lower()
         matches: list[dict[str, Any]] = []
@@ -87,7 +88,7 @@ async def search_keyword(
                     "match_sources": sorted(
                         {source for match in matches for source in match["sources"]}
                     ),
-                    "metadata": node.metadata,
+                    "metadata": metadata,
                     "head": node.raw_text[:_HEAD_CHARS],
                 },
             )

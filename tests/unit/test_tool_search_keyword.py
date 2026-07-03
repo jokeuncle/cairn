@@ -2,9 +2,17 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 from cairn.core.errors import ToolError
+from cairn.embed.fake import FakeEmbedder
+from cairn.index.summaries import SummaryBuilder
+from cairn.index.tree import TreeBuilder
+from cairn.index.vectors import VectorBuilder
+from cairn.ingest.markdown import MarkdownParser
+from cairn.summarize.fake import FakeSummarizer
 from cairn.tools.base import DocumentIndex
 from cairn.tools.search_keyword import search_keyword
 
@@ -65,6 +73,39 @@ class TestMatching:
         ids = {h["id"] for h in resp_any.data["hits"]}
         assert "introduction/quickstart" in ids
         assert "introduction/configuration" in ids
+
+    async def test_frontmatter_metadata_only_matches_document_entry(
+        self, tmp_path: Path
+    ) -> None:
+        doc = MarkdownParser().parse(
+            "\n".join(
+                [
+                    "---",
+                    "title: Keyword Metadata Title",
+                    "description: metadata-only keyword phrase",
+                    "---",
+                    "# Article Entry",
+                    "",
+                    "Short overview.",
+                    "",
+                    "## Child Section",
+                    "",
+                    "Child body.",
+                ]
+            ),
+            doc_id="metadata",
+        )
+        TreeBuilder().build(doc, out_dir=tmp_path)
+        await SummaryBuilder(FakeSummarizer()).build(doc, out_dir=tmp_path)
+        await VectorBuilder(FakeEmbedder(dim=32)).build(doc, out_dir=tmp_path)
+        index = DocumentIndex.load(tmp_path)
+
+        resp = await search_keyword(index, terms=["metadata-only keyword phrase"], k=5)
+
+        metadata_hits = [
+            hit["id"] for hit in resp.data["hits"] if "metadata" in hit["match_sources"]
+        ]
+        assert metadata_hits == ["article-entry"]
 
 
 class TestScoring:

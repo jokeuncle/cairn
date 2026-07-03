@@ -396,13 +396,14 @@ async def _load_repo_search_document(
         )
 
     vector_section_ids = set(vectors)
-    for node in index.tree:
+    for position, node in enumerate(index.tree):
         vector = vectors.get(node.id)
         if vector is None:
             continue
         summary = index.summaries.get(node.id)
         synopsis = summary.synopsis if summary is not None else ""
-        metadata_text = _metadata_text(node.metadata)
+        metadata = dict(node.metadata) if position == 0 else {}
+        metadata_text = _metadata_text(metadata)
         searchable_synopsis = "\n".join(part for part in (metadata_text, synopsis) if part)
         token_counts = _section_token_counts(
             doc_id=doc.id,
@@ -431,7 +432,7 @@ async def _load_repo_search_document(
                 ),
                 token_counts=dict(token_counts),
                 token_count=sum(token_counts.values()),
-                metadata=dict(node.metadata),
+                metadata=metadata,
                 metadata_text=metadata_text,
                 navigation_only=not node.raw_text.strip() and bool(node.children),
             )

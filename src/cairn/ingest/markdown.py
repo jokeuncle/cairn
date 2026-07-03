@@ -4,9 +4,10 @@ Preserves heading hierarchy, generates stable hierarchical slug-based section
 IDs, computes byte spans, and emits ``raw_text`` that excludes descendant
 section bodies (per ARCHITECTURE.md §2.2).
 
-Front-matter (YAML, TOML) is parsed and discarded. Content preceding the first
-heading is discarded; if a document has no headings, an empty section list is
-returned (callers may choose to treat this as a parse error).
+Front-matter is parsed as document-level metadata and attached only to the
+first section as the document entry point. Content preceding the first heading
+is discarded; if a document has no headings, an empty section list is returned
+(callers may choose to treat this as a parse error).
 """
 
 from __future__ import annotations
@@ -239,7 +240,7 @@ def _build_sections(
                 span=span,
                 path=path,
                 raw_text=raw_text,
-                metadata=dict(document_metadata or {}),
+                metadata=dict(document_metadata or {}) if idx == 0 else {},
             )
         )
 

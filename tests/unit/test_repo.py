@@ -742,6 +742,53 @@ class TestRepoSearch:
         assert "metadata" in hit["match_sources"]
         assert hit["metadata"]["title"] == "Metadata Search Title"
 
+    async def test_frontmatter_metadata_does_not_promote_every_section(
+        self, tmp_path: Path
+    ) -> None:
+        (tmp_path / "README.md").write_text(
+            "\n".join(
+                [
+                    "---",
+                    "title: MCP Skill Safety Boundary",
+                    "description: metadata-only safety phrase",
+                    "tags: [mcp, skill, safety]",
+                    "---",
+                    "# Article Entry",
+                    "",
+                    "Short overview.",
+                    "",
+                    "## Best Section",
+                    "",
+                    "This body explains the safety boundary conclusion.",
+                    "",
+                    "## Noisy Section",
+                    "",
+                    "This body talks about an unrelated middle form.",
+                ]
+            ),
+            encoding="utf-8",
+        )
+        write_default_config(tmp_path)
+        embedder = FakeEmbedder(dim=32)
+        await sync_repo(
+            tmp_path,
+            summarizer=FakeSummarizer(),
+            embedder=embedder,
+            index_config=IndexConfig(),
+        )
+
+        result = await search_repo_documents(
+            tmp_path,
+            embedder=embedder,
+            query="metadata-only safety phrase",
+            k=3,
+            sections_per_doc=3,
+        )
+
+        hits = result["data"]["hits"]
+        metadata_hits = [hit["id"] for hit in hits if "metadata" in hit["match_sources"]]
+        assert metadata_hits == ["article-entry"]
+
     async def test_repo_context_returns_composite_context(self, tmp_path: Path) -> None:
         _write_complex_repo_docs(tmp_path)
         write_default_config(tmp_path)

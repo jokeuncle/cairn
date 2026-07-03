@@ -63,7 +63,7 @@ def embedding_text(node: SectionNode, *, metadata: dict[str, Any] | None = None)
     Includes the title so heading information enters the embedding, and falls
     back to title alone for sections with empty bodies.
     """
-    metadata_part = _metadata_text(metadata or node.metadata)
+    metadata_part = _metadata_text(node.metadata if metadata is None else metadata)
     body = node.raw_text.strip()
     parts = [part for part in (metadata_part, node.title, body) if part]
     return "\n\n".join(parts)
@@ -117,7 +117,7 @@ class VectorBuilder:
         manifest_path = out_dir / VECTORS_MANIFEST_FILENAME
 
         ids = [s.id for s in document.sections]
-        texts = [embedding_text(s, metadata=document.metadata) for s in document.sections]
+        texts = [embedding_text(s) for s in document.sections]
 
         vectors: list[list[float]] = []
         for i in range(0, len(texts), self.batch_size):
