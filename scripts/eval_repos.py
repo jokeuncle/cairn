@@ -156,17 +156,37 @@ REPOS: dict[str, dict[str, Any]] = {
             {
                 "id": "server-tool",
                 "query": "how do I create an MCP server tool",
-                "acceptable": {"readme", "readme-v2"},
+                "acceptable": {
+                    "readme",
+                    "readme-v2",
+                    "docs-index",
+                    "docs-servers-index",
+                    "docs-servers-tools",
+                    "docs-advanced-low-level-server",
+                },
             },
             {
                 "id": "http-transport",
                 "query": "streamable http server transport",
-                "acceptable": {"readme", "readme-v2", "docs-low-level-server"},
+                "acceptable": {
+                    "readme",
+                    "readme-v2",
+                    "docs-low-level-server",
+                    "docs-run-index",
+                    "docs-client-transports",
+                    "docs-advanced-low-level-server",
+                },
             },
             {
                 "id": "authorization",
                 "query": "authorization oauth provider",
-                "acceptable": {"readme", "readme-v2", "docs-authorization"},
+                "acceptable": {
+                    "readme",
+                    "readme-v2",
+                    "docs-authorization",
+                    "docs-run-authorization",
+                    "docs-client-oauth-clients",
+                },
             },
             {
                 "id": "migration",

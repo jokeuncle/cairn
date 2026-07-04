@@ -55,11 +55,13 @@ async function api(path, options = {}) {
   return payload.data;
 }
 
-async function loadSnapshot() {
+async function loadSnapshot(useCurrentMode = false) {
   state.loading = 'snapshot';
   render();
   try {
-    state.snapshot = await api('/api/snapshot');
+    const suffix = useCurrentMode ? `?fake=${state.fake}` : '';
+    state.snapshot = await api(`/api/snapshot${suffix}`);
+    state.fake = Boolean(state.snapshot.fake);
     state.error = '';
   } catch (error) {
     state.error = error.message;
@@ -79,6 +81,7 @@ async function initRepo() {
       body: JSON.stringify({ markitdown: state.markitdown }),
     });
     state.snapshot = data.snapshot;
+    state.fake = Boolean(data.snapshot.fake);
     state.notice = `已初始化 ${data.config_path}`;
   } catch (error) {
     state.error = error.message;
@@ -99,6 +102,7 @@ async function runSync(force = false) {
     });
     state.lastRun = data;
     state.snapshot = data.snapshot;
+    state.fake = Boolean(data.snapshot.fake);
     state.notice = `同步完成：${data.summary.rebuilt} rebuilt, ${data.summary.skipped} skipped`;
   } catch (error) {
     state.error = error.message;
@@ -599,7 +603,7 @@ function bindActions() {
   document.querySelector('#fake-toggle')?.addEventListener('change', event => {
     state.fake = event.target.checked;
     state.mcpPreview = null;
-    loadSnapshot();
+    loadSnapshot(true);
   });
   document.querySelector('#fake-toggle-inner')?.addEventListener('change', event => {
     state.fake = event.target.checked;

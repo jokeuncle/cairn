@@ -32,6 +32,8 @@ from cairn.repo import (
     repo_context,
     repo_graph,
     repo_status,
+    resolve_runtime_mode,
+    runtime_mode_uses_fake,
     sync_repo,
     write_default_config,
 )
@@ -44,7 +46,7 @@ class ClientHTTPServer(ThreadingHTTPServer):
     """HTTP server carrying Cairn client runtime settings."""
 
     repo_root: Path
-    use_fake: bool
+    use_fake: bool | None
 
     def __init__(
         self,
@@ -52,7 +54,7 @@ class ClientHTTPServer(ThreadingHTTPServer):
         handler_class: type[BaseHTTPRequestHandler],
         *,
         repo_root: Path,
-        use_fake: bool,
+        use_fake: bool | None,
     ) -> None:
         super().__init__(server_address, handler_class)
         self.repo_root = repo_root
@@ -64,7 +66,7 @@ def serve_client(
     repo: Path | None = None,
     host: str = "127.0.0.1",
     port: int = 8765,
-    fake: bool = True,
+    fake: bool | None = None,
     open_browser: bool = True,
 ) -> None:
     """Serve the local Cairn web client until interrupted."""
@@ -98,12 +100,22 @@ def _resolve_start_root(repo: Path | None) -> Path:
         return start
 
 
-def client_snapshot(root: Path, *, fake: bool) -> dict[str, Any]:
+def client_snapshot(root: Path, *, fake: bool | None) -> dict[str, Any]:
     """Return the current repository state for the local client."""
     cfg_path = config_path(root)
     configured = cfg_path.exists()
+    cfg = load_repo_config(root) if configured else None
+    runtime_mode = resolve_runtime_mode(
+        root if configured else None,
+        fake=fake,
+        config=cfg,
+        default="fake",
+    )
+    use_fake = runtime_mode_uses_fake(runtime_mode)
     payload: dict[str, Any] = {
         "version": __version__,
+        "runtime_mode": runtime_mode,
+        "fake": use_fake,
         "repo": {
             "root": str(root),
             "configured": configured,
@@ -111,16 +123,17 @@ def client_snapshot(root: Path, *, fake: bool) -> dict[str, Any]:
         },
         "config": None,
         "status": None,
-        "doctor": _doctor_payload(root, fake=fake, status_obj=None),
-        "publish": _publish_payload(root, fake=fake, fixed_repo=configured),
+        "doctor": _doctor_payload(root, fake=use_fake, status_obj=None),
+        "publish": _publish_payload(root, fake=None, fixed_repo=configured),
     }
     if not configured:
         return payload
 
-    cfg = load_repo_config(root)
+    assert cfg is not None
     status_obj = repo_status(root, config=cfg)
     payload["config"] = {
         "documents_dir": cfg.documents_dir,
+        "runtime_mode": cfg.runtime_mode,
         "include": list(cfg.include),
         "exclude": list(cfg.exclude),
         "primary_doc": cfg.primary_doc,
@@ -129,7 +142,8 @@ def client_snapshot(root: Path, *, fake: bool) -> dict[str, Any]:
         "preferred_locales": list(cfg.preferred_locales),
     }
     payload["status"] = _status_payload(status_obj)
-    payload["doctor"] = _doctor_payload(root, fake=fake, status_obj=status_obj)
+    payload["doctor"] = _doctor_payload(root, fake=use_fake, status_obj=status_obj)
+    payload["publish"] = _publish_payload(root, fake=fake, fixed_repo=configured)
     return payload
 
 
@@ -137,26 +151,35 @@ def mcp_config_payload(
     root: Path,
     *,
     client: McpClient,
-    fake: bool,
+    fake: bool | None,
     fixed_repo: bool,
     command: str = "docsgraph",
 ) -> dict[str, Any]:
     """Return an MCP config preview for a target AI client."""
     args = _mcp_server_args(repo=root if fixed_repo else None)
-    if fake:
+    runtime_mode = resolve_runtime_mode(root if fixed_repo else None, fake=fake)
+    configured_fake = (
+        runtime_mode_uses_fake(resolve_runtime_mode(root))
+        if fixed_repo and config_path(root).exists()
+        else None
+    )
+    if fake is True and configured_fake is not True:
         args.append("--fake")
+    elif fake is False and configured_fake is True:
+        args.append("--real")
     target = _default_mcp_config_path(client)
     return {
         "client": client,
         "target": str(target),
         "command": command,
         "args": args,
+        "runtime_mode": runtime_mode,
         "fixed_repo": fixed_repo,
         "config": _format_mcp_config(client, command=command, args=args),
     }
 
 
-def _publish_payload(root: Path, *, fake: bool, fixed_repo: bool) -> dict[str, Any]:
+def _publish_payload(root: Path, *, fake: bool | None, fixed_repo: bool) -> dict[str, Any]:
     return {
         "clients": [
             mcp_config_payload(root, client=client, fake=fake, fixed_repo=fixed_repo)
@@ -285,10 +308,22 @@ def _doctor_payload(
     return {"ok": all(check["ok"] for check in checks), "checks": checks}
 
 
-def _parse_bool(value: str | None, *, default: bool) -> bool:
+def _parse_bool(value: str | None, *, default: bool | None) -> bool | None:
     if value is None:
         return default
     return value.lower() in {"1", "true", "yes", "on"}
+
+
+def _payload_fake_override(payload: dict[str, Any]) -> bool | None:
+    if "fake" not in payload:
+        return None
+    return bool(payload["fake"])
+
+
+def _use_fake_for_root(root: Path, override: bool | None) -> bool:
+    return runtime_mode_uses_fake(
+        resolve_runtime_mode(root, fake=override, default="fake")
+    )
 
 
 def _parse_bounded_int(
@@ -379,10 +414,11 @@ class ClientRequestHandler(BaseHTTPRequestHandler):
                     maximum=8,
                 )
                 fake = _parse_bool(_first(query, "fake"), default=server.use_fake)
+                resolved_fake = _use_fake_for_root(root, fake)
                 result = asyncio.run(
                     repo_context(
                         root,
-                        embedder=make_embedder(fake),
+                        embedder=make_embedder(resolved_fake),
                         query=q,
                         k=k,
                         related_k=min(4, k),
@@ -418,7 +454,7 @@ class ClientRequestHandler(BaseHTTPRequestHandler):
                             root,
                             client=client,
                             fake=fake,
-                            fixed_repo=fixed,
+                            fixed_repo=bool(fixed),
                         ),
                     }
                 )
@@ -441,6 +477,7 @@ class ClientRequestHandler(BaseHTTPRequestHandler):
                     root,
                     force=bool(payload.get("force", False)),
                     enable_markitdown=bool(payload.get("markitdown", False)),
+                    runtime_mode=resolve_runtime_mode(fake=server.use_fake),
                 )
                 self._send_json(
                     {
@@ -453,13 +490,16 @@ class ClientRequestHandler(BaseHTTPRequestHandler):
                 )
                 return
             if path == "/api/sync":
-                fake = bool(payload.get("fake", server.use_fake))
+                fake = _payload_fake_override(payload)
+                if fake is None:
+                    fake = server.use_fake
+                resolved_fake = _use_fake_for_root(root, fake)
                 progress: list[str] = []
                 results = asyncio.run(
                     sync_repo(
                         root,
-                        summarizer=make_summarizer(fake),
-                        embedder=make_embedder(fake),
+                        summarizer=make_summarizer(resolved_fake),
+                        embedder=make_embedder(resolved_fake),
                         index_config=load_index_config(),
                         force=bool(payload.get("force", False)),
                         progress=progress.append,
@@ -489,7 +529,9 @@ class ClientRequestHandler(BaseHTTPRequestHandler):
                 return
             if path == "/api/mcp/install":
                 client = _client_from_value(payload.get("client", "codex"))
-                fake = bool(payload.get("fake", server.use_fake))
+                fake = _payload_fake_override(payload)
+                if fake is None:
+                    fake = server.use_fake
                 fixed = bool(payload.get("fixed_repo", True))
                 config = mcp_config_payload(root, client=client, fake=fake, fixed_repo=fixed)
                 target = Path(config["target"])

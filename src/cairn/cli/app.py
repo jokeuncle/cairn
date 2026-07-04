@@ -32,6 +32,8 @@ from cairn.repo import (
     repo_embedder_mismatch_message,
     repo_index_embedder_infos,
     repo_status,
+    resolve_runtime_mode,
+    runtime_mode_uses_fake,
     search_repo_documents,
     sync_repo,
     validate_repo_embedder_compatibility,
@@ -76,6 +78,34 @@ def _make_embedder(use_fake: bool) -> Embedder:
     return make_embedder(use_fake)
 
 
+def _use_fake_for_repo(root: Path, override: bool | None) -> bool:
+    return runtime_mode_uses_fake(resolve_runtime_mode(root, fake=override))
+
+
+def _use_fake_with_default(override: bool | None, *, default: bool = False) -> bool:
+    return runtime_mode_uses_fake(
+        resolve_runtime_mode(fake=override, default="fake" if default else "real")
+    )
+
+
+def _append_mcp_runtime_override(
+    args: list[str],
+    *,
+    repo: Path | None,
+    override: bool | None,
+) -> None:
+    if override is None:
+        return
+    configured_fake: bool | None = None
+    if repo is not None:
+        root = find_repo_root(repo)
+        configured_fake = _use_fake_for_repo(root, None)
+    if override is True and configured_fake is not True:
+        args.append("--fake")
+    elif override is False and configured_fake is True:
+        args.append("--real")
+
+
 # ---------------------------------------------------------------------------
 # Commands
 # ---------------------------------------------------------------------------
@@ -118,12 +148,12 @@ def init(
 @app.command()
 def sync(
     fake: Annotated[
-        bool,
+        bool | None,
         typer.Option(
-            "--fake",
-            help="Use deterministic FakeSummarizer + FakeEmbedder (no network).",
+            "--fake/--real",
+            help="Override runtime_mode from .cairn/config.toml.",
         ),
-    ] = False,
+    ] = None,
     force: Annotated[
         bool,
         typer.Option("--force", help="Rebuild every configured document."),
@@ -137,16 +167,17 @@ def sync(
     asyncio.run(_run_sync(fake, force, dry_run))
 
 
-async def _run_sync(use_fake: bool, force: bool, dry_run: bool = False) -> None:
+async def _run_sync(use_fake: bool | None, force: bool, dry_run: bool = False) -> None:
     root = find_repo_root()
     if dry_run:
         report = discover_document_surface(root, load_repo_config(root))
         typer.echo(_format_discovery_report(report))
         return
+    resolved_fake = _use_fake_for_repo(root, use_fake)
     results = await sync_repo(
         root,
-        summarizer=_make_summarizer(use_fake),
-        embedder=_make_embedder(use_fake),
+        summarizer=_make_summarizer(resolved_fake),
+        embedder=_make_embedder(resolved_fake),
         index_config=load_index_config(),
         force=force,
         progress=lambda message: typer.echo(message, err=True),
@@ -203,12 +234,12 @@ def doctor(
         typer.Option("--json", help="Print machine-readable JSON."),
     ] = False,
     fake: Annotated[
-        bool,
+        bool | None,
         typer.Option(
-            "--fake",
-            help="Check query embedding compatibility with FakeEmbedder.",
+            "--fake/--real",
+            help="Override runtime_mode from .cairn/config.toml.",
         ),
-    ] = False,
+    ] = None,
 ) -> None:
     """Check repo setup, index freshness, and model configuration."""
     checks = _doctor_checks(use_fake=fake)
@@ -308,12 +339,12 @@ def serve(
         ),
     ] = None,
     fake: Annotated[
-        bool,
+        bool | None,
         typer.Option(
-            "--fake",
-            help="Use FakeEmbedder for query embedding (no network at query time).",
+            "--fake/--real",
+            help="Override runtime_mode from .cairn/config.toml for repo serving.",
         ),
-    ] = False,
+    ] = None,
     repo: Annotated[
         Path | None,
         typer.Option(
@@ -333,7 +364,7 @@ def serve(
         raise typer.Exit(code=2)
     if repo is not None:
         root = find_repo_root(repo)
-        embedder = _make_embedder(fake)
+        embedder = _make_embedder(_use_fake_for_repo(root, fake))
         try:
             validate_repo_embedder_compatibility(root, embedder)
         except Exception as exc:
@@ -342,12 +373,12 @@ def serve(
         asyncio.run(serve_repo_stdio(root, embedder=embedder))
         return
     if doc_dir is None:
-        asyncio.run(serve_repo_stdio(None, embedder=_make_embedder(fake)))
+        asyncio.run(serve_repo_stdio(None, embedder=_make_embedder(_use_fake_with_default(fake))))
         return
     if not doc_dir.exists() or not doc_dir.is_dir():
         typer.echo(f"error: document directory not found: {doc_dir}", err=True)
         raise typer.Exit(code=2)
-    asyncio.run(serve_stdio(doc_dir, embedder=_make_embedder(fake)))
+    asyncio.run(serve_stdio(doc_dir, embedder=_make_embedder(_use_fake_with_default(fake))))
 
 
 @app.command()
@@ -374,12 +405,12 @@ def client(
         typer.Option(min=0, max=65535, help="Port for the local web client."),
     ] = 8765,
     fake: Annotated[
-        bool,
+        bool | None,
         typer.Option(
             "--fake/--real",
-            help="Use deterministic local plugins unless --real is selected.",
+            help="Override runtime_mode from .cairn/config.toml.",
         ),
-    ] = True,
+    ] = None,
     open_browser: Annotated[
         bool,
         typer.Option("--open/--no-open", help="Open the client in a browser."),
@@ -427,12 +458,12 @@ def mcp_config(
         ),
     ] = "docsgraph",
     fake: Annotated[
-        bool,
+        bool | None,
         typer.Option(
-            "--fake",
-            help="Include --fake for deterministic local smoke tests.",
+            "--fake/--real",
+            help="Override runtime_mode in generated server args.",
         ),
-    ] = False,
+    ] = None,
     env: Annotated[
         list[str] | None,
         typer.Option(
@@ -450,8 +481,7 @@ def mcp_config(
 ) -> None:
     """Print a copy-pasteable MCP stdio configuration snippet."""
     args = _mcp_server_args(repo=repo)
-    if fake:
-        args.append("--fake")
+    _append_mcp_runtime_override(args, repo=repo, override=fake)
     env_map = _mcp_env(explicit=env or (), from_current=env_from_current)
     typer.echo(_format_mcp_config(client, command=command, args=args, env=env_map))
 
@@ -483,12 +513,12 @@ def install(
         typer.Option(help="Executable path clients should run."),
     ] = "docsgraph",
     fake: Annotated[
-        bool,
+        bool | None,
         typer.Option(
-            "--fake",
-            help="Include --fake for deterministic local smoke tests.",
+            "--fake/--real",
+            help="Override runtime_mode in installed server args.",
         ),
-    ] = False,
+    ] = None,
     env: Annotated[
         list[str] | None,
         typer.Option(
@@ -528,8 +558,7 @@ def install(
 ) -> None:
     """Install the Cairn MCP server config into an agent config file."""
     args = _mcp_server_args(repo=repo)
-    if fake:
-        args.append("--fake")
+    _append_mcp_runtime_override(args, repo=repo, override=fake)
     target = output or _default_mcp_config_path(client)
     env_map = _mcp_env(explicit=env or (), from_current=env_from_current)
     rendered = _format_mcp_config(client, command=command, args=args, env=env_map)
@@ -618,7 +647,10 @@ def query_repo(
             help="Repository root or child path containing .cairn/config.toml.",
         ),
     ] = None,
-    fake: Annotated[bool, typer.Option("--fake")] = False,
+    fake: Annotated[
+        bool | None,
+        typer.Option("--fake/--real", help="Override runtime_mode from .cairn/config.toml."),
+    ] = None,
 ) -> None:
     """Run repo-scoped hybrid search and print results as JSON."""
     asyncio.run(_run_search_repo(query, k, sections_per_doc, repo, fake))
@@ -629,12 +661,13 @@ async def _run_search_repo(
     k: int,
     sections_per_doc: int | None,
     repo: Path | None,
-    use_fake: bool,
+    use_fake: bool | None,
 ) -> None:
     root = find_repo_root(repo)
+    resolved_fake = _use_fake_for_repo(root, use_fake)
     resp = await search_repo_documents(
         root,
-        embedder=_make_embedder(use_fake),
+        embedder=_make_embedder(resolved_fake),
         query=query,
         k=k,
         sections_per_doc=sections_per_doc,
@@ -877,7 +910,7 @@ def _append_discovery_group(
         lines.append("  (none)")
 
 
-def _doctor_checks(*, use_fake: bool = False) -> list[dict[str, object]]:
+def _doctor_checks(*, use_fake: bool | None = None) -> list[dict[str, object]]:
     checks: list[dict[str, object]] = []
     status_obj: RepoStatus | None = None
     try:
@@ -898,6 +931,7 @@ def _doctor_checks(*, use_fake: bool = False) -> list[dict[str, object]]:
             "message": f"found {root / '.cairn' / 'config.toml'}",
         }
     )
+    resolved_fake = _use_fake_for_repo(root, use_fake)
     try:
         status_obj = repo_status(root)
         unhealthy = status_obj.missing_count + status_obj.stale_count + status_obj.error_count
@@ -934,7 +968,7 @@ def _doctor_checks(*, use_fake: bool = False) -> list[dict[str, object]]:
             }
         )
 
-    if use_fake:
+    if resolved_fake:
         query_embedder = _make_embedder(True)
         checks.append(
             {

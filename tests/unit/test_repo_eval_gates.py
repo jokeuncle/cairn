@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from scripts.eval_repos import eval_gate_failures
+from scripts.eval_repos import REPOS, eval_gate_failures
 from scripts.smoke_many_repos import smoke_gate_failures
 
 
@@ -83,3 +83,13 @@ def test_eval_gate_can_relax_top1_threshold() -> None:
     failures = eval_gate_failures(report, strict=True, min_top1_rate=0.8)
 
     assert failures == []
+
+
+def test_mcp_python_sdk_v2_docs_are_accepted() -> None:
+    cases = {case["id"]: set(case["acceptable"]) for case in REPOS["mcp-python-sdk"]["cases"]}
+
+    assert "docs-index" in cases["server-tool"]
+    assert "docs-servers-tools" in cases["server-tool"]
+    assert "docs-run-index" in cases["http-transport"]
+    assert "docs-client-transports" in cases["http-transport"]
+    assert "docs-run-authorization" in cases["authorization"]

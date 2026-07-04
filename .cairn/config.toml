@@ -1,6 +1,7 @@
 # Cairn repository documentation index.
 # Paths are relative to the repository root.
 documents_dir = "documents"
+runtime_mode = "real"
 enable_markitdown = false
 search_sections_per_doc = 1
 primary_doc = "readme"

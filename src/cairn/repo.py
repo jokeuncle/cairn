@@ -184,6 +184,7 @@ NATIVE_SUFFIXES: Final = frozenset({".md", ".markdown", ".mdown", ".mkd", ".pdf"
 SUPPORTED_SUFFIXES: Final = supported_extensions()
 
 DocState = Literal["indexed", "stale", "missing", "error", "orphaned"]
+RuntimeMode = Literal["real", "fake"]
 
 
 class IndexSettings(Protocol):
@@ -202,6 +203,7 @@ class RepoConfig(BaseModel):
     include: tuple[str, ...] = DEFAULT_INCLUDE
     exclude: tuple[str, ...] = DEFAULT_EXCLUDE
     documents_dir: str = "documents"
+    runtime_mode: RuntimeMode = "real"
     primary_doc: str | None = None
     enable_markitdown: bool = False
     search_sections_per_doc: int = Field(default=1, ge=1, le=8)
@@ -613,6 +615,7 @@ def write_default_config(
     *,
     force: bool = False,
     enable_markitdown: bool = False,
+    runtime_mode: RuntimeMode = "real",
 ) -> Path:
     """Create ``.cairn/config.toml`` with conservative repo-doc defaults."""
     path = config_path(root)
@@ -626,6 +629,7 @@ def write_default_config(
         include=include,
         primary_doc="readme",
         enable_markitdown=enable_markitdown,
+        runtime_mode=runtime_mode,
     )
     path.write_text(_render_config(cfg), encoding="utf-8")
     return path
@@ -649,6 +653,27 @@ def load_repo_config(root: Path) -> RepoConfig:
     except ValueError as exc:
         msg = f"invalid Cairn repo config: {path}"
         raise ConfigError(msg, details={"path": str(path)}) from exc
+
+
+def resolve_runtime_mode(
+    root: Path | None = None,
+    *,
+    fake: bool | None = None,
+    config: RepoConfig | None = None,
+    default: RuntimeMode = "real",
+) -> RuntimeMode:
+    """Resolve runtime mode from an explicit override or repo config."""
+    if fake is not None:
+        return "fake" if fake else "real"
+    if config is not None:
+        return config.runtime_mode
+    if root is not None and config_path(root).exists():
+        return load_repo_config(root).runtime_mode
+    return default
+
+
+def runtime_mode_uses_fake(mode: RuntimeMode) -> bool:
+    return mode == "fake"
 
 
 def discover_documents(root: Path, config: RepoConfig) -> tuple[DiscoveredDocument, ...]:
@@ -2078,6 +2103,7 @@ def _render_config(config: RepoConfig) -> str:
         "# Cairn repository documentation index.",
         "# Paths are relative to the repository root.",
         f"documents_dir = {_toml_string(config.documents_dir)}",
+        f"runtime_mode = {_toml_string(config.runtime_mode)}",
         f"enable_markitdown = {str(config.enable_markitdown).lower()}",
         f"search_sections_per_doc = {config.search_sections_per_doc}",
         "preferred_locales = ["

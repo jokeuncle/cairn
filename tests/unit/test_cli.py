@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import importlib
 import json
 from pathlib import Path
 
@@ -12,6 +13,8 @@ from typer.testing import CliRunner
 
 from cairn import __version__
 from cairn.cli.app import _mcp_env, app
+from cairn.embed.fake import FakeEmbedder
+from cairn.summarize.fake import FakeSummarizer
 
 
 @pytest.fixture
@@ -262,6 +265,49 @@ class TestRepoCommands:
         inspect_result = runner.invoke(app, ["inspect", "--out", "repo-inspector.html"])
         assert inspect_result.exit_code == 0, inspect_result.output
         assert (tmp_path / "repo-inspector.html").exists()
+
+    def test_configured_fake_runtime_is_used_without_repeating_flag(
+        self, tmp_path: Path, monkeypatch: MonkeyPatch, runner: CliRunner
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / "README.md").write_text("# Readme\n\nProject overview.\n", encoding="utf-8")
+        init_result = runner.invoke(app, ["init", "-y"])
+        assert init_result.exit_code == 0, init_result.output
+        config_path = tmp_path / ".cairn" / "config.toml"
+        config_path.write_text(
+            config_path.read_text(encoding="utf-8").replace(
+                'runtime_mode = "real"',
+                'runtime_mode = "fake"',
+            ),
+            encoding="utf-8",
+        )
+        seen: list[tuple[str, bool]] = []
+
+        def make_test_summarizer(use_fake: bool) -> FakeSummarizer:
+            seen.append(("summarizer", use_fake))
+            return FakeSummarizer()
+
+        def make_test_embedder(use_fake: bool) -> FakeEmbedder:
+            seen.append(("embedder", use_fake))
+            return FakeEmbedder(dim=64)
+
+        cli_app_module = importlib.import_module("cairn.cli.app")
+        monkeypatch.setattr(cli_app_module, "_make_summarizer", make_test_summarizer)
+        monkeypatch.setattr(cli_app_module, "_make_embedder", make_test_embedder)
+
+        sync_result = runner.invoke(app, ["sync"])
+        assert sync_result.exit_code == 0, sync_result.output
+        doctor_result = runner.invoke(app, ["doctor"])
+        assert doctor_result.exit_code == 0, doctor_result.output
+        query_result = runner.invoke(app, ["query", "repo", "project overview"])
+        assert query_result.exit_code == 0, query_result.output
+
+        assert seen == [
+            ("summarizer", True),
+            ("embedder", True),
+            ("embedder", True),
+            ("embedder", True),
+        ]
 
     def test_install_dry_run_prints_target_and_config(
         self, tmp_path: Path, monkeypatch: MonkeyPatch, runner: CliRunner

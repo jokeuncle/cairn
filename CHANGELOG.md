@@ -8,6 +8,16 @@ All notable changes to Cairn. Format follows
 
 No unreleased changes yet.
 
+## [0.1.0a12] — 2026-07-04
+
+### Changed
+
+- Repo runtime mode can now be declared once in `.cairn/config.toml` with
+  `runtime_mode`, and repo CLI/client/MCP flows consistently honor it unless
+  `--fake` or `--real` explicitly overrides it.
+- Repo regression fixtures now accept the MCP Python SDK v2 documentation pages
+  that replaced the older v1 doc IDs.
+
 ## [0.1.0a11] — 2026-07-04
 
 ### Changed

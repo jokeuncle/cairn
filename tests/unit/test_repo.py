@@ -105,6 +105,28 @@ def _write_complex_repo_docs(root: Path) -> None:
 
 
 class TestRepoConfig:
+    def test_default_config_declares_real_runtime_mode(self, tmp_path: Path) -> None:
+        write_default_config(tmp_path)
+
+        config = (tmp_path / ".cairn" / "config.toml").read_text(encoding="utf-8")
+
+        assert 'runtime_mode = "real"' in config
+
+    def test_repo_config_can_declare_fake_runtime_mode(self, tmp_path: Path) -> None:
+        write_default_config(tmp_path)
+        config_path = tmp_path / ".cairn" / "config.toml"
+        config_path.write_text(
+            config_path.read_text(encoding="utf-8").replace(
+                'runtime_mode = "real"',
+                'runtime_mode = "fake"',
+            ),
+            encoding="utf-8",
+        )
+
+        cfg = load_repo_config(tmp_path)
+
+        assert cfg.runtime_mode == "fake"
+
     def test_missing_config_errors_use_docsgraph_next_steps(self, tmp_path: Path) -> None:
         with pytest.raises(ConfigError) as exc_info:
             load_repo_config(tmp_path)

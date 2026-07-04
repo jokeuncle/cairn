@@ -80,7 +80,7 @@ docsgraph bench benchmarks/architecture.toml --fake
 
 Expected current dogfood:
 
-- Cairn repo: 18/18 docs indexed, 0 errors.
+- Cairn repo: 19/19 docs indexed, 0 errors.
 - Starter benchmark: Cairn recall@8 equals naive with 37.7% of naive tokens
   under the deterministic fake embedder.
 
@@ -95,14 +95,14 @@ The current public-readiness smoke set:
 Expected current results with fake plugins:
 
 - `pydantic/pydantic-ai`: 178/178 docs indexed, 0 errors; 8-case deep
-  eval top1 8/8, top5 8/8, drilldown 8/8.
+  eval top1 6/8, top3 8/8, top5 8/8, drilldown 8/8.
 - `uv`: 89/89 docs indexed, 0 errors; 16-case deep eval top1 15/16,
   top3 16/16, top5 16/16, drilldown 16/16.
-- `modelcontextprotocol/python-sdk`: 17/17 docs indexed, 0 errors; 4-case
-  deep eval top1 4/4, drilldown 4/4.
+- `modelcontextprotocol/python-sdk`: 57/57 docs indexed, 0 errors; 4-case
+  deep eval top1 4/4, top3 4/4, top5 4/4, drilldown 4/4.
 - `fastapi/full-stack-fastapi-template`: 7/7 docs indexed, 0 errors; 4-case
   deep eval top1 4/4, drilldown 4/4.
-- `scripts/smoke_many_repos.py --limit 37`: 2931 docs indexed across 37
+- `scripts/smoke_many_repos.py --limit 37`: 3054 docs indexed across 37
   repos, 0 sync failures, 185/185 searches with hits, 185/185 drilldowns.
 
 Do not tune ranking solely to one repository. Treat failures as signals about
