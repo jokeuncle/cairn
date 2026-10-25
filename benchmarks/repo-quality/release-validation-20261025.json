@@ -174,5 +174,17 @@
       "naive_mean_tokens": 4374.0
     },
     "starter_scope": "Legacy architecture fake-provider fixture; lower Cairn recall; not Agent savings or heldout quality."
+  },
+  "fresh_dependency_resolution": {
+    "mcp": "1.30.0",
+    "lancedb": "0.33.0",
+    "pyarrow": "26.0.0",
+    "python": "3.13",
+    "pytest_passed": 620,
+    "warnings": 8,
+    "mypy_source_files": 133,
+    "mcp_stdio_handshake_and_graph_impact": "passed",
+    "first_ci_failure": "https://github.com/jokeuncle/cairn/actions/runs/40180107704",
+    "fix": "Declare supported MCP>=1.28,<2 and LanceDB>=0.33,<0.34 API lines; mark only PyArrow third-party imports untyped."
   }
 }

@@ -79,6 +79,23 @@ Initial indexing still costs model calls and storage; cached reference/lexical
 queries need no provider. Unavailable/stale sources, caps and partial evidence
 remain explicit. Markdown reference reachability is not code dependency impact.
 
+## Fresh dependency resolution
+
+The first main-branch CI run failed before pytest: a fresh pip install selected
+MCP2.3 and LanceDB0.40, whose APIs differ from the locally locked MCP1.28 and
+LanceDB0.33. The release now declares MCP>=1.28,<2 and LanceDB>=0.33,<0.34.
+PyArrow lacks uniform distributed typing metadata, so only its third-party
+import is marked untyped; Cairn strict checks remain enabled. The failed CI
+run is retained publicly; tagging waits for clean re-resolution and green CI.
+[Initial CI failure](https://github.com/jokeuncle/cairn/actions/runs/40180107704).
+The [MCP migration guide](https://py.sdk.modelcontextprotocol.io/migration/)
+recommends retaining the <2 bound until migrating. No product-module source
+changed for this compatibility fix. A clean unlocked Python3.13 install resolves
+MCP1.30, LanceDB0.33 and PyArrow26; all620 tests and133-file strict mypy pass.
+Eight deprecation warnings are retained in that fresh run. An actual MCP SDK
+stdio handshake, tool-schema listing, cached graph and impact calls also pass
+with these freshly resolved dependencies.
+
 ## Release and rollback
 
 The authorized release is the experimental prerelease0.1.0a13 through the

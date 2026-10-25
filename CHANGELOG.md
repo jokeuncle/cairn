@@ -38,6 +38,9 @@ No unreleased changes yet.
 
 ### Fixed
 
+- Bound MCP to its supported v1 maintenance API and LanceDB to its tested0.33
+  minor line so fresh installs do not select incompatible SDK APIs. Declare
+  PyArrow as an untyped third-party import for platform-independent mypy checks.
 - Preserve bounded source-namespace confidence when action verbs precede literal
   command/identifier phrases (ADR-0018); title/body-only and partial-token
   occurrences do not receive that signal.
