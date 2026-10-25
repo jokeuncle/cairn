@@ -8,7 +8,7 @@ from __future__ import annotations
 from typing import Any, Literal
 
 from cairn.core.errors import IndexNotFoundError, ToolError
-from cairn.tools.base import DocumentIndex, ToolResponse, estimate_tokens
+from cairn.tools.base import DocumentIndex, ToolResponse, estimate_tokens_of_payload
 
 Level = Literal["gist", "synopsis", "digest", "full"]
 
@@ -50,10 +50,37 @@ async def get_section(
         "path": list(node.path),
         "has_children": bool(node.children),
         "next_levels_available": next_levels,
+        "content_scope": "section_body_only; descendant bodies require separate reads",
     }
+    children = index.tree.children_of(node.id)
+    peers = index.tree.children_of(node.parent) if node.parent is not None else index.tree.roots()
+    siblings = tuple(peer for peer in peers if peer.id != node.id)
+    if children or siblings:
+        payload["navigation"] = {
+            "children": [
+                {"id": child.id, "title": child.title, "anchor": index.anchor(child.id)}
+                for child in children[:8]
+            ],
+            "children_total": len(children),
+            "siblings": [
+                {"id": peer.id, "title": peer.title, "anchor": index.anchor(peer.id)}
+                for peer in siblings[:8]
+            ],
+            "siblings_total": len(siblings),
+            "outline": {
+                "doc": index.doc_id,
+                "depth": 6,
+                "focus": node.parent,
+            },
+            "next_step": (
+                "Navigation is optional, not a checklist. Read only headings relevant "
+                "to unmet requirements with get_section(level='full'). "
+                "Use outline for the complete map."
+            ),
+        }
     return ToolResponse(
         data=payload,
-        tokens_returned=estimate_tokens(content),
+        tokens_returned=estimate_tokens_of_payload(payload),
     )
 
 
@@ -94,10 +121,7 @@ def _content_at_level(
         return summary.synopsis
     if level == "digest":
         if summary.digest is None:
-            msg = (
-                f"digest not available for {section_id!r}; "
-                "v0.1 generates only gist + synopsis"
-            )
+            msg = f"digest not available for {section_id!r}; v0.1 generates only gist + synopsis"
             raise IndexNotFoundError(
                 msg,
                 details={"section_id": section_id, "level": level},
@@ -114,9 +138,7 @@ def _levels_deeper_than(
     section_id: str,
 ) -> list[str]:
     current_rank = _LEVEL_ORDER[current]
-    deeper = [
-        name for name, rank in _LEVEL_ORDER.items() if rank > current_rank
-    ]
+    deeper = [name for name, rank in _LEVEL_ORDER.items() if rank > current_rank]
     # Filter to what is actually available.
     summary = index.summaries.get(section_id)
     available: list[str] = []

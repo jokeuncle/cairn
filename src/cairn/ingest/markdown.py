@@ -5,9 +5,8 @@ IDs, computes byte spans, and emits ``raw_text`` that excludes descendant
 section bodies (per ARCHITECTURE.md §2.2).
 
 Front-matter is parsed as document-level metadata and attached only to the
-first section as the document entry point. Content preceding the first heading
-is discarded; if a document has no headings, an empty section list is returned
-(callers may choose to treat this as a parse error).
+first section as the document entry point. Preambles and headingless prose are
+preserved as independent synthetic sections without changing heading IDs.
 """
 
 from __future__ import annotations
@@ -59,6 +58,41 @@ class MarkdownParser:
             line_offsets,
             document_metadata=metadata,
         )
+        body_start_line = next(
+            (token.map[1] for token in tokens if token.type == "front_matter" and token.map),
+            0,
+        )
+        preamble_end_line = headings[0][2] if headings else len(line_offsets) - 1
+        start = _line_to_byte(line_offsets, body_start_line, len(text_bytes))
+        end = _line_to_byte(line_offsets, preamble_end_line, len(text_bytes))
+        preamble = text_bytes[start:end].decode("utf-8")
+        if preamble.strip():
+            occupied = {node.id for node in sections}
+            section_id = "document-introduction"
+            suffix = 2
+            while section_id in occupied:
+                section_id = f"document-introduction-{suffix}"
+                suffix += 1
+            source_title = derived_doc_id if source_path.name.startswith("<") else source_path.stem
+            title = str(metadata.get("title") or source_title)
+            if headings:
+                title = f"{title} — Introduction"
+            sections.insert(
+                0,
+                SectionNode(
+                    id=section_id,
+                    title=title,
+                    level=1,
+                    parent=None,
+                    span=Span(start=start, end=end),
+                    path=(title,),
+                    raw_text=preamble,
+                    metadata=dict(metadata),
+                ),
+            )
+            # Document metadata belongs to the entry point only.
+            if len(sections) > 1:
+                sections[1] = sections[1].model_copy(update={"metadata": {}})
 
         return Document(
             id=derived_doc_id,

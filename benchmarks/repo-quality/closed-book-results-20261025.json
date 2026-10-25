@@ -1,0 +1,657 @@
+{
+  "scope": "controlled synthetic novel-fact mechanism diagnostic; not a commercial/generalization proof",
+  "runs": [
+    {
+      "case_id": "closed-svc017",
+      "arm": "cairn",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 42.249965291997796,
+      "tool_invocations": 6,
+      "usage_events": [
+        {
+          "input_tokens": 215649,
+          "cached_input_tokens": 189568,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 1514,
+          "reasoning_output_tokens": 92
+        }
+      ],
+      "input_tokens": 215649,
+      "cached_input_tokens": 189568,
+      "output_tokens": 1514,
+      "final_answer_exists": true,
+      "review": {
+        "objects": 1,
+        "fields_match": true,
+        "manual_citation_and_derivation_review_required": true,
+        "citation_support": [
+          {
+            "id": "manual/authority",
+            "anchor_line": 7,
+            "direct_anchor": true,
+            "source_line_interval": [
+              5,
+              15
+            ],
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/active-services/svc017",
+            "anchor_line": 233,
+            "direct_anchor": true,
+            "source_line_interval": [
+              231,
+              243
+            ],
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/profiles/profile-p011",
+            "anchor_line": 542,
+            "direct_anchor": true,
+            "source_line_interval": [
+              540,
+              551
+            ],
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/regions/region-r010",
+            "anchor_line": 816,
+            "direct_anchor": true,
+            "source_line_interval": [
+              814,
+              824
+            ],
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/leases/lease-l005",
+            "anchor_line": 892,
+            "direct_anchor": true,
+            "source_line_interval": [
+              890,
+              898
+            ],
+            "local_line_in_section": false
+          }
+        ],
+        "manual_review": {
+          "all_five_supporting_sources_cited": true,
+          "derivation_matches_source_rules": true,
+          "active_omega_and_non_normative_scope_respected": true,
+          "evidence_access_within_protocol": true
+        },
+        "answer_sha256": "9cc12bf31ef0fd7c0d6ffe2584032da28cfd040e3782f2a322795325aa625169",
+        "complete_task_accepted": true
+      },
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/closed-book/closed-svc017-cairn"
+    },
+    {
+      "case_id": "closed-svc017",
+      "arm": "raw",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 44.92425454199838,
+      "tool_invocations": 5,
+      "usage_events": [
+        {
+          "input_tokens": 129425,
+          "cached_input_tokens": 121344,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 2279,
+          "reasoning_output_tokens": 237
+        }
+      ],
+      "input_tokens": 129425,
+      "cached_input_tokens": 121344,
+      "output_tokens": 2279,
+      "final_answer_exists": true,
+      "review": {
+        "objects": 1,
+        "fields_match": true,
+        "manual_citation_and_derivation_review_required": true,
+        "citation_support": [
+          {
+            "id": "manual/authority",
+            "anchor_line": 7,
+            "direct_anchor": false,
+            "source_line_interval": [
+              5,
+              15
+            ],
+            "local_line_in_section": true
+          },
+          {
+            "id": "manual/active-services/svc017",
+            "anchor_line": 233,
+            "direct_anchor": false,
+            "source_line_interval": [
+              231,
+              243
+            ],
+            "local_line_in_section": true
+          },
+          {
+            "id": "manual/profiles/profile-p011",
+            "anchor_line": 542,
+            "direct_anchor": false,
+            "source_line_interval": [
+              540,
+              551
+            ],
+            "local_line_in_section": true
+          },
+          {
+            "id": "manual/regions/region-r010",
+            "anchor_line": 816,
+            "direct_anchor": false,
+            "source_line_interval": [
+              814,
+              824
+            ],
+            "local_line_in_section": true
+          },
+          {
+            "id": "manual/leases/lease-l005",
+            "anchor_line": 892,
+            "direct_anchor": false,
+            "source_line_interval": [
+              890,
+              898
+            ],
+            "local_line_in_section": true
+          }
+        ],
+        "manual_review": {
+          "all_five_supporting_sources_cited": true,
+          "derivation_matches_source_rules": true,
+          "active_omega_and_non_normative_scope_respected": true,
+          "evidence_access_within_protocol": true
+        },
+        "answer_sha256": "cfe3eb4ffa07b8f4f23b609b83a854a2960db6646296c5d89d1848da086e9626",
+        "complete_task_accepted": true
+      },
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/closed-book/closed-svc017-raw"
+    },
+    {
+      "case_id": "closed-svc026",
+      "arm": "cairn",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 40.51628829200126,
+      "tool_invocations": 7,
+      "usage_events": [
+        {
+          "input_tokens": 229552,
+          "cached_input_tokens": 191104,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 1596,
+          "reasoning_output_tokens": 87
+        }
+      ],
+      "input_tokens": 229552,
+      "cached_input_tokens": 191104,
+      "output_tokens": 1596,
+      "final_answer_exists": true,
+      "review": {
+        "objects": 1,
+        "fields_match": true,
+        "manual_citation_and_derivation_review_required": true,
+        "citation_support": [
+          {
+            "id": "manual/authority",
+            "anchor_line": 7,
+            "direct_anchor": true,
+            "source_line_interval": [
+              5,
+              15
+            ],
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/active-services/svc026",
+            "anchor_line": 350,
+            "direct_anchor": true,
+            "source_line_interval": [
+              348,
+              360
+            ],
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/profiles/profile-p018",
+            "anchor_line": 626,
+            "direct_anchor": true,
+            "source_line_interval": [
+              624,
+              635
+            ],
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/regions/region-r012",
+            "anchor_line": 838,
+            "direct_anchor": true,
+            "source_line_interval": [
+              836,
+              846
+            ],
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/leases/lease-l001",
+            "anchor_line": 856,
+            "direct_anchor": true,
+            "source_line_interval": [
+              854,
+              862
+            ],
+            "local_line_in_section": false
+          }
+        ],
+        "manual_review": {
+          "all_five_supporting_sources_cited": true,
+          "derivation_matches_source_rules": true,
+          "active_omega_and_non_normative_scope_respected": true,
+          "evidence_access_within_protocol": true
+        },
+        "answer_sha256": "1fde3423cca90db72fa5fc35fb148893fd0f168e1df03f9956fc5763c4001cb0",
+        "complete_task_accepted": true
+      },
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/closed-book/closed-svc026-cairn"
+    },
+    {
+      "case_id": "closed-svc026",
+      "arm": "raw",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 38.457542332998855,
+      "tool_invocations": 5,
+      "usage_events": [
+        {
+          "input_tokens": 148628,
+          "cached_input_tokens": 132608,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 1799,
+          "reasoning_output_tokens": 51
+        }
+      ],
+      "input_tokens": 148628,
+      "cached_input_tokens": 132608,
+      "output_tokens": 1799,
+      "final_answer_exists": true,
+      "review": {
+        "objects": 1,
+        "fields_match": true,
+        "manual_citation_and_derivation_review_required": true,
+        "citation_support": [
+          {
+            "id": "manual/authority",
+            "anchor_line": 7,
+            "direct_anchor": true,
+            "source_line_interval": [
+              5,
+              15
+            ],
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/active-services/svc026",
+            "anchor_line": 350,
+            "direct_anchor": true,
+            "source_line_interval": [
+              348,
+              360
+            ],
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/profiles/profile-p018",
+            "anchor_line": 626,
+            "direct_anchor": true,
+            "source_line_interval": [
+              624,
+              635
+            ],
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/regions/region-r012",
+            "anchor_line": 838,
+            "direct_anchor": true,
+            "source_line_interval": [
+              836,
+              846
+            ],
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/leases/lease-l001",
+            "anchor_line": 856,
+            "direct_anchor": true,
+            "source_line_interval": [
+              854,
+              862
+            ],
+            "local_line_in_section": false
+          }
+        ],
+        "manual_review": {
+          "all_five_supporting_sources_cited": true,
+          "derivation_matches_source_rules": true,
+          "active_omega_and_non_normative_scope_respected": true,
+          "evidence_access_within_protocol": true
+        },
+        "answer_sha256": "0ff46010e01b39dc9ce2819b5fc3ae519d0075b67ac541d9e38a3b8407510a3c",
+        "complete_task_accepted": true
+      },
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/closed-book/closed-svc026-raw"
+    },
+    {
+      "case_id": "closed-svc030",
+      "arm": "cairn",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 40.923265666999214,
+      "tool_invocations": 8,
+      "usage_events": [
+        {
+          "input_tokens": 227585,
+          "cached_input_tokens": 199552,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 1652,
+          "reasoning_output_tokens": 100
+        }
+      ],
+      "input_tokens": 227585,
+      "cached_input_tokens": 199552,
+      "output_tokens": 1652,
+      "final_answer_exists": true,
+      "review": {
+        "objects": 1,
+        "fields_match": true,
+        "manual_citation_and_derivation_review_required": true,
+        "citation_support": [
+          {
+            "id": "manual/authority",
+            "anchor_line": 7,
+            "direct_anchor": true,
+            "source_line_interval": [
+              5,
+              15
+            ],
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/active-services/svc030",
+            "anchor_line": 402,
+            "direct_anchor": true,
+            "source_line_interval": [
+              400,
+              412
+            ],
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/profiles/profile-p012",
+            "anchor_line": 554,
+            "direct_anchor": true,
+            "source_line_interval": [
+              552,
+              563
+            ],
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/regions/region-r005",
+            "anchor_line": 761,
+            "direct_anchor": true,
+            "source_line_interval": [
+              759,
+              769
+            ],
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/leases/lease-l004",
+            "anchor_line": 883,
+            "direct_anchor": true,
+            "source_line_interval": [
+              881,
+              889
+            ],
+            "local_line_in_section": false
+          }
+        ],
+        "manual_review": {
+          "all_five_supporting_sources_cited": true,
+          "derivation_matches_source_rules": true,
+          "active_omega_and_non_normative_scope_respected": true,
+          "evidence_access_within_protocol": true
+        },
+        "answer_sha256": "cebe8e5adcb888579ca8d48fb6e1ac4efc4d837e6694de66255059c7b79083e8",
+        "complete_task_accepted": true
+      },
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/closed-book/closed-svc030-cairn"
+    },
+    {
+      "case_id": "closed-svc030",
+      "arm": "raw",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 32.47143199999846,
+      "tool_invocations": 4,
+      "usage_events": [
+        {
+          "input_tokens": 147910,
+          "cached_input_tokens": 109312,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 1975,
+          "reasoning_output_tokens": 130
+        }
+      ],
+      "input_tokens": 147910,
+      "cached_input_tokens": 109312,
+      "output_tokens": 1975,
+      "final_answer_exists": true,
+      "review": {
+        "objects": 1,
+        "fields_match": true,
+        "manual_citation_and_derivation_review_required": true,
+        "citation_support": [
+          {
+            "id": "manual/authority",
+            "anchor_line": 7,
+            "direct_anchor": true,
+            "source_line_interval": [
+              5,
+              15
+            ],
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/active-services/svc030",
+            "anchor_line": 402,
+            "direct_anchor": true,
+            "source_line_interval": [
+              400,
+              412
+            ],
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/profiles/profile-p012",
+            "anchor_line": 554,
+            "direct_anchor": true,
+            "source_line_interval": [
+              552,
+              563
+            ],
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/regions/region-r005",
+            "anchor_line": 761,
+            "direct_anchor": true,
+            "source_line_interval": [
+              759,
+              769
+            ],
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/leases/lease-l004",
+            "anchor_line": 883,
+            "direct_anchor": true,
+            "source_line_interval": [
+              881,
+              889
+            ],
+            "local_line_in_section": false
+          }
+        ],
+        "manual_review": {
+          "all_five_supporting_sources_cited": true,
+          "derivation_matches_source_rules": true,
+          "active_omega_and_non_normative_scope_respected": true,
+          "evidence_access_within_protocol": true
+        },
+        "answer_sha256": "19621c6478515727586b20a17c26b4bae47dfb4bd147be4f34e51068dd3e880d",
+        "complete_task_accepted": true
+      },
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/closed-book/closed-svc030-raw"
+    }
+  ],
+  "aggregates": [
+    {
+      "arm": "cairn",
+      "accepted": 3,
+      "tasks": 3,
+      "input_tokens": 672786,
+      "cached_input_tokens": 580224,
+      "output_tokens": 4762,
+      "tool_invocations": 21,
+      "seconds": 123.68951925099827,
+      "uncached_input_tokens": 92562
+    },
+    {
+      "arm": "raw",
+      "accepted": 3,
+      "tasks": 3,
+      "input_tokens": 425963,
+      "cached_input_tokens": 363264,
+      "output_tokens": 6053,
+      "tool_invocations": 14,
+      "seconds": 115.8532288749957,
+      "uncached_input_tokens": 62699
+    }
+  ],
+  "protocol": {
+    "model": "gpt-6.1-sol",
+    "reasoning_effort": "high (matches existing user configuration)",
+    "runtime": "codex-cli 0.164.0, ephemeral fresh sessions, existing ChatGPT auth; no API-key copying",
+    "scope": "Separate controlled information-grounding diagnostic: three synthetic novel-fact manual tasks x Cairn/raw, one attempt each",
+    "arms": [
+      "cairn",
+      "raw source files + rg"
+    ],
+    "tool_budget": 24,
+    "per_session_wall_time_limit_seconds": 900,
+    "final_output_request": "<=1800 tokens (prompt limit, not a decoder setting)",
+    "source_version": "unchanged joint-context-candidate/src",
+    "coding_tools": "same read-only shell, local Python tests allowed, no network requests or source edits",
+    "source_evidence": "MCP only for Cairn/BM25; curated copied docs and rg for raw arm",
+    "known_cases": "All source/cases/oracle fixed before first closed-book answer. Synthetic, repetitive padding; no customer/generalization/commercial claim.",
+    "usage": "CLI turn.completed totals, including cached_input_tokens and output_tokens; not dollar billing or cross-model comparable token counts",
+    "round": "Closed-book mechanism diagnostic, not escalation of failed public API parity screen",
+    "changes": [
+      "Joint source-block selection over the wider structural shortlist, under section/document caps.",
+      "Optional agent-supplied focused queries fused/deduplicated; shared source budget and marginal per-focus relevance. No backend query generation.",
+      "No forced agent workflow, oracle evidence or expected checks in prompts."
+    ],
+    "attempt_selection": "One valid attempt for each pair; retain all old and new runs, including failures.",
+    "runner_sha256": "75de6b8d2e20618f526b71df46d30609195925d14adafc4130e99a346b792edc",
+    "cases_sha256": "d9e72b227c700937618def4baf7f3c64f17e3fd80cf1cabe19661e79371cd572",
+    "acceptance": "Independent executable grader + manual source/requirements review. All valid failures preserved.",
+    "parity_gate": "Same task acceptance; compare cumulative total input I, uncached input U and output O. Componentwise no increase supports token-cost parity for nonnegative output prices and 0<=cached<=uncached input price. Indexing/latency still separate; single runs cannot prove stability.",
+    "escalation": "All six attempts are retained; no task or source tuning after answers. Compare strict JSON facts plus manual source/derivation citations. Do not pool with public API scores.",
+    "summary_provider": "deterministic extractive source words; controlled to isolate retrieval; not the original LLM summary setup",
+    "source_freeze": {
+      "seed": 20261025,
+      "source_utf8_bytes": 2294586,
+      "source_words": 290987,
+      "cases": 3,
+      "source_sha256": "3b2f575ce1ecac95327187b11b1ed099d3d695e1bc79c377940f4bcf2f1747ac",
+      "oracle_sha256": "5cecdeb171553e842d4ea9af4d7dec76e41ef1d54046ad266de575abbd722bd9",
+      "limitations": "Controlled synthetic manual, repetitive distractors, not real customer evidence or a generalization/commercial proof. All source values fixed before first run; no oracle enters index or agent prompts."
+    },
+    "indexing": {
+      "seconds": 72.25909429199965,
+      "index_bytes": 6999378,
+      "source_bytes": 2294586,
+      "documents": [
+        {
+          "id": "docs-manual",
+          "state": "indexed",
+          "sections": 912
+        }
+      ],
+      "embedding": "real local nomic 768d, document/query prefixes, windowed1500",
+      "summary_provider": "deterministic extractive source words; no LLM answer/synthetic oracle used in summaries",
+      "serialization_recovery": "Index built successfully; initial log serialization wrongly expected model_dump on sync_repo tuple. Verified persisted indexed state without rebuilding."
+    }
+  },
+  "source": {
+    "seed": 20261025,
+    "source_utf8_bytes": 2294586,
+    "source_words": 290987,
+    "cases": 3,
+    "source_sha256": "3b2f575ce1ecac95327187b11b1ed099d3d695e1bc79c377940f4bcf2f1747ac",
+    "oracle_sha256": "5cecdeb171553e842d4ea9af4d7dec76e41ef1d54046ad266de575abbd722bd9",
+    "limitations": "Controlled synthetic manual, repetitive distractors, not real customer evidence or a generalization/commercial proof. All source values fixed before first run; no oracle enters index or agent prompts."
+  },
+  "oracle_qualification": [
+    {
+      "case": "closed-svc017",
+      "source_parsed_independently_matches_reference": true,
+      "positive_and_two_negative_controls": true,
+      "required_sections_present": true
+    },
+    {
+      "case": "closed-svc026",
+      "source_parsed_independently_matches_reference": true,
+      "positive_and_two_negative_controls": true,
+      "required_sections_present": true
+    },
+    {
+      "case": "closed-svc030",
+      "source_parsed_independently_matches_reference": true,
+      "positive_and_two_negative_controls": true,
+      "required_sections_present": true
+    }
+  ],
+  "parity_gate_passed": false,
+  "limitations": [
+    "One attempt per pair",
+    "Shared manual, only three aliases",
+    "Synthetic repetitive distractors; all normative records near file start",
+    "Extractive source summaries isolate retrieval rather than default LLM summarization",
+    "Agent skill-reading behavior differed; total product/harness cost is counted, no causal isolation of retrieval",
+    "Index construction 72.26 seconds and 3.05x source storage before amortization"
+  ],
+  "citation_review_method": "Canonical source anchors or local file line references resolving inside the supporting original section; exact HTML anchor line is not required."
+}

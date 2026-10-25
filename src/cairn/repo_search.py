@@ -155,7 +155,44 @@ class _RepoRankProfile:
 
 
 _REPO_SEARCH_CACHES: dict[Path, _RepoSearchCache] = {}
+_REPO_LEXICAL_CACHES: dict[Path, _RepoSearchCache] = {}
 _DEFAULT_RANK_PROFILE = _RepoRankProfile()
+
+
+def select_context_hits(
+    hits: list[dict[str, Any]], *, k: int, sections_per_doc: int
+) -> list[dict[str, Any]]:
+    """Select complementary source evidence without document-topic bonuses.
+
+    Discovery ranking deliberately favors document identity. Evidence packs
+    instead use query-wide BM25 support and marginal query-term coverage.
+    Dense/hybrid rank remains the fallback when lexical evidence is absent.
+    """
+    matched = [set(hit.get("explanation", {}).get("matched_terms", ())) for hit in hits]
+    frequency = Counter(term for terms in matched for term in terms)
+    weights = {term: math.log1p(len(hits) / count) for term, count in frequency.items()}
+    chosen: list[dict[str, Any]] = []
+    remaining = list(range(len(hits)))
+    covered: set[str] = set()
+    counts: Counter[str] = Counter()
+    while remaining and len(chosen) < k:
+        eligible = [i for i in remaining if counts[hits[i]["doc"]] < sections_per_doc]
+        if not eligible:
+            break
+
+        def priority(i: int) -> tuple[float, float, float]:
+            sparse = float(hits[i].get("sparse_score", 0.0))
+            gain = sum(weights[term] for term in sorted(matched[i] - covered))
+            return (sparse * gain if chosen else sparse, sparse, float(hits[i]["score"]))
+
+        best = max(eligible, key=priority)
+        chosen.append(hits[best])
+        covered.update(matched[best])
+        counts[hits[best]["doc"]] += 1
+        remaining.remove(best)
+    return chosen
+
+
 _HISTORY_DOC_TERMS: Final = frozenset(
     {
         "changelog",
@@ -216,14 +253,14 @@ async def search_repo_index(
     *,
     candidates: Collection[RepoSearchCandidate],
     query: str,
-    query_vec: list[float],
+    query_vec: list[float] | None,
     k: int,
     include_set: Collection[IncludeField],
     sections_per_doc: int,
     preferred_locales: tuple[str, ...],
 ) -> dict[str, Any]:
     """Return the repo-search payload for already validated inputs."""
-    cache = await _get_repo_search_cache(root, candidates)
+    cache = await _get_repo_search_cache(root, candidates, include_vectors=query_vec is not None)
     lexical_query = _build_repo_lexical_query(
         query,
         cache=cache,
@@ -231,8 +268,12 @@ async def search_repo_index(
     )
     hits_by_key: dict[tuple[str, str], _RepoScoredHit] = {}
     skipped: list[dict[str, str]] = list(cache.skipped)
-    query_dim = len(query_vec)
-    incompatible_docs = {doc_id for doc_id, dim in cache.doc_dims.items() if dim != query_dim}
+    query_dim = len(query_vec) if query_vec is not None else 0
+    incompatible_docs = (
+        {doc_id for doc_id, dim in cache.doc_dims.items() if dim != query_dim}
+        if query_vec is not None
+        else set()
+    )
     for doc_id in sorted(incompatible_docs):
         skipped.append(
             {
@@ -247,8 +288,11 @@ async def search_repo_index(
             "index_dims": sorted({cache.doc_dims[doc_id] for doc_id in incompatible_docs}),
             "documents": sorted(incompatible_docs),
         }
-    normalized_query = l2_normalize(query_vec)
-    vector_scores = _repo_vector_scores(cache, normalized_query, query_dim)
+    vector_scores = (
+        _repo_vector_scores(cache, l2_normalize(query_vec), query_dim)
+        if query_vec is not None
+        else [0.0] * len(cache.records)
+    )
     candidate_indices, ranker_mode, compatible_count = _repo_candidate_indices(
         cache,
         query=lexical_query,
@@ -269,6 +313,12 @@ async def search_repo_index(
 
     hits = list(hits_by_key.values())
     _apply_graph_scores(hits, cache)
+    if query_vec is None:
+        hits = [
+            hit
+            for hit in hits
+            if hit.lexical_score > 0 or hit.sparse_score > 0 or hit.graph_score > 0
+        ]
     hits.sort(key=lambda item: item.score, reverse=True)
     selected_records = _diversify_repo_hits(
         hits,
@@ -284,7 +334,7 @@ async def search_repo_index(
         )
         for hit in selected_records
     ]
-    return {
+    payload = {
         "query": query,
         "hits": selected,
         "sections_per_doc": sections_per_doc,
@@ -300,15 +350,21 @@ async def search_repo_index(
         "embedding_mismatch": embedding_mismatch,
         "cursor": None,
     }
+    if query_vec is None:
+        payload["retrieval_mode"] = "lexical"
+    return payload
 
 
 async def _get_repo_search_cache(
     root: Path,
     candidates: Collection[RepoSearchCandidate],
+    *,
+    include_vectors: bool = True,
 ) -> _RepoSearchCache:
     resolved_root = root.resolve()
     signature = _repo_search_signature(root, candidates)
-    cached = _REPO_SEARCH_CACHES.get(resolved_root)
+    store = _REPO_SEARCH_CACHES if include_vectors else _REPO_LEXICAL_CACHES
+    cached = store.get(resolved_root)
     if cached is not None and cached.signature == signature:
         return cached
 
@@ -322,7 +378,7 @@ async def _get_repo_search_cache(
 
     async def load(doc: RepoSearchCandidate) -> _RepoSearchDocumentChunk:
         async with semaphore:
-            return await _load_repo_search_document(root, doc)
+            return await _load_repo_search_document(root, doc, include_vectors=include_vectors)
 
     chunks = await asyncio.gather(*(load(doc) for doc in candidates))
     for chunk in chunks:
@@ -346,7 +402,9 @@ async def _get_repo_search_cache(
             for dst in ordered[i + 1 :]:
                 _add_graph_edge(graph_weights, src, dst, weight=0.18)
 
-    vector_matrices, vector_record_indices = _repo_vector_matrices(records)
+    vector_matrices, vector_record_indices = (
+        _repo_vector_matrices(records) if include_vectors else ({}, {})
+    )
     cache = _RepoSearchCache(
         signature=signature,
         records=tuple(records),
@@ -363,19 +421,18 @@ async def _get_repo_search_cache(
         vector_matrices=vector_matrices,
         vector_record_indices=vector_record_indices,
     )
-    if (
-        resolved_root not in _REPO_SEARCH_CACHES
-        and len(_REPO_SEARCH_CACHES) >= _REPO_SEARCH_CACHE_MAX
-    ):
-        oldest = next(iter(_REPO_SEARCH_CACHES))
-        del _REPO_SEARCH_CACHES[oldest]
-    _REPO_SEARCH_CACHES[resolved_root] = cache
+    if resolved_root not in store and len(store) >= _REPO_SEARCH_CACHE_MAX:
+        oldest = next(iter(store))
+        del store[oldest]
+    store[resolved_root] = cache
     return cache
 
 
 async def _load_repo_search_document(
     root: Path,
     doc: RepoSearchCandidate,
+    *,
+    include_vectors: bool = True,
 ) -> _RepoSearchDocumentChunk:
     records: list[_RepoSectionRecord] = []
     df_counter: Counter[str] = Counter()
@@ -383,7 +440,11 @@ async def _load_repo_search_document(
     entity_sections: dict[str, set[tuple[str, str]]] = defaultdict(set)
     try:
         index = DocumentIndex.load(root / doc.doc_dir)
-        vectors = {entry.id: tuple(entry.vector) for entry in await index.vectors.entries()}
+        vectors = (
+            {entry.id: tuple(entry.vector) for entry in await index.vectors.entries()}
+            if include_vectors
+            else {node.id: () for node in index.tree}
+        )
     except Exception as exc:
         return _RepoSearchDocumentChunk(
             doc_id=None,
@@ -428,7 +489,7 @@ async def _load_repo_search_document(
                     _normalize_field_text(doc.source),
                     _normalize_field_text(node.title),
                     _normalize_field_text(searchable_synopsis),
-                    _normalize_field_text(node.raw_text[:2000]),
+                    _normalize_field_text(node.raw_text),
                 ),
                 token_counts=dict(token_counts),
                 token_count=sum(token_counts.values()),
@@ -696,7 +757,7 @@ def _section_token_counts(
             title,
             title,
             synopsis,
-            body[:4000],
+            body,
         )
     )
     return Counter(_tokenize_search_text(text))
@@ -735,11 +796,10 @@ def _bm25_sparse_score(
             (cache.df.get(variant, 0) for variant in query.variants[term] if " " not in variant),
             default=0,
         )
-        if tf <= 0 or df <= 0:
-            continue
         idf = math.log(1.0 + ((corpus_size - df + 0.5) / (df + 0.5)))
         weighted_idf = idf * query.weights[term]
-        raw += weighted_idf * ((tf * (k1 + 1.0)) / (tf + length_norm))
+        if tf > 0:
+            raw += weighted_idf * ((tf * (k1 + 1.0)) / (tf + length_norm))
         max_raw += weighted_idf * (k1 + 1.0)
     if max_raw <= 0:
         return 0.0
@@ -1123,14 +1183,22 @@ def _lexical_score_from_profile(
 
 def _repo_query_terms(query: str) -> list[str]:
     generic = {
+        "after",
         "about",
+        "can",
         "do",
         "does",
         "from",
         "how",
+        "have",
+        "has",
         "in",
         "into",
         "it",
+        "many",
+        "must",
+        "my",
+        "should",
         "on",
         "using",
         "what",
@@ -1140,9 +1208,20 @@ def _repo_query_terms(query: str) -> list[str]:
         "work",
         "works",
         "with",
+        "why",
+        "will",
+        "would",
+        "you",
+        "your",
     }
     terms = [term for term in _query_terms(query) if term not in generic]
     seen = set(terms)
+    for term in tuple(terms):
+        if "_" in term or "-" in term:
+            for part in _tokenize_search_text(term):
+                if part not in seen and part not in generic:
+                    terms.append(part)
+                    seen.add(part)
     for word in re.findall(r"[A-Za-z0-9_][A-Za-z0-9_-]*", query.lower()):
         if (
             len(word) >= 2
@@ -1280,6 +1359,9 @@ def _doc_identity_bonus(
     if not query.terms:
         return 0.0
     doc_id, source, _, _, _ = haystacks
+    namespaces = tuple(f" {' '.join(_tokenize_search_text(field))} " for field in (doc_id, source))
+    if any(f" {phrase} " in field for phrase in query.phrases for field in namespaces):
+        return _DEFAULT_RANK_PROFILE.doc_identity_bonus_weight
     focus_terms = tuple(term for term in query.terms if query.weights.get(term, 0.0) > 0)[:3]
     total = sum(query.weights[term] for term in focus_terms)
     if total <= 0:
@@ -1395,7 +1477,7 @@ def _first_term_has_structural_support(
 
 
 def _term_variants(term: str) -> tuple[str, ...]:
-    variants = {term}
+    variants = {term, _normalize_field_text(term)} - {""}
     if term.endswith("ies") and len(term) > 4:
         variants.add(f"{term[:-3]}y")
     if term.endswith("s") and len(term) > 3:

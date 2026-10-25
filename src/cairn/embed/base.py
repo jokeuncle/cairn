@@ -29,3 +29,19 @@ class Embedder(Protocol):
     async def embed(self, texts: list[str]) -> list[list[float]]:
         """Embed each text in ``texts`` to a ``dim``-dimensional vector."""
         ...
+
+
+@runtime_checkable
+class QueryEmbedder(Protocol):
+    """Optional query-role extension; legacy Embedders need not implement it."""
+
+    async def embed_queries(self, texts: list[str]) -> list[list[float]]: ...
+
+
+async def embed_query_texts(embedder: Embedder, texts: list[str]) -> list[list[float]]:
+    """Use an explicit query role when available, otherwise the legacy encoder."""
+    if not texts:
+        return []
+    if isinstance(embedder, QueryEmbedder):
+        return await embedder.embed_queries(texts)
+    return await embedder.embed(texts)

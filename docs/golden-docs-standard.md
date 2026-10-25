@@ -71,6 +71,12 @@ Cairn gives structural and lexical value to document ids, source paths, titles,
 and shallow headings. Clear entry points help broad queries land on the right
 surface before the agent drills down.
 
+A literal command or identifier phrase matching whole normalized tokens in a
+document ID or source path receives bounded document-identity confidence, even
+when an action verb precedes it. Title/body-only mentions and partial tokens do
+not receive this source signal. The existing confidence cap and fusion weights
+remain unchanged; see [ADR-0018](decisions/0018-bounded-source-namespace-confidence.md).
+
 ### 2. One topic per page
 
 Topic pages should map to concepts users actually ask about:

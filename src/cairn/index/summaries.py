@@ -21,6 +21,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Final
 
+import structlog
+
 from cairn.core.errors import IndexBuildError, IndexNotFoundError
 from cairn.core.types import Document, SectionNode, SummarySet
 from cairn.summarize.base import BatchSummarizer, Summarizer, SummaryLevel, SummaryRequest
@@ -28,6 +30,41 @@ from cairn.summarize.cache import SummaryCache
 
 SUMMARIES_FILENAME: Final = "summaries.json"
 SUMMARIES_FORMAT_VERSION: Final = 1
+_log = structlog.get_logger(__name__)
+
+
+def _stored_summary_texts(path: Path, model: str) -> dict[tuple[str, str], str]:
+    if not path.exists():
+        return {}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        _log.warning(
+            "stored_summary_reuse_unavailable", path=str(path), error_type=type(exc).__name__
+        )
+        return {}
+    if not isinstance(data, dict) or data.get("format_version") != SUMMARIES_FORMAT_VERSION:
+        return {}
+    if (
+        data.get("model") != model
+        or not isinstance(data.get("summaries"), list)
+        or not isinstance(data.get("levels"), list)
+    ):
+        return {}
+    stored: dict[tuple[str, str], str] = {}
+    for row in data["summaries"]:
+        if not isinstance(row, dict) or row.get("model") != model:
+            continue
+        fingerprint = row.get("section_hash")
+        if not isinstance(fingerprint, str):
+            continue
+        for level in SummaryLevel:
+            if level.value not in data["levels"]:
+                continue
+            text = row.get(level.value)
+            if isinstance(text, str):
+                stored[(fingerprint, level.value)] = text
+    return stored
 
 
 @dataclass(frozen=True)
@@ -84,6 +121,7 @@ class SummaryBuilder:
             SummaryLevel.SYNOPSIS,
             SummaryLevel.DIGEST,
         ),
+        reuse_existing: bool = True,
     ) -> Path:
         """Summarize every section in ``document`` and write ``summaries.json``.
 
@@ -104,15 +142,15 @@ class SummaryBuilder:
 
         out_dir.mkdir(parents=True, exist_ok=True)
         path = out_dir / SUMMARIES_FILENAME
+        stored = _stored_summary_texts(path, self.summarizer.name) if reuse_existing else {}
+        stored_reused = 0
         now = datetime.now(UTC)
         semaphore = asyncio.Semaphore(self.concurrency)
         progress_lock = asyncio.Lock()
         completed = 0
         total = len(document.sections) * len(ordered_levels)
         section_hashes = {node.id: section_hash(node) for node in document.sections}
-        results: dict[str, dict[str, str]] = {
-            node.id: {} for node in document.sections
-        }
+        results: dict[str, dict[str, str]] = {node.id: {} for node in document.sections}
 
         async def mark_progress() -> None:
             nonlocal completed
@@ -129,8 +167,10 @@ class SummaryBuilder:
             pending: list[_PendingSummary] = []
             for node in document.sections:
                 cache_key: str | None = None
-                cached: str | None = None
-                if self.cache is not None:
+                cached = stored.get((section_hashes[node.id], level.value))
+                if cached is not None:
+                    stored_reused += 1
+                elif self.cache is not None:
                     cache_key = SummaryCache.key(
                         model=self.summarizer.name,
                         level=level.value,
@@ -145,8 +185,7 @@ class SummaryBuilder:
                 pending.append(_PendingSummary(node=node, level=level, cache_key=cache_key))
 
             chunks = [
-                pending[i : i + self.batch_size]
-                for i in range(0, len(pending), self.batch_size)
+                pending[i : i + self.batch_size] for i in range(0, len(pending), self.batch_size)
             ]
 
             async def process_chunk(chunk: list[_PendingSummary]) -> None:
@@ -172,6 +211,8 @@ class SummaryBuilder:
             }
             for node in document.sections
         ]
+        if stored_reused:
+            _log.info("stored_summaries_reused", doc=document.id, summaries=stored_reused)
 
         payload: dict[str, Any] = {
             "format_version": SUMMARIES_FORMAT_VERSION,
@@ -204,10 +245,7 @@ class SummaryBuilder:
             ]
             texts = await self.summarizer.summarize_many(requests)
             if len(texts) != len(chunk):
-                msg = (
-                    f"batch summarizer returned {len(texts)} summaries for "
-                    f"{len(chunk)} requests"
-                )
+                msg = f"batch summarizer returned {len(texts)} summaries for {len(chunk)} requests"
                 raise IndexBuildError(msg)
             return texts
         return [

@@ -65,9 +65,7 @@ class TestRanking:
     async def test_hits_carry_anchor(
         self, index: DocumentIndex, fake_embedder: FakeEmbedder
     ) -> None:
-        resp = await search_semantic(
-            index, embedder=fake_embedder, query="intro body", k=3
-        )
+        resp = await search_semantic(index, embedder=fake_embedder, query="intro body", k=3)
         for hit in resp.data["hits"]:
             assert hit["anchor"].startswith("cairn://simple/")
 
@@ -106,6 +104,25 @@ class TestRanking:
 
         assert "本地向量库" in evidence["text"]
         assert "向量数据存储" in evidence["matched_terms"]
+
+    def test_evidence_normalizes_spelled_out_quantities(self) -> None:
+        body = "Routine setup. " * 100 + "Set worker_limit=70 to allow seventy workers."
+        snippet = _evidence_snippet(body, "Allow seventy workers", max_chars=150)
+        assert "worker_limit=70" in snippet["text"]
+        assert "70" in snippet["matched_terms"]
+
+    def test_fitting_code_example_is_not_cut_midway(self) -> None:
+        code = "```python\nengine_mode = 'safe'\n# " + "explanation " * 8 + "\n```"
+        body = "Introductory text. " * 40 + "\n\n" + code + "\n\nMore context. " * 10
+        snippet = _evidence_snippet(body, "engine_mode", max_chars=len(code) + 10)
+        assert code in snippet["text"]
+        assert not snippet.get("truncated_code", False)
+
+    def test_oversized_code_example_is_explicitly_marked(self) -> None:
+        body = "```python\nengine_mode = 'safe'\n" + "# explanation\n" * 100 + "```"
+        snippet = _evidence_snippet(body, "engine_mode", max_chars=100)
+        assert snippet["truncated_code"] is True
+        assert snippet["span"]["end"] - snippet["span"]["start"] <= 100
 
 
 class TestScope:

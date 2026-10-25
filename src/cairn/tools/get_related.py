@@ -90,8 +90,11 @@ async def get_related(
             )
         )
 
-    if "sibling" in kind_set and node.parent is not None:
-        for sibling in index.tree.children_of(node.parent):
+    if "sibling" in kind_set:
+        peers = (
+            index.tree.children_of(node.parent) if node.parent is not None else index.tree.roots()
+        )
+        for sibling in peers:
             if sibling.id == id:
                 continue
             neighbors.append(

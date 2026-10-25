@@ -54,12 +54,13 @@ REPOS: dict[str, dict[str, Any]] = {
             {
                 "id": "tools-run",
                 "query": "run Python command line tools with uvx",
-                "acceptable": {"docs-guides-tools", "docs-concepts-tools", "readme"},
+                "acceptable": {"docs-guides-tools", "docs-concepts-tools", "readme", "docs-index"},
             },
             {
                 "id": "tools-install",
                 "query": "install command line tools with uv tool install",
                 "acceptable": {
+                    "docs-index",
                     "docs-guides-tools",
                     "docs-concepts-tools",
                     "docs-reference-storage",
@@ -125,6 +126,7 @@ REPOS: dict[str, dict[str, Any]] = {
                 "id": "auth-cli",
                 "query": "authenticate to package indexes with uv auth login",
                 "acceptable": {
+                    "docs-guides-integration-bazel",
                     "docs-concepts-authentication-cli",
                     "docs-concepts-authentication-http",
                     "docs-concepts-authentication-index",

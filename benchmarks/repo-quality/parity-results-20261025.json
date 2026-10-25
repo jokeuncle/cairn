@@ -1,0 +1,1744 @@
+{
+  "date": "2026-10-25",
+  "status": "Two public-API prototype screens failed cost parity. No conditional expansion of joint candidate onto remaining known tasks. Closed-book study is a separate grounding diagnostic, not a commercial proof.",
+  "stages": {
+    "budget-context": {
+      "runs": [
+        {
+          "case_id": "httpx-service-client",
+          "arm": "cairn",
+          "model": "gpt-6.1-sol",
+          "runtime": "codex-cli 0.164.0",
+          "exit_code": 0,
+          "stop_reason": null,
+          "seconds": 98.43744191699807,
+          "tool_invocations": 7,
+          "usage_events": [
+            {
+              "input_tokens": 303179,
+              "cached_input_tokens": 272512,
+              "cache_write_input_tokens": 0,
+              "output_tokens": 3900,
+              "reasoning_output_tokens": 615
+            }
+          ],
+          "input_tokens": 303179,
+          "cached_input_tokens": 272512,
+          "output_tokens": 3900,
+          "final_answer_exists": true,
+          "uncached_input_tokens": 30667,
+          "answer_sha256": "dbd7125083f181883c11ad37714b4d25cc6da80691aca165dfc11cf9ecf389df",
+          "artifact": "codex/budget-context/httpx-service-client-cairn",
+          "independent_execution_review": {
+            "case_id": "httpx-service-client",
+            "answer": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/budget-context/httpx-service-client-cairn/answer.txt",
+            "answer_sha256": "dbd7125083f181883c11ad37714b4d25cc6da80691aca165dfc11cf9ecf389df",
+            "python_blocks": 1,
+            "runtime_attempted": true,
+            "manual_source_and_deliverable_review_required": true,
+            "compiled": true,
+            "required_interface_declared": true,
+            "runtime_checks": {
+              "timeouts": true,
+              "actual_timeouts": [
+                60.0,
+                10.0,
+                10.0,
+                10.0
+              ],
+              "trust_env": true,
+              "pool_limits": true,
+              "http2": true,
+              "async_response_hook": true,
+              "body_read_awaited": true,
+              "closed": true
+            },
+            "runtime_constraints_passed": true,
+            "generated_stdout": ""
+          },
+          "manual_source_requirement_review": "completed; Ruff-inheritance automatic-discovery runtime requirement fails",
+          "complete_task_accepted": true
+        },
+        {
+          "case_id": "httpx-service-client",
+          "arm": "raw",
+          "model": "gpt-6.1-sol",
+          "runtime": "codex-cli 0.164.0",
+          "exit_code": 0,
+          "stop_reason": null,
+          "seconds": 108.46087537499989,
+          "tool_invocations": 6,
+          "usage_events": [
+            {
+              "input_tokens": 238006,
+              "cached_input_tokens": 213888,
+              "cache_write_input_tokens": 0,
+              "output_tokens": 5135,
+              "reasoning_output_tokens": 1545
+            }
+          ],
+          "input_tokens": 238006,
+          "cached_input_tokens": 213888,
+          "output_tokens": 5135,
+          "final_answer_exists": true,
+          "uncached_input_tokens": 24118,
+          "answer_sha256": "300e9a41a9cc5e563d75eef4f6990628f09e8e51f36f0004f63654d4ca1b772a",
+          "artifact": "codex/budget-context/httpx-service-client-raw",
+          "independent_execution_review": {
+            "case_id": "httpx-service-client",
+            "answer": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/budget-context/httpx-service-client-raw/answer.txt",
+            "answer_sha256": "300e9a41a9cc5e563d75eef4f6990628f09e8e51f36f0004f63654d4ca1b772a",
+            "python_blocks": 2,
+            "runtime_attempted": true,
+            "manual_source_and_deliverable_review_required": true,
+            "compiled": true,
+            "required_interface_declared": true,
+            "runtime_checks": {
+              "timeouts": true,
+              "actual_timeouts": [
+                60.0,
+                10.0,
+                10.0,
+                10.0
+              ],
+              "trust_env": true,
+              "pool_limits": true,
+              "http2": true,
+              "async_response_hook": true,
+              "body_read_awaited": true,
+              "closed": true
+            },
+            "runtime_constraints_passed": true,
+            "generated_stdout": ""
+          },
+          "manual_source_requirement_review": "completed; Ruff-inheritance automatic-discovery runtime requirement fails",
+          "complete_task_accepted": true
+        },
+        {
+          "case_id": "ruff-inherited-project-config",
+          "arm": "cairn",
+          "model": "gpt-6.1-sol",
+          "runtime": "codex-cli 0.164.0",
+          "exit_code": 0,
+          "stop_reason": null,
+          "seconds": 129.1699859170003,
+          "tool_invocations": 16,
+          "usage_events": [
+            {
+              "input_tokens": 504584,
+              "cached_input_tokens": 459136,
+              "cache_write_input_tokens": 0,
+              "output_tokens": 5310,
+              "reasoning_output_tokens": 1163
+            }
+          ],
+          "input_tokens": 504584,
+          "cached_input_tokens": 459136,
+          "output_tokens": 5310,
+          "final_answer_exists": true,
+          "uncached_input_tokens": 45448,
+          "answer_sha256": "2a5fe7fd0d331c5882810b0e41b1d81a79d72cfa1e2d0ad603b6efa2cb27b15a",
+          "artifact": "codex/budget-context/ruff-inherited-project-config-cairn",
+          "independent_execution_review": {
+            "toml_parse_errors": [],
+            "toml_blocks": 2,
+            "files_modified": "temporary fixture only",
+            "root_config": {
+              "target-version": "py310",
+              "line-length": 100,
+              "lint": {
+                "select": [
+                  "E4",
+                  "E7",
+                  "E9",
+                  "F"
+                ]
+              },
+              "format": {
+                "quote-style": "single"
+              }
+            },
+            "child_config": {
+              "extend": "../../pyproject.toml",
+              "extend-exclude": [
+                "**/generated/**"
+              ],
+              "force-exclude": true,
+              "lint": {
+                "extend-select": [
+                  "I"
+                ],
+                "per-file-ignores": {
+                  "__init__.py": [
+                    "F401"
+                  ]
+                }
+              }
+            },
+            "unused_import": {
+              "exit": 1,
+              "codes": [
+                "F401"
+              ],
+              "error": ""
+            },
+            "import_sorting": {
+              "exit": 1,
+              "codes": [
+                "I001"
+              ],
+              "error": ""
+            },
+            "formatter_output": "word = 'hello'\n",
+            "formatter_error": "",
+            "package_init": {
+              "exit": 0,
+              "codes": [],
+              "error": ""
+            },
+            "explicit_generated": {
+              "exit": 1,
+              "codes": [
+                "F401"
+              ],
+              "error": ""
+            },
+            "auto_explicit_generated": {
+              "exit": 1,
+              "stdout": "[\n  {\n    \"cell\": null,\n    \"code\": \"E402\",\n    \"end_location\": {\n      \"column\": 10,\n      \"row\": 2\n    },\n    \"filename\": \"/private/var/folders/cg/xm8lr5_141j1zgmxc5qbd8rm0000gn/T/cairn-ruff-fixture-8_c2cfqs/packages/api/generated/bad.py\",\n    \"fix\": null,\n    \"location\": {\n      \"column\": 1,\n      \"row\": 2\n    },\n    \"message\": \"Module level import not at top of file\",\n    \"name\": \"module-import-not-at-top-of-file\",\n    \"noqa_row\": 2,\n    \"severity\": \"error\",\n    \"url\": \"https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file\"\n  },\n  {\n    \"cell\": null,\n    \"code\": \"F401\",\n    \"end_location\": {\n      \"column\": 10,\n      \"row\": 2\n    },\n    \"filename\": \"/private/var/folders/cg/xm8lr5_141j1zgmxc5qbd8rm0000gn/T/cairn-ruff-fixture-8_c2cfqs/packages/api/generated/bad.py\",\n    \"fix\": {\n      \"applicability\": \"safe\",\n      \"edits\": [\n        {\n          \"content\": \"\",\n          \"end_location\": {\n            \"column\": 1,\n            \"row\": 3\n          },\n          \"location\": {\n            \"column\": 1,\n            \"row\": 2\n          }\n        }\n      ],\n      \"message\": \"Remove unused import: `os`\"\n    },\n    \"location\": {\n      \"column\": 8,\n      \"row\": 2\n    },\n    \"message\": \"`os` imported but unused\",\n    \"name\": \"unused-import\",\n    \"noqa_row\": 2,\n    \"severity\": \"error\",\n    \"url\": \"https://docs.astral.sh/ruff/rules/unused-import\"\n  }\n]",
+              "stderr": ""
+            },
+            "auto_explicit_generated_format": {
+              "exit": 1,
+              "stdout": "Would reformat: packages/api/generated/bad.py\n1 file would be reformatted\n",
+              "stderr": ""
+            },
+            "checks": {
+              "root_line_length": true,
+              "unused_import_linted": true,
+              "import_sorting_enabled": true,
+              "single_quotes": true,
+              "target_version": true,
+              "package_init_ignored": true,
+              "explicit_generated_excluded": false
+            },
+            "config_passed": false
+          },
+          "manual_source_requirement_review": "completed; Ruff-inheritance automatic-discovery runtime requirement fails",
+          "complete_task_accepted": false
+        },
+        {
+          "case_id": "ruff-inherited-project-config",
+          "arm": "raw",
+          "model": "gpt-6.1-sol",
+          "runtime": "codex-cli 0.164.0",
+          "exit_code": 0,
+          "stop_reason": null,
+          "seconds": 125.73109699999986,
+          "tool_invocations": 13,
+          "usage_events": [
+            {
+              "input_tokens": 380335,
+              "cached_input_tokens": 355584,
+              "cache_write_input_tokens": 0,
+              "output_tokens": 6937,
+              "reasoning_output_tokens": 1496
+            }
+          ],
+          "input_tokens": 380335,
+          "cached_input_tokens": 355584,
+          "output_tokens": 6937,
+          "final_answer_exists": true,
+          "uncached_input_tokens": 24751,
+          "answer_sha256": "5313100ffaa044375801ce005f991a083c5768c47b1bfeda3ad30d7dfe6b5aeb",
+          "artifact": "codex/budget-context/ruff-inherited-project-config-raw",
+          "independent_execution_review": {
+            "toml_parse_errors": [],
+            "toml_blocks": 2,
+            "files_modified": "temporary fixture only",
+            "root_config": {
+              "target-version": "py310",
+              "line-length": 100,
+              "lint": {
+                "select": [
+                  "E4",
+                  "E7",
+                  "E9",
+                  "F"
+                ]
+              },
+              "format": {
+                "quote-style": "single"
+              }
+            },
+            "child_config": {
+              "extend": "../../pyproject.toml",
+              "extend-exclude": [
+                "generated",
+                "_generated"
+              ],
+              "force-exclude": true,
+              "lint": {
+                "extend-select": [
+                  "I"
+                ],
+                "per-file-ignores": {
+                  "__init__.py": [
+                    "F401"
+                  ]
+                }
+              }
+            },
+            "unused_import": {
+              "exit": 1,
+              "codes": [
+                "F401"
+              ],
+              "error": ""
+            },
+            "import_sorting": {
+              "exit": 1,
+              "codes": [
+                "I001"
+              ],
+              "error": ""
+            },
+            "formatter_output": "word = 'hello'\n",
+            "formatter_error": "",
+            "package_init": {
+              "exit": 0,
+              "codes": [],
+              "error": ""
+            },
+            "explicit_generated": {
+              "exit": 0,
+              "codes": [],
+              "error": "warning: No Python files found under the given path(s)\n"
+            },
+            "auto_explicit_generated": {
+              "exit": 1,
+              "stdout": "[\n  {\n    \"cell\": null,\n    \"code\": \"E402\",\n    \"end_location\": {\n      \"column\": 10,\n      \"row\": 2\n    },\n    \"filename\": \"/private/var/folders/cg/xm8lr5_141j1zgmxc5qbd8rm0000gn/T/cairn-ruff-fixture-h9521st3/packages/api/generated/bad.py\",\n    \"fix\": null,\n    \"location\": {\n      \"column\": 1,\n      \"row\": 2\n    },\n    \"message\": \"Module level import not at top of file\",\n    \"name\": \"module-import-not-at-top-of-file\",\n    \"noqa_row\": 2,\n    \"severity\": \"error\",\n    \"url\": \"https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file\"\n  },\n  {\n    \"cell\": null,\n    \"code\": \"F401\",\n    \"end_location\": {\n      \"column\": 10,\n      \"row\": 2\n    },\n    \"filename\": \"/private/var/folders/cg/xm8lr5_141j1zgmxc5qbd8rm0000gn/T/cairn-ruff-fixture-h9521st3/packages/api/generated/bad.py\",\n    \"fix\": {\n      \"applicability\": \"safe\",\n      \"edits\": [\n        {\n          \"content\": \"\",\n          \"end_location\": {\n            \"column\": 1,\n            \"row\": 3\n          },\n          \"location\": {\n            \"column\": 1,\n            \"row\": 2\n          }\n        }\n      ],\n      \"message\": \"Remove unused import: `os`\"\n    },\n    \"location\": {\n      \"column\": 8,\n      \"row\": 2\n    },\n    \"message\": \"`os` imported but unused\",\n    \"name\": \"unused-import\",\n    \"noqa_row\": 2,\n    \"severity\": \"error\",\n    \"url\": \"https://docs.astral.sh/ruff/rules/unused-import\"\n  }\n]",
+              "stderr": ""
+            },
+            "auto_explicit_generated_format": {
+              "exit": 1,
+              "stdout": "Would reformat: packages/api/generated/bad.py\n1 file would be reformatted\n",
+              "stderr": ""
+            },
+            "checks": {
+              "root_line_length": true,
+              "unused_import_linted": true,
+              "import_sorting_enabled": true,
+              "single_quotes": true,
+              "target_version": true,
+              "package_init_ignored": true,
+              "explicit_generated_excluded": false
+            },
+            "config_passed": false
+          },
+          "manual_source_requirement_review": "completed; Ruff-inheritance automatic-discovery runtime requirement fails",
+          "complete_task_accepted": false
+        },
+        {
+          "case_id": "ruff-isolated-ci-config",
+          "arm": "cairn",
+          "model": "gpt-6.1-sol",
+          "runtime": "codex-cli 0.164.0",
+          "exit_code": 0,
+          "stop_reason": null,
+          "seconds": 70.82846408300247,
+          "tool_invocations": 12,
+          "usage_events": [
+            {
+              "input_tokens": 266613,
+              "cached_input_tokens": 225280,
+              "cache_write_input_tokens": 0,
+              "output_tokens": 2341,
+              "reasoning_output_tokens": 539
+            }
+          ],
+          "input_tokens": 266613,
+          "cached_input_tokens": 225280,
+          "output_tokens": 2341,
+          "final_answer_exists": true,
+          "uncached_input_tokens": 41333,
+          "answer_sha256": "9b7c39bdc9e02b7af72150db57347edc602a63b584a06f935dd57472b4c9ee31",
+          "artifact": "codex/budget-context/ruff-isolated-ci-config-cairn",
+          "independent_execution_review": {
+            "toml_parse_errors": [],
+            "toml_blocks": 1,
+            "files_modified": "temporary fixture only",
+            "root_config": {
+              "line-length": 100,
+              "target-version": "py310",
+              "lint": {
+                "select": [
+                  "E4",
+                  "E7",
+                  "E9",
+                  "F",
+                  "I"
+                ]
+              },
+              "format": {
+                "quote-style": "single"
+              }
+            },
+            "unused_import": {
+              "exit": 1,
+              "codes": [
+                "F401"
+              ],
+              "error": ""
+            },
+            "import_sorting": {
+              "exit": 1,
+              "codes": [
+                "I001"
+              ],
+              "error": ""
+            },
+            "formatter_output": "word = 'hello'\n",
+            "formatter_error": "",
+            "checks": {
+              "root_line_length": true,
+              "unused_import_linted": true,
+              "import_sorting_enabled": true,
+              "single_quotes": true
+            },
+            "config_passed": true
+          },
+          "manual_source_requirement_review": "completed; Ruff-inheritance automatic-discovery runtime requirement fails",
+          "complete_task_accepted": true
+        },
+        {
+          "case_id": "ruff-isolated-ci-config",
+          "arm": "raw",
+          "model": "gpt-6.1-sol",
+          "runtime": "codex-cli 0.164.0",
+          "exit_code": 0,
+          "stop_reason": null,
+          "seconds": 44.19428245800009,
+          "tool_invocations": 3,
+          "usage_events": [
+            {
+              "input_tokens": 90109,
+              "cached_input_tokens": 69248,
+              "cache_write_input_tokens": 0,
+              "output_tokens": 2175,
+              "reasoning_output_tokens": 618
+            }
+          ],
+          "input_tokens": 90109,
+          "cached_input_tokens": 69248,
+          "output_tokens": 2175,
+          "final_answer_exists": true,
+          "uncached_input_tokens": 20861,
+          "answer_sha256": "4e6fc0d90cc8a9ff9984ec9f5a0c04f7ac0255617a9b86f365ccbc1781b73a32",
+          "artifact": "codex/budget-context/ruff-isolated-ci-config-raw",
+          "independent_execution_review": {
+            "toml_parse_errors": [],
+            "toml_blocks": 1,
+            "files_modified": "temporary fixture only",
+            "root_config": {
+              "line-length": 100,
+              "target-version": "py310",
+              "lint": {
+                "select": [
+                  "E4",
+                  "E7",
+                  "E9",
+                  "F",
+                  "I"
+                ]
+              },
+              "format": {
+                "quote-style": "single"
+              }
+            },
+            "unused_import": {
+              "exit": 1,
+              "codes": [
+                "F401"
+              ],
+              "error": ""
+            },
+            "import_sorting": {
+              "exit": 1,
+              "codes": [
+                "I001"
+              ],
+              "error": ""
+            },
+            "formatter_output": "word = 'hello'\n",
+            "formatter_error": "",
+            "checks": {
+              "root_line_length": true,
+              "unused_import_linted": true,
+              "import_sorting_enabled": true,
+              "single_quotes": true
+            },
+            "config_passed": true
+          },
+          "manual_source_requirement_review": "completed; Ruff-inheritance automatic-discovery runtime requirement fails",
+          "complete_task_accepted": true
+        },
+        {
+          "case_id": "starlette-shared-lifespan-state",
+          "arm": "cairn",
+          "model": "gpt-6.1-sol",
+          "runtime": "codex-cli 0.164.0",
+          "exit_code": 0,
+          "stop_reason": null,
+          "seconds": 61.67724850000013,
+          "tool_invocations": 6,
+          "usage_events": [
+            {
+              "input_tokens": 298904,
+              "cached_input_tokens": 254208,
+              "cache_write_input_tokens": 0,
+              "output_tokens": 2960,
+              "reasoning_output_tokens": 529
+            }
+          ],
+          "input_tokens": 298904,
+          "cached_input_tokens": 254208,
+          "output_tokens": 2960,
+          "final_answer_exists": true,
+          "uncached_input_tokens": 44696,
+          "answer_sha256": "106b5b3bfa5c65de9cb18a10bff252e5a3b25faca1e2e2a7864fe07bd3d356f3",
+          "artifact": "codex/budget-context/starlette-shared-lifespan-state-cairn",
+          "independent_execution_review": {
+            "case_id": "starlette-shared-lifespan-state",
+            "answer": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/budget-context/starlette-shared-lifespan-state-cairn/answer.txt",
+            "answer_sha256": "106b5b3bfa5c65de9cb18a10bff252e5a3b25faca1e2e2a7864fe07bd3d356f3",
+            "python_blocks": 1,
+            "runtime_attempted": true,
+            "manual_source_and_deliverable_review_required": true,
+            "compiled": true,
+            "required_interface_declared": true,
+            "runtime_checks": {
+              "endpoint": true,
+              "single_client": true,
+              "open_inside_lifespan": true,
+              "client_shared_in_state": true,
+              "closed_on_shutdown": true
+            },
+            "runtime_constraints_passed": true,
+            "generated_stdout": ""
+          },
+          "manual_source_requirement_review": "completed; Ruff-inheritance automatic-discovery runtime requirement fails",
+          "complete_task_accepted": true
+        },
+        {
+          "case_id": "starlette-shared-lifespan-state",
+          "arm": "raw",
+          "model": "gpt-6.1-sol",
+          "runtime": "codex-cli 0.164.0",
+          "exit_code": 0,
+          "stop_reason": null,
+          "seconds": 65.66340166599912,
+          "tool_invocations": 3,
+          "usage_events": [
+            {
+              "input_tokens": 106671,
+              "cached_input_tokens": 93440,
+              "cache_write_input_tokens": 0,
+              "output_tokens": 2932,
+              "reasoning_output_tokens": 609
+            }
+          ],
+          "input_tokens": 106671,
+          "cached_input_tokens": 93440,
+          "output_tokens": 2932,
+          "final_answer_exists": true,
+          "uncached_input_tokens": 13231,
+          "answer_sha256": "af6bc1a50915ac5f35784737d8aa339ead702dc1c08949c914f5ed9bba978eb8",
+          "artifact": "codex/budget-context/starlette-shared-lifespan-state-raw",
+          "independent_execution_review": {
+            "case_id": "starlette-shared-lifespan-state",
+            "answer": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/budget-context/starlette-shared-lifespan-state-raw/answer.txt",
+            "answer_sha256": "af6bc1a50915ac5f35784737d8aa339ead702dc1c08949c914f5ed9bba978eb8",
+            "python_blocks": 1,
+            "runtime_attempted": true,
+            "manual_source_and_deliverable_review_required": true,
+            "compiled": true,
+            "required_interface_declared": true,
+            "runtime_checks": {
+              "endpoint": true,
+              "single_client": true,
+              "open_inside_lifespan": true,
+              "client_shared_in_state": true,
+              "closed_on_shutdown": true
+            },
+            "runtime_constraints_passed": true,
+            "generated_stdout": ""
+          },
+          "manual_source_requirement_review": "completed; Ruff-inheritance automatic-discovery runtime requirement fails",
+          "complete_task_accepted": true
+        },
+        {
+          "case_id": "uvicorn-production-factory",
+          "arm": "cairn",
+          "model": "gpt-6.1-sol",
+          "runtime": "codex-cli 0.164.0",
+          "exit_code": 0,
+          "stop_reason": null,
+          "seconds": 72.35708937500021,
+          "tool_invocations": 7,
+          "usage_events": [
+            {
+              "input_tokens": 293966,
+              "cached_input_tokens": 258944,
+              "cache_write_input_tokens": 0,
+              "output_tokens": 3560,
+              "reasoning_output_tokens": 708
+            }
+          ],
+          "input_tokens": 293966,
+          "cached_input_tokens": 258944,
+          "output_tokens": 3560,
+          "final_answer_exists": true,
+          "uncached_input_tokens": 35022,
+          "answer_sha256": "32e8c61a5f83d185d0a5fa31b6c721d3014e43481a25cdeff918e5c35e63da65",
+          "artifact": "codex/budget-context/uvicorn-production-factory-cairn",
+          "independent_execution_review": {
+            "commands": [
+              [
+                "service:create_app",
+                "--factory",
+                "--app-dir",
+                "src",
+                "--host",
+                "0.0.0.0",
+                "--port",
+                "9000",
+                "--workers",
+                "3",
+                "--proxy-headers",
+                "--forwarded-allow-ips",
+                "10.0.0.1",
+                "--header",
+                "X-Service:demo",
+                "--no-server-header",
+                "--limit-concurrency",
+                "40",
+                "--backlog",
+                "128"
+              ]
+            ],
+            "server_started": false,
+            "parser_exit": 0,
+            "parser_output": "",
+            "parsed": {
+              "host": "0.0.0.0",
+              "port": 9000,
+              "uds": null,
+              "fd": null,
+              "loop": "auto",
+              "http": "auto",
+              "ws": "auto",
+              "ws_max_size": 16777216,
+              "ws_max_queue": 32,
+              "ws_ping_interval": 20.0,
+              "ws_ping_timeout": 20.0,
+              "ws_per_message_deflate": true,
+              "lifespan": "auto",
+              "env_file": null,
+              "log_config": {
+                "version": 1,
+                "disable_existing_loggers": false,
+                "formatters": {
+                  "default": {
+                    "()": "uvicorn.logging.DefaultFormatter",
+                    "fmt": "%(levelprefix)s %(message)s",
+                    "use_colors": null
+                  },
+                  "access": {
+                    "()": "uvicorn.logging.AccessFormatter",
+                    "fmt": "%(levelprefix)s %(client_addr)s - \"%(request_line)s\" %(status_code)s"
+                  }
+                },
+                "handlers": {
+                  "default": {
+                    "formatter": "default",
+                    "class": "logging.StreamHandler",
+                    "stream": "ext://sys.stderr"
+                  },
+                  "access": {
+                    "formatter": "access",
+                    "class": "logging.StreamHandler",
+                    "stream": "ext://sys.stdout"
+                  }
+                },
+                "loggers": {
+                  "uvicorn": {
+                    "handlers": [
+                      "default"
+                    ],
+                    "level": "INFO",
+                    "propagate": false
+                  },
+                  "uvicorn.error": {
+                    "level": "INFO"
+                  },
+                  "uvicorn.access": {
+                    "handlers": [
+                      "access"
+                    ],
+                    "level": "INFO",
+                    "propagate": false
+                  }
+                }
+              },
+              "log_level": null,
+              "access_log": true,
+              "interface": "auto",
+              "reload": false,
+              "reload_dirs": null,
+              "reload_includes": null,
+              "reload_excludes": null,
+              "reload_delay": 0.25,
+              "workers": 3,
+              "proxy_headers": true,
+              "server_header": false,
+              "date_header": true,
+              "forwarded_allow_ips": "10.0.0.1",
+              "root_path": "",
+              "limit_concurrency": 40,
+              "backlog": 128,
+              "limit_max_requests": null,
+              "limit_max_requests_jitter": 0,
+              "timeout_keep_alive": 5,
+              "timeout_graceful_shutdown": null,
+              "timeout_worker_healthcheck": 5,
+              "ssl_keyfile": null,
+              "ssl_certfile": null,
+              "ssl_keyfile_password": null,
+              "ssl_version": 17,
+              "ssl_cert_reqs": 0,
+              "ssl_ca_certs": null,
+              "ssl_ciphers": null,
+              "headers": [
+                [
+                  "X-Service",
+                  "demo"
+                ]
+              ],
+              "use_colors": null,
+              "factory": true,
+              "app_dir": "src",
+              "h11_max_incomplete_event_size": null,
+              "reset_contextvars": false
+            },
+            "app": "service:create_app",
+            "checks": {
+              "factory": true,
+              "app": true,
+              "app_dir": true,
+              "host": true,
+              "port": true,
+              "workers": true,
+              "reload": true,
+              "proxy_scope": true,
+              "header": true,
+              "no_server_header": true,
+              "concurrency": true,
+              "backlog": true
+            },
+            "cli_passed": true
+          },
+          "manual_source_requirement_review": "completed; Ruff-inheritance automatic-discovery runtime requirement fails",
+          "complete_task_accepted": true
+        },
+        {
+          "case_id": "uvicorn-production-factory",
+          "arm": "raw",
+          "model": "gpt-6.1-sol",
+          "runtime": "codex-cli 0.164.0",
+          "exit_code": 0,
+          "stop_reason": null,
+          "seconds": 93.05894070900104,
+          "tool_invocations": 6,
+          "usage_events": [
+            {
+              "input_tokens": 189758,
+              "cached_input_tokens": 156032,
+              "cache_write_input_tokens": 0,
+              "output_tokens": 4040,
+              "reasoning_output_tokens": 886
+            }
+          ],
+          "input_tokens": 189758,
+          "cached_input_tokens": 156032,
+          "output_tokens": 4040,
+          "final_answer_exists": true,
+          "uncached_input_tokens": 33726,
+          "answer_sha256": "9c482547230861ec9f1bda88638d6bac84410da1767ff15f293b6a7b9b17684c",
+          "artifact": "codex/budget-context/uvicorn-production-factory-raw",
+          "independent_execution_review": {
+            "commands": [
+              [
+                "service:create_app",
+                "--factory",
+                "--app-dir",
+                "src",
+                "--host",
+                "0.0.0.0",
+                "--port",
+                "9000",
+                "--workers",
+                "3",
+                "--proxy-headers",
+                "--forwarded-allow-ips",
+                "10.0.0.1",
+                "--header",
+                "X-Service:demo",
+                "--no-server-header",
+                "--limit-concurrency",
+                "40",
+                "--backlog",
+                "128"
+              ]
+            ],
+            "server_started": false,
+            "parser_exit": 0,
+            "parser_output": "",
+            "parsed": {
+              "host": "0.0.0.0",
+              "port": 9000,
+              "uds": null,
+              "fd": null,
+              "loop": "auto",
+              "http": "auto",
+              "ws": "auto",
+              "ws_max_size": 16777216,
+              "ws_max_queue": 32,
+              "ws_ping_interval": 20.0,
+              "ws_ping_timeout": 20.0,
+              "ws_per_message_deflate": true,
+              "lifespan": "auto",
+              "env_file": null,
+              "log_config": {
+                "version": 1,
+                "disable_existing_loggers": false,
+                "formatters": {
+                  "default": {
+                    "()": "uvicorn.logging.DefaultFormatter",
+                    "fmt": "%(levelprefix)s %(message)s",
+                    "use_colors": null
+                  },
+                  "access": {
+                    "()": "uvicorn.logging.AccessFormatter",
+                    "fmt": "%(levelprefix)s %(client_addr)s - \"%(request_line)s\" %(status_code)s"
+                  }
+                },
+                "handlers": {
+                  "default": {
+                    "formatter": "default",
+                    "class": "logging.StreamHandler",
+                    "stream": "ext://sys.stderr"
+                  },
+                  "access": {
+                    "formatter": "access",
+                    "class": "logging.StreamHandler",
+                    "stream": "ext://sys.stdout"
+                  }
+                },
+                "loggers": {
+                  "uvicorn": {
+                    "handlers": [
+                      "default"
+                    ],
+                    "level": "INFO",
+                    "propagate": false
+                  },
+                  "uvicorn.error": {
+                    "level": "INFO"
+                  },
+                  "uvicorn.access": {
+                    "handlers": [
+                      "access"
+                    ],
+                    "level": "INFO",
+                    "propagate": false
+                  }
+                }
+              },
+              "log_level": null,
+              "access_log": true,
+              "interface": "auto",
+              "reload": false,
+              "reload_dirs": null,
+              "reload_includes": null,
+              "reload_excludes": null,
+              "reload_delay": 0.25,
+              "workers": 3,
+              "proxy_headers": true,
+              "server_header": false,
+              "date_header": true,
+              "forwarded_allow_ips": "10.0.0.1",
+              "root_path": "",
+              "limit_concurrency": 40,
+              "backlog": 128,
+              "limit_max_requests": null,
+              "limit_max_requests_jitter": 0,
+              "timeout_keep_alive": 5,
+              "timeout_graceful_shutdown": null,
+              "timeout_worker_healthcheck": 5,
+              "ssl_keyfile": null,
+              "ssl_certfile": null,
+              "ssl_keyfile_password": null,
+              "ssl_version": 17,
+              "ssl_cert_reqs": 0,
+              "ssl_ca_certs": null,
+              "ssl_ciphers": null,
+              "headers": [
+                [
+                  "X-Service",
+                  "demo"
+                ]
+              ],
+              "use_colors": null,
+              "factory": true,
+              "app_dir": "src",
+              "h11_max_incomplete_event_size": null,
+              "reset_contextvars": false
+            },
+            "app": "service:create_app",
+            "checks": {
+              "factory": true,
+              "app": true,
+              "app_dir": true,
+              "host": true,
+              "port": true,
+              "workers": true,
+              "reload": true,
+              "proxy_scope": true,
+              "header": true,
+              "no_server_header": true,
+              "concurrency": true,
+              "backlog": true
+            },
+            "cli_passed": true
+          },
+          "manual_source_requirement_review": "completed; Ruff-inheritance automatic-discovery runtime requirement fails",
+          "complete_task_accepted": true
+        }
+      ],
+      "aggregates": [
+        {
+          "arm": "cairn",
+          "accepted": 4,
+          "tasks": 5,
+          "input_tokens": 1667246,
+          "cached_input_tokens": 1470080,
+          "uncached_input_tokens": 197166,
+          "output_tokens": 18071,
+          "tool_invocations": 48,
+          "seconds": 432.4702297920012
+        },
+        {
+          "arm": "raw",
+          "accepted": 4,
+          "tasks": 5,
+          "input_tokens": 1004879,
+          "cached_input_tokens": 888192,
+          "uncached_input_tokens": 116687,
+          "output_tokens": 21219,
+          "tool_invocations": 31,
+          "seconds": 437.108597208
+        }
+      ]
+    },
+    "joint-context": {
+      "runs": [
+        {
+          "case_id": "httpx-service-client",
+          "arm": "cairn",
+          "model": "gpt-6.1-sol",
+          "runtime": "codex-cli 0.164.0",
+          "exit_code": 0,
+          "stop_reason": null,
+          "seconds": 151.62213216700184,
+          "tool_invocations": 10,
+          "usage_events": [
+            {
+              "input_tokens": 343537,
+              "cached_input_tokens": 309632,
+              "cache_write_input_tokens": 0,
+              "output_tokens": 6744,
+              "reasoning_output_tokens": 1983
+            }
+          ],
+          "input_tokens": 343537,
+          "cached_input_tokens": 309632,
+          "output_tokens": 6744,
+          "final_answer_exists": true,
+          "uncached_input_tokens": 33905,
+          "answer_sha256": "4b988fd7abbb4ebb987bd504512c46a59f6206f43845cf143fdf6b6e1c51d5f1",
+          "artifact": "codex/joint-context/httpx-service-client-cairn",
+          "independent_execution_review": {
+            "case_id": "httpx-service-client",
+            "answer": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/joint-context/httpx-service-client-cairn/answer.txt",
+            "answer_sha256": "4b988fd7abbb4ebb987bd504512c46a59f6206f43845cf143fdf6b6e1c51d5f1",
+            "python_blocks": 1,
+            "runtime_attempted": true,
+            "manual_source_and_deliverable_review_required": true,
+            "compiled": true,
+            "required_interface_declared": true,
+            "runtime_checks": {
+              "timeouts": true,
+              "actual_timeouts": [
+                60.0,
+                10.0,
+                10.0,
+                10.0
+              ],
+              "trust_env": true,
+              "pool_limits": true,
+              "http2": true,
+              "async_response_hook": true,
+              "body_read_awaited": true,
+              "closed": true
+            },
+            "runtime_constraints_passed": true,
+            "generated_stdout": ""
+          },
+          "manual_source_requirement_review": "completed; Ruff-inheritance automatic-discovery runtime requirement fails",
+          "complete_task_accepted": true
+        },
+        {
+          "case_id": "httpx-service-client",
+          "arm": "raw",
+          "model": "gpt-6.1-sol",
+          "runtime": "codex-cli 0.164.0",
+          "exit_code": 0,
+          "stop_reason": null,
+          "seconds": 192.6006760829987,
+          "tool_invocations": 7,
+          "usage_events": [
+            {
+              "input_tokens": 260191,
+              "cached_input_tokens": 238720,
+              "cache_write_input_tokens": 0,
+              "output_tokens": 7973,
+              "reasoning_output_tokens": 2801
+            }
+          ],
+          "input_tokens": 260191,
+          "cached_input_tokens": 238720,
+          "output_tokens": 7973,
+          "final_answer_exists": true,
+          "uncached_input_tokens": 21471,
+          "answer_sha256": "30ae93b6d8ecf3b628f650e4edf4b57895eb6406fe0c8aa55ae17908ee2d55b9",
+          "artifact": "codex/joint-context/httpx-service-client-raw",
+          "independent_execution_review": {
+            "case_id": "httpx-service-client",
+            "answer": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/joint-context/httpx-service-client-raw/answer.txt",
+            "answer_sha256": "30ae93b6d8ecf3b628f650e4edf4b57895eb6406fe0c8aa55ae17908ee2d55b9",
+            "python_blocks": 1,
+            "runtime_attempted": true,
+            "manual_source_and_deliverable_review_required": true,
+            "compiled": true,
+            "required_interface_declared": true,
+            "runtime_checks": {
+              "timeouts": true,
+              "actual_timeouts": [
+                60.0,
+                10.0,
+                10.0,
+                10.0
+              ],
+              "trust_env": true,
+              "pool_limits": true,
+              "http2": true,
+              "async_response_hook": true,
+              "body_read_awaited": true,
+              "closed": true
+            },
+            "runtime_constraints_passed": true,
+            "generated_stdout": ""
+          },
+          "manual_source_requirement_review": "completed; Ruff-inheritance automatic-discovery runtime requirement fails",
+          "complete_task_accepted": true
+        },
+        {
+          "case_id": "ruff-isolated-ci-config",
+          "arm": "cairn",
+          "model": "gpt-6.1-sol",
+          "runtime": "codex-cli 0.164.0",
+          "exit_code": 0,
+          "stop_reason": null,
+          "seconds": 76.57990312499896,
+          "tool_invocations": 9,
+          "usage_events": [
+            {
+              "input_tokens": 249748,
+              "cached_input_tokens": 210304,
+              "cache_write_input_tokens": 0,
+              "output_tokens": 2449,
+              "reasoning_output_tokens": 777
+            }
+          ],
+          "input_tokens": 249748,
+          "cached_input_tokens": 210304,
+          "output_tokens": 2449,
+          "final_answer_exists": true,
+          "uncached_input_tokens": 39444,
+          "answer_sha256": "24fe7d1ed4c13846b2d3b0011197b1df0e27ccf8978b28907fb7c3bb9f264f37",
+          "artifact": "codex/joint-context/ruff-isolated-ci-config-cairn",
+          "independent_execution_review": {
+            "toml_parse_errors": [],
+            "toml_blocks": 1,
+            "files_modified": "temporary fixture only",
+            "root_config": {
+              "line-length": 100,
+              "target-version": "py310",
+              "lint": {
+                "select": [
+                  "E4",
+                  "E7",
+                  "E9",
+                  "F",
+                  "I"
+                ]
+              },
+              "format": {
+                "quote-style": "single"
+              }
+            },
+            "unused_import": {
+              "exit": 1,
+              "codes": [
+                "F401"
+              ],
+              "error": ""
+            },
+            "import_sorting": {
+              "exit": 1,
+              "codes": [
+                "I001"
+              ],
+              "error": ""
+            },
+            "formatter_output": "word = 'hello'\n",
+            "formatter_error": "",
+            "checks": {
+              "root_line_length": true,
+              "unused_import_linted": true,
+              "import_sorting_enabled": true,
+              "single_quotes": true
+            },
+            "config_passed": true
+          },
+          "manual_source_requirement_review": "completed; Ruff-inheritance automatic-discovery runtime requirement fails",
+          "complete_task_accepted": true
+        },
+        {
+          "case_id": "ruff-isolated-ci-config",
+          "arm": "raw",
+          "model": "gpt-6.1-sol",
+          "runtime": "codex-cli 0.164.0",
+          "exit_code": 0,
+          "stop_reason": null,
+          "seconds": 55.99523408299865,
+          "tool_invocations": 4,
+          "usage_events": [
+            {
+              "input_tokens": 123506,
+              "cached_input_tokens": 107392,
+              "cache_write_input_tokens": 0,
+              "output_tokens": 1880,
+              "reasoning_output_tokens": 377
+            }
+          ],
+          "input_tokens": 123506,
+          "cached_input_tokens": 107392,
+          "output_tokens": 1880,
+          "final_answer_exists": true,
+          "uncached_input_tokens": 16114,
+          "answer_sha256": "141095223539330de0d022d6e48dbde86a01b6ed36d03bf0b9ceee0073da6d88",
+          "artifact": "codex/joint-context/ruff-isolated-ci-config-raw",
+          "independent_execution_review": {
+            "toml_parse_errors": [],
+            "toml_blocks": 1,
+            "files_modified": "temporary fixture only",
+            "root_config": {
+              "line-length": 100,
+              "target-version": "py310",
+              "lint": {
+                "select": [
+                  "E4",
+                  "E7",
+                  "E9",
+                  "F",
+                  "I"
+                ]
+              },
+              "format": {
+                "quote-style": "single"
+              }
+            },
+            "unused_import": {
+              "exit": 1,
+              "codes": [
+                "F401"
+              ],
+              "error": ""
+            },
+            "import_sorting": {
+              "exit": 1,
+              "codes": [
+                "I001"
+              ],
+              "error": ""
+            },
+            "formatter_output": "word = 'hello'\n",
+            "formatter_error": "",
+            "checks": {
+              "root_line_length": true,
+              "unused_import_linted": true,
+              "import_sorting_enabled": true,
+              "single_quotes": true
+            },
+            "config_passed": true
+          },
+          "manual_source_requirement_review": "completed; Ruff-inheritance automatic-discovery runtime requirement fails",
+          "complete_task_accepted": true
+        }
+      ],
+      "aggregates": [
+        {
+          "arm": "cairn",
+          "accepted": 2,
+          "tasks": 2,
+          "input_tokens": 593285,
+          "cached_input_tokens": 519936,
+          "uncached_input_tokens": 73349,
+          "output_tokens": 9193,
+          "tool_invocations": 19,
+          "seconds": 228.2020352920008
+        },
+        {
+          "arm": "raw",
+          "accepted": 2,
+          "tasks": 2,
+          "input_tokens": 383697,
+          "cached_input_tokens": 346112,
+          "uncached_input_tokens": 37585,
+          "output_tokens": 9853,
+          "tool_invocations": 11,
+          "seconds": 248.59591016599734
+        }
+      ]
+    }
+  },
+  "protocols": {
+    "budget": {
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high (matches existing user configuration)",
+      "runtime": "codex-cli 0.164.0, ephemeral fresh sessions, existing ChatGPT auth; no API-key copying",
+      "scope": "Five known multi-constraint task texts x Cairn/raw; one fresh valid attempt per pair, alternating order",
+      "arms": [
+        "cairn",
+        "raw source files + rg"
+      ],
+      "tool_budget": 24,
+      "per_session_wall_time_limit_seconds": 900,
+      "final_output_request": "<=1800 tokens (prompt limit, not a decoder setting)",
+      "source_version": "budget-context-candidate/src",
+      "coding_tools": "same read-only shell, local Python tests allowed, no network requests or source edits",
+      "source_evidence": "MCP only for Cairn/BM25; curated copied docs and rg for raw arm",
+      "known_cases": "All five task texts have been exposed during previous development. Not held-out/generalization validation.",
+      "usage": "CLI turn.completed totals, including cached_input_tokens and output_tokens; not dollar billing or cross-model comparable token counts",
+      "round": "Budgeted source-block development parity screen",
+      "changes": [
+        "Opt-in evidence view with whole original blocks, neighboring prose, source spans and global budget.",
+        "CLI help typed as text/console is split into options with usage/group scope; arbitrary code remains atomic.",
+        "MCP descriptions advertise evidence view; agent choice remains autonomous; no workflow prompt or oracle answers injected."
+      ],
+      "attempt_selection": "One valid attempt for each pair; retain all old and new runs, including failures.",
+      "runner_sha256": "50267b45210aa6897daed03c7bc34bcd99c8815fda6ec71580e059d810a82f63",
+      "cases_sha256": "d9e72b227c700937618def4baf7f3c64f17e3fd80cf1cabe19661e79371cd572",
+      "acceptance": "Independent executable grader + manual source/requirements review. All valid failures preserved.",
+      "parity_gate": "Same task acceptance; compare cumulative total input I, uncached input U and output O. Componentwise no increase supports token-cost parity for nonnegative output prices and 0<=cached<=uncached input price. Indexing/latency still separate; single runs cannot prove stability."
+    },
+    "joint": {
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high (matches existing user configuration)",
+      "runtime": "codex-cli 0.164.0, ephemeral fresh sessions, existing ChatGPT auth; no API-key copying",
+      "scope": "Stage 1: two known development task texts x Cairn/raw, four fresh attempts",
+      "arms": [
+        "cairn",
+        "raw source files + rg"
+      ],
+      "tool_budget": 24,
+      "per_session_wall_time_limit_seconds": 900,
+      "final_output_request": "<=1800 tokens (prompt limit, not a decoder setting)",
+      "source_version": "joint-context-candidate/src",
+      "coding_tools": "same read-only shell, local Python tests allowed, no network requests or source edits",
+      "source_evidence": "MCP only for Cairn/BM25; curated copied docs and rg for raw arm",
+      "known_cases": "All five task texts have been exposed during previous development. Not held-out/generalization validation.",
+      "usage": "CLI turn.completed totals, including cached_input_tokens and output_tokens; not dollar billing or cross-model comparable token counts",
+      "round": "Joint source-block and focused-query development screen",
+      "changes": [
+        "Joint source-block selection over the wider structural shortlist, under section/document caps.",
+        "Optional agent-supplied focused queries fused/deduplicated; shared source budget and marginal per-focus relevance. No backend query generation.",
+        "No forced agent workflow, oracle evidence or expected checks in prompts."
+      ],
+      "attempt_selection": "One valid attempt for each pair; retain all old and new runs, including failures.",
+      "runner_sha256": "ae699e764285509ac456a863e1b65647ce155fb6db34abab1a01d6cc6f1a459d",
+      "cases_sha256": "d9e72b227c700937618def4baf7f3c64f17e3fd80cf1cabe19661e79371cd572",
+      "acceptance": "Independent executable grader + manual source/requirements review. All valid failures preserved.",
+      "parity_gate": "Same task acceptance; compare cumulative total input I, uncached input U and output O. Componentwise no increase supports token-cost parity for nonnegative output prices and 0<=cached<=uncached input price. Indexing/latency still separate; single runs cannot prove stability.",
+      "escalation": "After independent acceptance, extend to the three remaining frozen known cases only if the development pair has no increase in total input I, uncached input U or output O against fresh raw. Otherwise stop this candidate screen and record failure, without a generalization claim."
+    }
+  },
+  "source_hashes": {
+    "budget": {
+      "src/cairn/repo_search.py": "3fe15e0d470a4593f61583fc383f2dff79d7bb4396f30f31e53386a36c5f3a3a",
+      "src/cairn/__init__.py": "4975a3e97aad175b1155206322ba4ed3f1418f948db57a867bfa8b747b296b80",
+      "src/cairn/inspection.py": "2c762e9920bc1bdc45c61e8279ba10c133c2327d1274ebe1fb8420756f4d19df",
+      "src/cairn/providers.py": "ff842c46b112043444545e369de2a13f592fc7b38070847b45f9ff83f0c4035c",
+      "src/cairn/repo.py": "08d62f4a4267cd63fdb92d848daeab61b78aeec3d50d20ba25fb8e40d63a4201",
+      "src/cairn/agent_guidance.py": "ed396110c729b0c1ea2ace722fa391f00fe750d867f6819b4ea4a28d63cec51e",
+      "src/cairn/xref/fake.py": "f2fb4026baeeb28eb92f6fc4e6e1d56631202d1505b2f39c95393ca74b68b1bd",
+      "src/cairn/xref/__init__.py": "4829c30ba5562f43fef3e82cf2e91484ffab95dec9913ad9c9531dfba679d545",
+      "src/cairn/xref/base.py": "7a603b112e0529545ef47e77afbd7e1b0a737891241f338201b55a41e2c5856a",
+      "src/cairn/xref/heuristic.py": "b234cd12f758c40dfac24fbe3f735708156d895cc68d5a4ac100299f1bc800c2",
+      "src/cairn/bench/metrics.py": "9cebcee11b5b8e9e2eb40435fe5941eff81efa31038ab7b662f2bfda47edb8a5",
+      "src/cairn/bench/runner.py": "0a44ba791dde41024ee889321fa01cd4bd4db624c6a5adcf6d67c0b49daa0925",
+      "src/cairn/bench/baseline.py": "102f0ecf42fcf2b83c3c253d731338b40523a9ad8cb32262a97ebdfaf4730b98",
+      "src/cairn/bench/__init__.py": "6eefb5df8d97dbcbba95c13cff3a77fb5ebda4154ab086a06623062375acd9b1",
+      "src/cairn/bench/dataset.py": "bc7f147940dedc8f03b16d78c04e25ded591e5358ac482118ffc5a876e9bf08f",
+      "src/cairn/bench/judge.py": "0dce5bb0ed842449814919b6bd38f8a33d56976bc435a79a9a2962ff3a074d6c",
+      "src/cairn/bench/report.py": "c2fbc8890891db7c861c26c7af017532e98b20d13dbf6955f69e5445f62727b6",
+      "src/cairn/tools/search_semantic.py": "c078e9c4721e9f0e9f51b5e9c787004e22fb5f2ed0b9ee82d5ce49bcc74403c1",
+      "src/cairn/tools/read_range.py": "950914a9aa12ddf366ccbd9bd26a18ef6c188a3e326a108ec320fce2d00032c3",
+      "src/cairn/tools/search_keyword.py": "7d1917d60469204ac9c0a2d5fc36f39d9f695a5168bf40c423c662eeb7caba97",
+      "src/cairn/tools/find_mentions.py": "b2dd69ee779c454a94cc69a707b2bfa0e8917c49a42461a1c1c41635dd6e9651",
+      "src/cairn/tools/__init__.py": "ad17995a7e6cc108ba83dd49a6d8b65a293968fde0a66601583d33299d26edfa",
+      "src/cairn/tools/get_related.py": "f275a2e778aa96a088a71c152f071e4ea22da9a5b14f15cba9914a4fae55b162",
+      "src/cairn/tools/outline.py": "ed557e2865ddbd9a11b9ca31ec06b4605c6c4dbe3fc8f212f654d14e452a504e",
+      "src/cairn/tools/get_section.py": "c6b594a10e40851b0b3eb8e3dbb7b31f14d2ee9e2ae1704becd92873354eb6a2",
+      "src/cairn/tools/context_blocks.py": "09682771f7c23125bf1a6db3dea85943e92d8e49e3339cc13a21cfdc75819579",
+      "src/cairn/tools/base.py": "da1b46a1fad634eda53481b161e1077ec00ca385749bba5da3a42e8520104ce9",
+      "src/cairn/core/config.py": "0988f686b585bb266207c0cd976741e4d3ceae0fbb68a31095cee91cf7ef74fc",
+      "src/cairn/core/__init__.py": "55b20f63537926c009e0dd4fd57e1de6cb3f87d289a0ac47a177305badf9d1b8",
+      "src/cairn/core/types.py": "925db60bd1139d5cb4eb4dae401edc9b8481caed52f0897db1cd433e30947e83",
+      "src/cairn/core/errors.py": "a05de597f07140b65d6e2aa17ddb6766e9c76a89434bab2a99285659aadb4613",
+      "src/cairn/embed/fake.py": "87847e19e4574c19bd271a55091525314375f3273911e36c4cf1f54a63450b47",
+      "src/cairn/embed/openai_compatible.py": "c76e01422eb24ab60c6f0f84108227d0046408deb24df1e19f3d29dec909aaea",
+      "src/cairn/embed/__init__.py": "39c5945e10f3beb9144cb81d6b693ae7a9103a7c90c0e6f8d74e379d030a2158",
+      "src/cairn/embed/doubao.py": "5bb7467424ec6214f9735a19d0e4ae37b1ab2a6b4a880039a442ccc72991c612",
+      "src/cairn/embed/base.py": "f05b76deb60d038beea75bb207dabaf4d3ced9fe2479f18f91b109f1683c7b0d",
+      "src/cairn/embed/windowed.py": "df44bb06b045f0306cde46d86f723f2ff83ebc5d9eb9fd6226adaffa61c15ec6",
+      "src/cairn/entity/fake.py": "0e72510cd52c6b389472e7ec9f9330648c385a70db70925d4465ceb653da921a",
+      "src/cairn/entity/__init__.py": "9d226d39cab1f8a295b6e2b284eea2148bbb7c544085b33adf9955ad89b06f73",
+      "src/cairn/entity/base.py": "c4309984df6c98c12e5500c52f515fd7eddd368a70fba0edc0c5db7abbae3435",
+      "src/cairn/entity/heuristic.py": "5b996baa78427fe6b5a97a4a0a129694af6affcb2a23622d3b42f31133320555",
+      "src/cairn/ingest/__init__.py": "dad837ad362acd07a40d5891c8d64935915fa4cb13658022eedd4ea7e2fd2a7f",
+      "src/cairn/ingest/pdf.py": "87e9b16d547ec6017ee957ec1c98b21e97743bf2a9680abf3eb4b09bc1de7e96",
+      "src/cairn/ingest/markitdown.py": "f3dbd4fcb118a8525d3985e1e81148a95f6bb99dc16faeec1cdc18b1cafa7b58",
+      "src/cairn/ingest/markdown.py": "7b78c69399bf3dafbb060161e9ecbca5f08024ade0e88b38a81fdacb587ecfd2",
+      "src/cairn/ingest/base.py": "0d97d8b952dc7088886ad304dc116fb9b91afaec12afeb1bf52f7fb5d53989d2",
+      "src/cairn/summarize/fake.py": "3e07105efaa0c5210c2c835c8dc1e3dd36ef8a922c93e523dd451262888a11e8",
+      "src/cairn/summarize/openai_compatible.py": "67ece30a351e681a05bc33769428868b5d35eb5e8d25c0fde4850b3514eafbb1",
+      "src/cairn/summarize/cache.py": "8d5daa8cfbdb9c7d679ef4c2ff31a2a920bc95fa898861f5a5b27665c5e6f4b6",
+      "src/cairn/summarize/__init__.py": "22aef718f2e5e709b31ce21d069383308ed5e286aead8143121f2034f7e73acc",
+      "src/cairn/summarize/prompts.py": "accaff220bdd9e7392fcab43b8b262cc6588f243705af339c59041f6147ee532",
+      "src/cairn/summarize/base.py": "919c68e8b7aa781b0965cf57470107ae442fd60c1a167e0ea995ba5be0bf2589",
+      "src/cairn/mcp/server.py": "1ee6b2acf1130439f7db5b114789ecc31bf7e52cda7b210892f66a3f0da0b580",
+      "src/cairn/mcp/__init__.py": "182e2496b6fb3ae9bbdd04e245d282426e18d1e9481cde853c5f8bcf7ce5ee06",
+      "src/cairn/mcp/schemas.py": "485cb41988c75ba272d1d7be95fd8a3ac5bee0ba80a4f5de58d8270c063abf03",
+      "src/cairn/cli/config.py": "e835a4bda78f7f71b3ead748fcfd99003665cae10bc069a74f6aaa2aff82349d",
+      "src/cairn/cli/__init__.py": "12167b938c079bed1dc70fe8e9bdb444f1a3b9bc9075c64737ac8d6121ae0767",
+      "src/cairn/cli/app.py": "ce12c66976350b82c0c7472618455b264eb6ee19a0f8ff61ac490bac3bc7466f",
+      "src/cairn/index/vectors.py": "c598a4055a3dfb1dc3cb895dfb4b776c3e3c27ce0dbd270d8d255a9e97707c0d",
+      "src/cairn/index/tree.py": "13ef29a32ee9cd990fbbed69bbcc51270f646ddf04c74a6018d68bb2a52deeee",
+      "src/cairn/index/__init__.py": "93bf140dd9b0b6754f1e4a93872bd8b870420d33f588feebf63d1533e90c3295",
+      "src/cairn/index/entities.py": "eef3b823781ee542cd2ded19ad05942321802af55412291fcf41354a686e4064",
+      "src/cairn/index/summaries.py": "f459357287d5290d6733a655e07e5496007d76061c34f61e2af4e993d68dece6",
+      "src/cairn/index/xrefs.py": "0e48b57417817e47305d5c1653d00e0b5736e90696881b3d33ef9d447c6254bc",
+      "src/cairn/engine/manifest.py": "2cde1bb70de751c36b20f1f32bac04fddc820675b98d471f3663c20b5c4e0c6d",
+      "src/cairn/engine/__init__.py": "305ed7ffc9512688765620b03b9002b0cd2b63baeac11533a52e76051b82ac6c",
+      "src/cairn/engine/indexer.py": "51d078d22f26e970730bf9e607635af43b3aba1b6c76ac583a2c8deb502f83a9",
+      "src/cairn/client/server.py": "ded430660f9ee5ced05f3a3ec3665456bd58a409ae6beedbf1cd8e2acd7fbb4d",
+      "src/cairn/client/__init__.py": "d844deb2886bdf7495c47ccc8c7417867f3b65b28c4f2bd1ad299bf4bf177bf6",
+      "src/cairn/client/static/__init__.py": "0f90031cf0900f6ad827cd9823928f23574f5b941bd79cc5ba8f0731535ba785"
+    },
+    "joint": {
+      "src/cairn/repo_search.py": "3fe15e0d470a4593f61583fc383f2dff79d7bb4396f30f31e53386a36c5f3a3a",
+      "src/cairn/__init__.py": "4975a3e97aad175b1155206322ba4ed3f1418f948db57a867bfa8b747b296b80",
+      "src/cairn/inspection.py": "2c762e9920bc1bdc45c61e8279ba10c133c2327d1274ebe1fb8420756f4d19df",
+      "src/cairn/providers.py": "ff842c46b112043444545e369de2a13f592fc7b38070847b45f9ff83f0c4035c",
+      "src/cairn/repo.py": "3f2c8144eaddc48641071fb65c3e25c45563d1ed9acbcd51a8fe6daf9c90c8b9",
+      "src/cairn/agent_guidance.py": "ed396110c729b0c1ea2ace722fa391f00fe750d867f6819b4ea4a28d63cec51e",
+      "src/cairn/xref/fake.py": "f2fb4026baeeb28eb92f6fc4e6e1d56631202d1505b2f39c95393ca74b68b1bd",
+      "src/cairn/xref/__init__.py": "4829c30ba5562f43fef3e82cf2e91484ffab95dec9913ad9c9531dfba679d545",
+      "src/cairn/xref/base.py": "7a603b112e0529545ef47e77afbd7e1b0a737891241f338201b55a41e2c5856a",
+      "src/cairn/xref/heuristic.py": "b234cd12f758c40dfac24fbe3f735708156d895cc68d5a4ac100299f1bc800c2",
+      "src/cairn/bench/metrics.py": "9cebcee11b5b8e9e2eb40435fe5941eff81efa31038ab7b662f2bfda47edb8a5",
+      "src/cairn/bench/runner.py": "0a44ba791dde41024ee889321fa01cd4bd4db624c6a5adcf6d67c0b49daa0925",
+      "src/cairn/bench/baseline.py": "102f0ecf42fcf2b83c3c253d731338b40523a9ad8cb32262a97ebdfaf4730b98",
+      "src/cairn/bench/__init__.py": "6eefb5df8d97dbcbba95c13cff3a77fb5ebda4154ab086a06623062375acd9b1",
+      "src/cairn/bench/dataset.py": "bc7f147940dedc8f03b16d78c04e25ded591e5358ac482118ffc5a876e9bf08f",
+      "src/cairn/bench/judge.py": "0dce5bb0ed842449814919b6bd38f8a33d56976bc435a79a9a2962ff3a074d6c",
+      "src/cairn/bench/report.py": "c2fbc8890891db7c861c26c7af017532e98b20d13dbf6955f69e5445f62727b6",
+      "src/cairn/tools/search_semantic.py": "c078e9c4721e9f0e9f51b5e9c787004e22fb5f2ed0b9ee82d5ce49bcc74403c1",
+      "src/cairn/tools/read_range.py": "950914a9aa12ddf366ccbd9bd26a18ef6c188a3e326a108ec320fce2d00032c3",
+      "src/cairn/tools/search_keyword.py": "7d1917d60469204ac9c0a2d5fc36f39d9f695a5168bf40c423c662eeb7caba97",
+      "src/cairn/tools/find_mentions.py": "b2dd69ee779c454a94cc69a707b2bfa0e8917c49a42461a1c1c41635dd6e9651",
+      "src/cairn/tools/__init__.py": "ad17995a7e6cc108ba83dd49a6d8b65a293968fde0a66601583d33299d26edfa",
+      "src/cairn/tools/get_related.py": "f275a2e778aa96a088a71c152f071e4ea22da9a5b14f15cba9914a4fae55b162",
+      "src/cairn/tools/outline.py": "ed557e2865ddbd9a11b9ca31ec06b4605c6c4dbe3fc8f212f654d14e452a504e",
+      "src/cairn/tools/get_section.py": "c6b594a10e40851b0b3eb8e3dbb7b31f14d2ee9e2ae1704becd92873354eb6a2",
+      "src/cairn/tools/context_blocks.py": "ff8554e283af1c509d7c79e5a2a44fd5ce67e0432d34870b51ae372581a54407",
+      "src/cairn/tools/base.py": "da1b46a1fad634eda53481b161e1077ec00ca385749bba5da3a42e8520104ce9",
+      "src/cairn/core/config.py": "0988f686b585bb266207c0cd976741e4d3ceae0fbb68a31095cee91cf7ef74fc",
+      "src/cairn/core/__init__.py": "55b20f63537926c009e0dd4fd57e1de6cb3f87d289a0ac47a177305badf9d1b8",
+      "src/cairn/core/types.py": "925db60bd1139d5cb4eb4dae401edc9b8481caed52f0897db1cd433e30947e83",
+      "src/cairn/core/errors.py": "a05de597f07140b65d6e2aa17ddb6766e9c76a89434bab2a99285659aadb4613",
+      "src/cairn/embed/fake.py": "87847e19e4574c19bd271a55091525314375f3273911e36c4cf1f54a63450b47",
+      "src/cairn/embed/openai_compatible.py": "c76e01422eb24ab60c6f0f84108227d0046408deb24df1e19f3d29dec909aaea",
+      "src/cairn/embed/__init__.py": "39c5945e10f3beb9144cb81d6b693ae7a9103a7c90c0e6f8d74e379d030a2158",
+      "src/cairn/embed/doubao.py": "5bb7467424ec6214f9735a19d0e4ae37b1ab2a6b4a880039a442ccc72991c612",
+      "src/cairn/embed/base.py": "f05b76deb60d038beea75bb207dabaf4d3ced9fe2479f18f91b109f1683c7b0d",
+      "src/cairn/embed/windowed.py": "df44bb06b045f0306cde46d86f723f2ff83ebc5d9eb9fd6226adaffa61c15ec6",
+      "src/cairn/entity/fake.py": "0e72510cd52c6b389472e7ec9f9330648c385a70db70925d4465ceb653da921a",
+      "src/cairn/entity/__init__.py": "9d226d39cab1f8a295b6e2b284eea2148bbb7c544085b33adf9955ad89b06f73",
+      "src/cairn/entity/base.py": "c4309984df6c98c12e5500c52f515fd7eddd368a70fba0edc0c5db7abbae3435",
+      "src/cairn/entity/heuristic.py": "5b996baa78427fe6b5a97a4a0a129694af6affcb2a23622d3b42f31133320555",
+      "src/cairn/ingest/__init__.py": "dad837ad362acd07a40d5891c8d64935915fa4cb13658022eedd4ea7e2fd2a7f",
+      "src/cairn/ingest/pdf.py": "87e9b16d547ec6017ee957ec1c98b21e97743bf2a9680abf3eb4b09bc1de7e96",
+      "src/cairn/ingest/markitdown.py": "f3dbd4fcb118a8525d3985e1e81148a95f6bb99dc16faeec1cdc18b1cafa7b58",
+      "src/cairn/ingest/markdown.py": "7b78c69399bf3dafbb060161e9ecbca5f08024ade0e88b38a81fdacb587ecfd2",
+      "src/cairn/ingest/base.py": "0d97d8b952dc7088886ad304dc116fb9b91afaec12afeb1bf52f7fb5d53989d2",
+      "src/cairn/summarize/fake.py": "3e07105efaa0c5210c2c835c8dc1e3dd36ef8a922c93e523dd451262888a11e8",
+      "src/cairn/summarize/openai_compatible.py": "67ece30a351e681a05bc33769428868b5d35eb5e8d25c0fde4850b3514eafbb1",
+      "src/cairn/summarize/cache.py": "8d5daa8cfbdb9c7d679ef4c2ff31a2a920bc95fa898861f5a5b27665c5e6f4b6",
+      "src/cairn/summarize/__init__.py": "22aef718f2e5e709b31ce21d069383308ed5e286aead8143121f2034f7e73acc",
+      "src/cairn/summarize/prompts.py": "accaff220bdd9e7392fcab43b8b262cc6588f243705af339c59041f6147ee532",
+      "src/cairn/summarize/base.py": "919c68e8b7aa781b0965cf57470107ae442fd60c1a167e0ea995ba5be0bf2589",
+      "src/cairn/mcp/server.py": "c8b5755c6734079ec96665899d71389b5b05aca6c8f4a432a71486111fcc5868",
+      "src/cairn/mcp/__init__.py": "182e2496b6fb3ae9bbdd04e245d282426e18d1e9481cde853c5f8bcf7ce5ee06",
+      "src/cairn/mcp/schemas.py": "6c78a5ce1dcef9edacaf19270d1ce77a6181621f3bc386217ed5371eb4bcb10a",
+      "src/cairn/cli/config.py": "e835a4bda78f7f71b3ead748fcfd99003665cae10bc069a74f6aaa2aff82349d",
+      "src/cairn/cli/__init__.py": "12167b938c079bed1dc70fe8e9bdb444f1a3b9bc9075c64737ac8d6121ae0767",
+      "src/cairn/cli/app.py": "ce12c66976350b82c0c7472618455b264eb6ee19a0f8ff61ac490bac3bc7466f",
+      "src/cairn/index/vectors.py": "c598a4055a3dfb1dc3cb895dfb4b776c3e3c27ce0dbd270d8d255a9e97707c0d",
+      "src/cairn/index/tree.py": "13ef29a32ee9cd990fbbed69bbcc51270f646ddf04c74a6018d68bb2a52deeee",
+      "src/cairn/index/__init__.py": "93bf140dd9b0b6754f1e4a93872bd8b870420d33f588feebf63d1533e90c3295",
+      "src/cairn/index/entities.py": "eef3b823781ee542cd2ded19ad05942321802af55412291fcf41354a686e4064",
+      "src/cairn/index/summaries.py": "f459357287d5290d6733a655e07e5496007d76061c34f61e2af4e993d68dece6",
+      "src/cairn/index/xrefs.py": "0e48b57417817e47305d5c1653d00e0b5736e90696881b3d33ef9d447c6254bc",
+      "src/cairn/engine/manifest.py": "2cde1bb70de751c36b20f1f32bac04fddc820675b98d471f3663c20b5c4e0c6d",
+      "src/cairn/engine/__init__.py": "305ed7ffc9512688765620b03b9002b0cd2b63baeac11533a52e76051b82ac6c",
+      "src/cairn/engine/indexer.py": "51d078d22f26e970730bf9e607635af43b3aba1b6c76ac583a2c8deb502f83a9",
+      "src/cairn/client/server.py": "ded430660f9ee5ced05f3a3ec3665456bd58a409ae6beedbf1cd8e2acd7fbb4d",
+      "src/cairn/client/__init__.py": "d844deb2886bdf7495c47ccc8c7417867f3b65b28c4f2bd1ad299bf4bf177bf6",
+      "src/cairn/client/static/__init__.py": "0f90031cf0900f6ad827cd9823928f23574f5b941bd79cc5ba8f0731535ba785"
+    }
+  },
+  "joint_expansion_gate_passed": false,
+  "oracle_qualifications": {
+    "auto_discovery": {
+      "reason": "Previous exclusion grader forced --config, masking root-cwd automatic-discovery behavior for the commands actually proposed. New test covers lint and format explicit generated-file handling; requirements unchanged. Both old and new reviews retained.",
+      "before_sha256": "1b22cd12ae272e93930fc4b38120410760f67943ad493257b54a63b9e47ee15a",
+      "after_sha256": "f5de7e27b93b7e270c85a326068d26a6808048da0ac254b0fcc52d60e2be9fa1",
+      "controls": [
+        {
+          "control": "complete_auto_context",
+          "expected": true,
+          "observed": true,
+          "review": {
+            "toml_parse_errors": [],
+            "toml_blocks": 2,
+            "files_modified": "temporary fixture only",
+            "root_config": {
+              "target-version": "py310",
+              "line-length": 100,
+              "force-exclude": true,
+              "lint": {
+                "select": [
+                  "E4",
+                  "E7",
+                  "E9",
+                  "F"
+                ]
+              },
+              "format": {
+                "quote-style": "single"
+              }
+            },
+            "child_config": {
+              "extend": "../../pyproject.toml",
+              "extend-exclude": [
+                "generated"
+              ],
+              "force-exclude": true,
+              "lint": {
+                "extend-select": [
+                  "I"
+                ],
+                "per-file-ignores": {
+                  "__init__.py": [
+                    "F401"
+                  ]
+                }
+              }
+            },
+            "unused_import": {
+              "exit": 1,
+              "codes": [
+                "F401"
+              ],
+              "error": ""
+            },
+            "import_sorting": {
+              "exit": 1,
+              "codes": [
+                "I001"
+              ],
+              "error": ""
+            },
+            "formatter_output": "word = 'hello'\n",
+            "formatter_error": "",
+            "package_init": {
+              "exit": 0,
+              "codes": [],
+              "error": ""
+            },
+            "explicit_generated": {
+              "exit": 0,
+              "codes": [],
+              "error": "warning: No Python files found under the given path(s)\n"
+            },
+            "auto_explicit_generated": {
+              "exit": 0,
+              "stdout": "[]",
+              "stderr": "warning: No Python files found under the given path(s)\n"
+            },
+            "auto_explicit_generated_format": {
+              "exit": 0,
+              "stdout": "",
+              "stderr": "warning: No Python files found under the given path(s)\n"
+            },
+            "checks": {
+              "root_line_length": true,
+              "unused_import_linted": true,
+              "import_sorting_enabled": true,
+              "single_quotes": true,
+              "target_version": true,
+              "package_init_ignored": true,
+              "explicit_generated_excluded": true
+            },
+            "config_passed": true
+          }
+        },
+        {
+          "control": "child_only_force",
+          "expected": false,
+          "observed": false,
+          "review": {
+            "toml_parse_errors": [],
+            "toml_blocks": 2,
+            "files_modified": "temporary fixture only",
+            "root_config": {
+              "target-version": "py310",
+              "line-length": 100,
+              "lint": {
+                "select": [
+                  "E4",
+                  "E7",
+                  "E9",
+                  "F"
+                ]
+              },
+              "format": {
+                "quote-style": "single"
+              }
+            },
+            "child_config": {
+              "extend": "../../pyproject.toml",
+              "extend-exclude": [
+                "generated"
+              ],
+              "force-exclude": true,
+              "lint": {
+                "extend-select": [
+                  "I"
+                ],
+                "per-file-ignores": {
+                  "__init__.py": [
+                    "F401"
+                  ]
+                }
+              }
+            },
+            "unused_import": {
+              "exit": 1,
+              "codes": [
+                "F401"
+              ],
+              "error": ""
+            },
+            "import_sorting": {
+              "exit": 1,
+              "codes": [
+                "I001"
+              ],
+              "error": ""
+            },
+            "formatter_output": "word = 'hello'\n",
+            "formatter_error": "",
+            "package_init": {
+              "exit": 0,
+              "codes": [],
+              "error": ""
+            },
+            "explicit_generated": {
+              "exit": 0,
+              "codes": [],
+              "error": "warning: No Python files found under the given path(s)\n"
+            },
+            "auto_explicit_generated": {
+              "exit": 1,
+              "stdout": "[\n  {\n    \"cell\": null,\n    \"code\": \"E402\",\n    \"end_location\": {\n      \"column\": 10,\n      \"row\": 2\n    },\n    \"filename\": \"/private/var/folders/cg/xm8lr5_141j1zgmxc5qbd8rm0000gn/T/cairn-ruff-fixture-jtmdi48s/packages/api/generated/bad.py\",\n    \"fix\": null,\n    \"location\": {\n      \"column\": 1,\n      \"row\": 2\n    },\n    \"message\": \"Module level import not at top of file\",\n    \"name\": \"module-import-not-at-top-of-file\",\n    \"noqa_row\": 2,\n    \"severity\": \"error\",\n    \"url\": \"https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file\"\n  },\n  {\n    \"cell\": null,\n    \"code\": \"F401\",\n    \"end_location\": {\n      \"column\": 10,\n      \"row\": 2\n    },\n    \"filename\": \"/private/var/folders/cg/xm8lr5_141j1zgmxc5qbd8rm0000gn/T/cairn-ruff-fixture-jtmdi48s/packages/api/generated/bad.py\",\n    \"fix\": {\n      \"applicability\": \"safe\",\n      \"edits\": [\n        {\n          \"content\": \"\",\n          \"end_location\": {\n            \"column\": 1,\n            \"row\": 3\n          },\n          \"location\": {\n            \"column\": 1,\n            \"row\": 2\n          }\n        }\n      ],\n      \"message\": \"Remove unused import: `os`\"\n    },\n    \"location\": {\n      \"column\": 8,\n      \"row\": 2\n    },\n    \"message\": \"`os` imported but unused\",\n    \"name\": \"unused-import\",\n    \"noqa_row\": 2,\n    \"severity\": \"error\",\n    \"url\": \"https://docs.astral.sh/ruff/rules/unused-import\"\n  }\n]",
+              "stderr": ""
+            },
+            "auto_explicit_generated_format": {
+              "exit": 1,
+              "stdout": "Would reformat: packages/api/generated/bad.py\n1 file would be reformatted\n",
+              "stderr": ""
+            },
+            "checks": {
+              "root_line_length": true,
+              "unused_import_linted": true,
+              "import_sorting_enabled": true,
+              "single_quotes": true,
+              "target_version": true,
+              "package_init_ignored": true,
+              "explicit_generated_excluded": false
+            },
+            "config_passed": false
+          }
+        },
+        {
+          "control": "missing_exclusion",
+          "expected": false,
+          "observed": false,
+          "review": {
+            "toml_parse_errors": [],
+            "toml_blocks": 2,
+            "files_modified": "temporary fixture only",
+            "root_config": {
+              "target-version": "py310",
+              "line-length": 100,
+              "force-exclude": true,
+              "lint": {
+                "select": [
+                  "E4",
+                  "E7",
+                  "E9",
+                  "F"
+                ]
+              },
+              "format": {
+                "quote-style": "single"
+              }
+            },
+            "child_config": {
+              "extend": "../../pyproject.toml",
+              "extend-exclude": [],
+              "force-exclude": true,
+              "lint": {
+                "extend-select": [
+                  "I"
+                ],
+                "per-file-ignores": {
+                  "__init__.py": [
+                    "F401"
+                  ]
+                }
+              }
+            },
+            "unused_import": {
+              "exit": 1,
+              "codes": [
+                "F401"
+              ],
+              "error": ""
+            },
+            "import_sorting": {
+              "exit": 1,
+              "codes": [
+                "I001"
+              ],
+              "error": ""
+            },
+            "formatter_output": "word = 'hello'\n",
+            "formatter_error": "",
+            "package_init": {
+              "exit": 0,
+              "codes": [],
+              "error": ""
+            },
+            "explicit_generated": {
+              "exit": 1,
+              "codes": [
+                "F401"
+              ],
+              "error": ""
+            },
+            "auto_explicit_generated": {
+              "exit": 1,
+              "stdout": "[\n  {\n    \"cell\": null,\n    \"code\": \"E402\",\n    \"end_location\": {\n      \"column\": 10,\n      \"row\": 2\n    },\n    \"filename\": \"/private/var/folders/cg/xm8lr5_141j1zgmxc5qbd8rm0000gn/T/cairn-ruff-fixture-ammtl6wl/packages/api/generated/bad.py\",\n    \"fix\": null,\n    \"location\": {\n      \"column\": 1,\n      \"row\": 2\n    },\n    \"message\": \"Module level import not at top of file\",\n    \"name\": \"module-import-not-at-top-of-file\",\n    \"noqa_row\": 2,\n    \"severity\": \"error\",\n    \"url\": \"https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file\"\n  },\n  {\n    \"cell\": null,\n    \"code\": \"F401\",\n    \"end_location\": {\n      \"column\": 10,\n      \"row\": 2\n    },\n    \"filename\": \"/private/var/folders/cg/xm8lr5_141j1zgmxc5qbd8rm0000gn/T/cairn-ruff-fixture-ammtl6wl/packages/api/generated/bad.py\",\n    \"fix\": {\n      \"applicability\": \"safe\",\n      \"edits\": [\n        {\n          \"content\": \"\",\n          \"end_location\": {\n            \"column\": 1,\n            \"row\": 3\n          },\n          \"location\": {\n            \"column\": 1,\n            \"row\": 2\n          }\n        }\n      ],\n      \"message\": \"Remove unused import: `os`\"\n    },\n    \"location\": {\n      \"column\": 8,\n      \"row\": 2\n    },\n    \"message\": \"`os` imported but unused\",\n    \"name\": \"unused-import\",\n    \"noqa_row\": 2,\n    \"severity\": \"error\",\n    \"url\": \"https://docs.astral.sh/ruff/rules/unused-import\"\n  }\n]",
+              "stderr": ""
+            },
+            "auto_explicit_generated_format": {
+              "exit": 1,
+              "stdout": "Would reformat: packages/api/generated/bad.py\n1 file would be reformatted\n",
+              "stderr": ""
+            },
+            "checks": {
+              "root_line_length": true,
+              "unused_import_linted": true,
+              "import_sorting_enabled": true,
+              "single_quotes": true,
+              "target_version": true,
+              "package_init_ignored": true,
+              "explicit_generated_excluded": false
+            },
+            "config_passed": false
+          }
+        }
+      ]
+    },
+    "unittest": {
+      "reason": "Audited generated test uses standard-library unittest.mock; old allowlist incorrectly rejected it before execution. Task checks unchanged, all four Python attempts regraded. This verifier still requires manual code audit and is not a security sandbox.",
+      "before_sha256": "374619fa1d58321c4d930c85638ebddce691c2ec0fc4188a88dfc40d1a8b5b04",
+      "after_sha256": "2d155a42009f7157e122abe163ccf411113fcb81c3cc3fd9e175757ad7166de8",
+      "controls": [
+        {
+          "control": "audited_mock_import",
+          "expected": true,
+          "observed": true
+        },
+        {
+          "control": "unreviewed_import",
+          "expected": false,
+          "observed": false
+        }
+      ]
+    }
+  },
+  "limitations": [
+    "All public task texts repeatedly used in development; no untouched generalization claim.",
+    "One attempt per pair; no stable population success/cost estimate.",
+    "All-attempt token totals include failed Ruff-inheritance attempts.",
+    "Actual API pricing and amortized indexing are separate; I/U/O parity gate is deliberately conservative.",
+    "Focused-query relevance is lexical/rank based, not semantic entailment."
+  ]
+}

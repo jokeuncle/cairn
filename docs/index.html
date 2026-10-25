@@ -585,7 +585,7 @@
         <div class="hero-actions">
           <a class="button primary" href="#install">Install docsgraph</a>
           <a class="button" href="https://github.com/jokeuncle/cairn">View on GitHub</a>
-          <a class="button" href="retrieval-architecture-canvas.html">Architecture canvas</a>
+          <a class="button" href="architecture-current.html">Current architecture</a>
         </div>
         <div class="quick-install" id="install" aria-label="Install commands">
           <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
@@ -593,6 +593,41 @@
 docsgraph init -y
 docsgraph sync --fake
 docsgraph install --client codex --yes --fake</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="section alt" id="working-tree" aria-labelledby="working-tree-title">
+      <div class="container">
+        <div class="section-head">
+          <h2 id="working-tree-title">Experimental features in 0.1.0a13.</h2>
+          <p>CLI and MCP share cached documentation tools. Explicit Markdown links
+            now support local reverse paths, cycle membership and deletion
+            reachability with source citations. These additions ship in the 0.1.0a13 alpha
+            and remain experimental.</p>
+          <p>The current regression suite passes 620 tests; independent original-source
+            checks cover all 42 target documents in two pinned public corpora.
+            Fourteen new real-Agent runs pass task and citation checks. Both
+            studies fail their predeclared cost gates; broad cost superiority
+            and commercial readiness remain unproven.</p>
+        </div>
+        <figure>
+          <a href="architecture-current.html">
+            <picture>
+              <source media="(prefers-color-scheme: dark)" srcset="assets/cairn-architecture-dark.svg">
+              <img src="assets/cairn-architecture-light.svg" width="1000" height="594"
+                style="max-width:100%;height:auto" loading="lazy"
+                alt="Experimental Cairn architecture: CLI and MCP share dispatch; queries read cached indexes, hybrid search calls a configured model, and index builders parse source documents.">
+            </picture>
+          </a>
+          <figcaption>Experimental 0.1.0a13 query and indexing paths. Cached
+            queries still require an existing index; initial build and storage
+            costs remain. Reference analysis does not establish semantic or code impact.</figcaption>
+        </figure>
+        <div class="hero-actions">
+          <a class="button" href="architecture-current.html">Explore architecture</a>
+          <a class="button" href="https://github.com/jokeuncle/cairn/blob/main/docs/research/README.md">Public experiment ledger</a>
+          <a class="button" href="retrieval-architecture-canvas.html">Conceptual background</a>
         </div>
       </div>
     </section>
@@ -720,14 +755,14 @@ Cairn doctor: ok</code></pre>
         <div class="section-head">
           <h2>Open source, agent ready.</h2>
           <p>
-            Start with the README, inspect the architecture canvas, or install
+            Start with the README, inspect the current architecture, or install
             from PyPI and point your agent at the repository.
           </p>
         </div>
         <div class="hero-actions">
           <a class="button primary" href="https://pypi.org/project/docsgraph/">Open PyPI</a>
           <a class="button" href="https://github.com/jokeuncle/cairn">Open GitHub</a>
-          <a class="button" href="repo-docs-workflow-canvas.html">Workflow canvas</a>
+          <a class="button" href="https://github.com/jokeuncle/cairn#repository-workflow">Repository workflow</a>
           <a class="button" href="https://github.com/jokeuncle/cairn/blob/main/docs/specs/mcp-tools.md">MCP spec source</a>
         </div>
       </div>

@@ -1,0 +1,430 @@
+{
+  "generated_at": "2026-10-25T09:16:58.752815+00:00",
+  "suite": "Cairn Architecture v0.2.2 (starter)",
+  "k": 8,
+  "summary": {
+    "cairn_mean_recall_at_k": 0.25,
+    "naive_mean_recall_at_k": 0.45,
+    "cairn_mean_tokens": 1362.3,
+    "naive_mean_tokens": 4374.0
+  },
+  "questions": [
+    {
+      "document_id": "architecture",
+      "question_id": "default-vector-store",
+      "question": "What is the default vector store and where in the architecture is it specified?",
+      "expected_anchors": [
+        "2-5-vectors-v-semantic-overlay",
+        "7-tech-stack-and-rationale"
+      ],
+      "tags": [
+        "definition",
+        "tech-stack"
+      ],
+      "cairn": {
+        "system": "cairn",
+        "section_ids": [
+          "cairn-technical-architecture/5-storage-layout",
+          "cairn-technical-architecture/2-layered-architecture/layer-2-index",
+          "cairn-technical-architecture/4-data-model",
+          "cairn-technical-architecture/2-layered-architecture/layer-3-retrieval-tools/3-3-progressive-disclosure-contract",
+          "cairn-technical-architecture/11-end-state-vs-phased-rollout/2026-10-24-reliability-amendments",
+          "cairn-technical-architecture/2-layered-architecture/layer-2-index/2-6-builder-pipeline",
+          "cairn-technical-architecture/11-end-state-vs-phased-rollout",
+          "cairn-technical-architecture/2-layered-architecture/layer-5-tooling-cli-inspector-extensions"
+        ],
+        "recall_at_k": 0.0,
+        "tokens_returned": 1323
+      },
+      "naive": {
+        "system": "naive",
+        "section_ids": [
+          "cairn-technical-architecture/3-plug-in-architecture",
+          "cairn-technical-architecture/2-layered-architecture/layer-3-retrieval-tools/3-3-progressive-disclosure-contract",
+          "cairn-technical-architecture/2-layered-architecture/invariants-across-all-layers",
+          "cairn-technical-architecture/8-non-functional-requirements/security",
+          "cairn-technical-architecture/2-layered-architecture/layer-2-index/2-4-cross-references-x-document-graph",
+          "cairn-technical-architecture/1-system-overview/1-2-target-v1-0-layered-model",
+          "cairn-technical-architecture/6-mcp-tool-reference-summary"
+        ],
+        "recall_at_k": 0.0,
+        "tokens_returned": 4374
+      }
+    },
+    {
+      "document_id": "architecture",
+      "question_id": "progressive-disclosure",
+      "question": "What is the progressive-disclosure contract and why is it non-negotiable?",
+      "expected_anchors": [
+        "3-3-progressive-disclosure-contract"
+      ],
+      "tags": [
+        "definition",
+        "policy"
+      ],
+      "cairn": {
+        "system": "cairn",
+        "section_ids": [
+          "cairn-technical-architecture/2-layered-architecture/layer-3-retrieval-tools/3-3-progressive-disclosure-contract",
+          "cairn-technical-architecture/5-storage-layout",
+          "cairn-technical-architecture/2-layered-architecture/layer-2-index/2-6-builder-pipeline",
+          "cairn-technical-architecture/2-layered-architecture/layer-2-index",
+          "cairn-technical-architecture/11-end-state-vs-phased-rollout/2026-10-24-reliability-amendments",
+          "cairn-technical-architecture/2-layered-architecture/layer-2-index/2-3-entities-e-term-and-concept-index",
+          "cairn-technical-architecture",
+          "cairn-technical-architecture/4-data-model"
+        ],
+        "recall_at_k": 1.0,
+        "tokens_returned": 1345
+      },
+      "naive": {
+        "system": "naive",
+        "section_ids": [
+          "cairn-technical-architecture/3-plug-in-architecture",
+          "cairn-technical-architecture/2-layered-architecture/layer-3-retrieval-tools/3-3-progressive-disclosure-contract",
+          "cairn-technical-architecture/2-layered-architecture/invariants-across-all-layers",
+          "cairn-technical-architecture/8-non-functional-requirements/security",
+          "cairn-technical-architecture/2-layered-architecture/layer-2-index/2-4-cross-references-x-document-graph",
+          "cairn-technical-architecture/1-system-overview/1-2-target-v1-0-layered-model",
+          "cairn-technical-architecture/6-mcp-tool-reference-summary"
+        ],
+        "recall_at_k": 1.0,
+        "tokens_returned": 4374
+      }
+    },
+    {
+      "document_id": "architecture",
+      "question_id": "cross-ref-kinds",
+      "question": "What three kinds of cross-references does Cairn detect?",
+      "expected_anchors": [
+        "2-4-cross-references-x-document-graph"
+      ],
+      "tags": [
+        "structural",
+        "definition"
+      ],
+      "cairn": {
+        "system": "cairn",
+        "section_ids": [
+          "cairn-technical-architecture/2-layered-architecture/layer-3-retrieval-tools/3-3-progressive-disclosure-contract",
+          "cairn-technical-architecture/2-layered-architecture/layer-3-retrieval-tools/3-2-detailed-schemas",
+          "cairn-technical-architecture/11-end-state-vs-phased-rollout/2026-10-24-reliability-amendments",
+          "cairn-technical-architecture/2-layered-architecture/layer-5-tooling-cli-inspector-extensions",
+          "cairn-technical-architecture/11-end-state-vs-phased-rollout",
+          "cairn-technical-architecture/2-layered-architecture/layer-2-index/2-4-cross-references-x-document-graph",
+          "cairn-technical-architecture/2-layered-architecture/invariants-across-all-layers",
+          "cairn-technical-architecture/2-layered-architecture/layer-2-index/2-6-builder-pipeline"
+        ],
+        "recall_at_k": 1.0,
+        "tokens_returned": 1367
+      },
+      "naive": {
+        "system": "naive",
+        "section_ids": [
+          "cairn-technical-architecture/2-layered-architecture/layer-3-retrieval-tools/3-3-progressive-disclosure-contract",
+          "cairn-technical-architecture/8-non-functional-requirements/security",
+          "cairn-technical-architecture/2-layered-architecture/layer-2-index/2-4-cross-references-x-document-graph",
+          "cairn-technical-architecture/1-system-overview/1-2-target-v1-0-layered-model",
+          "cairn-technical-architecture/2-layered-architecture/invariants-across-all-layers",
+          "cairn-technical-architecture/3-plug-in-architecture",
+          "cairn-technical-architecture/6-mcp-tool-reference-summary"
+        ],
+        "recall_at_k": 1.0,
+        "tokens_returned": 4374
+      }
+    },
+    {
+      "document_id": "architecture",
+      "question_id": "storage-layout",
+      "question": "How is a built document persisted on disk?",
+      "expected_anchors": [
+        "5-storage-layout"
+      ],
+      "tags": [
+        "storage"
+      ],
+      "cairn": {
+        "system": "cairn",
+        "section_ids": [
+          "cairn-technical-architecture/2-layered-architecture/layer-2-index/2-3-entities-e-term-and-concept-index",
+          "cairn-technical-architecture/8-non-functional-requirements/reliability",
+          "cairn-technical-architecture/2-layered-architecture/layer-2-index/2-6-builder-pipeline",
+          "cairn-technical-architecture/2-layered-architecture/layer-3-retrieval-tools/3-3-progressive-disclosure-contract",
+          "cairn-technical-architecture/2-layered-architecture/invariants-across-all-layers",
+          "cairn-technical-architecture/8-non-functional-requirements/security",
+          "cairn-technical-architecture/2-layered-architecture/layer-5-tooling-cli-inspector-extensions",
+          "cairn-technical-architecture/11-end-state-vs-phased-rollout/2026-10-24-reliability-amendments"
+        ],
+        "recall_at_k": 0.0,
+        "tokens_returned": 1465
+      },
+      "naive": {
+        "system": "naive",
+        "section_ids": [
+          "cairn-technical-architecture/2-layered-architecture/layer-3-retrieval-tools/3-3-progressive-disclosure-contract",
+          "cairn-technical-architecture/2-layered-architecture/invariants-across-all-layers",
+          "cairn-technical-architecture/8-non-functional-requirements/security",
+          "cairn-technical-architecture/3-plug-in-architecture",
+          "cairn-technical-architecture/2-layered-architecture/layer-2-index/2-4-cross-references-x-document-graph",
+          "cairn-technical-architecture/6-mcp-tool-reference-summary",
+          "cairn-technical-architecture/1-system-overview/1-2-target-v1-0-layered-model"
+        ],
+        "recall_at_k": 0.0,
+        "tokens_returned": 4374
+      }
+    },
+    {
+      "document_id": "architecture",
+      "question_id": "entity-kinds",
+      "question": "What entity kinds does the index support and what extractor produces each?",
+      "expected_anchors": [
+        "2-3-entities-e-term-and-concept-index",
+        "3-plug-in-architecture"
+      ],
+      "tags": [
+        "definition",
+        "multi-hop"
+      ],
+      "cairn": {
+        "system": "cairn",
+        "section_ids": [
+          "cairn-technical-architecture/2-layered-architecture/layer-5-tooling-cli-inspector-extensions",
+          "cairn-technical-architecture/2-layered-architecture/layer-2-index/2-4-cross-references-x-document-graph",
+          "cairn-technical-architecture/4-data-model",
+          "cairn-technical-architecture/1-system-overview/1-1-alpha-0-1-0a13-experimental-query-path",
+          "cairn-technical-architecture/2-layered-architecture/layer-3-retrieval-tools/3-3-progressive-disclosure-contract",
+          "cairn-technical-architecture/11-end-state-vs-phased-rollout/2026-10-24-reliability-amendments",
+          "cairn-technical-architecture/2-layered-architecture/layer-2-index",
+          "cairn-technical-architecture/2-layered-architecture/layer-1-ingestion"
+        ],
+        "recall_at_k": 0.0,
+        "tokens_returned": 1324
+      },
+      "naive": {
+        "system": "naive",
+        "section_ids": [
+          "cairn-technical-architecture/2-layered-architecture/layer-3-retrieval-tools/3-3-progressive-disclosure-contract",
+          "cairn-technical-architecture/2-layered-architecture/invariants-across-all-layers",
+          "cairn-technical-architecture/3-plug-in-architecture",
+          "cairn-technical-architecture/8-non-functional-requirements/security",
+          "cairn-technical-architecture/2-layered-architecture/layer-2-index/2-4-cross-references-x-document-graph",
+          "cairn-technical-architecture/1-system-overview/1-2-target-v1-0-layered-model",
+          "cairn-technical-architecture/6-mcp-tool-reference-summary"
+        ],
+        "recall_at_k": 0.5,
+        "tokens_returned": 4374
+      }
+    },
+    {
+      "document_id": "architecture",
+      "question_id": "layer-dependencies",
+      "question": "What is the dependency rule between architectural layers?",
+      "expected_anchors": [
+        "invariants-across-all-layers"
+      ],
+      "tags": [
+        "policy",
+        "structural"
+      ],
+      "cairn": {
+        "system": "cairn",
+        "section_ids": [
+          "cairn-technical-architecture/4-data-model",
+          "cairn-technical-architecture/5-storage-layout",
+          "cairn-technical-architecture/2-layered-architecture/layer-5-tooling-cli-inspector-extensions",
+          "cairn-technical-architecture/2-layered-architecture/layer-2-index/2-4-cross-references-x-document-graph",
+          "cairn-technical-architecture/8-non-functional-requirements/security",
+          "cairn-technical-architecture/11-end-state-vs-phased-rollout/2026-10-24-reliability-amendments",
+          "cairn-technical-architecture/2-layered-architecture/layer-2-index/2-2-summaries-s-multi-granularity-views",
+          "cairn-technical-architecture/11-end-state-vs-phased-rollout"
+        ],
+        "recall_at_k": 0.0,
+        "tokens_returned": 1466
+      },
+      "naive": {
+        "system": "naive",
+        "section_ids": [
+          "cairn-technical-architecture/3-plug-in-architecture",
+          "cairn-technical-architecture/2-layered-architecture/layer-3-retrieval-tools/3-3-progressive-disclosure-contract",
+          "cairn-technical-architecture/2-layered-architecture/invariants-across-all-layers",
+          "cairn-technical-architecture/8-non-functional-requirements/security",
+          "cairn-technical-architecture/2-layered-architecture/layer-2-index/2-4-cross-references-x-document-graph",
+          "cairn-technical-architecture/1-system-overview/1-2-target-v1-0-layered-model",
+          "cairn-technical-architecture/6-mcp-tool-reference-summary"
+        ],
+        "recall_at_k": 1.0,
+        "tokens_returned": 4374
+      }
+    },
+    {
+      "document_id": "architecture",
+      "question_id": "section-node-fields",
+      "question": "What fields does a SectionNode carry and what do span and raw_text mean?",
+      "expected_anchors": [
+        "4-data-model",
+        "2-1-tree-t-structural-backbone"
+      ],
+      "tags": [
+        "data-model",
+        "multi-hop"
+      ],
+      "cairn": {
+        "system": "cairn",
+        "section_ids": [
+          "cairn-technical-architecture/2-layered-architecture/layer-5-tooling-cli-inspector-extensions",
+          "cairn-technical-architecture/2-layered-architecture/layer-3-retrieval-tools/3-3-progressive-disclosure-contract",
+          "cairn-technical-architecture/2-layered-architecture",
+          "cairn-technical-architecture/11-end-state-vs-phased-rollout/2026-10-24-reliability-amendments",
+          "cairn-technical-architecture/3-plug-in-architecture",
+          "cairn-technical-architecture/2-layered-architecture/layer-3-retrieval-tools/3-1-tool-catalog",
+          "cairn-technical-architecture",
+          "cairn-technical-architecture/1-system-overview/1-1-alpha-0-1-0a13-experimental-query-path"
+        ],
+        "recall_at_k": 0.0,
+        "tokens_returned": 1296
+      },
+      "naive": {
+        "system": "naive",
+        "section_ids": [
+          "cairn-technical-architecture/2-layered-architecture/layer-3-retrieval-tools/3-3-progressive-disclosure-contract",
+          "cairn-technical-architecture/8-non-functional-requirements/security",
+          "cairn-technical-architecture/2-layered-architecture/layer-2-index/2-4-cross-references-x-document-graph",
+          "cairn-technical-architecture/6-mcp-tool-reference-summary",
+          "cairn-technical-architecture/2-layered-architecture/invariants-across-all-layers",
+          "cairn-technical-architecture/3-plug-in-architecture",
+          "cairn-technical-architecture/1-system-overview/1-2-target-v1-0-layered-model"
+        ],
+        "recall_at_k": 0.0,
+        "tokens_returned": 4374
+      }
+    },
+    {
+      "document_id": "architecture",
+      "question_id": "perf-budget",
+      "question": "What are the v1.0 indexing throughput and query latency targets?",
+      "expected_anchors": [
+        "performance-budgets",
+        "8-non-functional-requirements"
+      ],
+      "tags": [
+        "non-functional",
+        "performance"
+      ],
+      "cairn": {
+        "system": "cairn",
+        "section_ids": [
+          "cairn-technical-architecture/2-layered-architecture/layer-4-mcp-server",
+          "cairn-technical-architecture/9-extensibility-boundaries",
+          "cairn-technical-architecture/1-system-overview/1-1-alpha-0-1-0a13-experimental-query-path",
+          "cairn-technical-architecture/2-layered-architecture/layer-2-index/2-1-tree-t-structural-backbone",
+          "cairn-technical-architecture/2-layered-architecture/layer-2-index/2-4-cross-references-x-document-graph",
+          "cairn-technical-architecture/2-layered-architecture/layer-3-retrieval-tools/3-3-progressive-disclosure-contract",
+          "cairn-technical-architecture/2-layered-architecture/layer-2-index/2-6-builder-pipeline",
+          "cairn-technical-architecture/8-non-functional-requirements/reliability"
+        ],
+        "recall_at_k": 0.5,
+        "tokens_returned": 1393
+      },
+      "naive": {
+        "system": "naive",
+        "section_ids": [
+          "cairn-technical-architecture/2-layered-architecture/layer-3-retrieval-tools/3-3-progressive-disclosure-contract",
+          "cairn-technical-architecture/2-layered-architecture/invariants-across-all-layers",
+          "cairn-technical-architecture/8-non-functional-requirements/security",
+          "cairn-technical-architecture/3-plug-in-architecture",
+          "cairn-technical-architecture/2-layered-architecture/layer-2-index/2-4-cross-references-x-document-graph",
+          "cairn-technical-architecture/6-mcp-tool-reference-summary",
+          "cairn-technical-architecture/1-system-overview/1-2-target-v1-0-layered-model"
+        ],
+        "recall_at_k": 0.5,
+        "tokens_returned": 4374
+      }
+    },
+    {
+      "document_id": "architecture",
+      "question_id": "anti-stack",
+      "question": "What dependencies are explicitly forbidden in the core path?",
+      "expected_anchors": [
+        "7-tech-stack-and-rationale"
+      ],
+      "tags": [
+        "anti-pattern",
+        "policy"
+      ],
+      "cairn": {
+        "system": "cairn",
+        "section_ids": [
+          "cairn-technical-architecture/2-layered-architecture/layer-2-index/2-4-cross-references-x-document-graph",
+          "cairn-technical-architecture/4-data-model",
+          "cairn-technical-architecture/1-system-overview/1-1-alpha-0-1-0a13-experimental-query-path",
+          "cairn-technical-architecture/2-layered-architecture/layer-3-retrieval-tools/3-2-detailed-schemas",
+          "cairn-technical-architecture/2-layered-architecture/layer-5-tooling-cli-inspector-extensions",
+          "cairn-technical-architecture/2-layered-architecture/layer-2-index/2-2-summaries-s-multi-granularity-views",
+          "cairn-technical-architecture/11-end-state-vs-phased-rollout/2026-10-24-reliability-amendments",
+          "cairn-technical-architecture/8-non-functional-requirements/security"
+        ],
+        "recall_at_k": 0.0,
+        "tokens_returned": 1352
+      },
+      "naive": {
+        "system": "naive",
+        "section_ids": [
+          "cairn-technical-architecture/3-plug-in-architecture",
+          "cairn-technical-architecture/2-layered-architecture/invariants-across-all-layers",
+          "cairn-technical-architecture/2-layered-architecture/layer-3-retrieval-tools/3-3-progressive-disclosure-contract",
+          "cairn-technical-architecture/8-non-functional-requirements/security",
+          "cairn-technical-architecture/1-system-overview/1-2-target-v1-0-layered-model",
+          "cairn-technical-architecture/2-layered-architecture/layer-2-index/2-4-cross-references-x-document-graph",
+          "cairn-technical-architecture/6-mcp-tool-reference-summary"
+        ],
+        "recall_at_k": 0.0,
+        "tokens_returned": 4374
+      }
+    },
+    {
+      "document_id": "architecture",
+      "question_id": "pluggable-interfaces",
+      "question": "Which interfaces in Cairn are pluggable and which are frozen?",
+      "expected_anchors": [
+        "3-plug-in-architecture",
+        "9-extensibility-boundaries"
+      ],
+      "tags": [
+        "extensibility",
+        "multi-hop"
+      ],
+      "cairn": {
+        "system": "cairn",
+        "section_ids": [
+          "cairn-technical-architecture/1-system-overview/1-1-alpha-0-1-0a13-experimental-query-path",
+          "cairn-technical-architecture/2-layered-architecture/layer-5-tooling-cli-inspector-extensions",
+          "cairn-technical-architecture/2-layered-architecture/layer-2-index/2-4-cross-references-x-document-graph",
+          "cairn-technical-architecture/2-layered-architecture/layer-3-retrieval-tools",
+          "cairn-technical-architecture/2-layered-architecture/layer-3-retrieval-tools/3-3-progressive-disclosure-contract",
+          "cairn-technical-architecture/4-data-model",
+          "cairn-technical-architecture/11-end-state-vs-phased-rollout/2026-10-24-reliability-amendments",
+          "cairn-technical-architecture/2-layered-architecture/layer-2-index"
+        ],
+        "recall_at_k": 0.0,
+        "tokens_returned": 1292
+      },
+      "naive": {
+        "system": "naive",
+        "section_ids": [
+          "cairn-technical-architecture/2-layered-architecture/layer-3-retrieval-tools/3-3-progressive-disclosure-contract",
+          "cairn-technical-architecture/2-layered-architecture/invariants-across-all-layers",
+          "cairn-technical-architecture/1-system-overview/1-2-target-v1-0-layered-model",
+          "cairn-technical-architecture/3-plug-in-architecture",
+          "cairn-technical-architecture/8-non-functional-requirements/security",
+          "cairn-technical-architecture/2-layered-architecture/layer-2-index/2-4-cross-references-x-document-graph",
+          "cairn-technical-architecture/6-mcp-tool-reference-summary"
+        ],
+        "recall_at_k": 0.5,
+        "tokens_returned": 4374
+      }
+    }
+  ],
+  "release": "0.1.0a13",
+  "source_sha256": "b5fc4d04a031b7191e511d84d7b0e511912130126ed73bd755fe8f90b7a00426",
+  "classification": "Legacy architecture fake-provider fixture; lower Cairn recall; not Agent savings or heldout quality."
+}

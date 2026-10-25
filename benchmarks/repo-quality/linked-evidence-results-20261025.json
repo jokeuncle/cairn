@@ -1,0 +1,1232 @@
+{
+  "runs": [
+    {
+      "case_id": "closed-svc004",
+      "arm": "cairn",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 35.51683004200095,
+      "tool_invocations": 4,
+      "usage_events": [
+        {
+          "input_tokens": 151146,
+          "cached_input_tokens": 130944,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 1518,
+          "reasoning_output_tokens": 83
+        }
+      ],
+      "input_tokens": 151146,
+      "cached_input_tokens": 130944,
+      "output_tokens": 1518,
+      "final_answer_exists": true,
+      "review": {
+        "objects": 1,
+        "fields_match": true,
+        "manual_citation_and_derivation_review_required": true,
+        "citation_support": [
+          {
+            "id": "manual/authority",
+            "source_line_interval": [
+              5,
+              15
+            ],
+            "direct_anchor": true,
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/active-services/svc004",
+            "source_line_interval": [
+              62,
+              74
+            ],
+            "direct_anchor": true,
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/profiles/profile-p011",
+            "source_line_interval": [
+              540,
+              551
+            ],
+            "direct_anchor": true,
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/regions/region-r011",
+            "source_line_interval": [
+              825,
+              835
+            ],
+            "direct_anchor": true,
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/leases/lease-l004",
+            "source_line_interval": [
+              881,
+              889
+            ],
+            "direct_anchor": true,
+            "local_line_in_section": false
+          }
+        ],
+        "manual_review": {
+          "all_five_supporting_sources_cited": true,
+          "derivation_and_active_scope_match_original_source": true,
+          "evidence_access_within_protocol": true
+        },
+        "source_tool_calls": [
+          {
+            "tool": "repo_context",
+            "arguments": {
+              "query": "svc004 current-omega deployment settings authority",
+              "queries": [
+                "svc004 service alias current-omega deployment settings",
+                "authority rules active records overrides safety caps non-normative examples"
+              ],
+              "level": "evidence",
+              "k": 7,
+              "max_context_chars": 18000,
+              "max_section_chars": 7000
+            },
+            "returned_section_ids": [
+              "manual/active-services/svc004",
+              "manual/authority",
+              "manual/profiles/profile-p011",
+              "manual/regions/region-r011",
+              "manual/leases/lease-l004"
+            ],
+            "returned_source_characters": 1555,
+            "unexpanded_links": []
+          }
+        ],
+        "answer_sha256": "845f34909c62a2993e67aa5e34ea08895cffd2a57e73f629be5162aeb882d066",
+        "complete_task_accepted": true
+      },
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/link-book/closed-svc004-cairn"
+    },
+    {
+      "case_id": "closed-svc004",
+      "arm": "raw",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 40.80663495799672,
+      "tool_invocations": 5,
+      "usage_events": [
+        {
+          "input_tokens": 174782,
+          "cached_input_tokens": 133376,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 1886,
+          "reasoning_output_tokens": 98
+        }
+      ],
+      "input_tokens": 174782,
+      "cached_input_tokens": 133376,
+      "output_tokens": 1886,
+      "final_answer_exists": true,
+      "review": {
+        "objects": 1,
+        "fields_match": true,
+        "manual_citation_and_derivation_review_required": true,
+        "citation_support": [
+          {
+            "id": "manual/authority",
+            "source_line_interval": [
+              5,
+              15
+            ],
+            "direct_anchor": true,
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/active-services/svc004",
+            "source_line_interval": [
+              62,
+              74
+            ],
+            "direct_anchor": true,
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/profiles/profile-p011",
+            "source_line_interval": [
+              540,
+              551
+            ],
+            "direct_anchor": true,
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/regions/region-r011",
+            "source_line_interval": [
+              825,
+              835
+            ],
+            "direct_anchor": true,
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/leases/lease-l004",
+            "source_line_interval": [
+              881,
+              889
+            ],
+            "direct_anchor": true,
+            "local_line_in_section": false
+          }
+        ],
+        "manual_review": {
+          "all_five_supporting_sources_cited": true,
+          "derivation_and_active_scope_match_original_source": true,
+          "evidence_access_within_protocol": true
+        },
+        "source_tool_calls": [],
+        "answer_sha256": "89be72dde5856962bc1fe9fb8110df815bfa3dbf74c9bb1e4216f9c3760f493a",
+        "complete_task_accepted": true
+      },
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/link-book/closed-svc004-raw"
+    },
+    {
+      "case_id": "closed-svc008",
+      "arm": "cairn",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 43.47030191700105,
+      "tool_invocations": 4,
+      "usage_events": [
+        {
+          "input_tokens": 177351,
+          "cached_input_tokens": 158592,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 1819,
+          "reasoning_output_tokens": 158
+        }
+      ],
+      "input_tokens": 177351,
+      "cached_input_tokens": 158592,
+      "output_tokens": 1819,
+      "final_answer_exists": true,
+      "review": {
+        "objects": 1,
+        "fields_match": true,
+        "manual_citation_and_derivation_review_required": true,
+        "citation_support": [
+          {
+            "id": "manual/authority",
+            "source_line_interval": [
+              5,
+              15
+            ],
+            "direct_anchor": true,
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/active-services/svc008",
+            "source_line_interval": [
+              114,
+              126
+            ],
+            "direct_anchor": true,
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/profiles/profile-p016",
+            "source_line_interval": [
+              600,
+              611
+            ],
+            "direct_anchor": true,
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/regions/region-r007",
+            "source_line_interval": [
+              781,
+              791
+            ],
+            "direct_anchor": true,
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/leases/lease-l001",
+            "source_line_interval": [
+              854,
+              862
+            ],
+            "direct_anchor": true,
+            "local_line_in_section": false
+          }
+        ],
+        "manual_review": {
+          "all_five_supporting_sources_cited": true,
+          "derivation_and_active_scope_match_original_source": true,
+          "evidence_access_within_protocol": true
+        },
+        "source_tool_calls": [
+          {
+            "tool": "repo_context",
+            "arguments": {
+              "query": "svc008 effective current-omega deployment settings authority",
+              "queries": [
+                "svc008 service alias current-omega settings",
+                "authority rules active records overrides safety caps current-omega"
+              ],
+              "level": "evidence",
+              "k": 6,
+              "max_context_chars": 24000,
+              "max_section_chars": 6500
+            },
+            "returned_section_ids": [
+              "manual/active-services/svc008",
+              "manual/authority",
+              "manual/profiles/profile-p016",
+              "manual/regions/region-r007",
+              "manual/leases/lease-l001"
+            ],
+            "returned_source_characters": 1537,
+            "unexpanded_links": []
+          }
+        ],
+        "answer_sha256": "9dd2ad6b3b9dfe699ad57033ceea0b6f805b388c8ada27c74de84b0e9c9f9131",
+        "complete_task_accepted": true
+      },
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/link-book/closed-svc008-cairn"
+    },
+    {
+      "case_id": "closed-svc008",
+      "arm": "raw",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 46.19761716699941,
+      "tool_invocations": 5,
+      "usage_events": [
+        {
+          "input_tokens": 146171,
+          "cached_input_tokens": 125440,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 1981,
+          "reasoning_output_tokens": 223
+        }
+      ],
+      "input_tokens": 146171,
+      "cached_input_tokens": 125440,
+      "output_tokens": 1981,
+      "final_answer_exists": true,
+      "review": {
+        "objects": 1,
+        "fields_match": true,
+        "manual_citation_and_derivation_review_required": true,
+        "citation_support": [
+          {
+            "id": "manual/authority",
+            "source_line_interval": [
+              5,
+              15
+            ],
+            "direct_anchor": true,
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/active-services/svc008",
+            "source_line_interval": [
+              114,
+              126
+            ],
+            "direct_anchor": true,
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/profiles/profile-p016",
+            "source_line_interval": [
+              600,
+              611
+            ],
+            "direct_anchor": true,
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/regions/region-r007",
+            "source_line_interval": [
+              781,
+              791
+            ],
+            "direct_anchor": true,
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/leases/lease-l001",
+            "source_line_interval": [
+              854,
+              862
+            ],
+            "direct_anchor": true,
+            "local_line_in_section": false
+          }
+        ],
+        "manual_review": {
+          "all_five_supporting_sources_cited": true,
+          "derivation_and_active_scope_match_original_source": true,
+          "evidence_access_within_protocol": true
+        },
+        "source_tool_calls": [],
+        "answer_sha256": "e34a63ae601ff4e110affd6d593419c329fc2488a261b016c2eedabec329b9d3",
+        "complete_task_accepted": true
+      },
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/link-book/closed-svc008-raw"
+    },
+    {
+      "case_id": "closed-svc028",
+      "arm": "cairn",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 40.514504791000945,
+      "tool_invocations": 4,
+      "usage_events": [
+        {
+          "input_tokens": 183665,
+          "cached_input_tokens": 163328,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 1595,
+          "reasoning_output_tokens": 144
+        }
+      ],
+      "input_tokens": 183665,
+      "cached_input_tokens": 163328,
+      "output_tokens": 1595,
+      "final_answer_exists": true,
+      "review": {
+        "objects": 1,
+        "fields_match": true,
+        "manual_citation_and_derivation_review_required": true,
+        "citation_support": [
+          {
+            "id": "manual/authority",
+            "source_line_interval": [
+              5,
+              15
+            ],
+            "direct_anchor": true,
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/active-services/svc028",
+            "source_line_interval": [
+              374,
+              386
+            ],
+            "direct_anchor": true,
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/profiles/profile-p010",
+            "source_line_interval": [
+              528,
+              539
+            ],
+            "direct_anchor": true,
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/regions/region-r004",
+            "source_line_interval": [
+              748,
+              758
+            ],
+            "direct_anchor": true,
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/leases/lease-l006",
+            "source_line_interval": [
+              899,
+              907
+            ],
+            "direct_anchor": true,
+            "local_line_in_section": false
+          }
+        ],
+        "manual_review": {
+          "all_five_supporting_sources_cited": true,
+          "derivation_and_active_scope_match_original_source": true,
+          "evidence_access_within_protocol": true
+        },
+        "source_tool_calls": [
+          {
+            "tool": "repo_context",
+            "arguments": {
+              "query": "svc028 current-omega deployment settings authority",
+              "queries": [
+                "svc028 service alias current-omega",
+                "authority rules active records overrides safety caps"
+              ],
+              "level": "evidence",
+              "k": 6,
+              "max_context_chars": 18000,
+              "max_section_chars": 7000
+            },
+            "returned_section_ids": [
+              "manual/active-services/svc028",
+              "manual/authority",
+              "manual/profiles/profile-p010",
+              "manual/regions/region-r004",
+              "manual/leases/lease-l006"
+            ],
+            "returned_source_characters": 1537,
+            "unexpanded_links": []
+          }
+        ],
+        "answer_sha256": "33f831b208265b01210677b27551c0e9dc1e33fff29d19852312e2f3a1df85c5",
+        "complete_task_accepted": true
+      },
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/link-book/closed-svc028-cairn"
+    },
+    {
+      "case_id": "closed-svc028",
+      "arm": "raw",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 43.57667366700116,
+      "tool_invocations": 5,
+      "usage_events": [
+        {
+          "input_tokens": 149873,
+          "cached_input_tokens": 119936,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 1871,
+          "reasoning_output_tokens": 129
+        }
+      ],
+      "input_tokens": 149873,
+      "cached_input_tokens": 119936,
+      "output_tokens": 1871,
+      "final_answer_exists": true,
+      "review": {
+        "objects": 1,
+        "fields_match": true,
+        "manual_citation_and_derivation_review_required": true,
+        "citation_support": [
+          {
+            "id": "manual/authority",
+            "source_line_interval": [
+              5,
+              15
+            ],
+            "direct_anchor": true,
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/active-services/svc028",
+            "source_line_interval": [
+              374,
+              386
+            ],
+            "direct_anchor": true,
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/profiles/profile-p010",
+            "source_line_interval": [
+              528,
+              539
+            ],
+            "direct_anchor": true,
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/regions/region-r004",
+            "source_line_interval": [
+              748,
+              758
+            ],
+            "direct_anchor": true,
+            "local_line_in_section": false
+          },
+          {
+            "id": "manual/leases/lease-l006",
+            "source_line_interval": [
+              899,
+              907
+            ],
+            "direct_anchor": true,
+            "local_line_in_section": false
+          }
+        ],
+        "manual_review": {
+          "all_five_supporting_sources_cited": true,
+          "derivation_and_active_scope_match_original_source": true,
+          "evidence_access_within_protocol": true
+        },
+        "source_tool_calls": [],
+        "answer_sha256": "09bb28f9f17aafc5910fe560524f9f7e2e857e12f1cab684eb8a2ea2add5b6a3",
+        "complete_task_accepted": true
+      },
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/link-book/closed-svc028-raw"
+    }
+  ],
+  "aggregates": [
+    {
+      "arm": "cairn",
+      "accepted": 3,
+      "tasks": 3,
+      "input_tokens": 512162,
+      "cached_input_tokens": 452864,
+      "output_tokens": 4932,
+      "tool_invocations": 12,
+      "seconds": 119.50163675000294,
+      "uncached_input_tokens": 59298
+    },
+    {
+      "arm": "raw",
+      "accepted": 3,
+      "tasks": 3,
+      "input_tokens": 470826,
+      "cached_input_tokens": 378752,
+      "output_tokens": 5738,
+      "tool_invocations": 15,
+      "seconds": 130.5809257919973,
+      "uncached_input_tokens": 92074
+    }
+  ],
+  "scope": "External one-hop linked evidence prototype, same synthetic manual, new aliases, real Codex sessions. Not a released feature or commercial/generalization proof.",
+  "protocol": {
+    "model": "gpt-6.1-sol",
+    "reasoning_effort": "high (matches existing user configuration)",
+    "runtime": "codex-cli 0.164.0, ephemeral fresh sessions, existing ChatGPT auth; no API-key copying",
+    "scope": "Separate one-hop linked original evidence spike; three new aliases in SAME known synthetic manual x Cairn/raw, not held-out domains",
+    "arms": [
+      "cairn",
+      "raw source files + rg"
+    ],
+    "tool_budget": 24,
+    "per_session_wall_time_limit_seconds": 900,
+    "final_output_request": "<=1800 tokens (prompt limit, not a decoder setting)",
+    "source_version": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/parity-20261025/link-spike/src",
+    "coding_tools": "same read-only shell, local Python tests allowed, no network requests or source edits",
+    "source_evidence": "MCP only for Cairn/BM25; curated copied docs and rg for raw arm",
+    "known_cases": "Aliases svc004,svc028,svc008 sampled with seed20261026 excluding prior three; same known manual, all maintenance=false; not independent generalization. No task-specific constants in product.",
+    "usage": "CLI turn.completed totals, including cached_input_tokens and output_tokens; not dollar billing or cross-model comparable token counts",
+    "round": "One-hop source-link spike; prior six failed-parity sessions remain separate",
+    "changes": [
+      "Evidence-only one-hop explicit fragment links, whole fitting original bodies; section/global/k caps retained",
+      "Unspecified evidence document cap=min(k,8), explicit cap obeyed",
+      "Small instruction sentence describing one-hop scope; same tool schemas and tools",
+      "No core source edits, prototype remains external"
+    ],
+    "attempt_selection": "One valid attempt for each pair; retain all old and new runs, including failures.",
+    "runner_sha256": "c7da9bbb2d155ca70d62f7c25470fd1fc837514f2143b6919b53ab26be188af3",
+    "cases_sha256": "84b48775dcd0d0642d151bf301840042fd92f5e8589e8ae9785a1c9b07f0f44f",
+    "acceptance": "Independent executable grader + manual source/requirements review. All valid failures preserved.",
+    "parity_gate": "Same task acceptance; compare cumulative total input I, uncached input U and output O. Componentwise no increase supports token-cost parity for nonnegative output prices and 0<=cached<=uncached input price. Indexing/latency still separate; single runs cannot prove stability.",
+    "escalation": "All six attempts retained; no source/protocol tuning after answers. One attempt per pair; compare facts/derivation/citations and I/U/O before considering adoption.",
+    "summary_provider": "deterministic extractive source words; controlled to isolate retrieval; not the original LLM summary setup",
+    "source_freeze": {
+      "seed": 20261025,
+      "source_utf8_bytes": 2294586,
+      "source_words": 290987,
+      "cases": 3,
+      "source_sha256": "3b2f575ce1ecac95327187b11b1ed099d3d695e1bc79c377940f4bcf2f1747ac",
+      "oracle_sha256": "5cecdeb171553e842d4ea9af4d7dec76e41ef1d54046ad266de575abbd722bd9",
+      "limitations": "Controlled synthetic manual, repetitive distractors, not real customer evidence or a generalization/commercial proof. All source values fixed before first run; no oracle enters index or agent prompts."
+    },
+    "indexing": {
+      "seconds": 72.25909429199965,
+      "index_bytes": 6999378,
+      "source_bytes": 2294586,
+      "documents": [
+        {
+          "id": "docs-manual",
+          "state": "indexed",
+          "sections": 912
+        }
+      ],
+      "embedding": "real local nomic 768d, document/query prefixes, windowed1500",
+      "summary_provider": "deterministic extractive source words; no LLM answer/synthetic oracle used in summaries",
+      "serialization_recovery": "Index built successfully; initial log serialization wrongly expected model_dump on sync_repo tuple. Verified persisted indexed state without rebuilding."
+    },
+    "alias_selection_seed": 20261026
+  },
+  "source_sha256": {
+    "cairn/__init__.py": "4975a3e97aad175b1155206322ba4ed3f1418f948db57a867bfa8b747b296b80",
+    "cairn/agent_guidance.py": "ed396110c729b0c1ea2ace722fa391f00fe750d867f6819b4ea4a28d63cec51e",
+    "cairn/bench/__init__.py": "6eefb5df8d97dbcbba95c13cff3a77fb5ebda4154ab086a06623062375acd9b1",
+    "cairn/bench/baseline.py": "102f0ecf42fcf2b83c3c253d731338b40523a9ad8cb32262a97ebdfaf4730b98",
+    "cairn/bench/dataset.py": "bc7f147940dedc8f03b16d78c04e25ded591e5358ac482118ffc5a876e9bf08f",
+    "cairn/bench/judge.py": "0dce5bb0ed842449814919b6bd38f8a33d56976bc435a79a9a2962ff3a074d6c",
+    "cairn/bench/metrics.py": "9cebcee11b5b8e9e2eb40435fe5941eff81efa31038ab7b662f2bfda47edb8a5",
+    "cairn/bench/report.py": "c2fbc8890891db7c861c26c7af017532e98b20d13dbf6955f69e5445f62727b6",
+    "cairn/bench/runner.py": "0a44ba791dde41024ee889321fa01cd4bd4db624c6a5adcf6d67c0b49daa0925",
+    "cairn/cli/__init__.py": "12167b938c079bed1dc70fe8e9bdb444f1a3b9bc9075c64737ac8d6121ae0767",
+    "cairn/cli/app.py": "ce12c66976350b82c0c7472618455b264eb6ee19a0f8ff61ac490bac3bc7466f",
+    "cairn/cli/config.py": "e835a4bda78f7f71b3ead748fcfd99003665cae10bc069a74f6aaa2aff82349d",
+    "cairn/client/__init__.py": "d844deb2886bdf7495c47ccc8c7417867f3b65b28c4f2bd1ad299bf4bf177bf6",
+    "cairn/client/server.py": "ded430660f9ee5ced05f3a3ec3665456bd58a409ae6beedbf1cd8e2acd7fbb4d",
+    "cairn/client/static/__init__.py": "0f90031cf0900f6ad827cd9823928f23574f5b941bd79cc5ba8f0731535ba785",
+    "cairn/core/__init__.py": "55b20f63537926c009e0dd4fd57e1de6cb3f87d289a0ac47a177305badf9d1b8",
+    "cairn/core/config.py": "0988f686b585bb266207c0cd976741e4d3ceae0fbb68a31095cee91cf7ef74fc",
+    "cairn/core/errors.py": "a05de597f07140b65d6e2aa17ddb6766e9c76a89434bab2a99285659aadb4613",
+    "cairn/core/types.py": "925db60bd1139d5cb4eb4dae401edc9b8481caed52f0897db1cd433e30947e83",
+    "cairn/embed/__init__.py": "39c5945e10f3beb9144cb81d6b693ae7a9103a7c90c0e6f8d74e379d030a2158",
+    "cairn/embed/base.py": "f05b76deb60d038beea75bb207dabaf4d3ced9fe2479f18f91b109f1683c7b0d",
+    "cairn/embed/doubao.py": "5bb7467424ec6214f9735a19d0e4ae37b1ab2a6b4a880039a442ccc72991c612",
+    "cairn/embed/fake.py": "87847e19e4574c19bd271a55091525314375f3273911e36c4cf1f54a63450b47",
+    "cairn/embed/openai_compatible.py": "c76e01422eb24ab60c6f0f84108227d0046408deb24df1e19f3d29dec909aaea",
+    "cairn/embed/windowed.py": "df44bb06b045f0306cde46d86f723f2ff83ebc5d9eb9fd6226adaffa61c15ec6",
+    "cairn/engine/__init__.py": "305ed7ffc9512688765620b03b9002b0cd2b63baeac11533a52e76051b82ac6c",
+    "cairn/engine/indexer.py": "51d078d22f26e970730bf9e607635af43b3aba1b6c76ac583a2c8deb502f83a9",
+    "cairn/engine/manifest.py": "2cde1bb70de751c36b20f1f32bac04fddc820675b98d471f3663c20b5c4e0c6d",
+    "cairn/entity/__init__.py": "9d226d39cab1f8a295b6e2b284eea2148bbb7c544085b33adf9955ad89b06f73",
+    "cairn/entity/base.py": "c4309984df6c98c12e5500c52f515fd7eddd368a70fba0edc0c5db7abbae3435",
+    "cairn/entity/fake.py": "0e72510cd52c6b389472e7ec9f9330648c385a70db70925d4465ceb653da921a",
+    "cairn/entity/heuristic.py": "5b996baa78427fe6b5a97a4a0a129694af6affcb2a23622d3b42f31133320555",
+    "cairn/index/__init__.py": "93bf140dd9b0b6754f1e4a93872bd8b870420d33f588feebf63d1533e90c3295",
+    "cairn/index/entities.py": "eef3b823781ee542cd2ded19ad05942321802af55412291fcf41354a686e4064",
+    "cairn/index/summaries.py": "f459357287d5290d6733a655e07e5496007d76061c34f61e2af4e993d68dece6",
+    "cairn/index/tree.py": "13ef29a32ee9cd990fbbed69bbcc51270f646ddf04c74a6018d68bb2a52deeee",
+    "cairn/index/vectors.py": "c598a4055a3dfb1dc3cb895dfb4b776c3e3c27ce0dbd270d8d255a9e97707c0d",
+    "cairn/index/xrefs.py": "0e48b57417817e47305d5c1653d00e0b5736e90696881b3d33ef9d447c6254bc",
+    "cairn/ingest/__init__.py": "dad837ad362acd07a40d5891c8d64935915fa4cb13658022eedd4ea7e2fd2a7f",
+    "cairn/ingest/base.py": "0d97d8b952dc7088886ad304dc116fb9b91afaec12afeb1bf52f7fb5d53989d2",
+    "cairn/ingest/markdown.py": "7b78c69399bf3dafbb060161e9ecbca5f08024ade0e88b38a81fdacb587ecfd2",
+    "cairn/ingest/markitdown.py": "f3dbd4fcb118a8525d3985e1e81148a95f6bb99dc16faeec1cdc18b1cafa7b58",
+    "cairn/ingest/pdf.py": "87e9b16d547ec6017ee957ec1c98b21e97743bf2a9680abf3eb4b09bc1de7e96",
+    "cairn/inspection.py": "2c762e9920bc1bdc45c61e8279ba10c133c2327d1274ebe1fb8420756f4d19df",
+    "cairn/mcp/__init__.py": "182e2496b6fb3ae9bbdd04e245d282426e18d1e9481cde853c5f8bcf7ce5ee06",
+    "cairn/mcp/schemas.py": "6c78a5ce1dcef9edacaf19270d1ce77a6181621f3bc386217ed5371eb4bcb10a",
+    "cairn/mcp/server.py": "8face904cd66b80f6df7c4900e40238bf1d838344f84b7ba3ee4f1c300dd0784",
+    "cairn/providers.py": "ff842c46b112043444545e369de2a13f592fc7b38070847b45f9ff83f0c4035c",
+    "cairn/repo.py": "5201e3e82561e2482962632a9c5d803b2aff0c29f717edee025be8809b60be77",
+    "cairn/repo_search.py": "3fe15e0d470a4593f61583fc383f2dff79d7bb4396f30f31e53386a36c5f3a3a",
+    "cairn/summarize/__init__.py": "22aef718f2e5e709b31ce21d069383308ed5e286aead8143121f2034f7e73acc",
+    "cairn/summarize/base.py": "919c68e8b7aa781b0965cf57470107ae442fd60c1a167e0ea995ba5be0bf2589",
+    "cairn/summarize/cache.py": "8d5daa8cfbdb9c7d679ef4c2ff31a2a920bc95fa898861f5a5b27665c5e6f4b6",
+    "cairn/summarize/fake.py": "3e07105efaa0c5210c2c835c8dc1e3dd36ef8a922c93e523dd451262888a11e8",
+    "cairn/summarize/openai_compatible.py": "67ece30a351e681a05bc33769428868b5d35eb5e8d25c0fde4850b3514eafbb1",
+    "cairn/summarize/prompts.py": "accaff220bdd9e7392fcab43b8b262cc6588f243705af339c59041f6147ee532",
+    "cairn/tools/__init__.py": "ad17995a7e6cc108ba83dd49a6d8b65a293968fde0a66601583d33299d26edfa",
+    "cairn/tools/base.py": "da1b46a1fad634eda53481b161e1077ec00ca385749bba5da3a42e8520104ce9",
+    "cairn/tools/context_blocks.py": "ff8554e283af1c509d7c79e5a2a44fd5ce67e0432d34870b51ae372581a54407",
+    "cairn/tools/find_mentions.py": "b2dd69ee779c454a94cc69a707b2bfa0e8917c49a42461a1c1c41635dd6e9651",
+    "cairn/tools/get_related.py": "f275a2e778aa96a088a71c152f071e4ea22da9a5b14f15cba9914a4fae55b162",
+    "cairn/tools/get_section.py": "c6b594a10e40851b0b3eb8e3dbb7b31f14d2ee9e2ae1704becd92873354eb6a2",
+    "cairn/tools/linked_evidence.py": "aa57e7b2bb1e34ef734068eb72c0b49ea9b2de7cc11d9f7d1f264a42473cc493",
+    "cairn/tools/outline.py": "ed557e2865ddbd9a11b9ca31ec06b4605c6c4dbe3fc8f212f654d14e452a504e",
+    "cairn/tools/read_range.py": "950914a9aa12ddf366ccbd9bd26a18ef6c188a3e326a108ec320fce2d00032c3",
+    "cairn/tools/search_keyword.py": "7d1917d60469204ac9c0a2d5fc36f39d9f695a5168bf40c423c662eeb7caba97",
+    "cairn/tools/search_semantic.py": "c078e9c4721e9f0e9f51b5e9c787004e22fb5f2ed0b9ee82d5ce49bcc74403c1",
+    "cairn/xref/__init__.py": "4829c30ba5562f43fef3e82cf2e91484ffab95dec9913ad9c9531dfba679d545",
+    "cairn/xref/base.py": "7a603b112e0529545ef47e77afbd7e1b0a737891241f338201b55a41e2c5856a",
+    "cairn/xref/fake.py": "f2fb4026baeeb28eb92f6fc4e6e1d56631202d1505b2f39c95393ca74b68b1bd",
+    "cairn/xref/heuristic.py": "b234cd12f758c40dfac24fbe3f735708156d895cc68d5a4ac100299f1bc800c2"
+  },
+  "oracle_qualification": [
+    {
+      "case": "closed-svc004",
+      "source_parsed_independently_matches_reference": true,
+      "positive_and_two_negative_controls": true,
+      "required_sections_present": true
+    },
+    {
+      "case": "closed-svc028",
+      "source_parsed_independently_matches_reference": true,
+      "positive_and_two_negative_controls": true,
+      "required_sections_present": true
+    },
+    {
+      "case": "closed-svc008",
+      "source_parsed_independently_matches_reference": true,
+      "positive_and_two_negative_controls": true,
+      "required_sections_present": true
+    }
+  ],
+  "same_case_baseline": {
+    "runs": [
+      {
+        "case_id": "closed-svc004",
+        "arm": "cairn",
+        "model": "gpt-6.1-sol",
+        "runtime": "codex-cli 0.164.0",
+        "exit_code": 0,
+        "stop_reason": null,
+        "seconds": 56.181955500000186,
+        "tool_invocations": 6,
+        "usage_events": [
+          {
+            "input_tokens": 232407,
+            "cached_input_tokens": 202880,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 1494,
+            "reasoning_output_tokens": 104
+          }
+        ],
+        "input_tokens": 232407,
+        "cached_input_tokens": 202880,
+        "output_tokens": 1494,
+        "final_answer_exists": true,
+        "review": {
+          "objects": 1,
+          "fields_match": true,
+          "manual_citation_and_derivation_review_required": true,
+          "citation_support": [
+            {
+              "id": "manual/authority",
+              "source_line_interval": [
+                5,
+                15
+              ],
+              "direct_anchor": true,
+              "local_line_in_section": false
+            },
+            {
+              "id": "manual/active-services/svc004",
+              "source_line_interval": [
+                62,
+                74
+              ],
+              "direct_anchor": true,
+              "local_line_in_section": false
+            },
+            {
+              "id": "manual/profiles/profile-p011",
+              "source_line_interval": [
+                540,
+                551
+              ],
+              "direct_anchor": true,
+              "local_line_in_section": false
+            },
+            {
+              "id": "manual/regions/region-r011",
+              "source_line_interval": [
+                825,
+                835
+              ],
+              "direct_anchor": true,
+              "local_line_in_section": false
+            },
+            {
+              "id": "manual/leases/lease-l004",
+              "source_line_interval": [
+                881,
+                889
+              ],
+              "direct_anchor": true,
+              "local_line_in_section": false
+            }
+          ],
+          "manual_review": {
+            "all_five_supporting_sources_cited": true,
+            "derivation_and_active_scope_match_original_source": true,
+            "evidence_access_within_protocol": true
+          },
+          "source_tool_calls": [
+            {
+              "tool": "repo_context",
+              "arguments": {
+                "query": "svc004 current-omega deployment settings authority",
+                "queries": [
+                  "svc004 service alias current-omega",
+                  "authority rules active records overrides safety caps non-normative examples"
+                ],
+                "level": "evidence",
+                "k": 6,
+                "max_context_chars": 16000,
+                "max_section_chars": 8000
+              },
+              "returned_section_ids": [
+                "manual/active-services/svc004",
+                "manual/authority"
+              ],
+              "returned_source_characters": 1164,
+              "unexpanded_links": null
+            },
+            {
+              "tool": "get_section",
+              "arguments": {
+                "doc": "docs-manual",
+                "id": "manual/profiles/profile-p011",
+                "level": "full"
+              },
+              "returned_section_ids": [],
+              "returned_source_characters": null,
+              "unexpanded_links": null
+            },
+            {
+              "tool": "get_section",
+              "arguments": {
+                "doc": "docs-manual",
+                "id": "manual/regions/region-r011",
+                "level": "full"
+              },
+              "returned_section_ids": [],
+              "returned_source_characters": null,
+              "unexpanded_links": null
+            },
+            {
+              "tool": "get_section",
+              "arguments": {
+                "doc": "docs-manual",
+                "id": "manual/leases/lease-l004",
+                "level": "full"
+              },
+              "returned_section_ids": [],
+              "returned_source_characters": null,
+              "unexpanded_links": null
+            }
+          ],
+          "answer_sha256": "2179d0e0f84da0c35fbf440a905a54f79498338608b59de8e4d32ba9a5bf78d1",
+          "complete_task_accepted": true
+        },
+        "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/link-control/closed-svc004-cairn"
+      },
+      {
+        "case_id": "closed-svc008",
+        "arm": "cairn",
+        "model": "gpt-6.1-sol",
+        "runtime": "codex-cli 0.164.0",
+        "exit_code": 0,
+        "stop_reason": null,
+        "seconds": 35.9671702079977,
+        "tool_invocations": 6,
+        "usage_events": [
+          {
+            "input_tokens": 184651,
+            "cached_input_tokens": 158848,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 1513,
+            "reasoning_output_tokens": 60
+          }
+        ],
+        "input_tokens": 184651,
+        "cached_input_tokens": 158848,
+        "output_tokens": 1513,
+        "final_answer_exists": true,
+        "review": {
+          "objects": 1,
+          "fields_match": true,
+          "manual_citation_and_derivation_review_required": true,
+          "citation_support": [
+            {
+              "id": "manual/authority",
+              "source_line_interval": [
+                5,
+                15
+              ],
+              "direct_anchor": true,
+              "local_line_in_section": false
+            },
+            {
+              "id": "manual/active-services/svc008",
+              "source_line_interval": [
+                114,
+                126
+              ],
+              "direct_anchor": true,
+              "local_line_in_section": false
+            },
+            {
+              "id": "manual/profiles/profile-p016",
+              "source_line_interval": [
+                600,
+                611
+              ],
+              "direct_anchor": true,
+              "local_line_in_section": false
+            },
+            {
+              "id": "manual/regions/region-r007",
+              "source_line_interval": [
+                781,
+                791
+              ],
+              "direct_anchor": true,
+              "local_line_in_section": false
+            },
+            {
+              "id": "manual/leases/lease-l001",
+              "source_line_interval": [
+                854,
+                862
+              ],
+              "direct_anchor": true,
+              "local_line_in_section": false
+            }
+          ],
+          "manual_review": {
+            "all_five_supporting_sources_cited": true,
+            "derivation_and_active_scope_match_original_source": true,
+            "evidence_access_within_protocol": true
+          },
+          "source_tool_calls": [
+            {
+              "tool": "repo_context",
+              "arguments": {
+                "query": "svc008 current-omega deployment settings authority overrides safety caps",
+                "level": "evidence",
+                "queries": [
+                  "svc008 service alias deployment linked settings",
+                  "current-omega authority rules active records overrides safety caps"
+                ],
+                "k": 6,
+                "max_context_chars": 18000,
+                "max_section_chars": 7000
+              },
+              "returned_section_ids": [
+                "manual/active-services/svc008",
+                "manual/authority"
+              ],
+              "returned_source_characters": 1164,
+              "unexpanded_links": null
+            },
+            {
+              "tool": "get_section",
+              "arguments": {
+                "doc": "docs-manual",
+                "id": "manual/profiles/profile-p016",
+                "level": "full"
+              },
+              "returned_section_ids": [],
+              "returned_source_characters": null,
+              "unexpanded_links": null
+            },
+            {
+              "tool": "get_section",
+              "arguments": {
+                "doc": "docs-manual",
+                "id": "manual/regions/region-r007",
+                "level": "full"
+              },
+              "returned_section_ids": [],
+              "returned_source_characters": null,
+              "unexpanded_links": null
+            },
+            {
+              "tool": "get_section",
+              "arguments": {
+                "doc": "docs-manual",
+                "id": "manual/leases/lease-l001",
+                "level": "full"
+              },
+              "returned_section_ids": [],
+              "returned_source_characters": null,
+              "unexpanded_links": null
+            }
+          ],
+          "answer_sha256": "fedd9ac2fcf68e9a31064935daa2979ad6eb46ca95f10bb10e1c2e82405e03ca",
+          "complete_task_accepted": true
+        },
+        "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/link-control/closed-svc008-cairn"
+      },
+      {
+        "case_id": "closed-svc028",
+        "arm": "cairn",
+        "model": "gpt-6.1-sol",
+        "runtime": "codex-cli 0.164.0",
+        "exit_code": 0,
+        "stop_reason": null,
+        "seconds": 38.28524416699656,
+        "tool_invocations": 7,
+        "usage_events": [
+          {
+            "input_tokens": 250780,
+            "cached_input_tokens": 223744,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 1613,
+            "reasoning_output_tokens": 23
+          }
+        ],
+        "input_tokens": 250780,
+        "cached_input_tokens": 223744,
+        "output_tokens": 1613,
+        "final_answer_exists": true,
+        "review": {
+          "objects": 1,
+          "fields_match": true,
+          "manual_citation_and_derivation_review_required": true,
+          "citation_support": [
+            {
+              "id": "manual/authority",
+              "source_line_interval": [
+                5,
+                15
+              ],
+              "direct_anchor": true,
+              "local_line_in_section": false
+            },
+            {
+              "id": "manual/active-services/svc028",
+              "source_line_interval": [
+                374,
+                386
+              ],
+              "direct_anchor": true,
+              "local_line_in_section": false
+            },
+            {
+              "id": "manual/profiles/profile-p010",
+              "source_line_interval": [
+                528,
+                539
+              ],
+              "direct_anchor": true,
+              "local_line_in_section": false
+            },
+            {
+              "id": "manual/regions/region-r004",
+              "source_line_interval": [
+                748,
+                758
+              ],
+              "direct_anchor": true,
+              "local_line_in_section": false
+            },
+            {
+              "id": "manual/leases/lease-l006",
+              "source_line_interval": [
+                899,
+                907
+              ],
+              "direct_anchor": true,
+              "local_line_in_section": false
+            }
+          ],
+          "manual_review": {
+            "all_five_supporting_sources_cited": true,
+            "derivation_and_active_scope_match_original_source": true,
+            "evidence_access_within_protocol": true
+          },
+          "source_tool_calls": [
+            {
+              "tool": "repo_context",
+              "arguments": {
+                "query": "svc028 current-omega deployment settings authority",
+                "queries": [
+                  "svc028 service alias current-omega",
+                  "authority rules active records overrides safety caps non normative examples"
+                ],
+                "level": "evidence",
+                "k": 6,
+                "max_context_chars": 17000,
+                "max_section_chars": 10000
+              }
+            },
+            {
+              "tool": "repo_context",
+              "arguments": {
+                "query": "svc028 current-omega deployment settings authority",
+                "queries": [
+                  "svc028 service alias current-omega",
+                  "authority rules active records overrides safety caps non normative examples"
+                ],
+                "level": "evidence",
+                "k": 6,
+                "max_context_chars": 17000,
+                "max_section_chars": 8000
+              },
+              "returned_section_ids": [
+                "manual/active-services/svc028",
+                "manual/authority"
+              ],
+              "returned_source_characters": 1164,
+              "unexpanded_links": null
+            },
+            {
+              "tool": "get_section",
+              "arguments": {
+                "doc": "docs-manual",
+                "id": "manual/profiles/profile-p010",
+                "level": "full"
+              },
+              "returned_section_ids": [],
+              "returned_source_characters": null,
+              "unexpanded_links": null
+            },
+            {
+              "tool": "get_section",
+              "arguments": {
+                "doc": "docs-manual",
+                "id": "manual/regions/region-r004",
+                "level": "full"
+              },
+              "returned_section_ids": [],
+              "returned_source_characters": null,
+              "unexpanded_links": null
+            },
+            {
+              "tool": "get_section",
+              "arguments": {
+                "doc": "docs-manual",
+                "id": "manual/leases/lease-l006",
+                "level": "full"
+              },
+              "returned_section_ids": [],
+              "returned_source_characters": null,
+              "unexpanded_links": null
+            }
+          ],
+          "answer_sha256": "21cbd80045761f54dcd67e77e2f8722b1ad32a63687da05bc89182f2353390e9",
+          "complete_task_accepted": true
+        },
+        "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/link-control/closed-svc028-cairn"
+      }
+    ],
+    "aggregates": [
+      {
+        "arm": "cairn",
+        "accepted": 3,
+        "tasks": 3,
+        "input_tokens": 667838,
+        "cached_input_tokens": 585472,
+        "output_tokens": 4620,
+        "tool_invocations": 19,
+        "seconds": 130.43436987499445,
+        "uncached_input_tokens": 82366
+      }
+    ]
+  },
+  "same_case_control_protocol": {
+    "scope": "Follow-up same-case unchanged joint-context baseline for the three link-spike aliases. Not new product tuning, not independent generalization. Separate from frozen six-session comparison.",
+    "model": "gpt-6.1-sol high, same CLI and access rules",
+    "sessions": 3,
+    "source_version": "navigation-round/joint-context-candidate/src, unchanged70files",
+    "cases_sha256": "84b48775dcd0d0642d151bf301840042fd92f5e8589e8ae9785a1c9b07f0f44f",
+    "runner_sha256": "d5b3a143691a8aa0f9d31252fda6248118434c61bb47805c49a0c9bb34c5d0f9",
+    "selection": "All three aliases, one attempt each, no replacing unfavorable results. Baseline source and cases unchanged after spike answers.",
+    "limitations": [
+      "Order not balanced against earlier candidate sessions",
+      "One attempt per pair",
+      "Prototype is a bundle: source links plus larger unspecified same-doc cap plus guidance; this is not a pure one-variable causal estimate",
+      "No commercial claim, no dollar price inferred"
+    ]
+  },
+  "componentwise_raw_parity_gate_passed": false,
+  "token_cost_sensitivity": {
+    "definition": "r = cached/uncached input token price, q = output/uncached input token price; exclude latency/indexing",
+    "delta_cost_divided_by_uncached_price": "-32776 + 74112*r - 806*q",
+    "sufficient_condition_for_token_cost_no_higher_at_any_q_ge_0": "0 <= r <= 32776/74112 (about0.44225)",
+    "not_an_invoice_or_actual_price": true
+  },
+  "limitations": [
+    "Three aliases in same synthetic manual; all maintenance false",
+    "One attempt perpair",
+    "Same-case baseline run later, order not balanced; not proof of reproducibility",
+    "Prototype bundles source-link expansion, guidance and unspecified document cap change; not a pure one-component causal attribution",
+    "All source remains outside product; full cumulative I still higher than raw",
+    "Diagnostics retain at most32 source-link/deferred records without an explicit truncation flag; large navigation pages remain unqualified",
+    "Custom HTML fragments/reference definitions outside selected blocks and cross-document links are not resolved",
+    "Indexing/latency/billing and independent domain generalization not qualified"
+  ]
+}

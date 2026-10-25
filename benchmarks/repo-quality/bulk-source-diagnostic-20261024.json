@@ -1,0 +1,264 @@
+{
+  "date": "2026-10-24",
+  "purpose": "Diagnostic only: provide all selected original documents verbatim in the first prompt; no oracle passages or expected answers. This is not a Cairn implementation or held-out win.",
+  "protocol": {
+    "model": "gpt-6.1-sol",
+    "reasoning_effort": "high (matches existing user configuration)",
+    "runtime": "codex-cli 0.164.0, ephemeral fresh sessions, existing ChatGPT auth; no API-key copying",
+    "scope": "Diagnostic bulk-source arm on the same two development tasks; one attempt each; no superiority or held-out claim",
+    "arms": [
+      "bulk-source prompt plus same raw files"
+    ],
+    "tool_budget": 24,
+    "per_session_wall_time_limit_seconds": 900,
+    "final_output_request": "<=1800 tokens (prompt limit, not a decoder setting)",
+    "source_version": "codex-compact-candidate/src",
+    "coding_tools": "same read-only shell, local Python tests allowed, no network requests or source edits",
+    "source_evidence": "MCP only for Cairn/BM25; curated copied docs and rg for raw arm",
+    "known_cases": "HTTPX is a development task; Ruff is a frozen unseen-composition task reused across different agent models. No product tuning after reading Codex answers.",
+    "usage": "CLI turn.completed totals, including cached_input_tokens and output_tokens; not dollar billing or cross-model comparable token counts",
+    "round": "bulk-source diagnostic after round2, not product evaluation",
+    "changes": [
+      "Supply ALL selected original documents verbatim in the initial prompt; no oracle labels, no hand-selected passages or answer generation.",
+      "Use same raw-arm shell source access; other model, task, shell permissions and budgets unchanged."
+    ],
+    "unchanged": [
+      "model",
+      "reasoning effort",
+      "case text",
+      "coding permissions",
+      "tool and time budgets",
+      "raw/BM25 source servers"
+    ],
+    "attempt_selection": "All three arms rerun once; retain all first-round and second-round outputs. Do not select only favorable repeats.",
+    "source_bundle_policy": "All files in the existing curated corpus selection, original order, exact original content. No source-content pruning.",
+    "runner_sha256": "b956f87a6d8418fa681dd557b9f687462adfb7cc7d796967347472ddd24163d4"
+  },
+  "runs": [
+    {
+      "case_id": "httpx-service-client",
+      "arm": "bulk",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 164.9628989169978,
+      "tool_invocations": 6,
+      "usage_events": [
+        {
+          "input_tokens": 292341,
+          "cached_input_tokens": 209152,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 7705,
+          "reasoning_output_tokens": 1625
+        }
+      ],
+      "input_tokens": 292341,
+      "cached_input_tokens": 209152,
+      "output_tokens": 7705,
+      "final_answer_exists": true,
+      "uncached_input_tokens": 83189,
+      "answer_sha256": "f96874b3e1d5748cc4b66243ca201382849bb6ad3898fdd18df379236f132c90",
+      "prompt_sha256": "9d5c90e4d1225d2873cae35c12dff61d810fd9bf4d92671ee334c187ebc0334c",
+      "prompt_utf8_bytes": 50214,
+      "artifact": "codex/bulk-diagnostic/httpx-service-client-bulk",
+      "complete_task_accepted": true,
+      "manual_review": "Required configuration, explanations and source citations passed manual review. No live networking.",
+      "independent_execution_review": {
+        "case_id": "httpx-service-client",
+        "answer": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/bulk-diagnostic/httpx-service-client-bulk/answer.txt",
+        "answer_sha256": "f96874b3e1d5748cc4b66243ca201382849bb6ad3898fdd18df379236f132c90",
+        "python_blocks": 1,
+        "runtime_attempted": true,
+        "manual_source_and_deliverable_review_required": true,
+        "compiled": true,
+        "required_interface_declared": true,
+        "runtime_checks": {
+          "timeouts": true,
+          "actual_timeouts": [
+            60.0,
+            10.0,
+            10.0,
+            10.0
+          ],
+          "trust_env": true,
+          "pool_limits": true,
+          "http2": true,
+          "async_response_hook": true,
+          "body_read_awaited": true,
+          "closed": true
+        },
+        "runtime_constraints_passed": true,
+        "generated_stdout": ""
+      }
+    },
+    {
+      "case_id": "ruff-isolated-ci-config",
+      "arm": "bulk",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 43.819037375000335,
+      "tool_invocations": 0,
+      "usage_events": [
+        {
+          "input_tokens": 32738,
+          "cached_input_tokens": 9856,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 1567,
+          "reasoning_output_tokens": 680
+        }
+      ],
+      "input_tokens": 32738,
+      "cached_input_tokens": 9856,
+      "output_tokens": 1567,
+      "final_answer_exists": true,
+      "uncached_input_tokens": 22882,
+      "answer_sha256": "1012743fdcefb149fba70f61caf0f039be104ce5b81b80620c48a65921e3265f",
+      "prompt_sha256": "21b251ee4648bd05fae3ff32a68c305b56368d9a3fe97897f46fe12135027d60",
+      "prompt_utf8_bytes": 62733,
+      "artifact": "codex/bulk-diagnostic/ruff-isolated-ci-config-bulk",
+      "complete_task_accepted": true,
+      "manual_review": "Required configuration, explanations and source citations passed manual review. No live networking.",
+      "independent_execution_review": {
+        "toml_parse_errors": [],
+        "toml_blocks": 1,
+        "files_modified": "temporary fixture only",
+        "root_config": {
+          "target-version": "py310",
+          "line-length": 100,
+          "lint": {
+            "select": [
+              "E4",
+              "E7",
+              "E9",
+              "F",
+              "I"
+            ]
+          },
+          "format": {
+            "quote-style": "single"
+          }
+        },
+        "unused_import": {
+          "exit": 1,
+          "codes": [
+            "F401"
+          ],
+          "error": ""
+        },
+        "import_sorting": {
+          "exit": 1,
+          "codes": [
+            "I001"
+          ],
+          "error": ""
+        },
+        "formatter_output": "word = 'hello'\n",
+        "formatter_error": "",
+        "checks": {
+          "root_line_length": true,
+          "unused_import_linted": true,
+          "import_sorting_enabled": true,
+          "single_quotes": true
+        },
+        "config_passed": true
+      }
+    }
+  ],
+  "raw_round2_comparators": [
+    {
+      "case_id": "httpx-service-client",
+      "arm": "raw",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 120.8676448749975,
+      "tool_invocations": 8,
+      "usage_events": [
+        {
+          "input_tokens": 236642,
+          "cached_input_tokens": 212864,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 4529,
+          "reasoning_output_tokens": 1045
+        }
+      ],
+      "input_tokens": 236642,
+      "cached_input_tokens": 212864,
+      "output_tokens": 4529,
+      "final_answer_exists": true,
+      "round": 2,
+      "uncached_input_tokens": 23778,
+      "answer_sha256": "0f2136a89b626fd9a8a385c97274e9fe12732408b5160b98621e8260a953dfe9",
+      "complete_task_accepted": true,
+      "acceptance": "Independent Python execution or actual Ruff fixture execution, plus manual deliverable and source review. Live networking excluded.",
+      "artifact": "codex/round2/httpx-service-client-raw"
+    },
+    {
+      "case_id": "ruff-isolated-ci-config",
+      "arm": "raw",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 54.808503958000074,
+      "tool_invocations": 3,
+      "usage_events": [
+        {
+          "input_tokens": 89610,
+          "cached_input_tokens": 67456,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 1714,
+          "reasoning_output_tokens": 330
+        }
+      ],
+      "input_tokens": 89610,
+      "cached_input_tokens": 67456,
+      "output_tokens": 1714,
+      "final_answer_exists": true,
+      "round": 2,
+      "uncached_input_tokens": 22154,
+      "answer_sha256": "25634d67ef67318ec584eff751a72f39d44b77ea310574e6912206bb3e47dedf",
+      "complete_task_accepted": true,
+      "acceptance": "Independent Python execution or actual Ruff fixture execution, plus manual deliverable and source review. Live networking excluded.",
+      "artifact": "codex/round2/ruff-isolated-ci-config-raw"
+    }
+  ],
+  "aggregates": [
+    {
+      "arm": "bulk",
+      "accepted": 2,
+      "tasks": 2,
+      "input_tokens": 325079,
+      "cached_input_tokens": 219008,
+      "uncached_input_tokens": 106071,
+      "output_tokens": 9272,
+      "tool_invocations": 6,
+      "seconds": 208.78193629199814
+    },
+    {
+      "arm": "raw-round2",
+      "accepted": 2,
+      "tasks": 2,
+      "input_tokens": 326252,
+      "cached_input_tokens": 280320,
+      "uncached_input_tokens": 45932,
+      "output_tokens": 6243,
+      "tool_invocations": 11,
+      "seconds": 175.67614883299757
+    }
+  ],
+  "oracle_runtime": {
+    "python": "3.14.6 (main, Jun 10 2026, 10:03:53) [Clang 21.0.0 (clang-2100.0.123.102)]",
+    "ruff": "ruff 0.15.18"
+  },
+  "limitations": [
+    "Same two development tasks, one bulk attempt each. No repeatability or causal effect estimate.",
+    "Initial source prompt and follow-up source access differ from retrieval arms.",
+    "Large source prefix affects caching; total input reduction is not equivalent to dollar savings.",
+    "Source selection was previously curated for every arm; no general corpus selection algorithm is tested."
+  ]
+}

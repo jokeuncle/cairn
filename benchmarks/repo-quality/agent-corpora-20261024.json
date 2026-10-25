@@ -1,0 +1,26 @@
+{
+  "uvicorn": {
+    "repository": "https://github.com/encode/uvicorn",
+    "revision": "cc6fea5b40ad559f7ca358a24b1a521451232281",
+    "docs": [
+      "settings.md",
+      "server-behavior.md"
+    ],
+    "source_sha256": {
+      "settings.md": "e40d7b31ef278aea50e57eeda437778dc2ce5e6a90dcef7862cdda33c58de67f",
+      "server-behavior.md": "2e8e0380f51d4ca58d65e3ff6f0ccac69d8c547394e432a90358ef76b2bcf25d"
+    }
+  },
+  "ruff": {
+    "repository": "https://github.com/astral-sh/ruff",
+    "revision": "ea1865842b8443c7ccecd143dfc55384abc1d794",
+    "docs": [
+      "configuration.md",
+      "linter.md"
+    ],
+    "source_sha256": {
+      "configuration.md": "03985b7ec257611355dcb1367572d3c074784a71e2fa17d0537b333b4a9e5656",
+      "linter.md": "a79e2d8c1dec885f3b666be975bf243d46c959600c5223090b431e4aab5f468d"
+    }
+  }
+}

@@ -1,0 +1,3161 @@
+{
+  "date": "2026-10-24",
+  "status": "Corrected on 2026-10-25: transfer 2/3 per arm, five-task Cairn/raw 4/5 each. Original all-pass acceptance overstated by a config-discovery oracle gap. Cost totals include failed attempts.",
+  "protocol": {
+    "model": "gpt-6.1-sol",
+    "reasoning_effort": "high (matches existing user configuration)",
+    "runtime": "codex-cli 0.164.0, ephemeral fresh sessions, existing ChatGPT auth; no API-key copying",
+    "scope": "Two known development tasks x Cairn/raw, one fresh attempt each; no unseen score",
+    "arms": [
+      "cairn",
+      "raw source files + rg"
+    ],
+    "tool_budget": 24,
+    "per_session_wall_time_limit_seconds": 900,
+    "final_output_request": "<=1800 tokens (prompt limit, not a decoder setting)",
+    "source_version": "paper-context-candidate/src",
+    "coding_tools": "same read-only shell, local Python tests allowed, no network requests or source edits",
+    "source_evidence": "MCP only for Cairn/BM25; curated copied docs and rg for raw arm",
+    "known_cases": "Both task texts have been used for development. No held-out or causal component-attribution claim.",
+    "usage": "CLI turn.completed totals, including cached_input_tokens and output_tokens; not dollar billing or cross-model comparable token counts",
+    "round": "paper-informed completeness/guidance candidate, autonomous tool choice",
+    "changes": [
+      "Explicit full-context truncation/source-body metadata and reuse guidance in product.",
+      "No user-prompt workflow constraint or oracle evidence supplied."
+    ],
+    "attempt_selection": "One valid attempt for each pair; retain all old and new runs, including failures.",
+    "runner_sha256": "d24076808971a2ad14e1b598bd431a5d691247ef0bf8a44bd42b3d67512b7f0d"
+  },
+  "source_hashes": {
+    "src/cairn/repo_search.py": "3fe15e0d470a4593f61583fc383f2dff79d7bb4396f30f31e53386a36c5f3a3a",
+    "src/cairn/__init__.py": "4975a3e97aad175b1155206322ba4ed3f1418f948db57a867bfa8b747b296b80",
+    "src/cairn/inspection.py": "2c762e9920bc1bdc45c61e8279ba10c133c2327d1274ebe1fb8420756f4d19df",
+    "src/cairn/providers.py": "ff842c46b112043444545e369de2a13f592fc7b38070847b45f9ff83f0c4035c",
+    "src/cairn/repo.py": "fbaaaa158deee5627ad7392667c6e30906b37a960ea0a5710571596cb8a66d5e",
+    "src/cairn/agent_guidance.py": "ed396110c729b0c1ea2ace722fa391f00fe750d867f6819b4ea4a28d63cec51e",
+    "src/cairn/xref/fake.py": "f2fb4026baeeb28eb92f6fc4e6e1d56631202d1505b2f39c95393ca74b68b1bd",
+    "src/cairn/xref/__init__.py": "4829c30ba5562f43fef3e82cf2e91484ffab95dec9913ad9c9531dfba679d545",
+    "src/cairn/xref/base.py": "7a603b112e0529545ef47e77afbd7e1b0a737891241f338201b55a41e2c5856a",
+    "src/cairn/xref/heuristic.py": "b234cd12f758c40dfac24fbe3f735708156d895cc68d5a4ac100299f1bc800c2",
+    "src/cairn/bench/metrics.py": "9cebcee11b5b8e9e2eb40435fe5941eff81efa31038ab7b662f2bfda47edb8a5",
+    "src/cairn/bench/runner.py": "0a44ba791dde41024ee889321fa01cd4bd4db624c6a5adcf6d67c0b49daa0925",
+    "src/cairn/bench/baseline.py": "102f0ecf42fcf2b83c3c253d731338b40523a9ad8cb32262a97ebdfaf4730b98",
+    "src/cairn/bench/__init__.py": "6eefb5df8d97dbcbba95c13cff3a77fb5ebda4154ab086a06623062375acd9b1",
+    "src/cairn/bench/dataset.py": "bc7f147940dedc8f03b16d78c04e25ded591e5358ac482118ffc5a876e9bf08f",
+    "src/cairn/bench/judge.py": "0dce5bb0ed842449814919b6bd38f8a33d56976bc435a79a9a2962ff3a074d6c",
+    "src/cairn/bench/report.py": "c2fbc8890891db7c861c26c7af017532e98b20d13dbf6955f69e5445f62727b6",
+    "src/cairn/tools/search_semantic.py": "c078e9c4721e9f0e9f51b5e9c787004e22fb5f2ed0b9ee82d5ce49bcc74403c1",
+    "src/cairn/tools/read_range.py": "950914a9aa12ddf366ccbd9bd26a18ef6c188a3e326a108ec320fce2d00032c3",
+    "src/cairn/tools/search_keyword.py": "7d1917d60469204ac9c0a2d5fc36f39d9f695a5168bf40c423c662eeb7caba97",
+    "src/cairn/tools/find_mentions.py": "b2dd69ee779c454a94cc69a707b2bfa0e8917c49a42461a1c1c41635dd6e9651",
+    "src/cairn/tools/__init__.py": "ad17995a7e6cc108ba83dd49a6d8b65a293968fde0a66601583d33299d26edfa",
+    "src/cairn/tools/get_related.py": "f275a2e778aa96a088a71c152f071e4ea22da9a5b14f15cba9914a4fae55b162",
+    "src/cairn/tools/outline.py": "ed557e2865ddbd9a11b9ca31ec06b4605c6c4dbe3fc8f212f654d14e452a504e",
+    "src/cairn/tools/get_section.py": "c6b594a10e40851b0b3eb8e3dbb7b31f14d2ee9e2ae1704becd92873354eb6a2",
+    "src/cairn/tools/base.py": "da1b46a1fad634eda53481b161e1077ec00ca385749bba5da3a42e8520104ce9",
+    "src/cairn/core/config.py": "0988f686b585bb266207c0cd976741e4d3ceae0fbb68a31095cee91cf7ef74fc",
+    "src/cairn/core/__init__.py": "55b20f63537926c009e0dd4fd57e1de6cb3f87d289a0ac47a177305badf9d1b8",
+    "src/cairn/core/types.py": "925db60bd1139d5cb4eb4dae401edc9b8481caed52f0897db1cd433e30947e83",
+    "src/cairn/core/errors.py": "a05de597f07140b65d6e2aa17ddb6766e9c76a89434bab2a99285659aadb4613",
+    "src/cairn/embed/fake.py": "87847e19e4574c19bd271a55091525314375f3273911e36c4cf1f54a63450b47",
+    "src/cairn/embed/openai_compatible.py": "c76e01422eb24ab60c6f0f84108227d0046408deb24df1e19f3d29dec909aaea",
+    "src/cairn/embed/__init__.py": "39c5945e10f3beb9144cb81d6b693ae7a9103a7c90c0e6f8d74e379d030a2158",
+    "src/cairn/embed/doubao.py": "5bb7467424ec6214f9735a19d0e4ae37b1ab2a6b4a880039a442ccc72991c612",
+    "src/cairn/embed/base.py": "f05b76deb60d038beea75bb207dabaf4d3ced9fe2479f18f91b109f1683c7b0d",
+    "src/cairn/embed/windowed.py": "df44bb06b045f0306cde46d86f723f2ff83ebc5d9eb9fd6226adaffa61c15ec6",
+    "src/cairn/entity/fake.py": "0e72510cd52c6b389472e7ec9f9330648c385a70db70925d4465ceb653da921a",
+    "src/cairn/entity/__init__.py": "9d226d39cab1f8a295b6e2b284eea2148bbb7c544085b33adf9955ad89b06f73",
+    "src/cairn/entity/base.py": "c4309984df6c98c12e5500c52f515fd7eddd368a70fba0edc0c5db7abbae3435",
+    "src/cairn/entity/heuristic.py": "5b996baa78427fe6b5a97a4a0a129694af6affcb2a23622d3b42f31133320555",
+    "src/cairn/ingest/__init__.py": "dad837ad362acd07a40d5891c8d64935915fa4cb13658022eedd4ea7e2fd2a7f",
+    "src/cairn/ingest/pdf.py": "87e9b16d547ec6017ee957ec1c98b21e97743bf2a9680abf3eb4b09bc1de7e96",
+    "src/cairn/ingest/markitdown.py": "f3dbd4fcb118a8525d3985e1e81148a95f6bb99dc16faeec1cdc18b1cafa7b58",
+    "src/cairn/ingest/markdown.py": "7b78c69399bf3dafbb060161e9ecbca5f08024ade0e88b38a81fdacb587ecfd2",
+    "src/cairn/ingest/base.py": "0d97d8b952dc7088886ad304dc116fb9b91afaec12afeb1bf52f7fb5d53989d2",
+    "src/cairn/summarize/fake.py": "3e07105efaa0c5210c2c835c8dc1e3dd36ef8a922c93e523dd451262888a11e8",
+    "src/cairn/summarize/openai_compatible.py": "67ece30a351e681a05bc33769428868b5d35eb5e8d25c0fde4850b3514eafbb1",
+    "src/cairn/summarize/cache.py": "8d5daa8cfbdb9c7d679ef4c2ff31a2a920bc95fa898861f5a5b27665c5e6f4b6",
+    "src/cairn/summarize/__init__.py": "22aef718f2e5e709b31ce21d069383308ed5e286aead8143121f2034f7e73acc",
+    "src/cairn/summarize/prompts.py": "accaff220bdd9e7392fcab43b8b262cc6588f243705af339c59041f6147ee532",
+    "src/cairn/summarize/base.py": "919c68e8b7aa781b0965cf57470107ae442fd60c1a167e0ea995ba5be0bf2589",
+    "src/cairn/mcp/server.py": "2fea00b2fa2d648f9f133c7945efba180eb8c9534723f438098ac669494129b8",
+    "src/cairn/mcp/__init__.py": "182e2496b6fb3ae9bbdd04e245d282426e18d1e9481cde853c5f8bcf7ce5ee06",
+    "src/cairn/mcp/schemas.py": "fe73d66184480a15d6343d454ab11fa336ffff0c119624d3e812981571e4efe0",
+    "src/cairn/cli/config.py": "e835a4bda78f7f71b3ead748fcfd99003665cae10bc069a74f6aaa2aff82349d",
+    "src/cairn/cli/__init__.py": "12167b938c079bed1dc70fe8e9bdb444f1a3b9bc9075c64737ac8d6121ae0767",
+    "src/cairn/cli/app.py": "ce12c66976350b82c0c7472618455b264eb6ee19a0f8ff61ac490bac3bc7466f",
+    "src/cairn/index/vectors.py": "c598a4055a3dfb1dc3cb895dfb4b776c3e3c27ce0dbd270d8d255a9e97707c0d",
+    "src/cairn/index/tree.py": "13ef29a32ee9cd990fbbed69bbcc51270f646ddf04c74a6018d68bb2a52deeee",
+    "src/cairn/index/__init__.py": "93bf140dd9b0b6754f1e4a93872bd8b870420d33f588feebf63d1533e90c3295",
+    "src/cairn/index/entities.py": "eef3b823781ee542cd2ded19ad05942321802af55412291fcf41354a686e4064",
+    "src/cairn/index/summaries.py": "f459357287d5290d6733a655e07e5496007d76061c34f61e2af4e993d68dece6",
+    "src/cairn/index/xrefs.py": "0e48b57417817e47305d5c1653d00e0b5736e90696881b3d33ef9d447c6254bc",
+    "src/cairn/engine/manifest.py": "2cde1bb70de751c36b20f1f32bac04fddc820675b98d471f3663c20b5c4e0c6d",
+    "src/cairn/engine/__init__.py": "305ed7ffc9512688765620b03b9002b0cd2b63baeac11533a52e76051b82ac6c",
+    "src/cairn/engine/indexer.py": "51d078d22f26e970730bf9e607635af43b3aba1b6c76ac583a2c8deb502f83a9",
+    "src/cairn/client/server.py": "ded430660f9ee5ced05f3a3ec3665456bd58a409ae6beedbf1cd8e2acd7fbb4d",
+    "src/cairn/client/__init__.py": "d844deb2886bdf7495c47ccc8c7417867f3b65b28c4f2bd1ad299bf4bf177bf6",
+    "src/cairn/client/static/__init__.py": "0f90031cf0900f6ad827cd9823928f23574f5b941bd79cc5ba8f0731535ba785"
+  },
+  "development_runs": [
+    {
+      "case_id": "httpx-service-client",
+      "arm": "cairn",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 106.76811545800228,
+      "tool_invocations": 7,
+      "usage_events": [
+        {
+          "input_tokens": 231248,
+          "cached_input_tokens": 200832,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 4324,
+          "reasoning_output_tokens": 997
+        }
+      ],
+      "input_tokens": 231248,
+      "cached_input_tokens": 200832,
+      "output_tokens": 4324,
+      "final_answer_exists": true,
+      "stage": "development",
+      "uncached_input_tokens": 30416,
+      "answer_sha256": "e039bf1192f8a6a15c004894cbce30d23f77515cf294fde49fd6ca74d04b0335",
+      "artifact": "codex/paper-context/httpx-service-client-cairn",
+      "independent_execution_review": {
+        "case_id": "httpx-service-client",
+        "answer": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/paper-context/httpx-service-client-cairn/answer.txt",
+        "answer_sha256": "e039bf1192f8a6a15c004894cbce30d23f77515cf294fde49fd6ca74d04b0335",
+        "python_blocks": 1,
+        "runtime_attempted": true,
+        "manual_source_and_deliverable_review_required": true,
+        "compiled": true,
+        "required_interface_declared": true,
+        "runtime_checks": {
+          "timeouts": true,
+          "actual_timeouts": [
+            60.0,
+            10.0,
+            10.0,
+            10.0
+          ],
+          "trust_env": true,
+          "pool_limits": true,
+          "http2": true,
+          "async_response_hook": true,
+          "body_read_awaited": true,
+          "closed": true
+        },
+        "runtime_constraints_passed": true,
+        "generated_stdout": ""
+      },
+      "manual_deliverable_and_source_review": "passed",
+      "complete_task_accepted": true
+    },
+    {
+      "case_id": "httpx-service-client",
+      "arm": "raw",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 139.25676999999996,
+      "tool_invocations": 7,
+      "usage_events": [
+        {
+          "input_tokens": 206652,
+          "cached_input_tokens": 181632,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 5853,
+          "reasoning_output_tokens": 1307
+        }
+      ],
+      "input_tokens": 206652,
+      "cached_input_tokens": 181632,
+      "output_tokens": 5853,
+      "final_answer_exists": true,
+      "stage": "development",
+      "uncached_input_tokens": 25020,
+      "answer_sha256": "e7178c6b265e9e6bda9590cd66009f3d454e43fba9fd5eed90cbddf8c40fd846",
+      "artifact": "codex/paper-context/httpx-service-client-raw",
+      "independent_execution_review": {
+        "case_id": "httpx-service-client",
+        "answer": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/paper-context/httpx-service-client-raw/answer.txt",
+        "answer_sha256": "e7178c6b265e9e6bda9590cd66009f3d454e43fba9fd5eed90cbddf8c40fd846",
+        "python_blocks": 1,
+        "runtime_attempted": true,
+        "manual_source_and_deliverable_review_required": true,
+        "compiled": true,
+        "required_interface_declared": true,
+        "runtime_checks": {
+          "timeouts": true,
+          "actual_timeouts": [
+            60.0,
+            10.0,
+            10.0,
+            10.0
+          ],
+          "trust_env": true,
+          "pool_limits": true,
+          "http2": true,
+          "async_response_hook": true,
+          "body_read_awaited": true,
+          "closed": true
+        },
+        "runtime_constraints_passed": true,
+        "generated_stdout": ""
+      },
+      "manual_deliverable_and_source_review": "passed",
+      "complete_task_accepted": true
+    },
+    {
+      "case_id": "ruff-isolated-ci-config",
+      "arm": "cairn",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 70.48687483300091,
+      "tool_invocations": 9,
+      "usage_events": [
+        {
+          "input_tokens": 313079,
+          "cached_input_tokens": 267008,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 1993,
+          "reasoning_output_tokens": 501
+        }
+      ],
+      "input_tokens": 313079,
+      "cached_input_tokens": 267008,
+      "output_tokens": 1993,
+      "final_answer_exists": true,
+      "stage": "development",
+      "uncached_input_tokens": 46071,
+      "answer_sha256": "3d4d8ce431bfde5e477268c974099d954b3691fccefe2de4b97dd9738b3442b4",
+      "artifact": "codex/paper-context/ruff-isolated-ci-config-cairn",
+      "independent_execution_review": {
+        "toml_parse_errors": [],
+        "toml_blocks": 1,
+        "files_modified": "temporary fixture only",
+        "root_config": {
+          "line-length": 100,
+          "target-version": "py310",
+          "lint": {
+            "select": [
+              "E4",
+              "E7",
+              "E9",
+              "F",
+              "I"
+            ]
+          },
+          "format": {
+            "quote-style": "single"
+          }
+        },
+        "unused_import": {
+          "exit": 1,
+          "codes": [
+            "F401"
+          ],
+          "error": ""
+        },
+        "import_sorting": {
+          "exit": 1,
+          "codes": [
+            "I001"
+          ],
+          "error": ""
+        },
+        "formatter_output": "word = 'hello'\n",
+        "formatter_error": "",
+        "checks": {
+          "root_line_length": true,
+          "unused_import_linted": true,
+          "import_sorting_enabled": true,
+          "single_quotes": true
+        },
+        "config_passed": true
+      },
+      "manual_deliverable_and_source_review": "passed",
+      "complete_task_accepted": true
+    },
+    {
+      "case_id": "ruff-isolated-ci-config",
+      "arm": "raw",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 54.47724287500023,
+      "tool_invocations": 3,
+      "usage_events": [
+        {
+          "input_tokens": 84387,
+          "cached_input_tokens": 65536,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 1867,
+          "reasoning_output_tokens": 280
+        }
+      ],
+      "input_tokens": 84387,
+      "cached_input_tokens": 65536,
+      "output_tokens": 1867,
+      "final_answer_exists": true,
+      "stage": "development",
+      "uncached_input_tokens": 18851,
+      "answer_sha256": "3406959f0c3f54ecc778237bb393b1818d3a3e5d766243cc2640fbf7a18e1111",
+      "artifact": "codex/paper-context/ruff-isolated-ci-config-raw",
+      "independent_execution_review": {
+        "toml_parse_errors": [],
+        "toml_blocks": 1,
+        "files_modified": "temporary fixture only",
+        "root_config": {
+          "line-length": 100,
+          "target-version": "py310",
+          "lint": {
+            "select": [
+              "E4",
+              "E7",
+              "E9",
+              "F",
+              "I"
+            ]
+          },
+          "format": {
+            "quote-style": "single"
+          }
+        },
+        "unused_import": {
+          "exit": 1,
+          "codes": [
+            "F401"
+          ],
+          "error": ""
+        },
+        "import_sorting": {
+          "exit": 1,
+          "codes": [
+            "I001"
+          ],
+          "error": ""
+        },
+        "formatter_output": "word = 'hello'\n",
+        "formatter_error": "",
+        "checks": {
+          "root_line_length": true,
+          "unused_import_linted": true,
+          "import_sorting_enabled": true,
+          "single_quotes": true
+        },
+        "config_passed": true
+      },
+      "manual_deliverable_and_source_review": "passed",
+      "complete_task_accepted": true
+    }
+  ],
+  "development_aggregates": [
+    {
+      "arm": "cairn",
+      "accepted": 2,
+      "tasks": 2,
+      "input_tokens": 544327,
+      "cached_input_tokens": 467840,
+      "uncached_input_tokens": 76487,
+      "output_tokens": 6317,
+      "tool_invocations": 16,
+      "seconds": 177.2549902910032
+    },
+    {
+      "arm": "raw",
+      "accepted": 2,
+      "tasks": 2,
+      "input_tokens": 291039,
+      "cached_input_tokens": 247168,
+      "uncached_input_tokens": 43871,
+      "output_tokens": 7720,
+      "tool_invocations": 10,
+      "seconds": 193.7340128750002
+    }
+  ],
+  "tool_overlap_diagnostic": [
+    {
+      "stage": "round2",
+      "case": "httpx-service-client-cairn",
+      "tool_invocations": 20,
+      "tool_counts": {
+        "shell": 3,
+        "search_documents": 9,
+        "get_section": 6,
+        "read_range": 2
+      },
+      "max_observed_overlap": 8,
+      "groups_by_active_call_drain": [
+        [
+          "shell"
+        ],
+        [
+          "search_documents",
+          "search_documents",
+          "search_documents",
+          "search_documents",
+          "search_documents",
+          "search_documents"
+        ],
+        [
+          "search_documents"
+        ],
+        [
+          "search_documents"
+        ],
+        [
+          "search_documents"
+        ],
+        [
+          "get_section",
+          "read_range",
+          "get_section",
+          "get_section",
+          "get_section",
+          "read_range",
+          "get_section",
+          "get_section"
+        ],
+        [
+          "shell"
+        ],
+        [
+          "shell"
+        ]
+      ],
+      "warning": "Observed overlap, not an exact count of model inference turns."
+    },
+    {
+      "stage": "round2",
+      "case": "ruff-isolated-ci-config-cairn",
+      "tool_invocations": 13,
+      "tool_counts": {
+        "search_documents": 2,
+        "get_section": 9,
+        "outline": 2
+      },
+      "max_observed_overlap": 5,
+      "groups_by_active_call_drain": [
+        [
+          "search_documents",
+          "search_documents"
+        ],
+        [
+          "get_section",
+          "get_section"
+        ],
+        [
+          "outline"
+        ],
+        [
+          "outline"
+        ],
+        [
+          "get_section",
+          "get_section",
+          "get_section",
+          "get_section",
+          "get_section"
+        ],
+        [
+          "get_section",
+          "get_section"
+        ]
+      ],
+      "warning": "Observed overlap, not an exact count of model inference turns."
+    },
+    {
+      "stage": "paper-context",
+      "case": "httpx-service-client-cairn",
+      "tool_invocations": 7,
+      "tool_counts": {
+        "shell": 3,
+        "repo_context": 4
+      },
+      "max_observed_overlap": 3,
+      "groups_by_active_call_drain": [
+        [
+          "shell"
+        ],
+        [
+          "repo_context"
+        ],
+        [
+          "repo_context"
+        ],
+        [
+          "repo_context",
+          "repo_context",
+          "shell"
+        ],
+        [
+          "shell"
+        ]
+      ],
+      "warning": "Observed overlap, not an exact count of model inference turns."
+    },
+    {
+      "stage": "paper-context",
+      "case": "ruff-isolated-ci-config-cairn",
+      "tool_invocations": 9,
+      "tool_counts": {
+        "repo_context": 3,
+        "search_documents": 3,
+        "outline": 1,
+        "get_section": 1,
+        "read_range": 1
+      },
+      "max_observed_overlap": 3,
+      "groups_by_active_call_drain": [
+        [
+          "repo_context"
+        ],
+        [
+          "repo_context"
+        ],
+        [
+          "repo_context"
+        ],
+        [
+          "search_documents",
+          "search_documents",
+          "search_documents"
+        ],
+        [
+          "outline",
+          "get_section"
+        ],
+        [
+          "read_range"
+        ]
+      ],
+      "warning": "Observed overlap, not an exact count of model inference turns."
+    }
+  ],
+  "transfer_protocol": {
+    "model": "gpt-6.1-sol",
+    "reasoning_effort": "high (matches existing user configuration)",
+    "runtime": "codex-cli 0.164.0, ephemeral fresh sessions, existing ChatGPT auth; no API-key copying",
+    "scope": "Three additional task texts x Cairn/BM25/raw; one valid attempt per pair; rotated arm order",
+    "arms": [
+      "cairn",
+      "bm25",
+      "raw source files + rg"
+    ],
+    "tool_budget": 24,
+    "per_session_wall_time_limit_seconds": 900,
+    "final_output_request": "<=1800 tokens (prompt limit, not a decoder setting)",
+    "source_version": "paper-context-candidate/src",
+    "coding_tools": "same read-only shell, local Python tests allowed, no network requests or source edits",
+    "source_evidence": "MCP only for Cairn/BM25; curated copied docs and rg for raw arm",
+    "known_cases": "These three task texts were frozen before prior Qwen trials, and have never been run with Codex in this experiment. Product evolved after Qwen results. No untouched held-out claim.",
+    "usage": "CLI turn.completed totals, including cached_input_tokens and output_tokens; not dollar billing or cross-model comparable token counts",
+    "round": "Model-transfer stress test; cases previously exposed to Qwen development, not untouched generalization",
+    "changes": [
+      "Explicit full-context truncation/source-body metadata and reuse guidance in product.",
+      "No user-prompt workflow constraint or oracle evidence supplied."
+    ],
+    "attempt_selection": "One valid attempt for each pair; retain all old and new runs, including failures.",
+    "runner_sha256": "6165a528cdc09e22fabc31ae3035cad4ed2210e3725b8689a92f19dcc0b7c76d",
+    "cases": [
+      "uvicorn-production-factory",
+      "ruff-inherited-project-config",
+      "starlette-shared-lifespan-state"
+    ],
+    "freeze": "Freeze before first transfer Codex answer. No source/protocol tuning on these answers.",
+    "acceptance": "Previously qualified actual Uvicorn parser and Ruff fixture execution, Starlette runtime verifier with positive/negative controls; manual all-requirement/source citation review mandatory."
+  },
+  "limitations": [
+    "Two repeatedly-used development tasks; one valid attempt per arm, no causal attribution or population estimate.",
+    "Transfer task texts previously exposed to Qwen; not untouched held-out validation.",
+    "Product changed completeness metadata and guidance together. No ranking algorithm change.",
+    "Costs retain cached/uncached/output separately; no API dollar price inferred.",
+    "MCP result text/structured duplication in event logs is not proof of model input duplication."
+  ],
+  "transfer_runs": [
+    {
+      "case_id": "ruff-inherited-project-config",
+      "arm": "bm25",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 161.42214012499971,
+      "tool_invocations": 22,
+      "usage_events": [
+        {
+          "input_tokens": 478915,
+          "cached_input_tokens": 437504,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 6581,
+          "reasoning_output_tokens": 1216
+        }
+      ],
+      "input_tokens": 478915,
+      "cached_input_tokens": 437504,
+      "output_tokens": 6581,
+      "final_answer_exists": true,
+      "stage": "transfer",
+      "uncached_input_tokens": 41411,
+      "answer_sha256": "f1297e1b0fc3a1abe58e5b88132c304848960966a360e76eef0f9f47c625b58c",
+      "artifact": "codex/paper-transfer/ruff-inherited-project-config-bm25",
+      "independent_execution_review": {
+        "toml_parse_errors": [],
+        "toml_blocks": 2,
+        "files_modified": "temporary fixture only",
+        "root_config": {
+          "target-version": "py310",
+          "line-length": 100,
+          "lint": {
+            "select": [
+              "E4",
+              "E7",
+              "E9",
+              "F"
+            ]
+          },
+          "format": {
+            "quote-style": "single"
+          }
+        },
+        "child_config": {
+          "extend": "../../pyproject.toml",
+          "extend-exclude": [
+            "generated",
+            "_generated"
+          ],
+          "force-exclude": true,
+          "lint": {
+            "extend-select": [
+              "I"
+            ],
+            "per-file-ignores": {
+              "__init__.py": [
+                "F401"
+              ]
+            }
+          }
+        },
+        "unused_import": {
+          "exit": 1,
+          "codes": [
+            "F401"
+          ],
+          "error": ""
+        },
+        "import_sorting": {
+          "exit": 1,
+          "codes": [
+            "I001"
+          ],
+          "error": ""
+        },
+        "formatter_output": "word = 'hello'\n",
+        "formatter_error": "",
+        "package_init": {
+          "exit": 0,
+          "codes": [],
+          "error": ""
+        },
+        "explicit_generated": {
+          "exit": 0,
+          "codes": [],
+          "error": "warning: No Python files found under the given path(s)\n"
+        },
+        "checks": {
+          "root_line_length": true,
+          "unused_import_linted": true,
+          "import_sorting_enabled": true,
+          "single_quotes": true,
+          "target_version": true,
+          "package_init_ignored": true,
+          "explicit_generated_excluded": true
+        },
+        "config_passed": true
+      },
+      "manual_deliverable_and_source_review": "passed against frozen task and selected original sources",
+      "complete_task_accepted": false,
+      "original_acceptance_before_oracle_correction": true,
+      "corrected_auto_discovery_execution_review": {
+        "toml_parse_errors": [],
+        "toml_blocks": 2,
+        "files_modified": "temporary fixture only",
+        "root_config": {
+          "target-version": "py310",
+          "line-length": 100,
+          "lint": {
+            "select": [
+              "E4",
+              "E7",
+              "E9",
+              "F"
+            ]
+          },
+          "format": {
+            "quote-style": "single"
+          }
+        },
+        "child_config": {
+          "extend": "../../pyproject.toml",
+          "extend-exclude": [
+            "generated",
+            "_generated"
+          ],
+          "force-exclude": true,
+          "lint": {
+            "extend-select": [
+              "I"
+            ],
+            "per-file-ignores": {
+              "__init__.py": [
+                "F401"
+              ]
+            }
+          }
+        },
+        "unused_import": {
+          "exit": 1,
+          "codes": [
+            "F401"
+          ],
+          "error": ""
+        },
+        "import_sorting": {
+          "exit": 1,
+          "codes": [
+            "I001"
+          ],
+          "error": ""
+        },
+        "formatter_output": "word = 'hello'\n",
+        "formatter_error": "",
+        "package_init": {
+          "exit": 0,
+          "codes": [],
+          "error": ""
+        },
+        "explicit_generated": {
+          "exit": 0,
+          "codes": [],
+          "error": "warning: No Python files found under the given path(s)\n"
+        },
+        "auto_explicit_generated": {
+          "exit": 1,
+          "stdout": "[\n  {\n    \"cell\": null,\n    \"code\": \"E402\",\n    \"end_location\": {\n      \"column\": 10,\n      \"row\": 2\n    },\n    \"filename\": \"/private/var/folders/cg/xm8lr5_141j1zgmxc5qbd8rm0000gn/T/cairn-ruff-fixture-ax8p5rui/packages/api/generated/bad.py\",\n    \"fix\": null,\n    \"location\": {\n      \"column\": 1,\n      \"row\": 2\n    },\n    \"message\": \"Module level import not at top of file\",\n    \"name\": \"module-import-not-at-top-of-file\",\n    \"noqa_row\": 2,\n    \"severity\": \"error\",\n    \"url\": \"https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file\"\n  },\n  {\n    \"cell\": null,\n    \"code\": \"F401\",\n    \"end_location\": {\n      \"column\": 10,\n      \"row\": 2\n    },\n    \"filename\": \"/private/var/folders/cg/xm8lr5_141j1zgmxc5qbd8rm0000gn/T/cairn-ruff-fixture-ax8p5rui/packages/api/generated/bad.py\",\n    \"fix\": {\n      \"applicability\": \"safe\",\n      \"edits\": [\n        {\n          \"content\": \"\",\n          \"end_location\": {\n            \"column\": 1,\n            \"row\": 3\n          },\n          \"location\": {\n            \"column\": 1,\n            \"row\": 2\n          }\n        }\n      ],\n      \"message\": \"Remove unused import: `os`\"\n    },\n    \"location\": {\n      \"column\": 8,\n      \"row\": 2\n    },\n    \"message\": \"`os` imported but unused\",\n    \"name\": \"unused-import\",\n    \"noqa_row\": 2,\n    \"severity\": \"error\",\n    \"url\": \"https://docs.astral.sh/ruff/rules/unused-import\"\n  }\n]",
+          "stderr": ""
+        },
+        "auto_explicit_generated_format": {
+          "exit": 1,
+          "stdout": "Would reformat: packages/api/generated/bad.py\n1 file would be reformatted\n",
+          "stderr": ""
+        },
+        "checks": {
+          "root_line_length": true,
+          "unused_import_linted": true,
+          "import_sorting_enabled": true,
+          "single_quotes": true,
+          "target_version": true,
+          "package_init_ignored": true,
+          "explicit_generated_excluded": false
+        },
+        "config_passed": false
+      },
+      "acceptance_correction": "Root-cwd explicit generated-file lint/format handling fails under automatic config discovery; old grader forced --config."
+    },
+    {
+      "case_id": "ruff-inherited-project-config",
+      "arm": "cairn",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 156.48962416699942,
+      "tool_invocations": 16,
+      "usage_events": [
+        {
+          "input_tokens": 588766,
+          "cached_input_tokens": 542592,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 5920,
+          "reasoning_output_tokens": 1133
+        }
+      ],
+      "input_tokens": 588766,
+      "cached_input_tokens": 542592,
+      "output_tokens": 5920,
+      "final_answer_exists": true,
+      "stage": "transfer",
+      "uncached_input_tokens": 46174,
+      "answer_sha256": "45a3a64c7918725da9a8418f1439087caa61bd2ef5528956fad642d458964510",
+      "artifact": "codex/paper-transfer/ruff-inherited-project-config-cairn",
+      "independent_execution_review": {
+        "toml_parse_errors": [],
+        "toml_blocks": 2,
+        "files_modified": "temporary fixture only",
+        "root_config": {
+          "target-version": "py310",
+          "line-length": 100,
+          "lint": {
+            "select": [
+              "E4",
+              "E7",
+              "E9",
+              "F"
+            ]
+          },
+          "format": {
+            "quote-style": "single"
+          }
+        },
+        "child_config": {
+          "extend": "../../pyproject.toml",
+          "extend-exclude": [
+            "generated"
+          ],
+          "force-exclude": true,
+          "lint": {
+            "extend-select": [
+              "I"
+            ],
+            "per-file-ignores": {
+              "__init__.py": [
+                "F401"
+              ]
+            }
+          }
+        },
+        "unused_import": {
+          "exit": 1,
+          "codes": [
+            "F401"
+          ],
+          "error": ""
+        },
+        "import_sorting": {
+          "exit": 1,
+          "codes": [
+            "I001"
+          ],
+          "error": ""
+        },
+        "formatter_output": "word = 'hello'\n",
+        "formatter_error": "",
+        "package_init": {
+          "exit": 0,
+          "codes": [],
+          "error": ""
+        },
+        "explicit_generated": {
+          "exit": 0,
+          "codes": [],
+          "error": "warning: No Python files found under the given path(s)\n"
+        },
+        "checks": {
+          "root_line_length": true,
+          "unused_import_linted": true,
+          "import_sorting_enabled": true,
+          "single_quotes": true,
+          "target_version": true,
+          "package_init_ignored": true,
+          "explicit_generated_excluded": true
+        },
+        "config_passed": true
+      },
+      "manual_deliverable_and_source_review": "passed against frozen task and selected original sources",
+      "complete_task_accepted": false,
+      "original_acceptance_before_oracle_correction": true,
+      "corrected_auto_discovery_execution_review": {
+        "toml_parse_errors": [],
+        "toml_blocks": 2,
+        "files_modified": "temporary fixture only",
+        "root_config": {
+          "target-version": "py310",
+          "line-length": 100,
+          "lint": {
+            "select": [
+              "E4",
+              "E7",
+              "E9",
+              "F"
+            ]
+          },
+          "format": {
+            "quote-style": "single"
+          }
+        },
+        "child_config": {
+          "extend": "../../pyproject.toml",
+          "extend-exclude": [
+            "generated"
+          ],
+          "force-exclude": true,
+          "lint": {
+            "extend-select": [
+              "I"
+            ],
+            "per-file-ignores": {
+              "__init__.py": [
+                "F401"
+              ]
+            }
+          }
+        },
+        "unused_import": {
+          "exit": 1,
+          "codes": [
+            "F401"
+          ],
+          "error": ""
+        },
+        "import_sorting": {
+          "exit": 1,
+          "codes": [
+            "I001"
+          ],
+          "error": ""
+        },
+        "formatter_output": "word = 'hello'\n",
+        "formatter_error": "",
+        "package_init": {
+          "exit": 0,
+          "codes": [],
+          "error": ""
+        },
+        "explicit_generated": {
+          "exit": 0,
+          "codes": [],
+          "error": "warning: No Python files found under the given path(s)\n"
+        },
+        "auto_explicit_generated": {
+          "exit": 1,
+          "stdout": "[\n  {\n    \"cell\": null,\n    \"code\": \"E402\",\n    \"end_location\": {\n      \"column\": 10,\n      \"row\": 2\n    },\n    \"filename\": \"/private/var/folders/cg/xm8lr5_141j1zgmxc5qbd8rm0000gn/T/cairn-ruff-fixture-1h9hq2l5/packages/api/generated/bad.py\",\n    \"fix\": null,\n    \"location\": {\n      \"column\": 1,\n      \"row\": 2\n    },\n    \"message\": \"Module level import not at top of file\",\n    \"name\": \"module-import-not-at-top-of-file\",\n    \"noqa_row\": 2,\n    \"severity\": \"error\",\n    \"url\": \"https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file\"\n  },\n  {\n    \"cell\": null,\n    \"code\": \"F401\",\n    \"end_location\": {\n      \"column\": 10,\n      \"row\": 2\n    },\n    \"filename\": \"/private/var/folders/cg/xm8lr5_141j1zgmxc5qbd8rm0000gn/T/cairn-ruff-fixture-1h9hq2l5/packages/api/generated/bad.py\",\n    \"fix\": {\n      \"applicability\": \"safe\",\n      \"edits\": [\n        {\n          \"content\": \"\",\n          \"end_location\": {\n            \"column\": 1,\n            \"row\": 3\n          },\n          \"location\": {\n            \"column\": 1,\n            \"row\": 2\n          }\n        }\n      ],\n      \"message\": \"Remove unused import: `os`\"\n    },\n    \"location\": {\n      \"column\": 8,\n      \"row\": 2\n    },\n    \"message\": \"`os` imported but unused\",\n    \"name\": \"unused-import\",\n    \"noqa_row\": 2,\n    \"severity\": \"error\",\n    \"url\": \"https://docs.astral.sh/ruff/rules/unused-import\"\n  }\n]",
+          "stderr": ""
+        },
+        "auto_explicit_generated_format": {
+          "exit": 1,
+          "stdout": "Would reformat: packages/api/generated/bad.py\n1 file would be reformatted\n",
+          "stderr": ""
+        },
+        "checks": {
+          "root_line_length": true,
+          "unused_import_linted": true,
+          "import_sorting_enabled": true,
+          "single_quotes": true,
+          "target_version": true,
+          "package_init_ignored": true,
+          "explicit_generated_excluded": false
+        },
+        "config_passed": false
+      },
+      "acceptance_correction": "Root-cwd explicit generated-file lint/format handling fails under automatic config discovery; old grader forced --config."
+    },
+    {
+      "case_id": "ruff-inherited-project-config",
+      "arm": "raw",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 163.15650095800083,
+      "tool_invocations": 12,
+      "usage_events": [
+        {
+          "input_tokens": 347137,
+          "cached_input_tokens": 309248,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 6351,
+          "reasoning_output_tokens": 1758
+        }
+      ],
+      "input_tokens": 347137,
+      "cached_input_tokens": 309248,
+      "output_tokens": 6351,
+      "final_answer_exists": true,
+      "stage": "transfer",
+      "uncached_input_tokens": 37889,
+      "answer_sha256": "65fb34438b74f830d421a17323e733f91867b77ab04ddadb3c564d87ce50b893",
+      "artifact": "codex/paper-transfer/ruff-inherited-project-config-raw",
+      "independent_execution_review": {
+        "toml_parse_errors": [],
+        "toml_blocks": 2,
+        "files_modified": "temporary fixture only",
+        "root_config": {
+          "target-version": "py310",
+          "line-length": 100,
+          "lint": {
+            "select": [
+              "E4",
+              "E7",
+              "E9",
+              "F"
+            ]
+          },
+          "format": {
+            "quote-style": "single"
+          }
+        },
+        "child_config": {
+          "extend": "../../pyproject.toml",
+          "extend-exclude": [
+            "generated"
+          ],
+          "force-exclude": true,
+          "lint": {
+            "extend-select": [
+              "I"
+            ],
+            "per-file-ignores": {
+              "__init__.py": [
+                "F401"
+              ]
+            }
+          }
+        },
+        "unused_import": {
+          "exit": 1,
+          "codes": [
+            "F401"
+          ],
+          "error": ""
+        },
+        "import_sorting": {
+          "exit": 1,
+          "codes": [
+            "I001"
+          ],
+          "error": ""
+        },
+        "formatter_output": "word = 'hello'\n",
+        "formatter_error": "",
+        "package_init": {
+          "exit": 0,
+          "codes": [],
+          "error": ""
+        },
+        "explicit_generated": {
+          "exit": 0,
+          "codes": [],
+          "error": "warning: No Python files found under the given path(s)\n"
+        },
+        "checks": {
+          "root_line_length": true,
+          "unused_import_linted": true,
+          "import_sorting_enabled": true,
+          "single_quotes": true,
+          "target_version": true,
+          "package_init_ignored": true,
+          "explicit_generated_excluded": true
+        },
+        "config_passed": true
+      },
+      "manual_deliverable_and_source_review": "passed against frozen task and selected original sources",
+      "complete_task_accepted": false,
+      "original_acceptance_before_oracle_correction": true,
+      "corrected_auto_discovery_execution_review": {
+        "toml_parse_errors": [],
+        "toml_blocks": 2,
+        "files_modified": "temporary fixture only",
+        "root_config": {
+          "target-version": "py310",
+          "line-length": 100,
+          "lint": {
+            "select": [
+              "E4",
+              "E7",
+              "E9",
+              "F"
+            ]
+          },
+          "format": {
+            "quote-style": "single"
+          }
+        },
+        "child_config": {
+          "extend": "../../pyproject.toml",
+          "extend-exclude": [
+            "generated"
+          ],
+          "force-exclude": true,
+          "lint": {
+            "extend-select": [
+              "I"
+            ],
+            "per-file-ignores": {
+              "__init__.py": [
+                "F401"
+              ]
+            }
+          }
+        },
+        "unused_import": {
+          "exit": 1,
+          "codes": [
+            "F401"
+          ],
+          "error": ""
+        },
+        "import_sorting": {
+          "exit": 1,
+          "codes": [
+            "I001"
+          ],
+          "error": ""
+        },
+        "formatter_output": "word = 'hello'\n",
+        "formatter_error": "",
+        "package_init": {
+          "exit": 0,
+          "codes": [],
+          "error": ""
+        },
+        "explicit_generated": {
+          "exit": 0,
+          "codes": [],
+          "error": "warning: No Python files found under the given path(s)\n"
+        },
+        "auto_explicit_generated": {
+          "exit": 1,
+          "stdout": "[\n  {\n    \"cell\": null,\n    \"code\": \"E402\",\n    \"end_location\": {\n      \"column\": 10,\n      \"row\": 2\n    },\n    \"filename\": \"/private/var/folders/cg/xm8lr5_141j1zgmxc5qbd8rm0000gn/T/cairn-ruff-fixture-8mu4nulq/packages/api/generated/bad.py\",\n    \"fix\": null,\n    \"location\": {\n      \"column\": 1,\n      \"row\": 2\n    },\n    \"message\": \"Module level import not at top of file\",\n    \"name\": \"module-import-not-at-top-of-file\",\n    \"noqa_row\": 2,\n    \"severity\": \"error\",\n    \"url\": \"https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file\"\n  },\n  {\n    \"cell\": null,\n    \"code\": \"F401\",\n    \"end_location\": {\n      \"column\": 10,\n      \"row\": 2\n    },\n    \"filename\": \"/private/var/folders/cg/xm8lr5_141j1zgmxc5qbd8rm0000gn/T/cairn-ruff-fixture-8mu4nulq/packages/api/generated/bad.py\",\n    \"fix\": {\n      \"applicability\": \"safe\",\n      \"edits\": [\n        {\n          \"content\": \"\",\n          \"end_location\": {\n            \"column\": 1,\n            \"row\": 3\n          },\n          \"location\": {\n            \"column\": 1,\n            \"row\": 2\n          }\n        }\n      ],\n      \"message\": \"Remove unused import: `os`\"\n    },\n    \"location\": {\n      \"column\": 8,\n      \"row\": 2\n    },\n    \"message\": \"`os` imported but unused\",\n    \"name\": \"unused-import\",\n    \"noqa_row\": 2,\n    \"severity\": \"error\",\n    \"url\": \"https://docs.astral.sh/ruff/rules/unused-import\"\n  }\n]",
+          "stderr": ""
+        },
+        "auto_explicit_generated_format": {
+          "exit": 1,
+          "stdout": "Would reformat: packages/api/generated/bad.py\n1 file would be reformatted\n",
+          "stderr": ""
+        },
+        "checks": {
+          "root_line_length": true,
+          "unused_import_linted": true,
+          "import_sorting_enabled": true,
+          "single_quotes": true,
+          "target_version": true,
+          "package_init_ignored": true,
+          "explicit_generated_excluded": false
+        },
+        "config_passed": false
+      },
+      "acceptance_correction": "Root-cwd explicit generated-file lint/format handling fails under automatic config discovery; old grader forced --config."
+    },
+    {
+      "case_id": "starlette-shared-lifespan-state",
+      "arm": "bm25",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 83.76337899999999,
+      "tool_invocations": 9,
+      "usage_events": [
+        {
+          "input_tokens": 156665,
+          "cached_input_tokens": 124800,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 3276,
+          "reasoning_output_tokens": 951
+        }
+      ],
+      "input_tokens": 156665,
+      "cached_input_tokens": 124800,
+      "output_tokens": 3276,
+      "final_answer_exists": true,
+      "stage": "transfer",
+      "uncached_input_tokens": 31865,
+      "answer_sha256": "09cfe96182dbb14581b773ebf476891a023f303338cdfdefb53b14bdefde1341",
+      "artifact": "codex/paper-transfer/starlette-shared-lifespan-state-bm25",
+      "independent_execution_review": {
+        "case_id": "starlette-shared-lifespan-state",
+        "answer": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/paper-transfer/starlette-shared-lifespan-state-bm25/answer.txt",
+        "answer_sha256": "09cfe96182dbb14581b773ebf476891a023f303338cdfdefb53b14bdefde1341",
+        "python_blocks": 1,
+        "runtime_attempted": true,
+        "manual_source_and_deliverable_review_required": true,
+        "compiled": true,
+        "required_interface_declared": true,
+        "runtime_checks": {
+          "endpoint": true,
+          "single_client": true,
+          "open_inside_lifespan": true,
+          "client_shared_in_state": true,
+          "closed_on_shutdown": true
+        },
+        "runtime_constraints_passed": true,
+        "generated_stdout": ""
+      },
+      "delivered_test_review": {
+        "audited": true,
+        "delivered_main_test_attempted": true,
+        "outbound_network_blocked": true,
+        "delivered_main_test_passed": true,
+        "warnings": [],
+        "stdout": "Tests passed\n"
+      },
+      "manual_deliverable_and_source_review": "passed against frozen task and selected original sources",
+      "complete_task_accepted": true
+    },
+    {
+      "case_id": "starlette-shared-lifespan-state",
+      "arm": "cairn",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 105.92529658299827,
+      "tool_invocations": 7,
+      "usage_events": [
+        {
+          "input_tokens": 247919,
+          "cached_input_tokens": 215552,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 3754,
+          "reasoning_output_tokens": 1307
+        }
+      ],
+      "input_tokens": 247919,
+      "cached_input_tokens": 215552,
+      "output_tokens": 3754,
+      "final_answer_exists": true,
+      "stage": "transfer",
+      "uncached_input_tokens": 32367,
+      "answer_sha256": "d62b4ef41ebadfdba731e3f1622a975dfecd6cf6b753a2950025b82221e06bf2",
+      "artifact": "codex/paper-transfer/starlette-shared-lifespan-state-cairn",
+      "independent_execution_review": {
+        "case_id": "starlette-shared-lifespan-state",
+        "answer": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/paper-transfer/starlette-shared-lifespan-state-cairn/answer.txt",
+        "answer_sha256": "d62b4ef41ebadfdba731e3f1622a975dfecd6cf6b753a2950025b82221e06bf2",
+        "python_blocks": 1,
+        "runtime_attempted": true,
+        "manual_source_and_deliverable_review_required": true,
+        "compiled": true,
+        "required_interface_declared": true,
+        "runtime_checks": {
+          "endpoint": true,
+          "single_client": true,
+          "open_inside_lifespan": true,
+          "client_shared_in_state": true,
+          "closed_on_shutdown": true
+        },
+        "runtime_constraints_passed": true,
+        "generated_stdout": ""
+      },
+      "delivered_test_review": {
+        "audited": true,
+        "delivered_main_test_attempted": true,
+        "outbound_network_blocked": true,
+        "delivered_main_test_passed": true,
+        "warnings": [
+          "Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead."
+        ],
+        "stdout": ""
+      },
+      "manual_deliverable_and_source_review": "passed against frozen task and selected original sources",
+      "complete_task_accepted": true
+    },
+    {
+      "case_id": "starlette-shared-lifespan-state",
+      "arm": "raw",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 70.004776709,
+      "tool_invocations": 3,
+      "usage_events": [
+        {
+          "input_tokens": 107939,
+          "cached_input_tokens": 86272,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 3747,
+          "reasoning_output_tokens": 1103
+        }
+      ],
+      "input_tokens": 107939,
+      "cached_input_tokens": 86272,
+      "output_tokens": 3747,
+      "final_answer_exists": true,
+      "stage": "transfer",
+      "uncached_input_tokens": 21667,
+      "answer_sha256": "93fef36d88cb5e3a0a7c577fdf0a260544834cd238dfdd084a9c61445e6951bd",
+      "artifact": "codex/paper-transfer/starlette-shared-lifespan-state-raw",
+      "independent_execution_review": {
+        "case_id": "starlette-shared-lifespan-state",
+        "answer": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/paper-transfer/starlette-shared-lifespan-state-raw/answer.txt",
+        "answer_sha256": "93fef36d88cb5e3a0a7c577fdf0a260544834cd238dfdd084a9c61445e6951bd",
+        "python_blocks": 1,
+        "runtime_attempted": true,
+        "manual_source_and_deliverable_review_required": true,
+        "compiled": true,
+        "required_interface_declared": true,
+        "runtime_checks": {
+          "endpoint": true,
+          "single_client": true,
+          "open_inside_lifespan": true,
+          "client_shared_in_state": true,
+          "closed_on_shutdown": true
+        },
+        "runtime_constraints_passed": true,
+        "generated_stdout": ""
+      },
+      "delivered_test_review": {
+        "audited": true,
+        "delivered_main_test_attempted": true,
+        "outbound_network_blocked": true,
+        "delivered_main_test_passed": true,
+        "warnings": [],
+        "stdout": ""
+      },
+      "manual_deliverable_and_source_review": "passed against frozen task and selected original sources",
+      "complete_task_accepted": true
+    },
+    {
+      "case_id": "uvicorn-production-factory",
+      "arm": "bm25",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 68.00637004199962,
+      "tool_invocations": 15,
+      "usage_events": [
+        {
+          "input_tokens": 286224,
+          "cached_input_tokens": 234368,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 3677,
+          "reasoning_output_tokens": 675
+        }
+      ],
+      "input_tokens": 286224,
+      "cached_input_tokens": 234368,
+      "output_tokens": 3677,
+      "final_answer_exists": true,
+      "stage": "transfer",
+      "uncached_input_tokens": 51856,
+      "answer_sha256": "4ceb436b787bea9c719dfe65e25c34dc62e71664018a852f68b262e4ac3d9f44",
+      "artifact": "codex/paper-transfer/uvicorn-production-factory-bm25",
+      "independent_execution_review": {
+        "commands": [
+          [
+            "service:create_app",
+            "--factory",
+            "--app-dir",
+            "src",
+            "--host",
+            "0.0.0.0",
+            "--port",
+            "9000",
+            "--workers",
+            "3",
+            "--proxy-headers",
+            "--forwarded-allow-ips",
+            "10.0.0.1",
+            "--header",
+            "X-Service: demo",
+            "--no-server-header",
+            "--limit-concurrency",
+            "40",
+            "--backlog",
+            "128"
+          ]
+        ],
+        "server_started": false,
+        "parser_exit": 0,
+        "parser_output": "",
+        "parsed": {
+          "host": "0.0.0.0",
+          "port": 9000,
+          "uds": null,
+          "fd": null,
+          "loop": "auto",
+          "http": "auto",
+          "ws": "auto",
+          "ws_max_size": 16777216,
+          "ws_max_queue": 32,
+          "ws_ping_interval": 20.0,
+          "ws_ping_timeout": 20.0,
+          "ws_per_message_deflate": true,
+          "lifespan": "auto",
+          "env_file": null,
+          "log_config": {
+            "version": 1,
+            "disable_existing_loggers": false,
+            "formatters": {
+              "default": {
+                "()": "uvicorn.logging.DefaultFormatter",
+                "fmt": "%(levelprefix)s %(message)s",
+                "use_colors": null
+              },
+              "access": {
+                "()": "uvicorn.logging.AccessFormatter",
+                "fmt": "%(levelprefix)s %(client_addr)s - \"%(request_line)s\" %(status_code)s"
+              }
+            },
+            "handlers": {
+              "default": {
+                "formatter": "default",
+                "class": "logging.StreamHandler",
+                "stream": "ext://sys.stderr"
+              },
+              "access": {
+                "formatter": "access",
+                "class": "logging.StreamHandler",
+                "stream": "ext://sys.stdout"
+              }
+            },
+            "loggers": {
+              "uvicorn": {
+                "handlers": [
+                  "default"
+                ],
+                "level": "INFO",
+                "propagate": false
+              },
+              "uvicorn.error": {
+                "level": "INFO"
+              },
+              "uvicorn.access": {
+                "handlers": [
+                  "access"
+                ],
+                "level": "INFO",
+                "propagate": false
+              }
+            }
+          },
+          "log_level": null,
+          "access_log": true,
+          "interface": "auto",
+          "reload": false,
+          "reload_dirs": null,
+          "reload_includes": null,
+          "reload_excludes": null,
+          "reload_delay": 0.25,
+          "workers": 3,
+          "proxy_headers": true,
+          "server_header": false,
+          "date_header": true,
+          "forwarded_allow_ips": "10.0.0.1",
+          "root_path": "",
+          "limit_concurrency": 40,
+          "backlog": 128,
+          "limit_max_requests": null,
+          "limit_max_requests_jitter": 0,
+          "timeout_keep_alive": 5,
+          "timeout_graceful_shutdown": null,
+          "timeout_worker_healthcheck": 5,
+          "ssl_keyfile": null,
+          "ssl_certfile": null,
+          "ssl_keyfile_password": null,
+          "ssl_version": 17,
+          "ssl_cert_reqs": 0,
+          "ssl_ca_certs": null,
+          "ssl_ciphers": null,
+          "headers": [
+            [
+              "X-Service",
+              " demo"
+            ]
+          ],
+          "use_colors": null,
+          "factory": true,
+          "app_dir": "src",
+          "h11_max_incomplete_event_size": null,
+          "reset_contextvars": false
+        },
+        "app": "service:create_app",
+        "checks": {
+          "factory": true,
+          "app": true,
+          "app_dir": true,
+          "host": true,
+          "port": true,
+          "workers": true,
+          "reload": true,
+          "proxy_scope": true,
+          "header": true,
+          "no_server_header": true,
+          "concurrency": true,
+          "backlog": true
+        },
+        "cli_passed": true
+      },
+      "manual_deliverable_and_source_review": "passed against frozen task and selected original sources",
+      "complete_task_accepted": true
+    },
+    {
+      "case_id": "uvicorn-production-factory",
+      "arm": "cairn",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 73.55168666600002,
+      "tool_invocations": 8,
+      "usage_events": [
+        {
+          "input_tokens": 290068,
+          "cached_input_tokens": 267648,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 3354,
+          "reasoning_output_tokens": 458
+        }
+      ],
+      "input_tokens": 290068,
+      "cached_input_tokens": 267648,
+      "output_tokens": 3354,
+      "final_answer_exists": true,
+      "stage": "transfer",
+      "uncached_input_tokens": 22420,
+      "answer_sha256": "ce9b9356626206b560898340d53579f08a58710d636c2f3aed53e9067f02df96",
+      "artifact": "codex/paper-transfer/uvicorn-production-factory-cairn",
+      "independent_execution_review": {
+        "commands": [
+          [
+            "service:create_app",
+            "--factory",
+            "--app-dir",
+            "src",
+            "--host",
+            "0.0.0.0",
+            "--port",
+            "9000",
+            "--workers",
+            "3",
+            "--proxy-headers",
+            "--forwarded-allow-ips",
+            "10.0.0.1",
+            "--header",
+            "X-Service:demo",
+            "--no-server-header",
+            "--limit-concurrency",
+            "40",
+            "--backlog",
+            "128"
+          ]
+        ],
+        "server_started": false,
+        "parser_exit": 0,
+        "parser_output": "",
+        "parsed": {
+          "host": "0.0.0.0",
+          "port": 9000,
+          "uds": null,
+          "fd": null,
+          "loop": "auto",
+          "http": "auto",
+          "ws": "auto",
+          "ws_max_size": 16777216,
+          "ws_max_queue": 32,
+          "ws_ping_interval": 20.0,
+          "ws_ping_timeout": 20.0,
+          "ws_per_message_deflate": true,
+          "lifespan": "auto",
+          "env_file": null,
+          "log_config": {
+            "version": 1,
+            "disable_existing_loggers": false,
+            "formatters": {
+              "default": {
+                "()": "uvicorn.logging.DefaultFormatter",
+                "fmt": "%(levelprefix)s %(message)s",
+                "use_colors": null
+              },
+              "access": {
+                "()": "uvicorn.logging.AccessFormatter",
+                "fmt": "%(levelprefix)s %(client_addr)s - \"%(request_line)s\" %(status_code)s"
+              }
+            },
+            "handlers": {
+              "default": {
+                "formatter": "default",
+                "class": "logging.StreamHandler",
+                "stream": "ext://sys.stderr"
+              },
+              "access": {
+                "formatter": "access",
+                "class": "logging.StreamHandler",
+                "stream": "ext://sys.stdout"
+              }
+            },
+            "loggers": {
+              "uvicorn": {
+                "handlers": [
+                  "default"
+                ],
+                "level": "INFO",
+                "propagate": false
+              },
+              "uvicorn.error": {
+                "level": "INFO"
+              },
+              "uvicorn.access": {
+                "handlers": [
+                  "access"
+                ],
+                "level": "INFO",
+                "propagate": false
+              }
+            }
+          },
+          "log_level": null,
+          "access_log": true,
+          "interface": "auto",
+          "reload": false,
+          "reload_dirs": null,
+          "reload_includes": null,
+          "reload_excludes": null,
+          "reload_delay": 0.25,
+          "workers": 3,
+          "proxy_headers": true,
+          "server_header": false,
+          "date_header": true,
+          "forwarded_allow_ips": "10.0.0.1",
+          "root_path": "",
+          "limit_concurrency": 40,
+          "backlog": 128,
+          "limit_max_requests": null,
+          "limit_max_requests_jitter": 0,
+          "timeout_keep_alive": 5,
+          "timeout_graceful_shutdown": null,
+          "timeout_worker_healthcheck": 5,
+          "ssl_keyfile": null,
+          "ssl_certfile": null,
+          "ssl_keyfile_password": null,
+          "ssl_version": 17,
+          "ssl_cert_reqs": 0,
+          "ssl_ca_certs": null,
+          "ssl_ciphers": null,
+          "headers": [
+            [
+              "X-Service",
+              "demo"
+            ]
+          ],
+          "use_colors": null,
+          "factory": true,
+          "app_dir": "src",
+          "h11_max_incomplete_event_size": null,
+          "reset_contextvars": false
+        },
+        "app": "service:create_app",
+        "checks": {
+          "factory": true,
+          "app": true,
+          "app_dir": true,
+          "host": true,
+          "port": true,
+          "workers": true,
+          "reload": true,
+          "proxy_scope": true,
+          "header": true,
+          "no_server_header": true,
+          "concurrency": true,
+          "backlog": true
+        },
+        "cli_passed": true
+      },
+      "manual_deliverable_and_source_review": "passed against frozen task and selected original sources",
+      "complete_task_accepted": true
+    },
+    {
+      "case_id": "uvicorn-production-factory",
+      "arm": "raw",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 112.97415720799836,
+      "tool_invocations": 6,
+      "usage_events": [
+        {
+          "input_tokens": 158089,
+          "cached_input_tokens": 125696,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 4704,
+          "reasoning_output_tokens": 1185
+        }
+      ],
+      "input_tokens": 158089,
+      "cached_input_tokens": 125696,
+      "output_tokens": 4704,
+      "final_answer_exists": true,
+      "stage": "transfer",
+      "uncached_input_tokens": 32393,
+      "answer_sha256": "99d7855e5e964ef3bfab426a62708db817d5c4cbe6f79f5f583a6a6696c7276d",
+      "artifact": "codex/paper-transfer/uvicorn-production-factory-raw",
+      "independent_execution_review": {
+        "commands": [
+          [
+            "service:create_app",
+            "--factory",
+            "--app-dir",
+            "src",
+            "--host",
+            "0.0.0.0",
+            "--port",
+            "9000",
+            "--workers",
+            "3",
+            "--proxy-headers",
+            "--forwarded-allow-ips",
+            "10.0.0.1",
+            "--header",
+            "X-Service:demo",
+            "--no-server-header",
+            "--limit-concurrency",
+            "40",
+            "--backlog",
+            "128"
+          ]
+        ],
+        "server_started": false,
+        "parser_exit": 0,
+        "parser_output": "",
+        "parsed": {
+          "host": "0.0.0.0",
+          "port": 9000,
+          "uds": null,
+          "fd": null,
+          "loop": "auto",
+          "http": "auto",
+          "ws": "auto",
+          "ws_max_size": 16777216,
+          "ws_max_queue": 32,
+          "ws_ping_interval": 20.0,
+          "ws_ping_timeout": 20.0,
+          "ws_per_message_deflate": true,
+          "lifespan": "auto",
+          "env_file": null,
+          "log_config": {
+            "version": 1,
+            "disable_existing_loggers": false,
+            "formatters": {
+              "default": {
+                "()": "uvicorn.logging.DefaultFormatter",
+                "fmt": "%(levelprefix)s %(message)s",
+                "use_colors": null
+              },
+              "access": {
+                "()": "uvicorn.logging.AccessFormatter",
+                "fmt": "%(levelprefix)s %(client_addr)s - \"%(request_line)s\" %(status_code)s"
+              }
+            },
+            "handlers": {
+              "default": {
+                "formatter": "default",
+                "class": "logging.StreamHandler",
+                "stream": "ext://sys.stderr"
+              },
+              "access": {
+                "formatter": "access",
+                "class": "logging.StreamHandler",
+                "stream": "ext://sys.stdout"
+              }
+            },
+            "loggers": {
+              "uvicorn": {
+                "handlers": [
+                  "default"
+                ],
+                "level": "INFO",
+                "propagate": false
+              },
+              "uvicorn.error": {
+                "level": "INFO"
+              },
+              "uvicorn.access": {
+                "handlers": [
+                  "access"
+                ],
+                "level": "INFO",
+                "propagate": false
+              }
+            }
+          },
+          "log_level": null,
+          "access_log": true,
+          "interface": "auto",
+          "reload": false,
+          "reload_dirs": null,
+          "reload_includes": null,
+          "reload_excludes": null,
+          "reload_delay": 0.25,
+          "workers": 3,
+          "proxy_headers": true,
+          "server_header": false,
+          "date_header": true,
+          "forwarded_allow_ips": "10.0.0.1",
+          "root_path": "",
+          "limit_concurrency": 40,
+          "backlog": 128,
+          "limit_max_requests": null,
+          "limit_max_requests_jitter": 0,
+          "timeout_keep_alive": 5,
+          "timeout_graceful_shutdown": null,
+          "timeout_worker_healthcheck": 5,
+          "ssl_keyfile": null,
+          "ssl_certfile": null,
+          "ssl_keyfile_password": null,
+          "ssl_version": 17,
+          "ssl_cert_reqs": 0,
+          "ssl_ca_certs": null,
+          "ssl_ciphers": null,
+          "headers": [
+            [
+              "X-Service",
+              "demo"
+            ]
+          ],
+          "use_colors": null,
+          "factory": true,
+          "app_dir": "src",
+          "h11_max_incomplete_event_size": null,
+          "reset_contextvars": false
+        },
+        "app": "service:create_app",
+        "checks": {
+          "factory": true,
+          "app": true,
+          "app_dir": true,
+          "host": true,
+          "port": true,
+          "workers": true,
+          "reload": true,
+          "proxy_scope": true,
+          "header": true,
+          "no_server_header": true,
+          "concurrency": true,
+          "backlog": true
+        },
+        "cli_passed": true
+      },
+      "manual_deliverable_and_source_review": "passed against frozen task and selected original sources",
+      "complete_task_accepted": true
+    }
+  ],
+  "transfer_aggregates": [
+    {
+      "arm": "cairn",
+      "accepted": 2,
+      "tasks": 3,
+      "input_tokens": 1126753,
+      "cached_input_tokens": 1025792,
+      "uncached_input_tokens": 100961,
+      "output_tokens": 13028,
+      "tool_invocations": 31,
+      "seconds": 335.9666074159977
+    },
+    {
+      "arm": "bm25",
+      "accepted": 2,
+      "tasks": 3,
+      "input_tokens": 921804,
+      "cached_input_tokens": 796672,
+      "uncached_input_tokens": 125132,
+      "output_tokens": 13534,
+      "tool_invocations": 46,
+      "seconds": 313.1918891669993
+    },
+    {
+      "arm": "raw",
+      "accepted": 2,
+      "tasks": 3,
+      "input_tokens": 613165,
+      "cached_input_tokens": 521216,
+      "uncached_input_tokens": 91949,
+      "output_tokens": 14802,
+      "tool_invocations": 21,
+      "seconds": 346.1354348749992
+    }
+  ],
+  "five_task_cairn_raw_aggregates": [
+    {
+      "arm": "cairn",
+      "accepted": 4,
+      "tasks": 5,
+      "input_tokens": 1671080,
+      "cached_input_tokens": 1493632,
+      "uncached_input_tokens": 177448,
+      "output_tokens": 19345,
+      "tool_invocations": 47,
+      "seconds": 513.2215977070009
+    },
+    {
+      "arm": "raw",
+      "accepted": 4,
+      "tasks": 5,
+      "input_tokens": 904204,
+      "cached_input_tokens": 768384,
+      "uncached_input_tokens": 135820,
+      "output_tokens": 22522,
+      "tool_invocations": 31,
+      "seconds": 539.8694477499994
+    }
+  ],
+  "oracle_qualification": {
+    "uvicorn_prefix": {
+      "reason": "Existing grader did not recognize valid UVICORN_ environment assignment prefixes. Only parser normalization changed; task checks unchanged. Qualify positive and negative controls, apply to all arms, preserve original grader.",
+      "original_sha256": "d7da77ca5a3828791d42e3eb50d3c68e6e30495890d24d75a0195e2a17a82583",
+      "qualified_sha256": "1b22cd12ae272e93930fc4b38120410760f67943ad493257b54a63b9e47ee15a",
+      "controls": [
+        {
+          "control": "plain",
+          "expected": true,
+          "observed": true,
+          "control_passed": true,
+          "review": {
+            "commands": [
+              [
+                "service:create_app",
+                "--factory",
+                "--app-dir",
+                "src",
+                "--host",
+                "0.0.0.0",
+                "--port",
+                "9000",
+                "--workers",
+                "3",
+                "--proxy-headers",
+                "--forwarded-allow-ips",
+                "10.0.0.1",
+                "--header",
+                "X-Service: demo",
+                "--no-server-header",
+                "--limit-concurrency",
+                "40",
+                "--backlog",
+                "128"
+              ]
+            ],
+            "server_started": false,
+            "parser_exit": 0,
+            "parser_output": "",
+            "parsed": {
+              "host": "0.0.0.0",
+              "port": 9000,
+              "uds": null,
+              "fd": null,
+              "loop": "auto",
+              "http": "auto",
+              "ws": "auto",
+              "ws_max_size": 16777216,
+              "ws_max_queue": 32,
+              "ws_ping_interval": 20.0,
+              "ws_ping_timeout": 20.0,
+              "ws_per_message_deflate": true,
+              "lifespan": "auto",
+              "env_file": null,
+              "log_config": {
+                "version": 1,
+                "disable_existing_loggers": false,
+                "formatters": {
+                  "default": {
+                    "()": "uvicorn.logging.DefaultFormatter",
+                    "fmt": "%(levelprefix)s %(message)s",
+                    "use_colors": null
+                  },
+                  "access": {
+                    "()": "uvicorn.logging.AccessFormatter",
+                    "fmt": "%(levelprefix)s %(client_addr)s - \"%(request_line)s\" %(status_code)s"
+                  }
+                },
+                "handlers": {
+                  "default": {
+                    "formatter": "default",
+                    "class": "logging.StreamHandler",
+                    "stream": "ext://sys.stderr"
+                  },
+                  "access": {
+                    "formatter": "access",
+                    "class": "logging.StreamHandler",
+                    "stream": "ext://sys.stdout"
+                  }
+                },
+                "loggers": {
+                  "uvicorn": {
+                    "handlers": [
+                      "default"
+                    ],
+                    "level": "INFO",
+                    "propagate": false
+                  },
+                  "uvicorn.error": {
+                    "level": "INFO"
+                  },
+                  "uvicorn.access": {
+                    "handlers": [
+                      "access"
+                    ],
+                    "level": "INFO",
+                    "propagate": false
+                  }
+                }
+              },
+              "log_level": null,
+              "access_log": true,
+              "interface": "auto",
+              "reload": false,
+              "reload_dirs": null,
+              "reload_includes": null,
+              "reload_excludes": null,
+              "reload_delay": 0.25,
+              "workers": 3,
+              "proxy_headers": true,
+              "server_header": false,
+              "date_header": true,
+              "forwarded_allow_ips": "10.0.0.1",
+              "root_path": "",
+              "limit_concurrency": 40,
+              "backlog": 128,
+              "limit_max_requests": null,
+              "limit_max_requests_jitter": 0,
+              "timeout_keep_alive": 5,
+              "timeout_graceful_shutdown": null,
+              "timeout_worker_healthcheck": 5,
+              "ssl_keyfile": null,
+              "ssl_certfile": null,
+              "ssl_keyfile_password": null,
+              "ssl_version": 17,
+              "ssl_cert_reqs": 0,
+              "ssl_ca_certs": null,
+              "ssl_ciphers": null,
+              "headers": [
+                [
+                  "X-Service",
+                  " demo"
+                ]
+              ],
+              "use_colors": null,
+              "factory": true,
+              "app_dir": "src",
+              "h11_max_incomplete_event_size": null,
+              "reset_contextvars": false
+            },
+            "app": "service:create_app",
+            "checks": {
+              "factory": true,
+              "app": true,
+              "app_dir": true,
+              "host": true,
+              "port": true,
+              "workers": true,
+              "reload": true,
+              "proxy_scope": true,
+              "header": true,
+              "no_server_header": true,
+              "concurrency": true,
+              "backlog": true
+            },
+            "cli_passed": true
+          }
+        },
+        {
+          "control": "assignment",
+          "expected": true,
+          "observed": true,
+          "control_passed": true,
+          "review": {
+            "commands": [
+              [
+                "service:create_app",
+                "--factory",
+                "--app-dir",
+                "src",
+                "--host",
+                "0.0.0.0",
+                "--port",
+                "9000",
+                "--workers",
+                "3",
+                "--proxy-headers",
+                "--forwarded-allow-ips",
+                "10.0.0.1",
+                "--header",
+                "X-Service: demo",
+                "--no-server-header",
+                "--limit-concurrency",
+                "40",
+                "--backlog",
+                "128"
+              ]
+            ],
+            "server_started": false,
+            "parser_exit": 0,
+            "parser_output": "",
+            "parsed": {
+              "host": "0.0.0.0",
+              "port": 9000,
+              "uds": null,
+              "fd": null,
+              "loop": "auto",
+              "http": "auto",
+              "ws": "auto",
+              "ws_max_size": 16777216,
+              "ws_max_queue": 32,
+              "ws_ping_interval": 20.0,
+              "ws_ping_timeout": 20.0,
+              "ws_per_message_deflate": true,
+              "lifespan": "auto",
+              "env_file": null,
+              "log_config": {
+                "version": 1,
+                "disable_existing_loggers": false,
+                "formatters": {
+                  "default": {
+                    "()": "uvicorn.logging.DefaultFormatter",
+                    "fmt": "%(levelprefix)s %(message)s",
+                    "use_colors": null
+                  },
+                  "access": {
+                    "()": "uvicorn.logging.AccessFormatter",
+                    "fmt": "%(levelprefix)s %(client_addr)s - \"%(request_line)s\" %(status_code)s"
+                  }
+                },
+                "handlers": {
+                  "default": {
+                    "formatter": "default",
+                    "class": "logging.StreamHandler",
+                    "stream": "ext://sys.stderr"
+                  },
+                  "access": {
+                    "formatter": "access",
+                    "class": "logging.StreamHandler",
+                    "stream": "ext://sys.stdout"
+                  }
+                },
+                "loggers": {
+                  "uvicorn": {
+                    "handlers": [
+                      "default"
+                    ],
+                    "level": "INFO",
+                    "propagate": false
+                  },
+                  "uvicorn.error": {
+                    "level": "INFO"
+                  },
+                  "uvicorn.access": {
+                    "handlers": [
+                      "access"
+                    ],
+                    "level": "INFO",
+                    "propagate": false
+                  }
+                }
+              },
+              "log_level": null,
+              "access_log": true,
+              "interface": "auto",
+              "reload": false,
+              "reload_dirs": null,
+              "reload_includes": null,
+              "reload_excludes": null,
+              "reload_delay": 0.25,
+              "workers": 3,
+              "proxy_headers": true,
+              "server_header": false,
+              "date_header": true,
+              "forwarded_allow_ips": "10.0.0.1",
+              "root_path": "",
+              "limit_concurrency": 40,
+              "backlog": 128,
+              "limit_max_requests": null,
+              "limit_max_requests_jitter": 0,
+              "timeout_keep_alive": 5,
+              "timeout_graceful_shutdown": null,
+              "timeout_worker_healthcheck": 5,
+              "ssl_keyfile": null,
+              "ssl_certfile": null,
+              "ssl_keyfile_password": null,
+              "ssl_version": 17,
+              "ssl_cert_reqs": 0,
+              "ssl_ca_certs": null,
+              "ssl_ciphers": null,
+              "headers": [
+                [
+                  "X-Service",
+                  " demo"
+                ]
+              ],
+              "use_colors": null,
+              "factory": true,
+              "app_dir": "src",
+              "h11_max_incomplete_event_size": null,
+              "reset_contextvars": false
+            },
+            "app": "service:create_app",
+            "checks": {
+              "factory": true,
+              "app": true,
+              "app_dir": true,
+              "host": true,
+              "port": true,
+              "workers": true,
+              "reload": true,
+              "proxy_scope": true,
+              "header": true,
+              "no_server_header": true,
+              "concurrency": true,
+              "backlog": true
+            },
+            "cli_passed": true
+          }
+        },
+        {
+          "control": "env_assignment",
+          "expected": true,
+          "observed": true,
+          "control_passed": true,
+          "review": {
+            "commands": [
+              [
+                "service:create_app",
+                "--factory",
+                "--app-dir",
+                "src",
+                "--host",
+                "0.0.0.0",
+                "--port",
+                "9000",
+                "--workers",
+                "3",
+                "--proxy-headers",
+                "--forwarded-allow-ips",
+                "10.0.0.1",
+                "--header",
+                "X-Service: demo",
+                "--no-server-header",
+                "--limit-concurrency",
+                "40",
+                "--backlog",
+                "128"
+              ]
+            ],
+            "server_started": false,
+            "parser_exit": 0,
+            "parser_output": "",
+            "parsed": {
+              "host": "0.0.0.0",
+              "port": 9000,
+              "uds": null,
+              "fd": null,
+              "loop": "auto",
+              "http": "auto",
+              "ws": "auto",
+              "ws_max_size": 16777216,
+              "ws_max_queue": 32,
+              "ws_ping_interval": 20.0,
+              "ws_ping_timeout": 20.0,
+              "ws_per_message_deflate": true,
+              "lifespan": "auto",
+              "env_file": null,
+              "log_config": {
+                "version": 1,
+                "disable_existing_loggers": false,
+                "formatters": {
+                  "default": {
+                    "()": "uvicorn.logging.DefaultFormatter",
+                    "fmt": "%(levelprefix)s %(message)s",
+                    "use_colors": null
+                  },
+                  "access": {
+                    "()": "uvicorn.logging.AccessFormatter",
+                    "fmt": "%(levelprefix)s %(client_addr)s - \"%(request_line)s\" %(status_code)s"
+                  }
+                },
+                "handlers": {
+                  "default": {
+                    "formatter": "default",
+                    "class": "logging.StreamHandler",
+                    "stream": "ext://sys.stderr"
+                  },
+                  "access": {
+                    "formatter": "access",
+                    "class": "logging.StreamHandler",
+                    "stream": "ext://sys.stdout"
+                  }
+                },
+                "loggers": {
+                  "uvicorn": {
+                    "handlers": [
+                      "default"
+                    ],
+                    "level": "INFO",
+                    "propagate": false
+                  },
+                  "uvicorn.error": {
+                    "level": "INFO"
+                  },
+                  "uvicorn.access": {
+                    "handlers": [
+                      "access"
+                    ],
+                    "level": "INFO",
+                    "propagate": false
+                  }
+                }
+              },
+              "log_level": null,
+              "access_log": true,
+              "interface": "auto",
+              "reload": false,
+              "reload_dirs": null,
+              "reload_includes": null,
+              "reload_excludes": null,
+              "reload_delay": 0.25,
+              "workers": 3,
+              "proxy_headers": true,
+              "server_header": false,
+              "date_header": true,
+              "forwarded_allow_ips": "10.0.0.1",
+              "root_path": "",
+              "limit_concurrency": 40,
+              "backlog": 128,
+              "limit_max_requests": null,
+              "limit_max_requests_jitter": 0,
+              "timeout_keep_alive": 5,
+              "timeout_graceful_shutdown": null,
+              "timeout_worker_healthcheck": 5,
+              "ssl_keyfile": null,
+              "ssl_certfile": null,
+              "ssl_keyfile_password": null,
+              "ssl_version": 17,
+              "ssl_cert_reqs": 0,
+              "ssl_ca_certs": null,
+              "ssl_ciphers": null,
+              "headers": [
+                [
+                  "X-Service",
+                  " demo"
+                ]
+              ],
+              "use_colors": null,
+              "factory": true,
+              "app_dir": "src",
+              "h11_max_incomplete_event_size": null,
+              "reset_contextvars": false
+            },
+            "app": "service:create_app",
+            "checks": {
+              "factory": true,
+              "app": true,
+              "app_dir": true,
+              "host": true,
+              "port": true,
+              "workers": true,
+              "reload": true,
+              "proxy_scope": true,
+              "header": true,
+              "no_server_header": true,
+              "concurrency": true,
+              "backlog": true
+            },
+            "cli_passed": true
+          }
+        },
+        {
+          "control": "reload_enabled",
+          "expected": false,
+          "observed": false,
+          "control_passed": true,
+          "review": {
+            "commands": [
+              [
+                "service:create_app",
+                "--factory",
+                "--app-dir",
+                "src",
+                "--host",
+                "0.0.0.0",
+                "--port",
+                "9000",
+                "--workers",
+                "3",
+                "--proxy-headers",
+                "--forwarded-allow-ips",
+                "10.0.0.1",
+                "--header",
+                "X-Service: demo",
+                "--no-server-header",
+                "--limit-concurrency",
+                "40",
+                "--backlog",
+                "128"
+              ]
+            ],
+            "server_started": false,
+            "parser_exit": 0,
+            "parser_output": "",
+            "parsed": {
+              "host": "0.0.0.0",
+              "port": 9000,
+              "uds": null,
+              "fd": null,
+              "loop": "auto",
+              "http": "auto",
+              "ws": "auto",
+              "ws_max_size": 16777216,
+              "ws_max_queue": 32,
+              "ws_ping_interval": 20.0,
+              "ws_ping_timeout": 20.0,
+              "ws_per_message_deflate": true,
+              "lifespan": "auto",
+              "env_file": null,
+              "log_config": {
+                "version": 1,
+                "disable_existing_loggers": false,
+                "formatters": {
+                  "default": {
+                    "()": "uvicorn.logging.DefaultFormatter",
+                    "fmt": "%(levelprefix)s %(message)s",
+                    "use_colors": null
+                  },
+                  "access": {
+                    "()": "uvicorn.logging.AccessFormatter",
+                    "fmt": "%(levelprefix)s %(client_addr)s - \"%(request_line)s\" %(status_code)s"
+                  }
+                },
+                "handlers": {
+                  "default": {
+                    "formatter": "default",
+                    "class": "logging.StreamHandler",
+                    "stream": "ext://sys.stderr"
+                  },
+                  "access": {
+                    "formatter": "access",
+                    "class": "logging.StreamHandler",
+                    "stream": "ext://sys.stdout"
+                  }
+                },
+                "loggers": {
+                  "uvicorn": {
+                    "handlers": [
+                      "default"
+                    ],
+                    "level": "INFO",
+                    "propagate": false
+                  },
+                  "uvicorn.error": {
+                    "level": "INFO"
+                  },
+                  "uvicorn.access": {
+                    "handlers": [
+                      "access"
+                    ],
+                    "level": "INFO",
+                    "propagate": false
+                  }
+                }
+              },
+              "log_level": null,
+              "access_log": true,
+              "interface": "auto",
+              "reload": true,
+              "reload_dirs": null,
+              "reload_includes": null,
+              "reload_excludes": null,
+              "reload_delay": 0.25,
+              "workers": 3,
+              "proxy_headers": true,
+              "server_header": false,
+              "date_header": true,
+              "forwarded_allow_ips": "10.0.0.1",
+              "root_path": "",
+              "limit_concurrency": 40,
+              "backlog": 128,
+              "limit_max_requests": null,
+              "limit_max_requests_jitter": 0,
+              "timeout_keep_alive": 5,
+              "timeout_graceful_shutdown": null,
+              "timeout_worker_healthcheck": 5,
+              "ssl_keyfile": null,
+              "ssl_certfile": null,
+              "ssl_keyfile_password": null,
+              "ssl_version": 17,
+              "ssl_cert_reqs": 0,
+              "ssl_ca_certs": null,
+              "ssl_ciphers": null,
+              "headers": [
+                [
+                  "X-Service",
+                  " demo"
+                ]
+              ],
+              "use_colors": null,
+              "factory": true,
+              "app_dir": "src",
+              "h11_max_incomplete_event_size": null,
+              "reset_contextvars": false
+            },
+            "app": "service:create_app",
+            "checks": {
+              "factory": true,
+              "app": true,
+              "app_dir": true,
+              "host": true,
+              "port": true,
+              "workers": true,
+              "reload": false,
+              "proxy_scope": true,
+              "header": true,
+              "no_server_header": true,
+              "concurrency": true,
+              "backlog": true
+            },
+            "cli_passed": false
+          }
+        },
+        {
+          "control": "invalid_no_reload",
+          "expected": false,
+          "observed": false,
+          "control_passed": true,
+          "review": {
+            "commands": [
+              [
+                "service:create_app",
+                "--factory",
+                "--app-dir",
+                "src",
+                "--host",
+                "0.0.0.0",
+                "--port",
+                "9000",
+                "--workers",
+                "3",
+                "--proxy-headers",
+                "--forwarded-allow-ips",
+                "10.0.0.1",
+                "--header",
+                "X-Service: demo",
+                "--no-server-header",
+                "--limit-concurrency",
+                "40",
+                "--backlog",
+                "128",
+                "--no-reload"
+              ]
+            ],
+            "server_started": false,
+            "parser_exit": 2,
+            "parser_output": "Usage: main [OPTIONS] APP\nTry 'main --help' for help.\n\nError: No such option '--no-reload'. (Did you mean one of: '--reload', '--reload-delay', '--reload-dir'?)\n",
+            "cli_passed": false
+          }
+        },
+        {
+          "control": "wrong_concurrency",
+          "expected": false,
+          "observed": false,
+          "control_passed": true,
+          "review": {
+            "commands": [
+              [
+                "service:create_app",
+                "--factory",
+                "--app-dir",
+                "src",
+                "--host",
+                "0.0.0.0",
+                "--port",
+                "9000",
+                "--workers",
+                "3",
+                "--proxy-headers",
+                "--forwarded-allow-ips",
+                "10.0.0.1",
+                "--header",
+                "X-Service: demo",
+                "--no-server-header",
+                "--limit-concurrency",
+                "41",
+                "--backlog",
+                "128"
+              ]
+            ],
+            "server_started": false,
+            "parser_exit": 0,
+            "parser_output": "",
+            "parsed": {
+              "host": "0.0.0.0",
+              "port": 9000,
+              "uds": null,
+              "fd": null,
+              "loop": "auto",
+              "http": "auto",
+              "ws": "auto",
+              "ws_max_size": 16777216,
+              "ws_max_queue": 32,
+              "ws_ping_interval": 20.0,
+              "ws_ping_timeout": 20.0,
+              "ws_per_message_deflate": true,
+              "lifespan": "auto",
+              "env_file": null,
+              "log_config": {
+                "version": 1,
+                "disable_existing_loggers": false,
+                "formatters": {
+                  "default": {
+                    "()": "uvicorn.logging.DefaultFormatter",
+                    "fmt": "%(levelprefix)s %(message)s",
+                    "use_colors": null
+                  },
+                  "access": {
+                    "()": "uvicorn.logging.AccessFormatter",
+                    "fmt": "%(levelprefix)s %(client_addr)s - \"%(request_line)s\" %(status_code)s"
+                  }
+                },
+                "handlers": {
+                  "default": {
+                    "formatter": "default",
+                    "class": "logging.StreamHandler",
+                    "stream": "ext://sys.stderr"
+                  },
+                  "access": {
+                    "formatter": "access",
+                    "class": "logging.StreamHandler",
+                    "stream": "ext://sys.stdout"
+                  }
+                },
+                "loggers": {
+                  "uvicorn": {
+                    "handlers": [
+                      "default"
+                    ],
+                    "level": "INFO",
+                    "propagate": false
+                  },
+                  "uvicorn.error": {
+                    "level": "INFO"
+                  },
+                  "uvicorn.access": {
+                    "handlers": [
+                      "access"
+                    ],
+                    "level": "INFO",
+                    "propagate": false
+                  }
+                }
+              },
+              "log_level": null,
+              "access_log": true,
+              "interface": "auto",
+              "reload": false,
+              "reload_dirs": null,
+              "reload_includes": null,
+              "reload_excludes": null,
+              "reload_delay": 0.25,
+              "workers": 3,
+              "proxy_headers": true,
+              "server_header": false,
+              "date_header": true,
+              "forwarded_allow_ips": "10.0.0.1",
+              "root_path": "",
+              "limit_concurrency": 41,
+              "backlog": 128,
+              "limit_max_requests": null,
+              "limit_max_requests_jitter": 0,
+              "timeout_keep_alive": 5,
+              "timeout_graceful_shutdown": null,
+              "timeout_worker_healthcheck": 5,
+              "ssl_keyfile": null,
+              "ssl_certfile": null,
+              "ssl_keyfile_password": null,
+              "ssl_version": 17,
+              "ssl_cert_reqs": 0,
+              "ssl_ca_certs": null,
+              "ssl_ciphers": null,
+              "headers": [
+                [
+                  "X-Service",
+                  " demo"
+                ]
+              ],
+              "use_colors": null,
+              "factory": true,
+              "app_dir": "src",
+              "h11_max_incomplete_event_size": null,
+              "reset_contextvars": false
+            },
+            "app": "service:create_app",
+            "checks": {
+              "factory": true,
+              "app": true,
+              "app_dir": true,
+              "host": true,
+              "port": true,
+              "workers": true,
+              "reload": true,
+              "proxy_scope": true,
+              "header": true,
+              "no_server_header": true,
+              "concurrency": false,
+              "backlog": true
+            },
+            "cli_passed": false
+          }
+        }
+      ]
+    },
+    "earlier_qwen_uvicorn_regrade": [
+      {
+        "artifact": "heldout/bm25/uvicorn-development-reloader.json",
+        "cli_passed": false
+      },
+      {
+        "artifact": "heldout/bm25/uvicorn-production-factory.json",
+        "cli_passed": false
+      },
+      {
+        "artifact": "heldout/cairn/uvicorn-development-reloader.json",
+        "cli_passed": false
+      },
+      {
+        "artifact": "heldout/cairn/uvicorn-production-factory.json",
+        "cli_passed": false
+      },
+      {
+        "artifact": "heldout/raw/uvicorn-development-reloader.json",
+        "cli_passed": false
+      },
+      {
+        "artifact": "heldout/raw/uvicorn-production-factory.json",
+        "cli_passed": false
+      }
+    ],
+    "starlette_controls": [
+      {
+        "control": "positive",
+        "expected_accept": true,
+        "observed_accept": true,
+        "control_passed": true
+      },
+      {
+        "control": "request_rebinding_loses_history",
+        "expected_accept": false,
+        "observed_accept": false,
+        "control_passed": true
+      }
+    ],
+    "automatic_discovery_correction": {
+      "reason": "Previous exclusion grader forced --config, masking root-cwd automatic-discovery behavior for the commands actually proposed. New test covers lint and format explicit generated-file handling; requirements unchanged. Both old and new reviews retained.",
+      "before_sha256": "1b22cd12ae272e93930fc4b38120410760f67943ad493257b54a63b9e47ee15a",
+      "after_sha256": "f5de7e27b93b7e270c85a326068d26a6808048da0ac254b0fcc52d60e2be9fa1",
+      "controls": [
+        {
+          "control": "complete_auto_context",
+          "expected": true,
+          "observed": true,
+          "review": {
+            "toml_parse_errors": [],
+            "toml_blocks": 2,
+            "files_modified": "temporary fixture only",
+            "root_config": {
+              "target-version": "py310",
+              "line-length": 100,
+              "force-exclude": true,
+              "lint": {
+                "select": [
+                  "E4",
+                  "E7",
+                  "E9",
+                  "F"
+                ]
+              },
+              "format": {
+                "quote-style": "single"
+              }
+            },
+            "child_config": {
+              "extend": "../../pyproject.toml",
+              "extend-exclude": [
+                "generated"
+              ],
+              "force-exclude": true,
+              "lint": {
+                "extend-select": [
+                  "I"
+                ],
+                "per-file-ignores": {
+                  "__init__.py": [
+                    "F401"
+                  ]
+                }
+              }
+            },
+            "unused_import": {
+              "exit": 1,
+              "codes": [
+                "F401"
+              ],
+              "error": ""
+            },
+            "import_sorting": {
+              "exit": 1,
+              "codes": [
+                "I001"
+              ],
+              "error": ""
+            },
+            "formatter_output": "word = 'hello'\n",
+            "formatter_error": "",
+            "package_init": {
+              "exit": 0,
+              "codes": [],
+              "error": ""
+            },
+            "explicit_generated": {
+              "exit": 0,
+              "codes": [],
+              "error": "warning: No Python files found under the given path(s)\n"
+            },
+            "auto_explicit_generated": {
+              "exit": 0,
+              "stdout": "[]",
+              "stderr": "warning: No Python files found under the given path(s)\n"
+            },
+            "auto_explicit_generated_format": {
+              "exit": 0,
+              "stdout": "",
+              "stderr": "warning: No Python files found under the given path(s)\n"
+            },
+            "checks": {
+              "root_line_length": true,
+              "unused_import_linted": true,
+              "import_sorting_enabled": true,
+              "single_quotes": true,
+              "target_version": true,
+              "package_init_ignored": true,
+              "explicit_generated_excluded": true
+            },
+            "config_passed": true
+          }
+        },
+        {
+          "control": "child_only_force",
+          "expected": false,
+          "observed": false,
+          "review": {
+            "toml_parse_errors": [],
+            "toml_blocks": 2,
+            "files_modified": "temporary fixture only",
+            "root_config": {
+              "target-version": "py310",
+              "line-length": 100,
+              "lint": {
+                "select": [
+                  "E4",
+                  "E7",
+                  "E9",
+                  "F"
+                ]
+              },
+              "format": {
+                "quote-style": "single"
+              }
+            },
+            "child_config": {
+              "extend": "../../pyproject.toml",
+              "extend-exclude": [
+                "generated"
+              ],
+              "force-exclude": true,
+              "lint": {
+                "extend-select": [
+                  "I"
+                ],
+                "per-file-ignores": {
+                  "__init__.py": [
+                    "F401"
+                  ]
+                }
+              }
+            },
+            "unused_import": {
+              "exit": 1,
+              "codes": [
+                "F401"
+              ],
+              "error": ""
+            },
+            "import_sorting": {
+              "exit": 1,
+              "codes": [
+                "I001"
+              ],
+              "error": ""
+            },
+            "formatter_output": "word = 'hello'\n",
+            "formatter_error": "",
+            "package_init": {
+              "exit": 0,
+              "codes": [],
+              "error": ""
+            },
+            "explicit_generated": {
+              "exit": 0,
+              "codes": [],
+              "error": "warning: No Python files found under the given path(s)\n"
+            },
+            "auto_explicit_generated": {
+              "exit": 1,
+              "stdout": "[\n  {\n    \"cell\": null,\n    \"code\": \"E402\",\n    \"end_location\": {\n      \"column\": 10,\n      \"row\": 2\n    },\n    \"filename\": \"/private/var/folders/cg/xm8lr5_141j1zgmxc5qbd8rm0000gn/T/cairn-ruff-fixture-jtmdi48s/packages/api/generated/bad.py\",\n    \"fix\": null,\n    \"location\": {\n      \"column\": 1,\n      \"row\": 2\n    },\n    \"message\": \"Module level import not at top of file\",\n    \"name\": \"module-import-not-at-top-of-file\",\n    \"noqa_row\": 2,\n    \"severity\": \"error\",\n    \"url\": \"https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file\"\n  },\n  {\n    \"cell\": null,\n    \"code\": \"F401\",\n    \"end_location\": {\n      \"column\": 10,\n      \"row\": 2\n    },\n    \"filename\": \"/private/var/folders/cg/xm8lr5_141j1zgmxc5qbd8rm0000gn/T/cairn-ruff-fixture-jtmdi48s/packages/api/generated/bad.py\",\n    \"fix\": {\n      \"applicability\": \"safe\",\n      \"edits\": [\n        {\n          \"content\": \"\",\n          \"end_location\": {\n            \"column\": 1,\n            \"row\": 3\n          },\n          \"location\": {\n            \"column\": 1,\n            \"row\": 2\n          }\n        }\n      ],\n      \"message\": \"Remove unused import: `os`\"\n    },\n    \"location\": {\n      \"column\": 8,\n      \"row\": 2\n    },\n    \"message\": \"`os` imported but unused\",\n    \"name\": \"unused-import\",\n    \"noqa_row\": 2,\n    \"severity\": \"error\",\n    \"url\": \"https://docs.astral.sh/ruff/rules/unused-import\"\n  }\n]",
+              "stderr": ""
+            },
+            "auto_explicit_generated_format": {
+              "exit": 1,
+              "stdout": "Would reformat: packages/api/generated/bad.py\n1 file would be reformatted\n",
+              "stderr": ""
+            },
+            "checks": {
+              "root_line_length": true,
+              "unused_import_linted": true,
+              "import_sorting_enabled": true,
+              "single_quotes": true,
+              "target_version": true,
+              "package_init_ignored": true,
+              "explicit_generated_excluded": false
+            },
+            "config_passed": false
+          }
+        },
+        {
+          "control": "missing_exclusion",
+          "expected": false,
+          "observed": false,
+          "review": {
+            "toml_parse_errors": [],
+            "toml_blocks": 2,
+            "files_modified": "temporary fixture only",
+            "root_config": {
+              "target-version": "py310",
+              "line-length": 100,
+              "force-exclude": true,
+              "lint": {
+                "select": [
+                  "E4",
+                  "E7",
+                  "E9",
+                  "F"
+                ]
+              },
+              "format": {
+                "quote-style": "single"
+              }
+            },
+            "child_config": {
+              "extend": "../../pyproject.toml",
+              "extend-exclude": [],
+              "force-exclude": true,
+              "lint": {
+                "extend-select": [
+                  "I"
+                ],
+                "per-file-ignores": {
+                  "__init__.py": [
+                    "F401"
+                  ]
+                }
+              }
+            },
+            "unused_import": {
+              "exit": 1,
+              "codes": [
+                "F401"
+              ],
+              "error": ""
+            },
+            "import_sorting": {
+              "exit": 1,
+              "codes": [
+                "I001"
+              ],
+              "error": ""
+            },
+            "formatter_output": "word = 'hello'\n",
+            "formatter_error": "",
+            "package_init": {
+              "exit": 0,
+              "codes": [],
+              "error": ""
+            },
+            "explicit_generated": {
+              "exit": 1,
+              "codes": [
+                "F401"
+              ],
+              "error": ""
+            },
+            "auto_explicit_generated": {
+              "exit": 1,
+              "stdout": "[\n  {\n    \"cell\": null,\n    \"code\": \"E402\",\n    \"end_location\": {\n      \"column\": 10,\n      \"row\": 2\n    },\n    \"filename\": \"/private/var/folders/cg/xm8lr5_141j1zgmxc5qbd8rm0000gn/T/cairn-ruff-fixture-ammtl6wl/packages/api/generated/bad.py\",\n    \"fix\": null,\n    \"location\": {\n      \"column\": 1,\n      \"row\": 2\n    },\n    \"message\": \"Module level import not at top of file\",\n    \"name\": \"module-import-not-at-top-of-file\",\n    \"noqa_row\": 2,\n    \"severity\": \"error\",\n    \"url\": \"https://docs.astral.sh/ruff/rules/module-import-not-at-top-of-file\"\n  },\n  {\n    \"cell\": null,\n    \"code\": \"F401\",\n    \"end_location\": {\n      \"column\": 10,\n      \"row\": 2\n    },\n    \"filename\": \"/private/var/folders/cg/xm8lr5_141j1zgmxc5qbd8rm0000gn/T/cairn-ruff-fixture-ammtl6wl/packages/api/generated/bad.py\",\n    \"fix\": {\n      \"applicability\": \"safe\",\n      \"edits\": [\n        {\n          \"content\": \"\",\n          \"end_location\": {\n            \"column\": 1,\n            \"row\": 3\n          },\n          \"location\": {\n            \"column\": 1,\n            \"row\": 2\n          }\n        }\n      ],\n      \"message\": \"Remove unused import: `os`\"\n    },\n    \"location\": {\n      \"column\": 8,\n      \"row\": 2\n    },\n    \"message\": \"`os` imported but unused\",\n    \"name\": \"unused-import\",\n    \"noqa_row\": 2,\n    \"severity\": \"error\",\n    \"url\": \"https://docs.astral.sh/ruff/rules/unused-import\"\n  }\n]",
+              "stderr": ""
+            },
+            "auto_explicit_generated_format": {
+              "exit": 1,
+              "stdout": "Would reformat: packages/api/generated/bad.py\n1 file would be reformatted\n",
+              "stderr": ""
+            },
+            "checks": {
+              "root_line_length": true,
+              "unused_import_linted": true,
+              "import_sorting_enabled": true,
+              "single_quotes": true,
+              "target_version": true,
+              "package_init_ignored": true,
+              "explicit_generated_excluded": false
+            },
+            "config_passed": false
+          }
+        }
+      ]
+    }
+  },
+  "transport_diagnostic": {
+    "runs": [
+      {
+        "variant": "both",
+        "index": 0,
+        "exit_code": 0,
+        "stop_reason": null,
+        "seconds": 11.715221791000658,
+        "usage": {
+          "input_tokens": 39487,
+          "cached_input_tokens": 27264,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 83,
+          "reasoning_output_tokens": 0
+        },
+        "tool_invocations": 1,
+        "valid": true,
+        "answer": "ledger-onyx-74291",
+        "protocol_valid": true,
+        "marker_correct": true,
+        "infrastructure_failure": null
+      },
+      {
+        "variant": "single",
+        "index": 1,
+        "exit_code": 0,
+        "stop_reason": null,
+        "seconds": 16.634286541997426,
+        "usage": {
+          "input_tokens": 35125,
+          "cached_input_tokens": 27264,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 251,
+          "reasoning_output_tokens": 156
+        },
+        "tool_invocations": 1,
+        "valid": false,
+        "answer": "I couldn\u2019t retrieve the source marker.",
+        "protocol_valid": true,
+        "marker_correct": false,
+        "infrastructure_failure": null
+      },
+      {
+        "variant": "single",
+        "index": 2,
+        "exit_code": 0,
+        "stop_reason": null,
+        "seconds": 18.991198040999734,
+        "usage": {
+          "input_tokens": 35135,
+          "cached_input_tokens": 27264,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 342,
+          "reasoning_output_tokens": 238
+        },
+        "tool_invocations": 1,
+        "valid": false,
+        "answer": "Unable to retrieve the source marker.",
+        "protocol_valid": true,
+        "marker_correct": false,
+        "infrastructure_failure": null
+      },
+      {
+        "variant": "both",
+        "index": 3,
+        "exit_code": 1,
+        "stop_reason": null,
+        "seconds": 20.46733816699998,
+        "usage": {},
+        "tool_invocations": 0,
+        "valid": false,
+        "answer": "",
+        "protocol_valid": false,
+        "marker_correct": false,
+        "infrastructure_failure": "required MCP server handshake timeout"
+      }
+    ],
+    "client_controls": [
+      {
+        "mode": "both",
+        "structured_marker_present": true,
+        "text_characters": 12148,
+        "text_marker_present": true,
+        "structured_records": 160,
+        "output_schema": {
+          "type": "object",
+          "properties": {
+            "source": {
+              "type": "string"
+            },
+            "records": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "marker": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "source",
+            "records",
+            "marker"
+          ]
+        }
+      },
+      {
+        "mode": "single",
+        "structured_marker_present": true,
+        "text_characters": 40,
+        "text_marker_present": false,
+        "structured_records": 160,
+        "output_schema": {
+          "type": "object",
+          "properties": {
+            "source": {
+              "type": "string"
+            },
+            "records": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "marker": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "source",
+            "records",
+            "marker"
+          ]
+        }
+      }
+    ],
+    "interpretation": "One full-text control succeeds; both brief-text plus structured-only payload attempts fail marker retrieval. One later full-text control has a retained infrastructure startup failure, not a model task failure. Do not remove product text or infer billed duplication from event fields.",
+    "limitations": "Tiny controlled fixture, specific Codex version/model, not proof of internal serialization implementation."
+  }
+}

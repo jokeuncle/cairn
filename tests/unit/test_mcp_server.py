@@ -8,6 +8,7 @@ envelope shape contract.
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 from cairn.cli.config import IndexConfig
 from cairn.embed.fake import FakeEmbedder
@@ -15,6 +16,7 @@ from cairn.mcp.schemas import CAIRN_TOOLS, REPO_TOOLS
 from cairn.mcp.server import (
     REPO_INSTRUCTIONS,
     RepoRootResolver,
+    _compact_search_data,
     dispatch_repo_tool,
     dispatch_tool,
     dispatch_workspace_repo_tool,
@@ -25,6 +27,37 @@ from cairn.tools.base import DocumentIndex
 
 
 class TestSchemas:
+    def test_compact_search_keeps_evidence_metadata_and_recovery_signals(self) -> None:
+        evidence = {"text": "original source", "truncated_code": True}
+        mismatch = {"query_dim": 64, "index_dims": [32], "documents": ["d"]}
+        data: dict[str, Any] = {
+            "query": "source",
+            "searched_documents": 1,
+            "hits": [
+                {
+                    "doc": "d",
+                    "id": "s",
+                    "anchor": "cairn://d/s",
+                    "evidence": evidence,
+                    "metadata": {"version": "2"},
+                    "explanation": {"score": 0.9},
+                }
+            ],
+            "embedding_mismatch": mismatch,
+            "stale_documents": ["d"],
+            "skipped_documents": [{"id": "bad", "reason": "incompatible dimensions"}],
+            "next_steps": [{"command": "docsgraph sync"}],
+        }
+        compact = _compact_search_data(data)
+        assert compact["hits"][0]["evidence"] == evidence
+        assert compact["hits"][0]["metadata"] == {"version": "2"}
+        assert compact["embedding_mismatch"] == mismatch
+        assert compact["stale_documents"] == ["d"]
+        assert compact["skipped_documents"] == data["skipped_documents"]
+        assert compact["next_steps"] == data["next_steps"]
+        assert "explanation" not in compact["hits"][0]
+        assert "explanation" in data["hits"][0]
+
     def test_v02_tools_registered(self) -> None:
         names = {t.name for t in CAIRN_TOOLS}
         assert names == {
@@ -382,6 +415,23 @@ class TestRepoDispatch:
         assert env["ok"] is True
         assert env["tokens_returned"] > 0
         assert any(hit["doc"] == "docs-guide" for hit in env["data"]["hits"])
+        assert "ranker" not in env["data"]
+        assert all("explanation" not in hit for hit in env["data"]["hits"])
+        detailed = await dispatch_repo_tool(
+            "search_documents",
+            {"query": "detailed docs", "k": 4, "include_details": True},
+            tmp_path,
+            fake_embedder,
+        )
+        assert detailed["ok"] is True
+        assert "ranker" in detailed["data"]
+        assert [hit["anchor"] for hit in env["data"]["hits"]] == [
+            hit["anchor"] for hit in detailed["data"]["hits"]
+        ]
+        for compact, full in zip(env["data"]["hits"], detailed["data"]["hits"], strict=True):
+            assert compact["evidence"] == full["evidence"]
+            assert "explanation" in full
+        assert env["tokens_returned"] < detailed["tokens_returned"]
 
     async def test_search_keyword_without_doc_searches_all_repo_documents(
         self, tmp_path: Path, fake_embedder: FakeEmbedder
@@ -481,7 +531,7 @@ class TestRepoDispatch:
 
         context = await dispatch_repo_tool(
             "repo_context",
-            {"query": "plugin tools install", "k": 2, "related_k": 2},
+            {"query": "plugin tools install", "k": 2, "related_k": 2, "include_details": True},
             tmp_path,
             fake_embedder,
         )
@@ -489,6 +539,52 @@ class TestRepoDispatch:
         assert context["data"]["context_sections"]
         assert context["data"]["relationship_map"]["nodes"]
         assert context["data"]["codegraph_bridge"]["status"] == "not_invoked"
+        evidence = await dispatch_repo_tool(
+            "repo_context",
+            {
+                "query": "plugin tools install",
+                "queries": ["plugin install", "tools"],
+                "level": "evidence",
+                "max_context_chars": 1000,
+            },
+            tmp_path,
+            fake_embedder,
+        )
+        assert evidence["ok"] is True
+        assert evidence["data"]["context_sections"][0]["evidence_blocks"]
+        assert evidence["data"]["returned_source_characters"] <= 1000
+        assert "hits" not in evidence["data"]
+        invalid_evidence = await dispatch_repo_tool(
+            "repo_context",
+            {"query": "plugin", "level": "evidence", "include_details": True},
+            tmp_path,
+            fake_embedder,
+        )
+        assert invalid_evidence["ok"] is False
+        section = context["data"]["context_sections"][0]
+        anchored = await dispatch_repo_tool(
+            "get_section", {"id": section["anchor"], "level": "full"}, tmp_path, fake_embedder
+        )
+        assert anchored["ok"] is True
+        assert anchored["data"]["id"] == section["id"]
+        assert anchored["data"]["doc"] == section["doc"]
+        related = await dispatch_repo_tool(
+            "get_related",
+            {"id": section["anchor"], "kinds": ["parent", "sibling"]},
+            tmp_path,
+            fake_embedder,
+        )
+        assert related["ok"] is True
+        conflicting = await dispatch_repo_tool(
+            "get_section", {"id": section["anchor"], "doc": "other"}, tmp_path, fake_embedder
+        )
+        assert conflicting["ok"] is False
+        assert "conflicts" in conflicting["error"]["message"]
+        for invalid in ("cairn://readme/", "cairn://[invalid/path", "cairn://readme/id?x=1"):
+            malformed = await dispatch_repo_tool(
+                "get_section", {"id": invalid}, tmp_path, fake_embedder
+            )
+            assert malformed["ok"] is False
         context_steps = {step["name"] for step in context["trace"]["steps"]}
         assert {
             "search_documents",

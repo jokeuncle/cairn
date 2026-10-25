@@ -3,13 +3,41 @@
 > **Status:** Authoritative. Changes require an ADR under `docs/decisions/`.
 > **Audience:** Engineers and AI agents implementing Cairn.
 
-This document describes the **end-state** architecture (v1.0). Phased rollout is
+This document separates the **experimental 0.1.0a13 query path**
+from the **end-state** layered architecture (v1.0). Phased rollout is
 described in `ROADMAP.md`. When implementing, build *toward* this shape — never
 build something that would have to be torn down to reach it.
 
 ---
 
 ## 1. System Overview
+
+### 1.1 Alpha 0.1.0a13 — experimental query path
+
+[![Experimental alpha architecture](docs/assets/cairn-architecture-light.svg)](docs/architecture-current.html)
+
+The CLI and MCP share transport-neutral dispatch. Repository tools read cached
+indexes; lexical queries, section reads and explicit reference/impact views need
+no query model. Hybrid search remains the default and calls the configured
+query embedder. Index construction still generates summaries and embeddings.
+Freshness checks hash original files; retrieval bodies come from the cache.
+
+`repo_graph(view="documents")` resolves explicit cached Markdown body links.
+`repo_impact(view="references")` computes bounded reverse shortest paths,
+strongly connected components and optional entry reachability after document
+deletion. Both retain source citations and completeness/staleness signals.
+These are document-reference operations, without semantic or code-impact claims.
+The graph/impact views are opt-in; default section/entity and artifact views stay
+unchanged. See ADR-0016/0017 and the [public experiment ledger](docs/research/README.md).
+
+[Interactive diagram](docs/architecture-current.html) ·
+[Source snapshot and diagram checks](docs/architecture/README.md)
+
+### 1.2 Target v1.0 layered model
+
+The diagram below describes the intended layer contracts and deferred parser/
+transport capabilities. Use the alpha query map above for implemented query
+paths; neither diagram is a released-version or performance claim.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
@@ -163,6 +191,21 @@ class Entity(BaseModel):
 
 #### 2.4 Cross-references (X) — Document graph
 
+ADR-0016 adds an opt-in `repo_graph(view="documents")` over explicit Markdown
+links in cached section bodies. Document-pair edges carry source-section anchors
+and occurrence counts; source excerpts are opt-in. Relative paths resolve only
+within the selected indexed universe. Scope, caps, stale/skipped/unavailable
+documents and fragment non-validation are explicit. This query uses no model
+or new storage artifact and preserves the default section/entity graph. See
+[the tool contract](docs/specs/mcp-tools.md#repository-only-tool-repo_graph).
+
+ADR-0017 extends the existing impact tool with `view="references"`: local
+reverse BFS, canonical shortest paths, component membership and entry
+reachability after document deletion. Computation uses that explicit cached
+graph, bounded results and source-anchor proofs. This is structural metadata,
+not synthesized prose or semantic/code impact. The old artifact view is the
+default. See [the impact contract](docs/specs/mcp-tools.md#repository-only-tool-repo_impact).
+
 Directed edges between section nodes derived from:
 - Explicit internal links (`[…](#anchor)`, `[[wiki-link]]`)
 - Heading references ("see § 3.2", "Chapter 4 introduced …") — detected via
@@ -262,6 +305,16 @@ binding to MCP is generated from there; do not handwrite MCP schemas elsewhere.
 
 #### 3.3 Progressive-disclosure contract
 
+ADR-0004: repo-scoped `repo_context` returns cited summaries and bounded original
+evidence once per hit by default. Ranking/relationship diagnostics are opt-in
+with `include_details=true`; full original section bodies remain explicit.
+ADR-0012 adds experimental, explicit `level="evidence"` context packs: bounded
+original Markdown blocks and fitting examples, with source spans and omission
+status. Selection is query-aware and budgeted; it introduces no query-time model
+or persistent index. Existing summary defaults remain unchanged.
+Markdown ingestion retains preambles and headingless prose as synthetic root
+sections without changing existing heading anchors.
+
 By default, tools return summaries before bodies. Specifically:
 
 - `outline()` returns gists, never full text.
@@ -270,9 +323,9 @@ By default, tools return summaries before bodies. Specifically:
 - `get_section(id)` defaults to `level="synopsis"`; the agent passes
   `level="full"` to opt into the raw text.
 
-This is **non-negotiable**. It is the single biggest reason Cairn delivers
-better token economics than naive RAG. Removing this default for "convenience"
-is a regression.
+This default is **non-negotiable**. It bounds unsolicited disclosure; improved
+whole-agent token economics must be measured rather than inferred from the
+interface. Removing this default for "convenience" is a regression.
 
 ---
 
@@ -311,8 +364,16 @@ docsgraph serve [--http]        # start MCP server
 docsgraph inspect <doc-id>      # print index stats
 docsgraph outline <doc-id>      # print tree
 docsgraph query <doc-id> ...    # exercise tools from terminal
+docsgraph query tool NAME JSON --repo ROOT  # shared read-only repository tools
 docsgraph migrate               # bump index format versions
 ```
+
+Repository CLI and MCP calls share `src/cairn/dispatch.py`; neither transport is
+imported by the retrieval layer. Explicit `retrieval="lexical"` reuses cached
+source and sparse/structural evidence without constructing a query embedder or
+reading vector entries. Hybrid remains the default. CLI JSON is complete by
+default; experimental `--format text` is lossless and never larger in UTF-8
+bytes, with no model-token guarantee. See [ADR-0013](docs/decisions/0013-lexical-cli-and-source-text.md).
 
 Future (v0.3+):
 - `docsgraph web` — local inspector UI (read-only).
@@ -576,4 +637,17 @@ If a phase plan ever conflicts with this architecture, update the architecture
 
 ---
 
-*Last reviewed: foundation commit.*
+### 2026-10-24 reliability amendments
+
+ADR-0005 makes section boundaries and bounded child/sibling navigation explicit;
+full descendant bodies remain opt-in reads. ADR-0006 selects complementary
+source evidence in compact context without changing document-discovery ranking,
+and respects fitting fenced examples inside excerpt budgets.
+
+ADR-0007 adds an explicitly selected embedding-window adapter. Windows are
+internal to vector computation; original sections, the tree and citations remain
+the primary retrieval units. ADR-0008 reuses already stored, fingerprinted
+summaries during normal rebuilding without adding a cache/storage artifact.
+See the ADRs for semantics, costs and compatibility.
+
+*Foundation design; amendments above are part of the current implementation.*

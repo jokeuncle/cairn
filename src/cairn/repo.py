@@ -27,17 +27,20 @@ from pydantic import BaseModel, ConfigDict, Field
 from slugify import slugify
 
 from cairn import __version__
-from cairn.core.errors import ConfigError, IndexNotFoundError, ToolError
-from cairn.embed.base import Embedder
-from cairn.engine.indexer import Indexer
+from cairn.core.errors import CairnError, ConfigError, IndexNotFoundError, ToolError
+from cairn.embed.base import Embedder, embed_query_texts
+from cairn.engine.indexer import _TREE_BUILDER_VERSION, Indexer
 from cairn.engine.manifest import read_manifest
 from cairn.entity.heuristic import HeuristicExtractor
 from cairn.ingest import parser_for_path, supported_extensions
-from cairn.repo_search import search_repo_index
+from cairn.repo_links import LinkDocument, document_reference_graph
+from cairn.repo_reference_impact import reference_impact
+from cairn.repo_search import search_repo_index, select_context_hits
 from cairn.summarize.base import Summarizer
 from cairn.tools.base import DocumentIndex, estimate_tokens_of_payload
+from cairn.tools.context_blocks import EvidenceSource, pack_evidence
 from cairn.tools.search_keyword import Mode, search_keyword
-from cairn.tools.search_semantic import IncludeField
+from cairn.tools.search_semantic import IncludeField, _evidence_snippet
 from cairn.xref.heuristic import HeuristicXRefExtractor
 
 _fcntl: ModuleType | None
@@ -1038,11 +1041,12 @@ def _sync_lock_owner_suffix(path: Path) -> str:
 async def search_repo_documents(
     root: Path,
     *,
-    embedder: Embedder,
+    embedder: Embedder | None = None,
     query: str,
     k: int = 8,
     include: Iterable[IncludeField] = ("synopsis", "head", "evidence"),
     sections_per_doc: int | None = None,
+    retrieval: Literal["hybrid", "lexical"] = "hybrid",
 ) -> dict[str, Any]:
     """Search across every indexed document in a repository Cairn index."""
     if k < 1 or k > 32:
@@ -1051,6 +1055,8 @@ async def search_repo_documents(
     if not query.strip():
         msg = "query must not be empty"
         raise ToolError(msg)
+    if retrieval not in {"hybrid", "lexical"}:
+        raise ToolError("retrieval must be 'hybrid' or 'lexical'")
 
     config = load_repo_config(root)
     effective_sections_per_doc = (
@@ -1072,11 +1078,15 @@ async def search_repo_documents(
         msg = "no searchable Cairn documents found for this repo. Run `docsgraph sync` first."
         raise IndexNotFoundError(msg, details=_repo_setup_details(root, status=status))
 
-    vectors = await embedder.embed([query])
-    if not vectors:
-        msg = "embedder returned no vector for query"
-        raise ToolError(msg)
-    query_vec = vectors[0]
+    query_vec: list[float] | None = None
+    if retrieval == "hybrid":
+        if embedder is None:
+            raise ToolError("hybrid retrieval requires an embedding provider")
+        vectors = await embed_query_texts(embedder, [query])
+        if not vectors:
+            msg = "embedder returned no vector for query"
+            raise ToolError(msg)
+        query_vec = vectors[0]
 
     payload = await search_repo_index(
         root,
@@ -1139,31 +1149,71 @@ async def search_repo_keyword(
 async def repo_context(
     root: Path,
     *,
-    embedder: Embedder,
+    embedder: Embedder | None = None,
     query: str,
     k: int = 5,
     sections_per_doc: int | None = None,
     related_k: int = 3,
-    level: Literal["gist", "synopsis", "full"] = "synopsis",
+    level: Literal["gist", "synopsis", "full", "evidence"] = "synopsis",
     max_section_chars: int = 1600,
+    max_context_chars: int = 8000,
+    queries: list[str] | None = None,
+    include_details: bool = False,
+    retrieval: Literal["hybrid", "lexical"] = "hybrid",
 ) -> dict[str, Any]:
     """Build a compact repo-scoped context pack for an agent query."""
+    if k < 1 or k > 32:
+        raise ToolError("k must be in [1, 32]")
+    if sections_per_doc is not None and not 1 <= sections_per_doc <= 8:
+        raise ToolError("sections_per_doc must be in [1, 8]")
     if related_k < 0 or related_k > 12:
         msg = f"related_k must be in [0, 12]; got {related_k}"
         raise ToolError(msg, details={"related_k": related_k})
     if max_section_chars < 200 or max_section_chars > 8000:
         msg = f"max_section_chars must be in [200, 8000]; got {max_section_chars}"
         raise ToolError(msg, details={"max_section_chars": max_section_chars})
+    if not 1000 <= max_context_chars <= 32000:
+        raise ToolError("max_context_chars must be in [1000, 32000]")
+    if level != "evidence" and max_context_chars != 8000:
+        raise ToolError("max_context_chars is only supported with level='evidence'")
+    if level == "evidence" and include_details:
+        raise ToolError("level='evidence' requires include_details=false")
+    if queries is not None:
+        if level != "evidence":
+            raise ToolError("queries is only supported with level='evidence'")
+        if not 1 <= len(queries) <= 8 or any(not q.strip() or len(q) > 1000 for q in queries):
+            raise ToolError("queries must contain 1-8 nonempty strings of at most 1000 characters")
 
-    search = await search_repo_documents(
-        root,
-        embedder=embedder,
-        query=query,
-        k=k,
-        include=("synopsis", "evidence"),
-        sections_per_doc=sections_per_doc,
-    )
+    searches = [
+        await search_repo_documents(
+            root,
+            embedder=embedder,
+            query=focus,
+            k=k if include_details else min(32, k * 4),
+            include=("synopsis", "evidence"),
+            sections_per_doc=sections_per_doc if include_details else min(8, k),
+            retrieval=retrieval,
+        )
+        for focus in (queries if queries is not None else [query])
+    ]
+    search = _merge_context_queries(searches) if queries is not None else searches[0]
     hits = list(search["data"]["hits"])
+    if not include_details and level != "evidence":
+        hits = select_context_hits(
+            hits, k=k, sections_per_doc=sections_per_doc if sections_per_doc is not None else 3
+        )
+    if level == "evidence":
+        return _repo_evidence_context(
+            root,
+            query=query,
+            hits=hits,
+            search=search,
+            max_section_chars=max_section_chars,
+            max_context_chars=max_context_chars,
+            k=k,
+            sections_per_doc=sections_per_doc if sections_per_doc is not None else 3,
+            queries=queries,
+        )
     context_sections: list[dict[str, Any]] = []
     graph_nodes: dict[str, dict[str, Any]] = {}
     graph_edges: list[dict[str, Any]] = []
@@ -1174,13 +1224,16 @@ async def repo_context(
         node = index.tree.get(hit["id"])
         if node is None:
             continue
-        content = _repo_context_content(
+        complete_content = _repo_context_content(
             index,
             section_id=node.id,
             level=level,
             fallback=node.raw_text,
-        )[:max_section_chars]
-        relationships = _section_relationships(index, node.id, k=related_k)
+        )
+        content = complete_content[:max_section_chars]
+        relationships = (
+            _section_relationships(index, node.id, k=related_k) if include_details else []
+        )
         context_sections.append(
             {
                 "rank": rank,
@@ -1196,6 +1249,23 @@ async def repo_context(
                 "relationships": relationships,
             }
         )
+        if level == "full":
+            context_sections[-1].update(
+                content_scope="section_body_only",
+                source_characters=len(complete_content),
+                truncated=len(content) < len(complete_content),
+            )
+        if not include_details:
+            section = context_sections[-1]
+            for field in ("rank", "path", "hit", "relationships"):
+                section.pop(field)
+            if level != "full":
+                section["evidence"] = _evidence_snippet(
+                    node.raw_text,
+                    query,
+                    max_chars=min(1600 if rank == 1 else 400, max_section_chars),
+                )
+            continue
         _add_repo_doc_graph_node(graph_nodes, hit["doc"], source=hit["source"])
         _add_repo_section_graph_node(graph_nodes, hit["doc"], index, node.id)
         _add_repo_graph_edge(
@@ -1237,13 +1307,120 @@ async def repo_context(
             ),
         },
     }
+    if not include_details:
+        payload = {
+            "query": query,
+            "context_sections": context_sections,
+            "next_step": (
+                "These are original section bodies; descendants are separate. "
+                "Reuse complete bodies without re-reading them. Expand only truncated "
+                "sections or requirements not covered by this pack."
+                if level == "full"
+                else "Verify exact values with get_section(doc,id,level='full'). "
+                "For missing parts use get_related/outline; excerpts are not exhaustive."
+            ),
+        }
+        for field in ("stale_documents", "skipped_documents"):
+            if search["data"].get(field):
+                payload[field] = search["data"][field]
     if search["data"].get("embedding_mismatch") is not None:
         payload["embedding_mismatch"] = search["data"]["embedding_mismatch"]
         payload["next_steps"] = repo_embedding_mismatch_next_steps(root)
+    if retrieval == "lexical":
+        payload["retrieval_mode"] = "lexical"
     return {
         "tokens_returned": estimate_tokens_of_payload(payload),
         "data": payload,
     }
+
+
+def _merge_context_queries(searches: list[dict[str, Any]]) -> dict[str, Any]:
+    """Fuse focused query shortlists, retaining each query's discovery rank."""
+    hits: dict[tuple[str, str], dict[str, Any]] = {}
+    ranks: dict[tuple[str, str], list[int | None]] = {}
+    for query_index, search in enumerate(searches):
+        for rank, hit in enumerate(search["data"]["hits"]):
+            key = hit["doc"], hit["id"]
+            hits.setdefault(key, dict(hit))
+            ranks.setdefault(key, [None] * len(searches))[query_index] = rank
+    ordered = sorted(hits, key=lambda key: -sum(1 / (r + 1) for r in ranks[key] if r is not None))
+    data = dict(searches[0]["data"])
+    data["hits"] = [{**hits[key], "_query_ranks": ranks[key]} for key in ordered[:64]]
+    for field in ("stale_documents", "skipped_documents"):
+        unique: dict[str, Any] = {}
+        for search in searches:
+            for item in search["data"].get(field, []):
+                unique.setdefault(json.dumps(item, sort_keys=True), item)
+        data[field] = list(unique.values())
+    for search in searches:
+        if search["data"].get("embedding_mismatch"):
+            data["embedding_mismatch"] = search["data"]["embedding_mismatch"]
+            break
+    return {"data": data}
+
+
+def _repo_evidence_context(
+    root: Path,
+    *,
+    query: str,
+    hits: list[dict[str, Any]],
+    search: dict[str, Any],
+    max_section_chars: int,
+    max_context_chars: int,
+    k: int,
+    sections_per_doc: int,
+    queries: list[str] | None,
+) -> dict[str, Any]:
+    sources: list[EvidenceSource] = []
+    for hit in hits:
+        index = load_repo_document_index(root, doc_id=hit["doc"])
+        node = index.tree.get(hit["id"])
+        if node is not None:
+            sources.append(
+                EvidenceSource(
+                    doc=hit["doc"],
+                    source=hit["source"],
+                    id=node.id,
+                    title=node.title,
+                    path=list(node.path),
+                    anchor=index.anchor(node.id),
+                    body=node.raw_text,
+                    query_ranks=hit.get("_query_ranks", []),
+                )
+            )
+    sections = pack_evidence(
+        sources,
+        query=query,
+        max_chars=max_context_chars,
+        max_section_chars=max_section_chars,
+        max_sections=k,
+        sections_per_doc=sections_per_doc,
+        queries=queries,
+    )
+    payload: dict[str, Any] = {
+        "query": query,
+        "context_sections": sections,
+        "max_context_chars": max_context_chars,
+        "returned_source_characters": sum(s["returned_source_characters"] for s in sections),
+        "candidate_sections": len(sources),
+        "sections_without_blocks": [s.anchor for s in sources[:k]] if not sections else [],
+        "next_step": (
+            "These are selected original blocks, not exhaustive sections. Ancestor and "
+            "descendant bodies are separate. Reuse this evidence; read get_section(level='full') "
+            "only for missing requirements, omitted conditions or oversized examples. "
+            "Spans use section-relative Unicode characters. Coverage is not certified."
+        ),
+    }
+    if queries is not None:
+        payload["queries"] = queries
+    if search["data"].get("retrieval_mode"):
+        payload["retrieval_mode"] = search["data"]["retrieval_mode"]
+    for field in ("stale_documents", "skipped_documents", "embedding_mismatch"):
+        if search["data"].get(field):
+            payload[field] = search["data"][field]
+    if payload.get("embedding_mismatch"):
+        payload["next_steps"] = repo_embedding_mismatch_next_steps(root)
+    return {"tokens_returned": estimate_tokens_of_payload(payload), "data": payload}
 
 
 async def repo_graph(
@@ -1254,8 +1431,18 @@ async def repo_graph(
     max_entities: int = 40,
     include_entities: bool = True,
     include_xrefs: bool = True,
+    view: Literal["sections", "documents"] = "sections",
+    max_documents: int = 100,
+    max_references: int = 200,
+    include_evidence: bool = False,
 ) -> dict[str, Any]:
     """Return a repo-level documentation relationship map."""
+    if view not in {"sections", "documents"}:
+        raise ToolError("view must be 'sections' or 'documents'")
+    if not 1 <= max_documents <= 500:
+        raise ToolError("max_documents must be in [1, 500]")
+    if not 1 <= max_references <= 2000:
+        raise ToolError("max_references must be in [1, 2000]")
     if max_sections < 1 or max_sections > 500:
         msg = f"max_sections must be in [1, 500]; got {max_sections}"
         raise ToolError(msg, details={"max_sections": max_sections})
@@ -1264,6 +1451,15 @@ async def repo_graph(
         raise ToolError(msg, details={"max_entities": max_entities})
 
     status = repo_status(root)
+    if view == "documents":
+        reference_payload = _document_reference_payload(
+            root, status, doc=doc, max_documents=max_documents,
+            max_references=max_references, include_evidence=include_evidence,
+        )
+        return {
+            "tokens_returned": estimate_tokens_of_payload(reference_payload),
+            "data": reference_payload,
+        }
     candidates = [
         item
         for item in status.documents
@@ -1301,18 +1497,99 @@ async def repo_graph(
     }
 
 
+def _document_reference_payload(
+    root: Path,
+    status: RepoStatus,
+    *,
+    doc: str | None,
+    max_documents: int,
+    max_references: int,
+    include_evidence: bool,
+) -> dict[str, Any]:
+    candidates = sorted(
+        (item for item in status.documents if item.state in {"indexed", "stale"}),
+        key=lambda item: (item.id != doc, item.id),
+    )
+    if doc is not None and not any(item.id == doc for item in candidates):
+        raise IndexNotFoundError(f"repo document is not indexed: {doc!r}", details={"doc": doc})
+    selected = candidates[:max_documents]
+    documents: list[LinkDocument] = []
+    skipped: list[dict[str, str]] = []
+    for item in selected:
+        try:
+            index = DocumentIndex.load(root / item.doc_dir)
+        except (CairnError, OSError, ValueError) as exc:
+            skipped.append({"doc": item.id, "reason": str(exc)})
+            continue
+        documents.append(LinkDocument(
+            item.id, item.source, item.state,
+            tuple((index.anchor(section.id), section.raw_text) for section in index.tree),
+        ))
+    graph = document_reference_graph(
+        tuple(documents), doc=doc, max_references=max_references,
+        include_evidence=include_evidence,
+    )
+    graph["stats"]["total_documents"] = len(candidates)
+    graph["stats"]["truncated"] |= len(selected) < len(candidates) or bool(skipped)
+    stale = [item.id for item in selected if item.state == "stale"]
+    unavailable = [
+        {"doc": item.id, "state": item.state}
+        for item in status.documents if item.state not in {"indexed", "stale"}
+    ]
+    return {
+        "root": str(status.root), "doc": doc, "view": "documents", **graph,
+        "scope": {
+            "links": "explicit CommonMark hyperlinks in cached Markdown section bodies",
+            "doc_filter": "incident edges in either direction" if doc else "all selected documents",
+            "excluded": "headings, code, HTML links, external/unindexed targets and self-links",
+            "fragments": "retained in href; not validated",
+            "impact": "document references only; not semantic or source-code impact",
+        },
+        "stale_documents": stale, "skipped_documents": skipped,
+        "unavailable_documents": unavailable,
+        "complete": not (graph["stats"]["truncated"] or stale or unavailable),
+    }
+
+
 async def repo_impact(
     root: Path,
     *,
     doc: str,
     id: str | None = None,
     max_results: int = 24,
+    view: Literal["artifacts", "references"] = "artifacts",
+    entry: str | None = None,
+    max_hops: int = 3,
+    max_witnesses: int = 200,
 ) -> dict[str, Any]:
     """Estimate documentation surfaces affected by a document or section change."""
+    if view not in {"artifacts", "references"}:
+        raise ToolError("view must be 'artifacts' or 'references'")
+    if not 1 <= max_hops <= 8:
+        raise ToolError("max_hops must be in [1, 8]")
+    if not 1 <= max_witnesses <= 2000:
+        raise ToolError("max_witnesses must be in [1, 2000]")
+    if view == "references" and id is not None:
+        raise ToolError("reference impact is document-level; omit id")
+    if view == "artifacts" and entry is not None:
+        raise ToolError("entry requires view='references'")
     if max_results < 1 or max_results > 100:
         msg = f"max_results must be in [1, 100]; got {max_results}"
         raise ToolError(msg, details={"max_results": max_results})
     status = repo_status(root)
+    if view == "references":
+        graph = _document_reference_payload(
+            root, status, doc=None, max_documents=500,
+            max_references=2000, include_evidence=False,
+        )
+        reference_payload = reference_impact(
+            graph, doc=doc, entry=entry, max_hops=max_hops,
+            max_results=max_results, max_witnesses=max_witnesses,
+        )
+        return {
+            "tokens_returned": estimate_tokens_of_payload(reference_payload),
+            "data": reference_payload,
+        }
     doc_status = next((item for item in status.documents if item.id == doc), None)
     if doc_status is None or doc_status.state == "missing":
         msg = f"repo document is not indexed: {doc!r}"
@@ -1990,12 +2267,20 @@ def _document_status(
         )
 
     previous_indexed_file_hash = previous.indexed_source_file_hash if previous is not None else None
+    tree = manifest.subindexes.get("tree")
+    tree_current = tree is not None and tree.builder_version == _TREE_BUILDER_VERSION
     if (
         previous is not None
         and previous.indexed_hash == manifest.source_hash
+        and previous.indexed_at == manifest.indexed_at
+        and previous.section_count not in (None, 0)
         and previous_indexed_file_hash is not None
     ):
-        state: DocState = "indexed" if previous_indexed_file_hash == source_file_hash else "stale"
+        state: DocState = (
+            "indexed"
+            if previous_indexed_file_hash == source_file_hash and tree_current
+            else "stale"
+        )
         return RepoDocumentStatus(
             id=doc.id,
             source=doc.relative_source,
@@ -2023,7 +2308,7 @@ def _document_status(
             error=str(exc),
         )
 
-    state = "indexed" if manifest.source_hash == source_hash else "stale"
+    state = "indexed" if manifest.source_hash == source_hash and tree_current else "stale"
 
     return RepoDocumentStatus(
         id=doc.id,

@@ -1,0 +1,179 @@
+{
+  "date": "2026-10-24",
+  "baseline_commit": "e73210be5ccc6f6c3619dfeb677686ae9b7239a2",
+  "answer_model": "Qwen3-4B-Instruct-2507 Q4_K_M",
+  "embedder": "nomic-embed-text-v1.5 Q4_K_M, 768 dimensions",
+  "metric": "Required-fact screening with manual answer review; not whole-answer or code correctness.",
+  "results": {
+    "httpx_original": {
+      "cairn_synopsis": {
+        "evidence_complete": 15,
+        "retrieval_n": 24,
+        "hit1": 18,
+        "hit5": 19,
+        "median_raw_tokens": 8051.5,
+        "median_evidence_tokens": 619.0,
+        "answer_complete": 3,
+        "qa_n": 12
+      },
+      "cairn_full": {
+        "evidence_complete": 18,
+        "retrieval_n": 24,
+        "hit1": 18,
+        "hit5": 19,
+        "median_raw_tokens": 8673.5,
+        "median_evidence_tokens": 1162.0,
+        "answer_complete": 6,
+        "qa_n": 12
+      },
+      "naive_vector": {
+        "evidence_complete": 22,
+        "retrieval_n": 24,
+        "hit1": 18,
+        "hit5": 23,
+        "median_raw_tokens": 3966.5,
+        "median_evidence_tokens": 3558.0,
+        "answer_complete": 11,
+        "qa_n": 12
+      },
+      "bm25": {
+        "evidence_complete": 22,
+        "retrieval_n": 24,
+        "hit1": 19,
+        "hit5": 23,
+        "median_raw_tokens": 1180.0,
+        "median_evidence_tokens": 1013.0,
+        "answer_complete": 11,
+        "qa_n": 12
+      }
+    },
+    "httpx_repaired": {
+      "cairn_synopsis": {
+        "evidence_complete": 21,
+        "retrieval_n": 24,
+        "hit1": 21,
+        "hit5": 23,
+        "median_raw_tokens": 1431.5,
+        "median_evidence_tokens": 853.5,
+        "answer_complete": 11,
+        "qa_n": 12
+      },
+      "cairn_full": {
+        "evidence_complete": 21,
+        "retrieval_n": 24,
+        "hit1": 21,
+        "hit5": 23,
+        "median_raw_tokens": 1446.0,
+        "median_evidence_tokens": 985.5,
+        "answer_complete": 11,
+        "qa_n": 12
+      },
+      "naive_vector": {
+        "evidence_complete": 22,
+        "retrieval_n": 24,
+        "hit1": 18,
+        "hit5": 23,
+        "median_raw_tokens": 3966.5,
+        "median_evidence_tokens": 3558.0,
+        "answer_complete": 11,
+        "qa_n": 12
+      },
+      "bm25": {
+        "evidence_complete": 22,
+        "retrieval_n": 24,
+        "hit1": 19,
+        "hit5": 23,
+        "median_raw_tokens": 1180.0,
+        "median_evidence_tokens": 1013.0,
+        "answer_complete": 11,
+        "qa_n": 12
+      }
+    },
+    "starlette_repaired": {
+      "cairn_synopsis": {
+        "evidence_complete": 6,
+        "retrieval_n": 6,
+        "hit1": 6,
+        "hit5": 6,
+        "median_raw_tokens": 1339.0,
+        "median_evidence_tokens": 772.5,
+        "answer_complete": 6,
+        "qa_n": 6
+      },
+      "cairn_full": {
+        "evidence_complete": 6,
+        "retrieval_n": 6,
+        "hit1": 6,
+        "hit5": 6,
+        "median_raw_tokens": 1917.5,
+        "median_evidence_tokens": 1486.5,
+        "answer_complete": 6,
+        "qa_n": 6
+      },
+      "naive_vector": {
+        "evidence_complete": 6,
+        "retrieval_n": 6,
+        "hit1": 6,
+        "hit5": 6,
+        "median_raw_tokens": 3858.0,
+        "median_evidence_tokens": 3425.0,
+        "answer_complete": 6,
+        "qa_n": 6
+      },
+      "bm25": {
+        "evidence_complete": 6,
+        "retrieval_n": 6,
+        "hit1": 6,
+        "hit5": 6,
+        "median_raw_tokens": 1444.0,
+        "median_evidence_tokens": 1238.5,
+        "answer_complete": 6,
+        "qa_n": 6
+      }
+    },
+    "mkdocs_repaired": {
+      "cairn_synopsis": {
+        "evidence_complete": 4,
+        "retrieval_n": 6,
+        "hit1": 6,
+        "hit5": 6,
+        "median_raw_tokens": 1661.5,
+        "median_evidence_tokens": 1005.5,
+        "answer_complete": 4,
+        "qa_n": 6
+      },
+      "cairn_full": {
+        "evidence_complete": 5,
+        "retrieval_n": 6,
+        "hit1": 6,
+        "hit5": 6,
+        "median_raw_tokens": 2315.5,
+        "median_evidence_tokens": 1790.5,
+        "answer_complete": 5,
+        "qa_n": 6
+      },
+      "naive_vector": {
+        "evidence_complete": 5,
+        "retrieval_n": 6,
+        "hit1": 5,
+        "hit5": 6,
+        "median_raw_tokens": 4259.0,
+        "median_evidence_tokens": 3897.0,
+        "answer_complete": 4,
+        "qa_n": 6
+      },
+      "bm25": {
+        "evidence_complete": 6,
+        "retrieval_n": 6,
+        "hit1": 6,
+        "hit5": 6,
+        "median_raw_tokens": 1892.5,
+        "median_evidence_tokens": 1701.0,
+        "answer_complete": 4,
+        "qa_n": 6
+      }
+    }
+  },
+  "actual_mcp_default_median_tokens": 1967,
+  "artifact_directory": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024"
+}

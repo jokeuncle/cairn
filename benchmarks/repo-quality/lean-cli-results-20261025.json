@@ -1,0 +1,1383 @@
+{
+  "runs": [
+    {
+      "case_id": "pydantic-job",
+      "arm": "lexical-text",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 123.30728462499974,
+      "tool_invocations": 17,
+      "usage_events": [
+        {
+          "input_tokens": 498583,
+          "cached_input_tokens": 446464,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 5691,
+          "reasoning_output_tokens": 1152
+        }
+      ],
+      "input_tokens": 498583,
+      "cached_input_tokens": 446464,
+      "output_tokens": 5691,
+      "final_answer_exists": true,
+      "review": {
+        "runtime": {
+          "passed": true,
+          "checks": [
+            "valid_payload_and_purity",
+            "valid_payload_and_purity",
+            "valid_payload_and_purity",
+            "strict_limit_'4'",
+            "strict_limit_True",
+            "strict_limit_4.0",
+            "strict_limit_0",
+            "strict_limit_9",
+            "bad_tags_'x'",
+            "bad_tags_['']",
+            "bad_tags_['  ']",
+            "bad_tags_[3]",
+            "bad_window",
+            "bad_window",
+            "bad_window",
+            "bad_window",
+            "bad_window",
+            "invalid_scope",
+            "invalid_scope",
+            "invalid_scope",
+            "invalid_scope",
+            "invalid_scope",
+            "invalid_scope",
+            "invalid_scope",
+            "internal_name_not_external_alias",
+            "serialization_alias_not_input",
+            "independent_defaults",
+            "frozen_assignment"
+          ]
+        },
+        "manual": {
+          "answer_sha256": "479eeb185dde10865599722d72ad7911c11e96eedfab06ba76459bf0db524f04",
+          "safe_complete_module": true,
+          "source_access_within_protocol": true,
+          "requirements_and_explanation_match_source": true,
+          "resilient_callbacks_checked": true,
+          "notes": "Audited complete pure Pydantic module, all shell calls and canonical source sections. JSON-mode source paragraph verified. No external imports, side effects, corpus/index reads or delegation."
+        },
+        "citations": [
+          {
+            "label": "`AliasChoices` prioritizes earlier choices; `AliasPath` traverses nested input",
+            "target": "cairn://docs-concepts-alias/aliaspath-and-aliaschoices",
+            "source": "docs/concepts/alias.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Alias-only validation",
+            "target": "cairn://docs-concepts-alias/alias-configuration/configdict-settings/validation",
+            "source": "docs/concepts/alias.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Before model validators receive raw input; after model validators check validated instances",
+            "target": "cairn://docs-concepts-validators/model-validators",
+            "source": "docs/concepts/validators.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "After field validators run after type validation",
+            "target": "cairn://docs-concepts-validators/field-validators",
+            "source": "docs/concepts/validators.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Strict types",
+            "target": "cairn://docs-concepts-strict-mode/at-the-field-level/using-the-strict-metadata-class",
+            "source": "docs/concepts/strict_mode.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "field constraints",
+            "target": "cairn://docs-concepts-fields/field-constraints",
+            "source": "docs/concepts/fields.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "`extra=\"forbid\"`",
+            "target": "cairn://docs-concepts-models/extra-data",
+            "source": "docs/concepts/models.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "`frozen=True` prevents field assignment",
+            "target": "cairn://docs-concepts-models/faux-immutability",
+            "source": "docs/concepts/models.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "`default_factory` creates defaults per instance",
+            "target": "cairn://docs-concepts-fields/default-values",
+            "source": "docs/concepts/fields.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "`model_dump(mode=\"json\", by_alias=True)`",
+            "target": "cairn://docs-concepts-serialization/serializing-data/python-mode",
+            "source": "docs/concepts/serialization.md",
+            "resolves_in_selected_source": true
+          }
+        ],
+        "documentation_cli_calls": 11,
+        "process_skill_calls": 3,
+        "documentation_cli_errors": 1,
+        "accepted": true
+      },
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/lean-cli-20261025/runs/r00"
+    },
+    {
+      "case_id": "pydantic-job",
+      "arm": "hybrid-json",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 112.85018454099918,
+      "tool_invocations": 17,
+      "usage_events": [
+        {
+          "input_tokens": 405179,
+          "cached_input_tokens": 370816,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 5635,
+          "reasoning_output_tokens": 1035
+        }
+      ],
+      "input_tokens": 405179,
+      "cached_input_tokens": 370816,
+      "output_tokens": 5635,
+      "final_answer_exists": true,
+      "review": {
+        "runtime": {
+          "passed": true,
+          "checks": [
+            "valid_payload_and_purity",
+            "valid_payload_and_purity",
+            "valid_payload_and_purity",
+            "strict_limit_'4'",
+            "strict_limit_True",
+            "strict_limit_4.0",
+            "strict_limit_0",
+            "strict_limit_9",
+            "bad_tags_'x'",
+            "bad_tags_['']",
+            "bad_tags_['  ']",
+            "bad_tags_[3]",
+            "bad_window",
+            "bad_window",
+            "bad_window",
+            "bad_window",
+            "bad_window",
+            "invalid_scope",
+            "invalid_scope",
+            "invalid_scope",
+            "invalid_scope",
+            "invalid_scope",
+            "invalid_scope",
+            "invalid_scope",
+            "internal_name_not_external_alias",
+            "serialization_alias_not_input",
+            "independent_defaults",
+            "frozen_assignment"
+          ]
+        },
+        "manual": {
+          "answer_sha256": "b3d0ee61aa252c39385512ddc4bb7fc7456c05e8ccf3ca2044ed153f52442717",
+          "safe_complete_module": true,
+          "source_access_within_protocol": true,
+          "requirements_and_explanation_match_source": true,
+          "resilient_callbacks_checked": true,
+          "notes": "Reviewed pure Pydantic module, command history and source citations; before-validator copies mapping; strict element validation precedes normalization; defaults/frozen/JSON serialization retained."
+        },
+        "citations": [
+          {
+            "label": "Alias choices and paths",
+            "target": "cairn://docs-concepts-alias/aliaspath-and-aliaschoices",
+            "source": "docs/concepts/alias.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Validation stages",
+            "target": "cairn://docs-concepts-validators/model-validators",
+            "source": "docs/concepts/validators.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "field validators",
+            "target": "cairn://docs-concepts-validators/field-validators",
+            "source": "docs/concepts/validators.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Strict fields",
+            "target": "cairn://docs-concepts-fields/strict-fields",
+            "source": "docs/concepts/fields.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "constraints",
+            "target": "cairn://docs-concepts-fields/field-constraints",
+            "source": "docs/concepts/fields.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "extra handling",
+            "target": "cairn://docs-concepts-models/extra-data",
+            "source": "docs/concepts/models.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Defaults",
+            "target": "cairn://docs-concepts-fields/default-values",
+            "source": "docs/concepts/fields.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "frozen models",
+            "target": "cairn://docs-concepts-models/faux-immutability",
+            "source": "docs/concepts/models.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Separate aliases",
+            "target": "cairn://docs-concepts-fields/field-aliases",
+            "source": "docs/concepts/fields.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "JSON-compatible dumping",
+            "target": "cairn://docs-concepts-serialization/serializing-data/python-mode",
+            "source": "docs/concepts/serialization.md",
+            "resolves_in_selected_source": true
+          }
+        ],
+        "documentation_cli_calls": 12,
+        "process_skill_calls": 2,
+        "documentation_cli_errors": 1,
+        "accepted": true
+      },
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/lean-cli-20261025/runs/r01"
+    },
+    {
+      "case_id": "pydantic-job",
+      "arm": "raw",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 132.85655341600068,
+      "tool_invocations": 5,
+      "usage_events": [
+        {
+          "input_tokens": 184582,
+          "cached_input_tokens": 136704,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 7808,
+          "reasoning_output_tokens": 1727
+        }
+      ],
+      "input_tokens": 184582,
+      "cached_input_tokens": 136704,
+      "output_tokens": 7808,
+      "final_answer_exists": true,
+      "review": {
+        "runtime": {
+          "passed": true,
+          "checks": [
+            "valid_payload_and_purity",
+            "valid_payload_and_purity",
+            "valid_payload_and_purity",
+            "strict_limit_'4'",
+            "strict_limit_True",
+            "strict_limit_4.0",
+            "strict_limit_0",
+            "strict_limit_9",
+            "bad_tags_'x'",
+            "bad_tags_['']",
+            "bad_tags_['  ']",
+            "bad_tags_[3]",
+            "bad_window",
+            "bad_window",
+            "bad_window",
+            "bad_window",
+            "bad_window",
+            "invalid_scope",
+            "invalid_scope",
+            "invalid_scope",
+            "invalid_scope",
+            "invalid_scope",
+            "invalid_scope",
+            "invalid_scope",
+            "internal_name_not_external_alias",
+            "serialization_alias_not_input",
+            "independent_defaults",
+            "frozen_assignment"
+          ]
+        },
+        "manual": {
+          "answer_sha256": "8eb94f9efb02b68834b52ab9f3eb296fd6e940577a59d44f7646bd76acbadd7b",
+          "safe_complete_module": true,
+          "source_access_within_protocol": true,
+          "requirements_and_explanation_match_source": true,
+          "resilient_callbacks_checked": true,
+          "notes": "Reviewed complete pure Pydantic code, local doc-read/test history and cited line positions/claims. All source files are the selected frozen documentation; no installed package-source or external evidence read."
+        },
+        "citations": [
+          {
+            "label": "Alias paths and ordered choices",
+            "target": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/lean-cli-20261025/runs/r02/workspace/docs/concepts/alias.md:16",
+            "source": "docs/concepts/alias.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Alias validation settings",
+            "target": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/lean-cli-20261025/runs/r02/workspace/docs/concepts/alias.md:224",
+            "source": "docs/concepts/alias.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Before and after model validators",
+            "target": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/lean-cli-20261025/runs/r02/workspace/docs/concepts/validators.md:465",
+            "source": "docs/concepts/validators.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Validator exceptions",
+            "target": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/lean-cli-20261025/runs/r02/workspace/docs/concepts/validators.md:554",
+            "source": "docs/concepts/validators.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Strict fields and types",
+            "target": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/lean-cli-20261025/runs/r02/workspace/docs/concepts/strict_mode.md:89",
+            "source": "docs/concepts/strict_mode.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "field constraints",
+            "target": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/lean-cli-20261025/runs/r02/workspace/docs/concepts/fields.md:438",
+            "source": "docs/concepts/fields.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Extra-data configuration",
+            "target": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/lean-cli-20261025/runs/r02/workspace/docs/concepts/models.md:236",
+            "source": "docs/concepts/models.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Default factories and default validation",
+            "target": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/lean-cli-20261025/runs/r02/workspace/docs/concepts/fields.md:151",
+            "source": "docs/concepts/fields.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Frozen models",
+            "target": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/lean-cli-20261025/runs/r02/workspace/docs/concepts/models.md:1475",
+            "source": "docs/concepts/models.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Serialization",
+            "target": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/lean-cli-20261025/runs/r02/workspace/docs/concepts/serialization.md:51",
+            "source": "docs/concepts/serialization.md",
+            "resolves_in_selected_source": true
+          }
+        ],
+        "documentation_cli_calls": 0,
+        "process_skill_calls": 1,
+        "documentation_cli_errors": 0,
+        "accepted": true
+      },
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/lean-cli-20261025/runs/r02"
+    },
+    {
+      "case_id": "pydantic-job",
+      "arm": "lexical-json",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 113.01907841599314,
+      "tool_invocations": 12,
+      "usage_events": [
+        {
+          "input_tokens": 276138,
+          "cached_input_tokens": 241024,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 6436,
+          "reasoning_output_tokens": 1833
+        }
+      ],
+      "input_tokens": 276138,
+      "cached_input_tokens": 241024,
+      "output_tokens": 6436,
+      "final_answer_exists": true,
+      "review": {
+        "runtime": {
+          "passed": true,
+          "checks": [
+            "valid_payload_and_purity",
+            "valid_payload_and_purity",
+            "valid_payload_and_purity",
+            "strict_limit_'4'",
+            "strict_limit_True",
+            "strict_limit_4.0",
+            "strict_limit_0",
+            "strict_limit_9",
+            "bad_tags_'x'",
+            "bad_tags_['']",
+            "bad_tags_['  ']",
+            "bad_tags_[3]",
+            "bad_window",
+            "bad_window",
+            "bad_window",
+            "bad_window",
+            "bad_window",
+            "invalid_scope",
+            "invalid_scope",
+            "invalid_scope",
+            "invalid_scope",
+            "invalid_scope",
+            "invalid_scope",
+            "invalid_scope",
+            "internal_name_not_external_alias",
+            "serialization_alias_not_input",
+            "independent_defaults",
+            "frozen_assignment"
+          ]
+        },
+        "manual": {
+          "answer_sha256": "19d2324b76ebf791ac0ef4d55a3f576ede7b4aa79daa895290d192b5eeee33f4",
+          "safe_complete_module": true,
+          "source_access_within_protocol": true,
+          "requirements_and_explanation_match_source": true,
+          "resilient_callbacks_checked": true,
+          "notes": "Audited complete pure Pydantic module and tool/local-test history. Strict annotated types normalize after validation; mapping copied for alias precedence; cross-field errors are ValueError; source claims consistent with reviewed aliases/validators/constraints/defaults/serialization sections."
+        },
+        "citations": [
+          {
+            "label": "`AliasChoices` prioritizes earlier choices; `AliasPath` reads nested values",
+            "target": "cairn://docs-concepts-alias/aliaspath-and-aliaschoices",
+            "source": "docs/concepts/alias.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Before model validators receive raw input; after validators check validated models",
+            "target": "cairn://docs-concepts-validators/model-validators",
+            "source": "docs/concepts/validators.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Field after validators",
+            "target": "cairn://docs-concepts-validators/field-validators",
+            "source": "docs/concepts/validators.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "`Field(strict=True)` enforces strict validation",
+            "target": "cairn://docs-concepts-strict-mode/at-the-field-level",
+            "source": "docs/concepts/strict_mode.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "`extra=\"forbid\"` rejects extra keys",
+            "target": "cairn://docs-concepts-models/extra-data",
+            "source": "docs/concepts/models.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "`frozen=True` blocks field assignment",
+            "target": "cairn://docs-concepts-models/faux-immutability",
+            "source": "docs/concepts/models.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "`default_factory` generates per-instance defaults",
+            "target": "cairn://docs-concepts-fields/default-values",
+            "source": "docs/concepts/fields.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Validation and serialization aliases serve separate purposes",
+            "target": "cairn://docs-concepts-fields/field-aliases",
+            "source": "docs/concepts/fields.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "`model_dump(mode=\"json\", by_alias=True)` produces a JSON-compatible dictionary using serialization aliases",
+            "target": "cairn://docs-concepts-serialization/serializing-data/python-mode",
+            "source": "docs/concepts/serialization.md",
+            "resolves_in_selected_source": true
+          }
+        ],
+        "documentation_cli_calls": 8,
+        "process_skill_calls": 2,
+        "documentation_cli_errors": 0,
+        "accepted": true
+      },
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/lean-cli-20261025/runs/r03"
+    },
+    {
+      "case_id": "pydantic-job",
+      "arm": "hybrid-text",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 123.51795208399562,
+      "tool_invocations": 11,
+      "usage_events": [
+        {
+          "input_tokens": 226002,
+          "cached_input_tokens": 192384,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 6677,
+          "reasoning_output_tokens": 1259
+        }
+      ],
+      "input_tokens": 226002,
+      "cached_input_tokens": 192384,
+      "output_tokens": 6677,
+      "final_answer_exists": true,
+      "review": {
+        "runtime": {
+          "passed": true,
+          "checks": [
+            "valid_payload_and_purity",
+            "valid_payload_and_purity",
+            "valid_payload_and_purity",
+            "strict_limit_'4'",
+            "strict_limit_True",
+            "strict_limit_4.0",
+            "strict_limit_0",
+            "strict_limit_9",
+            "bad_tags_'x'",
+            "bad_tags_['']",
+            "bad_tags_['  ']",
+            "bad_tags_[3]",
+            "bad_window",
+            "bad_window",
+            "bad_window",
+            "bad_window",
+            "bad_window",
+            "invalid_scope",
+            "invalid_scope",
+            "invalid_scope",
+            "invalid_scope",
+            "invalid_scope",
+            "invalid_scope",
+            "invalid_scope",
+            "internal_name_not_external_alias",
+            "serialization_alias_not_input",
+            "independent_defaults",
+            "frozen_assignment"
+          ]
+        },
+        "manual": {
+          "answer_sha256": "f15b364f41d96be69017f32df1a58e3f3740adb1cfbf0ed819b946c914a5de0d",
+          "safe_complete_module": true,
+          "source_access_within_protocol": true,
+          "requirements_and_explanation_match_source": true,
+          "resilient_callbacks_checked": true,
+          "notes": "Reviewed pure Pydantic module, full command history, cited APIs and all specified interactions. Two invalid context-budget calls retained; no source bypass, imports or side effects outside task."
+        },
+        "citations": [
+          {
+            "label": "`AliasChoices` and `AliasPath`",
+            "target": "cairn://docs-concepts-alias/aliaspath-and-aliaschoices",
+            "source": "docs/concepts/alias.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Alias configuration",
+            "target": "cairn://docs-concepts-alias/alias-configuration/configdict-settings/validation",
+            "source": "docs/concepts/alias.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Before/after validators",
+            "target": "cairn://docs-concepts-validators/model-validators",
+            "source": "docs/concepts/validators.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Strict fields",
+            "target": "cairn://docs-concepts-strict-mode/at-the-field-level",
+            "source": "docs/concepts/strict_mode.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "field constraints",
+            "target": "cairn://docs-concepts-fields/field-constraints",
+            "source": "docs/concepts/fields.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "`extra=\"forbid\"`",
+            "target": "cairn://docs-concepts-models/extra-data",
+            "source": "docs/concepts/models.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "`frozen=True`",
+            "target": "cairn://docs-concepts-models/faux-immutability",
+            "source": "docs/concepts/models.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "`default_factory`",
+            "target": "cairn://docs-concepts-fields/default-values",
+            "source": "docs/concepts/fields.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "`model_dump`",
+            "target": "cairn://docs-concepts-serialization/serializing-data/python-mode",
+            "source": "docs/concepts/serialization.md",
+            "resolves_in_selected_source": true
+          }
+        ],
+        "documentation_cli_calls": 10,
+        "process_skill_calls": 0,
+        "documentation_cli_errors": 2,
+        "accepted": true
+      },
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/lean-cli-20261025/runs/r04"
+    },
+    {
+      "case_id": "typer-release",
+      "arm": "hybrid-text",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 106.43200345800142,
+      "tool_invocations": 7,
+      "usage_events": [
+        {
+          "input_tokens": 221025,
+          "cached_input_tokens": 199040,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 6042,
+          "reasoning_output_tokens": 889
+        }
+      ],
+      "input_tokens": 221025,
+      "cached_input_tokens": 199040,
+      "output_tokens": 6042,
+      "final_answer_exists": true,
+      "review": {
+        "runtime": {
+          "passed": true,
+          "checks": [
+            "eager_version_without_required_root_option",
+            "eager_version_before_invalid_profile",
+            "repeat_invocation_context_alpha",
+            "repeat_invocation_context_beta",
+            "invalid_tag_bad",
+            "invalid_tag_=x",
+            "invalid_tag_k=",
+            "required_profile",
+            "invalid_mode",
+            "confirmation_reject_aborts",
+            "confirmation_accept_default_mode"
+          ]
+        },
+        "manual": {
+          "answer_sha256": "d0e876ecded8ef8ff06bcab20b0fb9cd9bf6e57fb3dc9f885ed1cf24a6160b88",
+          "safe_complete_module": true,
+          "source_access_within_protocol": true,
+          "requirements_and_explanation_match_source": true,
+          "resilient_callbacks_checked": true,
+          "notes": "Audited complete Typer module, pure import behavior, per-invocation context and command history. Both parameter callbacks guard resilient parsing before validating/exiting. Eager version precedes profile enum validation; ordered duplicate tags, confirmation and exact JSON checked. All cited frozen source sections inspected."
+        },
+        "citations": [
+          {
+            "label": "Root callbacks",
+            "target": "cairn://docs-tutorial-commands-callback/typer-callback",
+            "source": "docs/tutorial/commands/callback.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "context injection/resilient parsing",
+            "target": "cairn://docs-tutorial-options-callback-and-context/cli-option-callback-and-context/handling-completion/fix-completion-using-the-context",
+            "source": "docs/tutorial/options/callback-and-context.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Eager version precedence",
+            "target": "cairn://docs-tutorial-options-version/version-cli-option-is-eager/previous-parameters-and-is-eager/fix-with-is-eager",
+            "source": "docs/tutorial/options/version.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Case-insensitive enums",
+            "target": "cairn://docs-tutorial-parameter-types-enum/enum-choices/case-insensitive-enum-choices",
+            "source": "docs/tutorial/parameter-types/enum.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Repeated options",
+            "target": "cairn://docs-tutorial-multiple-values-multiple-options/multiple-cli-options",
+            "source": "docs/tutorial/multiple-values/multiple-options.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "parameter callbacks/errors",
+            "target": "cairn://docs-tutorial-options-callback-and-context/cli-option-callback-and-context/using-the-callbackparam-object",
+            "source": "docs/tutorial/options/callback-and-context.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Confirmation and abort",
+            "target": "cairn://docs-tutorial-prompt/ask-with-prompt/confirm",
+            "source": "docs/tutorial/prompt.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "CliRunner testing",
+            "target": "cairn://docs-tutorial-testing/testing/test-the-app/import-and-create-a-clirunner",
+            "source": "docs/tutorial/testing.md",
+            "resolves_in_selected_source": true
+          }
+        ],
+        "documentation_cli_calls": 5,
+        "process_skill_calls": 1,
+        "documentation_cli_errors": 0,
+        "accepted": true
+      },
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/lean-cli-20261025/runs/r05"
+    },
+    {
+      "case_id": "typer-release",
+      "arm": "lexical-json",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 82.91521395900054,
+      "tool_invocations": 9,
+      "usage_events": [
+        {
+          "input_tokens": 315385,
+          "cached_input_tokens": 283904,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 6523,
+          "reasoning_output_tokens": 1052
+        }
+      ],
+      "input_tokens": 315385,
+      "cached_input_tokens": 283904,
+      "output_tokens": 6523,
+      "final_answer_exists": true,
+      "review": {
+        "runtime": {
+          "passed": true,
+          "checks": [
+            "eager_version_without_required_root_option",
+            "eager_version_before_invalid_profile",
+            "repeat_invocation_context_alpha",
+            "repeat_invocation_context_beta",
+            "invalid_tag_bad",
+            "invalid_tag_=x",
+            "invalid_tag_k=",
+            "required_profile",
+            "invalid_mode",
+            "confirmation_reject_aborts",
+            "confirmation_accept_default_mode"
+          ]
+        },
+        "manual": {
+          "answer_sha256": "b53ddd6a9b955db7b376675f8517a98f6f6618a69c3b9b210d5815cd1b8b6233",
+          "safe_complete_module": true,
+          "source_access_within_protocol": true,
+          "requirements_and_explanation_match_source": true,
+          "resilient_callbacks_checked": true,
+          "notes": "Audited complete Typer module, pure import behavior, per-invocation context and command history. Both parameter callbacks guard resilient parsing before validating/exiting. Eager version precedes profile enum validation; ordered duplicate tags, confirmation and exact JSON checked. All cited frozen source sections inspected."
+        },
+        "citations": [
+          {
+            "label": "Root callbacks",
+            "target": "cairn://docs-tutorial-commands-callback/typer-callback",
+            "source": "docs/tutorial/commands/callback.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "context/resilient parsing",
+            "target": "cairn://docs-tutorial-options-callback-and-context/cli-option-callback-and-context/handling-completion/fix-completion-using-the-context",
+            "source": "docs/tutorial/options/callback-and-context.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Eager version handling",
+            "target": "cairn://docs-tutorial-options-version/version-cli-option-is-eager/previous-parameters-and-is-eager/fix-with-is-eager",
+            "source": "docs/tutorial/options/version.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Case-insensitive enum choices",
+            "target": "cairn://docs-tutorial-parameter-types-enum/enum-choices/case-insensitive-enum-choices",
+            "source": "docs/tutorial/parameter-types/enum.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Repeated options",
+            "target": "cairn://docs-tutorial-multiple-values-multiple-options/multiple-cli-options",
+            "source": "docs/tutorial/multiple-values/multiple-options.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "parameter callbacks/errors",
+            "target": "cairn://docs-tutorial-options-callback-and-context/cli-option-callback-and-context/using-the-callbackparam-object",
+            "source": "docs/tutorial/options/callback-and-context.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Confirmation and abort",
+            "target": "cairn://docs-tutorial-prompt/ask-with-prompt/confirm",
+            "source": "docs/tutorial/prompt.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "`CliRunner` invocation",
+            "target": "cairn://docs-tutorial-testing/testing/test-the-app/call-the-app",
+            "source": "docs/tutorial/testing.md",
+            "resolves_in_selected_source": true
+          }
+        ],
+        "documentation_cli_calls": 7,
+        "process_skill_calls": 1,
+        "documentation_cli_errors": 1,
+        "accepted": true
+      },
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/lean-cli-20261025/runs/r06"
+    },
+    {
+      "case_id": "typer-release",
+      "arm": "raw",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 95.36683366699435,
+      "tool_invocations": 4,
+      "usage_events": [
+        {
+          "input_tokens": 178941,
+          "cached_input_tokens": 153088,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 5278,
+          "reasoning_output_tokens": 1023
+        }
+      ],
+      "input_tokens": 178941,
+      "cached_input_tokens": 153088,
+      "output_tokens": 5278,
+      "final_answer_exists": true,
+      "review": {
+        "runtime": {
+          "passed": true,
+          "checks": [
+            "eager_version_without_required_root_option",
+            "eager_version_before_invalid_profile",
+            "repeat_invocation_context_alpha",
+            "repeat_invocation_context_beta",
+            "invalid_tag_bad",
+            "invalid_tag_=x",
+            "invalid_tag_k=",
+            "required_profile",
+            "invalid_mode",
+            "confirmation_reject_aborts",
+            "confirmation_accept_default_mode"
+          ]
+        },
+        "manual": {
+          "answer_sha256": "94b9287eb350c0fcb97fe508353884b0d986b06df6d70f502a708d2d3d1e90bf",
+          "safe_complete_module": true,
+          "source_access_within_protocol": true,
+          "requirements_and_explanation_match_source": true,
+          "resilient_callbacks_checked": true,
+          "notes": "Reviewed complete pure Typer module and available read/test history; both parameter callbacks guard resilient parsing, root creates invocation state, eager version and confirmation behavior match source and qualified runtime requirements. Citation granularity and context-injection/runtime-inheritance distinction checked."
+        },
+        "citations": [
+          {
+            "label": "root callbacks",
+            "target": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/lean-cli-20261025/runs/r07/workspace/docs/tutorial/commands/callback.md:11",
+            "source": "docs/tutorial/commands/callback.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "callback/context",
+            "target": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/lean-cli-20261025/runs/r07/workspace/docs/tutorial/options/callback-and-context.md:169",
+            "source": "docs/tutorial/options/callback-and-context.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "eager handling",
+            "target": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/lean-cli-20261025/runs/r07/workspace/docs/tutorial/options/version.md:159",
+            "source": "docs/tutorial/options/version.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "case-insensitive enums",
+            "target": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/lean-cli-20261025/runs/r07/workspace/docs/tutorial/parameter-types/enum.md:98",
+            "source": "docs/tutorial/parameter-types/enum.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "repeated list options",
+            "target": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/lean-cli-20261025/runs/r07/workspace/docs/tutorial/multiple-values/multiple-options.md:19",
+            "source": "docs/tutorial/multiple-values/multiple-options.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "parameter validation callbacks",
+            "target": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/lean-cli-20261025/runs/r07/workspace/docs/tutorial/options/callback-and-context.md:20",
+            "source": "docs/tutorial/options/callback-and-context.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "confirmation with abort",
+            "target": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/lean-cli-20261025/runs/r07/workspace/docs/tutorial/prompt.md:86",
+            "source": "docs/tutorial/prompt.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "CliRunner assertions",
+            "target": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/lean-cli-20261025/runs/r07/workspace/docs/tutorial/testing.md:54",
+            "source": "docs/tutorial/testing.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "simulated input",
+            "target": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/lean-cli-20261025/runs/r07/workspace/docs/tutorial/testing.md:207",
+            "source": "docs/tutorial/testing.md",
+            "resolves_in_selected_source": true
+          }
+        ],
+        "documentation_cli_calls": 0,
+        "process_skill_calls": 0,
+        "documentation_cli_errors": 0,
+        "accepted": true
+      },
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/lean-cli-20261025/runs/r07"
+    },
+    {
+      "case_id": "typer-release",
+      "arm": "hybrid-json",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 90.86844016700343,
+      "tool_invocations": 14,
+      "usage_events": [
+        {
+          "input_tokens": 349217,
+          "cached_input_tokens": 304512,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 5296,
+          "reasoning_output_tokens": 957
+        }
+      ],
+      "input_tokens": 349217,
+      "cached_input_tokens": 304512,
+      "output_tokens": 5296,
+      "final_answer_exists": true,
+      "review": {
+        "runtime": {
+          "passed": true,
+          "checks": [
+            "eager_version_without_required_root_option",
+            "eager_version_before_invalid_profile",
+            "repeat_invocation_context_alpha",
+            "repeat_invocation_context_beta",
+            "invalid_tag_bad",
+            "invalid_tag_=x",
+            "invalid_tag_k=",
+            "required_profile",
+            "invalid_mode",
+            "confirmation_reject_aborts",
+            "confirmation_accept_default_mode"
+          ]
+        },
+        "manual": {
+          "answer_sha256": "56a6ed2ff043009138f73f7b852f49609cbb23b690cd548ec405766a6f571cdf",
+          "safe_complete_module": true,
+          "source_access_within_protocol": true,
+          "requirements_and_explanation_match_source": true,
+          "resilient_callbacks_checked": true,
+          "notes": "Reviewed complete pure Typer module and available read/test history; both parameter callbacks guard resilient parsing, root creates invocation state, eager version and confirmation behavior match source and qualified runtime requirements. Citation granularity and context-injection/runtime-inheritance distinction checked."
+        },
+        "citations": [
+          {
+            "label": "Root callbacks",
+            "target": "cairn://docs-tutorial-commands-callback/typer-callback",
+            "source": "docs/tutorial/commands/callback.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "context injection/resilient parsing",
+            "target": "cairn://docs-tutorial-options-callback-and-context/cli-option-callback-and-context/using-the-callbackparam-object",
+            "source": "docs/tutorial/options/callback-and-context.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Eager version processing, including earlier invalid parameters",
+            "target": "cairn://docs-tutorial-options-version/version-cli-option-is-eager/previous-parameters-and-is-eager/fix-with-is-eager",
+            "source": "docs/tutorial/options/version.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Case-insensitive enum choices",
+            "target": "cairn://docs-tutorial-parameter-types-enum/enum-choices/case-insensitive-enum-choices",
+            "source": "docs/tutorial/parameter-types/enum.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Repeated list options",
+            "target": "cairn://docs-tutorial-multiple-values-multiple-options/multiple-cli-options",
+            "source": "docs/tutorial/multiple-values/multiple-options.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "callback parameter errors",
+            "target": "cairn://docs-tutorial-options-callback-and-context/cli-option-callback-and-context/validate-cli-parameters",
+            "source": "docs/tutorial/options/callback-and-context.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Confirmation and abort",
+            "target": "cairn://docs-tutorial-prompt/ask-with-prompt/confirm",
+            "source": "docs/tutorial/prompt.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "CliRunner testing",
+            "target": "cairn://docs-tutorial-testing/testing/test-the-app/import-and-create-a-clirunner",
+            "source": "docs/tutorial/testing.md",
+            "resolves_in_selected_source": true
+          }
+        ],
+        "documentation_cli_calls": 10,
+        "process_skill_calls": 2,
+        "documentation_cli_errors": 1,
+        "accepted": true
+      },
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/lean-cli-20261025/runs/r08"
+    },
+    {
+      "case_id": "typer-release",
+      "arm": "lexical-text",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 99.59985654200136,
+      "tool_invocations": 11,
+      "usage_events": [
+        {
+          "input_tokens": 221529,
+          "cached_input_tokens": 183936,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 4915,
+          "reasoning_output_tokens": 1026
+        }
+      ],
+      "input_tokens": 221529,
+      "cached_input_tokens": 183936,
+      "output_tokens": 4915,
+      "final_answer_exists": true,
+      "review": {
+        "runtime": {
+          "passed": true,
+          "checks": [
+            "eager_version_without_required_root_option",
+            "eager_version_before_invalid_profile",
+            "repeat_invocation_context_alpha",
+            "repeat_invocation_context_beta",
+            "invalid_tag_bad",
+            "invalid_tag_=x",
+            "invalid_tag_k=",
+            "required_profile",
+            "invalid_mode",
+            "confirmation_reject_aborts",
+            "confirmation_accept_default_mode"
+          ]
+        },
+        "manual": {
+          "answer_sha256": "b133015fd50050826206b0b332666c1ed18b06db4d672f93e6bb06c4ae5f5386",
+          "safe_complete_module": true,
+          "source_access_within_protocol": true,
+          "requirements_and_explanation_match_source": true,
+          "resilient_callbacks_checked": true,
+          "notes": "Reviewed complete pure Typer module and all command history; both parameter callbacks return before effects on resilient parsing, each root invocation creates a new context dict, repeated tags and final exact JSON retained. Source explanation explicitly distinguishes context injection from runtime state inheritance."
+        },
+        "citations": [
+          {
+            "label": "Root callbacks and option placement",
+            "target": "cairn://docs-tutorial-commands-callback/typer-callback",
+            "source": "docs/tutorial/commands/callback.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "context injection and resilient parsing",
+            "target": "cairn://docs-tutorial-options-callback-and-context/cli-option-callback-and-context/handling-completion/fix-completion-using-the-context",
+            "source": "docs/tutorial/options/callback-and-context.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Eager version processing before earlier parameters",
+            "target": "cairn://docs-tutorial-options-version/version-cli-option-is-eager/previous-parameters-and-is-eager/fix-with-is-eager",
+            "source": "docs/tutorial/options/version.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Case-insensitive enum choices and normalized `.value`",
+            "target": "cairn://docs-tutorial-parameter-types-enum/enum-choices/case-insensitive-enum-choices",
+            "source": "docs/tutorial/parameter-types/enum.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Repeated list options",
+            "target": "cairn://docs-tutorial-multiple-values-multiple-options/multiple-cli-options",
+            "source": "docs/tutorial/multiple-values/multiple-options.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "validation callbacks and `BadParameter`",
+            "target": "cairn://docs-tutorial-options-callback-and-context/cli-option-callback-and-context/using-the-callbackparam-object",
+            "source": "docs/tutorial/options/callback-and-context.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Confirmation and abort",
+            "target": "cairn://docs-tutorial-prompt/ask-with-prompt/confirm",
+            "source": "docs/tutorial/prompt.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "CliRunner invocation and assertions",
+            "target": "cairn://docs-tutorial-testing/testing/test-the-app/import-and-create-a-clirunner",
+            "source": "docs/tutorial/testing.md",
+            "resolves_in_selected_source": true
+          }
+        ],
+        "documentation_cli_calls": 7,
+        "process_skill_calls": 2,
+        "documentation_cli_errors": 1,
+        "accepted": true
+      },
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/lean-cli-20261025/runs/r09"
+    }
+  ],
+  "aggregates": [
+    {
+      "arm": "hybrid-json",
+      "sessions": 2,
+      "accepted": 2,
+      "input_tokens": 754396,
+      "cached_input_tokens": 675328,
+      "output_tokens": 10931,
+      "tool_invocations": 31,
+      "seconds": 203.7186247080026,
+      "uncached_input_tokens": 79068,
+      "documentation_cli_calls": 22,
+      "process_skill_calls": 4,
+      "documentation_cli_errors": 2
+    },
+    {
+      "arm": "hybrid-text",
+      "sessions": 2,
+      "accepted": 2,
+      "input_tokens": 447027,
+      "cached_input_tokens": 391424,
+      "output_tokens": 12719,
+      "tool_invocations": 18,
+      "seconds": 229.94995554199704,
+      "uncached_input_tokens": 55603,
+      "documentation_cli_calls": 15,
+      "process_skill_calls": 1,
+      "documentation_cli_errors": 2
+    },
+    {
+      "arm": "lexical-json",
+      "sessions": 2,
+      "accepted": 2,
+      "input_tokens": 591523,
+      "cached_input_tokens": 524928,
+      "output_tokens": 12959,
+      "tool_invocations": 21,
+      "seconds": 195.93429237499367,
+      "uncached_input_tokens": 66595,
+      "documentation_cli_calls": 15,
+      "process_skill_calls": 3,
+      "documentation_cli_errors": 1
+    },
+    {
+      "arm": "lexical-text",
+      "sessions": 2,
+      "accepted": 2,
+      "input_tokens": 720112,
+      "cached_input_tokens": 630400,
+      "output_tokens": 10606,
+      "tool_invocations": 28,
+      "seconds": 222.9071411670011,
+      "uncached_input_tokens": 89712,
+      "documentation_cli_calls": 18,
+      "process_skill_calls": 5,
+      "documentation_cli_errors": 2
+    },
+    {
+      "arm": "raw",
+      "sessions": 2,
+      "accepted": 2,
+      "input_tokens": 363523,
+      "cached_input_tokens": 289792,
+      "output_tokens": 13086,
+      "tool_invocations": 9,
+      "seconds": 228.22338708299503,
+      "uncached_input_tokens": 73731,
+      "documentation_cli_calls": 0,
+      "process_skill_calls": 1,
+      "documentation_cli_errors": 0
+    }
+  ],
+  "phase": "lean-cli-20261025",
+  "unique_tasktexts": 2,
+  "development_cases_reused": true,
+  "primary": "lexical-text",
+  "primary_gate_passed": false,
+  "frozen_files_verified": 107,
+  "protocol_path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/lean-cli-20261025/protocol-frozen.json",
+  "representation_replay": {
+    "source_files_identical": 72,
+    "responses": [
+      {
+        "event_source": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/strong-control-20261025/runs/real/pydantic-job-cairn/events.jsonl",
+        "json_bytes": 8090,
+        "text_bytes": 7558,
+        "framed": true
+      },
+      {
+        "event_source": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/strong-control-20261025/runs/real/pydantic-job-cairn/events.jsonl",
+        "json_bytes": 7683,
+        "text_bytes": 7428,
+        "framed": true
+      },
+      {
+        "event_source": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/strong-control-20261025/runs/real/pydantic-job-cairn/events.jsonl",
+        "json_bytes": 5379,
+        "text_bytes": 5236,
+        "framed": true
+      },
+      {
+        "event_source": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/strong-control-20261025/runs/real/pydantic-job-cairn/events.jsonl",
+        "json_bytes": 4421,
+        "text_bytes": 4356,
+        "framed": true
+      },
+      {
+        "event_source": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/strong-control-20261025/runs/real/pydantic-job-cairn/events.jsonl",
+        "json_bytes": 9280,
+        "text_bytes": 8411,
+        "framed": true
+      },
+      {
+        "event_source": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/strong-control-20261025/runs/real/pydantic-job-cairn/events.jsonl",
+        "json_bytes": 3521,
+        "text_bytes": 3396,
+        "framed": true
+      },
+      {
+        "event_source": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/strong-control-20261025/runs/real/pydantic-job-cairn/events.jsonl",
+        "json_bytes": 2400,
+        "text_bytes": 2309,
+        "framed": true
+      },
+      {
+        "event_source": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/strong-control-20261025/runs/real/pydantic-job-cairn/events.jsonl",
+        "json_bytes": 2145,
+        "text_bytes": 2132,
+        "framed": true
+      },
+      {
+        "event_source": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/strong-control-20261025/runs/real/pydantic-job-cairn/events.jsonl",
+        "json_bytes": 3305,
+        "text_bytes": 3210,
+        "framed": true
+      },
+      {
+        "event_source": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/strong-control-20261025/runs/real/pydantic-job-cairn/events.jsonl",
+        "json_bytes": 2993,
+        "text_bytes": 2875,
+        "framed": true
+      },
+      {
+        "event_source": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/strong-control-20261025/runs/real/pydantic-job-cairn/events.jsonl",
+        "json_bytes": 2471,
+        "text_bytes": 2471,
+        "framed": false
+      },
+      {
+        "event_source": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/strong-control-20261025/runs/real/pydantic-job-cairn/events.jsonl",
+        "json_bytes": 2488,
+        "text_bytes": 2488,
+        "framed": false
+      },
+      {
+        "event_source": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/strong-control-20261025/runs/real/typer-release-cairn/events.jsonl",
+        "json_bytes": 10698,
+        "text_bytes": 9621,
+        "framed": true
+      },
+      {
+        "event_source": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/strong-control-20261025/runs/real/typer-release-cairn/events.jsonl",
+        "json_bytes": 8105,
+        "text_bytes": 7645,
+        "framed": true
+      },
+      {
+        "event_source": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/strong-control-20261025/runs/real/typer-release-cairn/events.jsonl",
+        "json_bytes": 9363,
+        "text_bytes": 8547,
+        "framed": true
+      }
+    ],
+    "json_bytes": 82342,
+    "text_bytes": 77683
+  },
+  "index_setup": {
+    "pydantic": {
+      "seconds": 3.9973741249996237,
+      "source_bytes": 192386,
+      "index_bytes": 1364135,
+      "provider": "openai-compat:nomic-embed-text-v1.5.Q4_K_M:utf8-window-v1:1500:weighted-unit-mean",
+      "query_and_document_provider": "stock make_embedder(False), no injected task prefix; controlled extractive summaries, actual local nomic768d+1500bytewindows; server already running"
+    },
+    "typer": {
+      "seconds": 0.8932733749970794,
+      "source_bytes": 42879,
+      "index_bytes": 512598,
+      "provider": "openai-compat:nomic-embed-text-v1.5.Q4_K_M:utf8-window-v1:1500:weighted-unit-mean",
+      "query_and_document_provider": "stock make_embedder(False), no injected task prefix; controlled extractive summaries, actual local nomic768d+1500bytewindows; server already running"
+    }
+  },
+  "limitations": [
+    "Two reused development tasktexts, one session per cell; not heldout generalization",
+    "Uncontrolled Agent skill reads and test strategy differ; end-to-end observations are not isolated algorithm/format effects",
+    "Index uses controlled extractive summaries and already-running Nomic server, not default summary-provider cold start",
+    "Stock document/query embedder has no injected task prefixes; earlier prefix-adapter studies are not pooled",
+    "Text byte bound is not model-token bound; paid-cost result depends on cache and output prices",
+    "CLI is actual product wheel/shared dispatcher; external one-hop link prototype not merged"
+  ]
+}

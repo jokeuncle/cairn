@@ -16,34 +16,44 @@ from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from mcp.types import Tool
 
-from cairn.agent_guidance import agent_usage_guidance
 from cairn.core.errors import CairnError, ConfigError, ToolError
+from cairn.dispatch import (
+    SERVER_NAME as SERVER_NAME,
+)
+from cairn.dispatch import (
+    _compact_search_data as _compact_search_data,
+)
+from cairn.dispatch import (
+    _error_envelope as _error_envelope,
+)
+from cairn.dispatch import (
+    _new_trace as _new_trace,
+)
+from cairn.dispatch import (
+    _normalize_section_anchors as _normalize_section_anchors,
+)
+from cairn.dispatch import (
+    _success_envelope as _success_envelope,
+)
+from cairn.dispatch import (
+    _trace_step as _trace_step,
+)
+from cairn.dispatch import (
+    dispatch_repo_tool as dispatch_repo_tool,
+)
+from cairn.dispatch import (
+    dispatch_tool as dispatch_tool,
+)
 from cairn.embed.base import Embedder
 from cairn.mcp.schemas import CAIRN_TOOLS, REPO_TOOLS
 from cairn.repo import (
     find_repo_root,
-    load_repo_document_index,
-    repo_config_guidance,
-    repo_context,
-    repo_graph,
-    repo_impact,
     repo_setup_next_steps,
-    repo_status,
-    search_repo_documents,
-    search_repo_keyword,
 )
-from cairn.tools.base import DocumentIndex, estimate_tokens_of_payload
-from cairn.tools.find_mentions import find_mentions as find_mentions_tool
-from cairn.tools.get_related import get_related as get_related_tool
-from cairn.tools.get_section import expand as expand_tool
-from cairn.tools.get_section import get_section as get_section_tool
-from cairn.tools.outline import outline as outline_tool
-from cairn.tools.read_range import read_range as read_range_tool
-from cairn.tools.search_keyword import search_keyword as search_keyword_tool
-from cairn.tools.search_semantic import search_semantic as search_semantic_tool
+from cairn.tools.base import DocumentIndex
 
-SERVER_NAME = "cairn"
 ROOTS_LIST_TIMEOUT = timedelta(seconds=5)
+
 
 # Server-level guidance injected into the client's system prompt (when the
 # client surfaces MCP `instructions`). This is the highest-leverage place to
@@ -64,10 +74,28 @@ REPO_INSTRUCTIONS = (
     "architecture files for project knowledge, call Cairn. Prefer Cairn for "
     "documentation, product, architecture, setup, naming, protocol, business "
     "workflow, and durable decision-record questions. Start with `repo_context` "
-    "(one call: ranked hits + ready-to-read sections + relationship map) or "
+    "(one call: cited summaries and verbatim evidence) or "
     "`search_documents` (cross-document ranked hits), then drill into a specific "
     "doc with `get_section`/`get_related`. If a repo tool reports setup next "
     "steps, show or run those commands instead of falling back to raw file reads. "
+    "For exact API/configuration names, values and conditions, use cited original "
+    "evidence rather than summaries. repo_context(level='evidence') combines discovery "
+    "and budgeted original blocks with source spans; use max_context_chars to bound "
+    "the pack and max_section_chars per section. Omissions are explicit. "
+    "For independent requirements provide 2-6 focused queries in the same evidence "
+    "call; results are deduplicated and selected jointly. Follow dependent needs later. "
+    "Use full section reads for missing conditions or complete oversized examples. "
+    "Reuse evidence already supplied instead of fetching it again. "
+    "Verify every part of multi-part questions. "
+    "Full section bodies exclude descendant bodies. Follow returned navigation "
+    "links to children and siblings when a section does not cover every requirement. "
+    "For uncovered requirements, use short targeted searches. Do not exhaust navigation lists "
+    "or re-read the same section unless new evidence requires it. "
+    "Use read_range to fetch adjacent sections together when several bodies "
+    "are needed, rather than issuing one read per child. "
+    "If a cited section covers only part of a question, inspect its parent or "
+    "siblings with get_related or search again. Do not infer that something is "
+    "undocumented from an incomplete excerpt or one section. "
     "Each repository is isolated: use the current workspace's `.cairn` index, "
     "or pass `projectPath` only when the user explicitly wants another repo. "
     "Do not use Cairn as a mandatory pre-step for small known-file code edits, "
@@ -75,137 +103,6 @@ REPO_INSTRUCTIONS = (
     "code/search/shell tools for those. Results are summaries with stable, "
     "citable section ids by default; request `full` text only when needed."
 )
-
-
-def _new_trace(
-    tool: str,
-    arguments: dict[str, Any],
-    *,
-    mode: str,
-    repo_root: Path | None = None,
-    doc: str | None = None,
-) -> dict[str, Any]:
-    trace: dict[str, Any] = {
-        "server": SERVER_NAME,
-        "tool": tool,
-        "mode": mode,
-        "status": "ok",
-        "arguments": dict(arguments),
-        "steps": [],
-    }
-    if repo_root is not None:
-        trace["repo_root"] = str(repo_root)
-    if doc is not None:
-        trace["doc"] = doc
-    return trace
-
-
-def _trace_step(trace: dict[str, Any], name: str, **details: Any) -> None:
-    step: dict[str, Any] = {"name": name, "status": details.pop("status", "ok")}
-    step.update(details)
-    trace["steps"].append(step)
-
-
-def _success_envelope(
-    *,
-    data: dict[str, Any],
-    tokens_returned: int,
-    trace: dict[str, Any],
-) -> dict[str, Any]:
-    trace["status"] = "ok"
-    _trace_step(trace, "return_result", tokens_returned=tokens_returned)
-    return {
-        "ok": True,
-        "tokens_returned": tokens_returned,
-        "data": data,
-        "trace": trace,
-    }
-
-
-def _error_envelope(
-    *,
-    error: dict[str, Any],
-    trace: dict[str, Any],
-) -> dict[str, Any]:
-    trace["status"] = "error"
-    _trace_step(
-        trace,
-        "return_error",
-        status="error",
-        code=error.get("code"),
-        message=error.get("message"),
-    )
-    return {"ok": False, "error": error, "trace": trace}
-
-
-async def dispatch_tool(
-    name: str,
-    arguments: dict[str, Any] | None,
-    index: DocumentIndex,
-    embedder: Embedder,
-    *,
-    trace: dict[str, Any] | None = None,
-    mode: str = "document",
-) -> dict[str, Any]:
-    """Run a named tool and return the MCP envelope dict.
-
-    Never raises: all CairnError subclasses are caught and converted to the
-    ``{"ok": False, "error": {...}}`` shape documented in mcp-tools.md §0.
-    """
-    args: dict[str, Any] = dict(arguments or {})
-    trace = trace or _new_trace(name, args, mode=mode)
-    try:
-        _trace_step(trace, "select_tool", tool=name)
-        if name == "outline":
-            resp = await outline_tool(index, **args)
-        elif name == "get_section":
-            resp = await get_section_tool(index, **args)
-        elif name == "expand":
-            resp = await expand_tool(index, **args)
-        elif name == "search_semantic":
-            _trace_step(
-                trace,
-                "embed_query",
-                embedder=embedder.name,
-                dim=embedder.dim,
-            )
-            resp = await search_semantic_tool(index, embedder=embedder, **args)
-        elif name == "search_keyword":
-            resp = await search_keyword_tool(index, **args)
-        elif name == "find_mentions":
-            resp = await find_mentions_tool(index, **args)
-        elif name == "get_related":
-            resp = await get_related_tool(index, **args)
-        elif name == "read_range":
-            resp = await read_range_tool(index, **args)
-        else:
-            msg = f"unknown tool: {name!r}"
-            _trace_step(trace, "select_tool", status="error", tool=name)
-            raise ToolError(msg, details={"name": name})
-        _trace_step(
-            trace,
-            "execute_tool",
-            tool=name,
-            tokens_returned=resp.tokens_returned,
-        )
-        return _success_envelope(
-            tokens_returned=resp.tokens_returned,
-            data=resp.data,
-            trace=trace,
-        )
-    except CairnError as exc:
-        return _error_envelope(error=exc.to_envelope(), trace=trace)
-    except TypeError as exc:
-        # Pydantic / Python TypeError from wrong kwarg names → 400-like error.
-        msg = f"invalid arguments for tool {name!r}: {exc}"
-        return _error_envelope(
-            trace=trace,
-            error={
-                "code": "INVALID_INPUT",
-                "message": msg,
-                "details": {"arguments": args},
-            },
-        )
 
 
 def build_server(index: DocumentIndex, embedder: Embedder) -> Server:
@@ -223,188 +120,6 @@ def build_server(index: DocumentIndex, embedder: Embedder) -> Server:
         return await dispatch_tool(name, arguments, index, embedder)
 
     return server
-
-
-async def dispatch_repo_tool(
-    name: str,
-    arguments: dict[str, Any] | None,
-    repo_root: Path,
-    embedder: Embedder,
-    *,
-    trace: dict[str, Any] | None = None,
-) -> dict[str, Any]:
-    """Run a tool against one document from a repo-scoped Cairn index."""
-    args: dict[str, Any] = dict(arguments or {})
-    trace = trace or _new_trace(name, args, mode="repo", repo_root=repo_root)
-    trace["repo_root"] = str(repo_root)
-    try:
-        _trace_step(trace, "select_tool", tool=name)
-        if name == "list_documents":
-            state = args.get("state")
-            status = repo_status(repo_root)
-            docs = [
-                doc.model_dump(mode="json")
-                for doc in status.documents
-                if state is None or doc.state == state
-            ]
-            data = {
-                "root": str(status.root),
-                "primary_doc": status.primary_doc,
-                "documents": docs,
-                "usage_guidance": agent_usage_guidance(),
-            }
-            if not any(doc.state in {"indexed", "stale"} for doc in status.documents):
-                data["next_steps"] = repo_setup_next_steps()
-            guidance = repo_config_guidance(status)
-            if guidance is not None:
-                data["config_guidance"] = guidance
-            _trace_step(
-                trace,
-                "load_repo_status",
-                documents=len(status.documents),
-                indexed=status.indexed_count,
-                stale=status.stale_count,
-                missing=status.missing_count,
-                errors=status.error_count,
-            )
-            _trace_step(trace, "filter_documents", state=state, returned=len(docs))
-            return _success_envelope(
-                tokens_returned=estimate_tokens_of_payload(data),
-                data=data,
-                trace=trace,
-            )
-        if name == "search_documents":
-            _trace_step(
-                trace,
-                "embed_query",
-                embedder=embedder.name,
-                dim=embedder.dim,
-            )
-            result = await search_repo_documents(repo_root, embedder=embedder, **args)
-            data = result["data"]
-            _trace_step(
-                trace,
-                "search_documents",
-                query=args.get("query"),
-                hits=len(data.get("hits", [])),
-                searched_documents=data.get("searched_documents"),
-                ranker_mode=data.get("ranker", {}).get("mode"),
-                scored_sections=data.get("ranker", {}).get("scored_sections"),
-            )
-            return _success_envelope(
-                tokens_returned=result["tokens_returned"],
-                data=data,
-                trace=trace,
-            )
-        if name == "repo_context":
-            _trace_step(
-                trace,
-                "embed_query",
-                embedder=embedder.name,
-                dim=embedder.dim,
-            )
-            result = await repo_context(repo_root, embedder=embedder, **args)
-            data = result["data"]
-            relationship_map = data.get("relationship_map", {})
-            _trace_step(
-                trace,
-                "search_documents",
-                query=args.get("query"),
-                hits=len(data.get("hits", [])),
-            )
-            _trace_step(
-                trace,
-                "load_context_sections",
-                sections=len(data.get("context_sections", [])),
-                level=args.get("level", "synopsis"),
-            )
-            _trace_step(
-                trace,
-                "build_relationship_map",
-                nodes=len(relationship_map.get("nodes", [])),
-                edges=len(relationship_map.get("edges", [])),
-            )
-            return _success_envelope(
-                tokens_returned=result["tokens_returned"],
-                data=data,
-                trace=trace,
-            )
-        if name == "repo_graph":
-            result = await repo_graph(repo_root, **args)
-            data = result["data"]
-            _trace_step(
-                trace,
-                "build_repo_graph",
-                nodes=len(data.get("nodes", [])),
-                edges=len(data.get("edges", [])),
-                doc=args.get("doc"),
-            )
-            return _success_envelope(
-                tokens_returned=result["tokens_returned"],
-                data=data,
-                trace=trace,
-            )
-        if name == "repo_impact":
-            result = await repo_impact(repo_root, **args)
-            data = result["data"]
-            _trace_step(
-                trace,
-                "estimate_repo_impact",
-                scope=data.get("scope"),
-                affected_surfaces=len(data.get("affected_surfaces", [])),
-                related_sections=len(data.get("related_sections", [])),
-            )
-            return _success_envelope(
-                tokens_returned=result["tokens_returned"],
-                data=data,
-                trace=trace,
-            )
-        if name == "search_keyword" and args.get("doc") is None:
-            args.pop("doc", None)
-            result = await search_repo_keyword(repo_root, **args)
-            data = result["data"]
-            _trace_step(
-                trace,
-                "search_repo_keyword",
-                returned=len(data.get("hits", [])),
-                searched_documents=data.get("searched_documents"),
-            )
-            return _success_envelope(
-                tokens_returned=result["tokens_returned"],
-                data=data,
-                trace=trace,
-            )
-
-        doc_id = args.pop("doc", None)
-        if doc_id is not None and not isinstance(doc_id, str):
-            msg = "`doc` must be a string when provided"
-            _trace_step(trace, "select_document", status="error", doc=doc_id)
-            raise ToolError(msg, details={"doc": doc_id})
-        trace["mode"] = "repo_document"
-        if doc_id is not None:
-            trace["doc"] = doc_id
-        index = load_repo_document_index(repo_root, doc_id=doc_id)
-        _trace_step(trace, "load_document_index", doc=doc_id)
-        return await dispatch_tool(
-            name,
-            args,
-            index,
-            embedder,
-            trace=trace,
-            mode="repo_document",
-        )
-    except CairnError as exc:
-        return _error_envelope(error=exc.to_envelope(), trace=trace)
-    except TypeError as exc:
-        msg = f"invalid arguments for repo tool {name!r}: {exc}"
-        return _error_envelope(
-            trace=trace,
-            error={
-                "code": "INVALID_INPUT",
-                "message": msg,
-                "details": {"arguments": args},
-            },
-        )
 
 
 def _path_from_uri(uri: object) -> Path | None:

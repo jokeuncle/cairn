@@ -1,0 +1,178 @@
+{
+  "version": "0.1.0a13",
+  "date": "2026-10-25",
+  "classification": "development regression and targeted source-label adjudication; not heldout Agent/generalization evidence",
+  "original_release_original_labels": {
+    "total": 32,
+    "top1": 29,
+    "top3": 32,
+    "top5": 32,
+    "drilldown": 32
+  },
+  "candidate_before_guard_original_labels": {
+    "total": 32,
+    "top1": 27,
+    "top3": 31,
+    "top5": 32,
+    "drilldown": 32
+  },
+  "candidate_before_guard_corrected_labels": {
+    "total": 32,
+    "top1": 29,
+    "top3": 31,
+    "top5": 32,
+    "drilldown": 32
+  },
+  "candidate_after_guard_original_labels": {
+    "total": 32,
+    "top1": 29,
+    "top3": 32,
+    "top5": 32,
+    "drilldown": 32
+  },
+  "candidate_after_guard_corrected_labels": {
+    "total": 32,
+    "top1": 29,
+    "top3": 32,
+    "top5": 32,
+    "drilldown": 32
+  },
+  "original_release_corrected_labels": {
+    "total": 32,
+    "top1": 30,
+    "top3": 32,
+    "top5": 32,
+    "drilldown": 32
+  },
+  "thresholds_unchanged": {
+    "top1_rate": 0.9,
+    "top3_rate": 1.0,
+    "top5_rate": 1.0,
+    "drilldown_rate": 1.0
+  },
+  "tests": {
+    "python_versions": [
+      "3.11",
+      "3.12",
+      "3.13"
+    ],
+    "passed_each": 620,
+    "warnings_each": 5,
+    "warning_scope": "Existing PyMuPDF SWIG deprecation warnings"
+  },
+  "code_equivalence": {
+    "evaluated_product_modules": 75,
+    "release_product_modules": 75,
+    "changed_modules": [
+      "cairn/__init__.py",
+      "cairn/repo_search.py"
+    ],
+    "graph_and_impact_implementation_identical": true,
+    "late_guard": "ADR-0018 source namespace confidence has three metamorphic regressions plus final public gates; earlier Agent token results do not evaluate this late guard."
+  },
+  "source_oracle_correction": "source-label-correction-20261025.json",
+  "corpora": [
+    {
+      "name": "uv",
+      "url": "https://github.com/astral-sh/uv",
+      "revision": "6fe4f0f5cfa8322e97af4479cbfb3d53a3ce9596",
+      "documents": {
+        "total": 89,
+        "ok": 89,
+        "failed": 0
+      },
+      "metrics": {
+        "total": 16,
+        "top1": 16,
+        "top3": 16,
+        "top5": 16,
+        "drilldown": 16
+      }
+    },
+    {
+      "name": "mcp-python-sdk",
+      "url": "https://github.com/modelcontextprotocol/python-sdk",
+      "revision": "a525a3d9bece967d91534b746a6c842931b7b4ec",
+      "documents": {
+        "total": 67,
+        "ok": 67,
+        "failed": 0
+      },
+      "metrics": {
+        "total": 4,
+        "top1": 4,
+        "top3": 4,
+        "top5": 4,
+        "drilldown": 4
+      }
+    },
+    {
+      "name": "pydantic-ai",
+      "url": "https://github.com/pydantic/pydantic-ai",
+      "revision": "4ee11516b5be6b767654304ec8fe346b81369597",
+      "documents": {
+        "total": 355,
+        "ok": 355,
+        "failed": 0
+      },
+      "metrics": {
+        "total": 8,
+        "top1": 6,
+        "top3": 8,
+        "top5": 8,
+        "drilldown": 8
+      }
+    },
+    {
+      "name": "fastapi-template",
+      "url": "https://github.com/fastapi/full-stack-fastapi-template",
+      "revision": "b1125d8839482cb7bbae603ddc6d0081bf87532e",
+      "documents": {
+        "total": 8,
+        "ok": 8,
+        "failed": 0
+      },
+      "metrics": {
+        "total": 4,
+        "top1": 3,
+        "top3": 4,
+        "top5": 4,
+        "drilldown": 4
+      }
+    }
+  ],
+  "limits": [
+    "All rankings use fake summaries and fake embeddings; these are wiring/lexical regression checks.",
+    "Targets were inspected during development. Several rejected ablations and original failed runs are retained externally.",
+    "Independent reviewer was blind to scores but its four questions were selected after development failures.",
+    "Original-release baseline copied public Markdown successfully; an unrelated dangling .claude skill symlink produced a copy warning and is retained in logs.",
+    "Fourteen comparative graph/analysis Agent sessions remain accepted but fail cost gates; last namespace guard was not part of those frozen Agent builds."
+  ],
+  "public_smoke": {
+    "repos": 37,
+    "ok": 37,
+    "failed": 0,
+    "indexed_docs": 3754,
+    "sync_failures": 0,
+    "query_count": 185,
+    "queries_with_hits": 185,
+    "drilldowns_ok": 185
+  },
+  "installed_wheel_dogfood": {
+    "synced": 51,
+    "failed": 0,
+    "stale": 0,
+    "missing": 0,
+    "doctor": "ok",
+    "query_embedding_dim": 64,
+    "graph_tool": "ok",
+    "impact_tool": "ok",
+    "starter": {
+      "cairn_mean_recall_at_k": 0.25,
+      "naive_mean_recall_at_k": 0.45,
+      "cairn_mean_tokens": 1362.3,
+      "naive_mean_tokens": 4374.0
+    },
+    "starter_scope": "Legacy architecture fake-provider fixture; lower Cairn recall; not Agent savings or heldout quality."
+  }
+}

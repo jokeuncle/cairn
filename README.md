@@ -25,20 +25,132 @@ agent can ask Cairn to `list_documents`, `search_documents`, inspect an
 `outline`, and drill into exact sections with stable `cairn://` anchors. The
 same engine also works for standalone handbooks, papers, and PDFs.
 
-The result: better retrieval accuracy, lower token spend, and a practical MCP
-tool layer between your project documentation and every AI coding agent you
-use. Local-first. Vendor-neutral. Designed for open-source repos.
+Cairn provides cited, bounded access to documentation through MCP and a local
+CLI. It is an experimental infrastructure tool: **a general Agent cost advantage
+or commercial superiority has not been established**. See the
+[experiment ledger](docs/research/README.md) for retained successes, failures,
+controls and scope limits.
 
-> 🚀 **Alpha — `0.1.0a12`.** Markdown + PDF ingest, the core MCP tool set,
+The latest public-document studies use real Codex Agents and independent answer
+and citation checks. All arms complete the selected tasks; task acceptance is
+separate from the predeclared cost gate:
+
+| Study | Completed sessions | Cairn vs fresh raw: input / uncached input / output | Cost gate |
+|---|---:|---|---|
+| [Explicit document graph](docs/research/2026-10-25-document-links.md) | 6 | −18.5% / −24.1% / +5.1% | Failed |
+| [Local reference analysis](docs/research/2026-10-25-reference-impact.md) | 8 | +25.5% / −3.2% / +13.8% | Failed |
+
+These rows use different target-document tasks and are not a before/after causal
+comparison. Input is cumulative, uncached input excludes cache hits, and output
+includes reasoning. Four target instances share one graph-analysis task family
+on two pinned public projects; they do not establish broad generalization.
+The analysis study includes a lightweight independent helper with the same
+mathematics. Build/storage costs and autonomous skill/verification overhead are
+disclosed in the reports. Earlier [retrieval repairs](docs/retrieval-reliability.md),
+[Agent cost diagnosis](docs/agent-cost-diagnosis.md), [paper-informed work](docs/research/2026-10-24-evidence-policy.md),
+[parity screens](docs/research/2026-10-25-budget-parity.md),
+[strong controls](docs/research/2026-10-25-strong-control.md), and the
+[CLI screen](docs/research/2026-10-25-lean-cli.md) remain available.
+Documentation with local code includes can be
+[prepared explicitly](docs/snippet-preparation.md) before indexing.
+
+> 🚀 **Alpha — `0.1.0a13`.** Markdown + PDF ingest, the core MCP tool set,
 > the full structure-aware index (tree + summaries + entities + xrefs +
 > vectors), repo-level `init/sync/status`, repo-scoped MCP tools with
 > `list_documents`, `search_documents`, `repo_context`, `repo_graph`, and
 > `repo_impact`, failure-isolated sync, static graph inspector, Doubao
-> multimodal embeddings, and a benchmark harness with headline numbers. See
+> multimodal embeddings, and an evaluation harness. See
 > [`CHANGELOG.md`](CHANGELOG.md) for what's in this
 > release and [`ROADMAP.md`](ROADMAP.md) for what's next.
 
 ---
+
+## Experimental capabilities (0.1.0a13)
+
+The additions below are included in the **0.1.0a13 alpha** and remain
+experimental. Install with `pip install --upgrade docsgraph==0.1.0a13`, or use
+`pip install -e .` for this checkout. Defaults
+remain hybrid search, synopsis context, the section/entity graph and
+artifact/entity impact. Original full text and the new reference views are
+explicit choices.
+
+| Need | Tool / option | Model call at query time |
+|---|---|---|
+| Find matching documents or context | `search_documents`, `repo_context` (hybrid default) | Yes |
+| Search literal terms without an endpoint | `retrieval="lexical"` on those tools | No |
+| Navigate or read cached sections | `outline`, `get_section` | No |
+| Inspect explicit cross-document links | `repo_graph(view="documents")` | No |
+| Compute reverse paths, cycles and deletion reachability | `repo_impact(view="references")` | No |
+
+<a href="docs/architecture-current.html">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/cairn-architecture-dark.svg">
+  <img src="docs/assets/cairn-architecture-light.svg" alt="Experimental working-tree architecture: CLI and MCP share dispatch; repository tools read cached indexes, hybrid queries use configured models, and index builders read source documents.">
+</picture>
+</a>
+
+[Explore the current architecture](docs/architecture-current.html) ·
+[Architecture source and verification](docs/architecture/README.md) ·
+[Full architecture contract](ARCHITECTURE.md)
+
+After indexing a repository, the read-only CLI and MCP expose the same handlers:
+
+```sh
+docsgraph query tool repo_graph '{"view":"documents"}' --repo /path/to/project
+
+docsgraph query tool repo_impact \
+  '{"view":"references","doc":"docs/guide.md","entry":"README.md","max_hops":3}' \
+  --repo /path/to/project
+```
+
+Replace the example paths with indexed sources (`list_documents` lists them).
+The reference view follows explicit Markdown body links and returns canonical
+shortest paths, cycle membership, deletion reachability and cited witnesses.
+It reports completeness, caps and stale/skipped documents. Heading/code/HTML
+links and external/unindexed targets are excluded; fragments are not validated.
+References do not establish semantic or source-code impact.
+
+An existing index is still required; query-time availability does not eliminate
+embedding, summary-generation, startup or storage costs. The current regression
+suite passes **620 tests** ([release validation](docs/research/2026-10-25-release-validation.md)); independent full-source checks cover all **42 target
+documents** in the two graph corpora. CLI and MCP stdio graph/impact calls were
+verified with the model endpoint stopped. These checks qualify functionality,
+not general Agent cost savings. See [CLI usage](docs/cli-retrieval.md),
+[embedding role configuration](docs/embedding-instructions.md),
+[ADR-0016](docs/decisions/0016-explicit-document-reference-view.md) and
+[ADR-0017](docs/decisions/0017-local-reference-impact-analysis.md).
+
+## Retrieval reliability update
+
+Markdown prose before the first heading and documents without headings are
+indexed as independent introduction sections. Existing heading anchors keep
+their IDs. Run `docsgraph sync` after upgrading: old tree producers rebuild
+automatically; a subsequent unchanged sync is a no-op.
+
+`repo_context` returns cited summaries and bounded original evidence once per
+section by default. Use `get_section(doc, id, level="full")` for complete examples
+and precise conditions. Clients needing the earlier ranking and relationship
+payload can pass `include_details=true`. MCP search explanations are also
+available with `search_documents(include_details=true)`; the Python library
+search response remains detailed. `repo_graph` provides explicit graph inspection.
+Section tools accept returned `cairn://doc/section` citations directly and reject
+conflicting document namespaces. See [ADR-0004](docs/decisions/0004-lossless-ingest-compact-context.md)
+and the [verified repair results](docs/retrieval-reliability.md).
+
+Full section text excludes descendant bodies. Section reads now show bounded,
+cited navigation links; `get_related` also finds siblings at the document root.
+Compact context selects complementary original evidence rather than repeating
+topic overviews. Small fenced code examples stay intact within excerpt budgets;
+partial oversized code is marked `truncated_code`.
+
+For a short-context embedding endpoint, explicitly opt into
+`CAIRN_EMBED_PROVIDER=windowed-openai-compatible` before indexing and serving.
+It embeds all 1,500-byte UTF-8 windows and pools one vector per original section;
+it adds embedding work and can dilute localized facts. It does not discard text
+or replace the document tree. Run sync after changing providers. Normal rebuilds
+reuse stored summaries with matching model/content fingerprints; `sync --force`
+bypasses that stored reuse. See [ADR-0007](docs/decisions/0007-explicit-embedding-windows.md)
+and [ADR-0008](docs/decisions/0008-reuse-fingerprinted-summaries.md).
 
 ## Why Cairn?
 
@@ -208,8 +320,8 @@ Repo-scoped MCP adds:
 | Tool | Use it for |
 |---|---|
 | `list_documents` | See every indexed doc, its source path, freshness, section count, and structured agent usage guidance. |
-| `search_documents` | Search across all indexed docs and get globally ranked, explainable section hits with `doc` ids, skipped docs, and stale-doc warnings. |
-| `repo_context` | Get a ready-to-read context pack: ranked hits, selected section text, hit explanations, and a relationship map. |
+| `search_documents` | Find ranked, cited source hits across indexed docs. MCP ranking diagnostics are opt-in with `include_details=true`; recovery warnings are preserved. |
+| `repo_context` | Get cited summaries and bounded original evidence once per section. Request `include_details=true` for ranking diagnostics and expanded relationships. |
 | `repo_graph` | Inspect the repo documentation graph: document, section, entity, contains, xref, and mention edges. Cross-document links are exposed through shared entity nodes. |
 | `repo_impact` | Estimate documentation surfaces affected by a document or section change. |
 | `search_keyword` | Search all indexed docs when `doc` is omitted, or one selected doc when `doc` is provided. |
@@ -300,20 +412,19 @@ docsgraph bench benchmarks/architecture.toml --fake
 
 | metric | naive vector RAG | Cairn |
 |---|---:|---:|
-| mean recall@8 | 25% | 25% |
-| mean tokens returned | 3,677 | **1,386 (37.7% of naive)** |
+| mean recall@8 | 45% | 25% |
+| mean tokens returned | 4,374 | 1,362 (31.1% of naive) |
 
-Caveat — these numbers come from the deterministic `FakeEmbedder` (a
-bag-of-words hash with no semantic understanding). Recall ties because
-neither system has semantics; **the 2.6× token efficiency win is independent
-of the embedder**: it comes from progressive disclosure and section-aware
-retrieval, not from vector quality. Cairn now returns a short `evidence`
-snippet with every semantic hit by default, which raises the token count but
-makes ranking errors easier to inspect. Reproduce these numbers in under a
-second on any machine — and re-run with Ollama (`nomic-embed-text`) or
-Doubao for the real-semantics version. See
-[`benchmarks/README.md`](benchmarks/README.md) for caveats and how to author
-your own suites.
+These0.1.0a13 numbers use the deterministic `FakeEmbedder` (a bag-of-words
+hash with no semantic understanding). Cairn has lower recall on this small,
+legacy fixture. Smaller returned payloads do not establish task success or
+whole-Agent savings. The questions and anchors are unchanged; the architecture
+document evolved. This is a development demonstration, not a semantic benchmark
+or evidence that this release outperforms the baseline.
+[Raw result](benchmarks/repo-quality/release-starter-results-20261025.json) and
+[release limitations](docs/research/2026-10-25-release-validation.md) are public.
+Run with a configured real provider for a semantic comparison; see
+[`benchmarks/README.md`](benchmarks/README.md) for suite authoring.
 
 Repo-level smoke tests are also public and reproducible:
 
@@ -348,10 +459,10 @@ uses a two-stage path: dense seeds, cheap lexical/path seeds, and graph
 neighbors form a wide shortlist, then the full BM25/graph/explanation ranker
 scores only that candidate set. Cold cache construction loads per-document
 indexes concurrently while preserving per-document failure isolation.
-Search responses expose `ranker.mode`, `total_sections`, and `scored_sections`
-so the performance path is visible to clients and benchmarks.
-Each hit includes a score breakdown and short explanation so agents and humans
-can see whether dense, lexical, sparse, or graph evidence dominated the result.
+Library responses and MCP diagnostic views expose `ranker.mode`, `total_sections`,
+and `scored_sections`, plus score breakdowns and explanations. MCP source views
+keep citations and requested evidence compact by default; use
+`include_details=true` when inspecting ranking behavior.
 Changelog, release-note, and migration-history documents are intent-gated: they
 stay first-class results for release/version/change queries, but broad topic
 queries prefer guides, API docs, and README-style docs when comparable evidence

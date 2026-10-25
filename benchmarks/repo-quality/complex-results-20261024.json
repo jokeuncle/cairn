@@ -1,0 +1,131 @@
+{
+  "date": "2026-10-24",
+  "model": "Qwen3-4B-Instruct-2507 Q4_K_M",
+  "protocol": {
+    "cases_file": "complex-cases.json",
+    "case_modifications": false,
+    "product_modifications_between_complex_attempts": false,
+    "valid_attempts_per_case": 1,
+    "context_tokens": 32768,
+    "tool_rounds": 16,
+    "total_tool_calls": 24,
+    "max_output_tokens": 1800,
+    "fixes": [
+      "Previous two-slot server allowed only 16384 tokens per sequence: recorded HTTP 400 at 16823 tokens. Use one slot with the same total 32768 context allocation.",
+      "Previous driver silently rejected more than three parallel calls even when under the total budget. Remove that hidden restriction and preserve all tool replies.",
+      "Always request final synthesis at the tool budget limit. Preserve finish reasons and full exception causes."
+    ],
+    "interpretation": "Earlier traces are diagnostics, not a comparable complete capability score. Preserve them; report failures honestly. Do not retry valid final attempts until green."
+  },
+  "complete_tasks_passed": 0,
+  "tasks": 3,
+  "matched_complex_agent_baseline": false,
+  "results": [
+    {
+      "id": "httpx-service-client",
+      "model_rounds": 13,
+      "tool_attempts": 12,
+      "finish_reason": "stop",
+      "max_model_prompt_tokens": 16938,
+      "accepted": false,
+      "execution_error": "ValueError: httpx.Timeout must either include a default, or set all four parameters explicitly.",
+      "additional_review": [
+        "Missing pool timeout/default timeout",
+        "Limits uses unsupported total_connections and assigns max_connections=5",
+        "No trust_env=False",
+        "Response hook defined but not registered on AsyncClient",
+        "Correct explanation of connection-only transport retry scope and HTTP/2 fallback does not make code executable"
+      ],
+      "trace": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/httpx-service-client-agent-final.json",
+      "trace_sha256": "7a6c01b444735467758fdb0ad3b75a1d126cc02a99fc9dab83bf91b76bbc2269",
+      "code_verification": {
+        "trace": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/httpx-service-client-agent-final.json",
+        "finish_reason": "stop",
+        "python_blocks": 1,
+        "compiled": true,
+        "runtime_executed": true,
+        "error": {
+          "type": "ValueError",
+          "message": "httpx.Timeout must either include a default, or set all four parameters explicitly.",
+          "traceback": "Traceback (most recent call last):\n  File \"/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/verify_generated.py\", line 97, in main\n    if trace['case']['repo']=='httpx':result['runtime_checks']=asyncio.run(check_httpx(module))\n                                                               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/ksher/.local/share/uv/python/cpython-3.14-macos-aarch64-none/lib/python3.14/asyncio/runners.py\", line 204, in run\n    return runner.run(main)\n           ~~~~~~~~~~^^^^^^\n  File \"/Users/ksher/.local/share/uv/python/cpython-3.14-macos-aarch64-none/lib/python3.14/asyncio/runners.py\", line 127, in run\n    return self._loop.run_until_complete(task)\n           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^\n  File \"/Users/ksher/.local/share/uv/python/cpython-3.14-macos-aarch64-none/lib/python3.14/asyncio/base_events.py\", line 719, in run_until_complete\n    return future.result()\n           ~~~~~~~~~~~~~^^\n  File \"/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/verify_generated.py\", line 23, in check_httpx\n    obj=module.build_client()\n  File \"/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/httpx-service-client-agent-final/block_0.py\", line 33, in build_client\n    timeout = httpx.Timeout(connect=60.0, read=10.0, write=10.0)\n  File \"/Users/ksher/self-projects/cairn/.venv/lib/python3.14/site-packages/httpx/_config.py\", line 123, in __init__\n    raise ValueError(\n    ...<2 lines>...\n    )\nValueError: httpx.Timeout must either include a default, or set all four parameters explicitly.\n"
+        }
+      },
+      "code_verification_sha256": "eb78eda0e7735a48f5499b43223af61bfab61e328354a63494ec6c36cc24f025"
+    },
+    {
+      "id": "starlette-lifecycle-service",
+      "model_rounds": 9,
+      "tool_attempts": 8,
+      "finish_reason": "stop",
+      "max_model_prompt_tokens": 8820,
+      "accepted": false,
+      "execution_error": "TypeError: 'list' object is not callable (unmodified generated test)",
+      "additional_review": [
+        "No required make_app factory",
+        "Passes a list instead of BackgroundTasks to response",
+        "Claims later background tasks still execute after the first raises",
+        "Claims default capacity is 100 instead of 40 and does not set total_tokens",
+        "Reads parent Thread Pool section but omits Concurrency Limitations child; reads single-task section but not multiple-task section"
+      ],
+      "trace": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/starlette-lifecycle-service-agent-final.json",
+      "trace_sha256": "a26655fedbd92c11f4d69540e4923d893fe5d0c6cfef7cb49353f8cfcc2a1751",
+      "code_verification": {
+        "trace": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/starlette-lifecycle-service-agent-final.json",
+        "finish_reason": "stop",
+        "python_blocks": 1,
+        "compiled": true,
+        "runtime_executed": true,
+        "error": {
+          "type": "AttributeError",
+          "message": "module 'agent_generated' has no attribute 'make_app'",
+          "traceback": "Traceback (most recent call last):\n  File \"/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/verify_generated.py\", line 96, in main\n    elif trace['case']['repo']=='starlette':result['runtime_checks']=check_starlette(module)\n                                                                     ~~~~~~~~~~~~~~~^^^^^^^^\n  File \"/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/verify_generated.py\", line 61, in check_starlette\n    app=module.make_app();output=io.StringIO()\n        ^^^^^^^^^^^^^^^\nAttributeError: module 'agent_generated' has no attribute 'make_app'\n"
+        }
+      },
+      "code_verification_sha256": "9e5069f9fc3541527a843f260f8efe9a3eca1c67e444432b59befe6db612b4a6",
+      "provided_test": {
+        "test": "unmodified generated test_health_endpoint",
+        "network": "blocked",
+        "passed": false,
+        "error": "TypeError",
+        "message": "'list' object is not callable",
+        "traceback": "Traceback (most recent call last):\n  File \"<stdin>\", line 9, in <module>\n  File \"/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/starlette-lifecycle-service-agent-final/block_0.py\", line 56, in test_health_endpoint\n    response = client.get(\"/\")\n  File \"/Users/ksher/self-projects/cairn/.venv/lib/python3.14/site-packages/starlette/testclient.py\", line 482, in get\n    return super().get(\n           ~~~~~~~~~~~^\n        url,\n        ^^^^\n    ...<6 lines>...\n        extensions=extensions,\n        ^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/Users/ksher/self-projects/cairn/.venv/lib/python3.14/site-packages/httpx/_client.py\", line 1053, in get\n    return self.request(\n           ~~~~~~~~~~~~^\n        \"GET\",\n        ^^^^^^\n    ...<7 lines>...\n        extensions=extensions,\n        ^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/Users/ksher/self-projects/cairn/.venv/lib/python3.14/site-packages/starlette/testclient.py\", line 454, in request\n    return super().request(\n           ~~~~~~~~~~~~~~~^\n        method,\n        ^^^^^^^\n    ...<11 lines>...\n        extensions=extensions,\n        ^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/Users/ksher/self-projects/cairn/.venv/lib/python3.14/site-packages/httpx/_client.py\", line 825, in request\n    return self.send(request, auth=auth, follow_redirects=follow_redirects)\n           ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/ksher/self-projects/cairn/.venv/lib/python3.14/site-packages/httpx/_client.py\", line 914, in send\n    response = self._send_handling_auth(\n        request,\n    ...<2 lines>...\n        history=[],\n    )\n  File \"/Users/ksher/self-projects/cairn/.venv/lib/python3.14/site-packages/httpx/_client.py\", line 942, in _send_handling_auth\n    response = self._send_handling_redirects(\n        request,\n        follow_redirects=follow_redirects,\n        history=history,\n    )\n  File \"/Users/ksher/self-projects/cairn/.venv/lib/python3.14/site-packages/httpx/_client.py\", line 979, in _send_handling_redirects\n    response = self._send_single_request(request)\n  File \"/Users/ksher/self-projects/cairn/.venv/lib/python3.14/site-packages/httpx/_client.py\", line 1014, in _send_single_request\n    response = transport.handle_request(request)\n  File \"/Users/ksher/self-projects/cairn/.venv/lib/python3.14/site-packages/starlette/testclient.py\", line 356, in handle_request\n    raise exc\n  File \"/Users/ksher/self-projects/cairn/.venv/lib/python3.14/site-packages/starlette/testclient.py\", line 353, in handle_request\n    portal.call(self.app, scope, receive, send)\n    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/ksher/self-projects/cairn/.venv/lib/python3.14/site-packages/anyio/from_thread.py\", line 338, in call\n    return cast(T_Retval, self.start_task_soon(func, *args).result())\n                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^\n  File \"/Users/ksher/.local/share/uv/python/cpython-3.14-macos-aarch64-none/lib/python3.14/concurrent/futures/_base.py\", line 443, in result\n    return self.__get_result()\n           ~~~~~~~~~~~~~~~~~^^\n  File \"/Users/ksher/.local/share/uv/python/cpython-3.14-macos-aarch64-none/lib/python3.14/concurrent/futures/_base.py\", line 395, in __get_result\n    raise self._exception\n  File \"/Users/ksher/self-projects/cairn/.venv/lib/python3.14/site-packages/anyio/from_thread.py\", line 263, in _call_func\n    retval = await retval_or_awaitable\n             ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/ksher/self-projects/cairn/.venv/lib/python3.14/site-packages/starlette/applications.py\", line 90, in __call__\n    await self.middleware_stack(scope, receive, send)\n  File \"/Users/ksher/self-projects/cairn/.venv/lib/python3.14/site-packages/starlette/middleware/errors.py\", line 186, in __call__\n    raise exc\n  File \"/Users/ksher/self-projects/cairn/.venv/lib/python3.14/site-packages/starlette/middleware/errors.py\", line 164, in __call__\n    await self.app(scope, receive, _send)\n  File \"/Users/ksher/self-projects/cairn/.venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py\", line 63, in __call__\n    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)\n  File \"/Users/ksher/self-projects/cairn/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py\", line 53, in wrapped_app\n    raise exc\n  File \"/Users/ksher/self-projects/cairn/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py\", line 42, in wrapped_app\n    await app(scope, receive, sender)\n  File \"/Users/ksher/self-projects/cairn/.venv/lib/python3.14/site-packages/starlette/routing.py\", line 660, in __call__\n    await self.middleware_stack(scope, receive, send)\n  File \"/Users/ksher/self-projects/cairn/.venv/lib/python3.14/site-packages/starlette/routing.py\", line 680, in app\n    await route.handle(scope, receive, send)\n  File \"/Users/ksher/self-projects/cairn/.venv/lib/python3.14/site-packages/starlette/routing.py\", line 276, in handle\n    await self.app(scope, receive, send)\n  File \"/Users/ksher/self-projects/cairn/.venv/lib/python3.14/site-packages/starlette/routing.py\", line 64, in app\n    await wrap_app_handling_exceptions(app, request)(scope, receive, send)\n  File \"/Users/ksher/self-projects/cairn/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py\", line 53, in wrapped_app\n    raise exc\n  File \"/Users/ksher/self-projects/cairn/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py\", line 42, in wrapped_app\n    await app(scope, receive, sender)\n  File \"/Users/ksher/self-projects/cairn/.venv/lib/python3.14/site-packages/starlette/routing.py\", line 62, in app\n    await response(scope, receive, send)\n  File \"/Users/ksher/self-projects/cairn/.venv/lib/python3.14/site-packages/starlette/responses.py\", line 170, in __call__\n    await self.background()\n          ~~~~~~~~~~~~~~~^^\nTypeError: 'list' object is not callable\n"
+      }
+    },
+    {
+      "id": "mkdocs-inheritance-deploy",
+      "model_rounds": 3,
+      "tool_attempts": 9,
+      "finish_reason": "stop",
+      "max_model_prompt_tokens": 17925,
+      "accepted": false,
+      "execution_error": null,
+      "additional_review": [
+        "Correct INHERIT ../base.yml and primary-config-relative source/output directories",
+        "Correct CNAME placement and separate organization repository command",
+        "Incorrect Project Pages default branch master instead of gh-pages",
+        "Missing use_directory_urls: false; validation absolute_links is not a replacement",
+        "Mentions mkdocs build --strict but YAML omits strict: true and uses invalid validation keys; no deployment executed"
+      ],
+      "trace": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/mkdocs-inheritance-deploy-agent-final.json",
+      "trace_sha256": "31826693bd51f41a4385f784e80f26d792797b040bede480c583ff3d158cfdd8",
+      "yaml_parse_passed": true,
+      "parsed_yaml": [
+        {
+          "INHERIT": "../base.yml",
+          "site_name": "Product Documentation",
+          "site_url": "https://example.com/product",
+          "validation": {
+            "omitted_files": "warn",
+            "not_found": "warn",
+            "absolute_links": "warn",
+            "anchors": "warn"
+          },
+          "docs_dir": "docs/",
+          "site_dir": "site/"
+        }
+      ],
+      "commands_parse_passed": true,
+      "commands_executed": false
+    }
+  ]
+}

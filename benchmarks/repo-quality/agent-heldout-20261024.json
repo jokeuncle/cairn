@@ -1,0 +1,101 @@
+[
+  {
+    "id": "uvicorn-production-factory",
+    "repo": "uvicorn",
+    "task": "Using this repository documentation, give one production Uvicorn command for an application factory service:create_app found under src. Bind all IPv4 interfaces on port 9000 with three workers and no reload. Trust proxy headers only from 10.0.0.1. Add X-Service: demo and suppress the Server header. Set simultaneous application work to forty and the socket backlog to 128. Explain what excess application concurrency receives versus the TCP accept queue, which configuration source wins when CLI and UVICORN_ variables disagree, and whether UVICORN_ settings belong in --env-file. Cite the exact sections. Give commands as text; do not start a server or make network requests.",
+    "checks": [
+      "factory flag and app-dir src",
+      "host0.0.0.0 port9000 workers3 no reload",
+      "proxyheaders limited10.0.0.1",
+      "header X-Service:demo no server header",
+      "limit-concurrency40 backlog128",
+      "immediate503 vs TCP listen queue",
+      "CLI overrides environment",
+      "env-file configures app not UVICORN_ settings",
+      "citations"
+    ]
+  },
+  {
+    "id": "uvicorn-development-reloader",
+    "repo": "uvicorn",
+    "task": "Write a development command for main:app watching only src. Python and HTML changes must trigger reload, but changes under src/generated must not. Explain the installation requirement for these watch filters and behavior if that dependency is absent. Explicitly choose the standard-library asyncio event loop, h11 HTTP, no WebSockets, lifespan on, and root path /api. Explain why adding two workers to this reload command is invalid. Also give an equivalent guarded Python uvicorn.run configuration for the documented options. Cite original sections. Do not execute the server.",
+    "checks": [
+      "reload with reload-dir src",
+      "reload-include py and html",
+      "reload-exclude generated",
+      "watchfiles or uvicorn[standard] dependency",
+      "without dependency only py modification times and filters ignored",
+      "loopasyncio httph11 wsnone lifespanon rootpath/api",
+      "reload workers mutuallyexclusive",
+      "__main__ guarded uvicorn.run equivalent",
+      "citations"
+    ]
+  },
+  {
+    "id": "ruff-inherited-project-config",
+    "repo": "ruff",
+    "task": "Provide complete pyproject.toml snippets for a repository root and packages/api/pyproject.toml. The root config must target Python 3.10, set line length 100, and lint E4/E7/E9/F. The API config must explicitly inherit the root, add import-sorting checks while preserving those selections, ignore unused imports only in __init__.py, and exclude generated directories even when passed explicitly on the CLI. Use single quotes in the formatter. Explain why nearest-file discovery alone does not merge these configurations, how the extension path resolves, and provide commands to check and format the API subtree. Cite the documentation. Do not modify files.",
+    "checks": [
+      "root targetpy310 length100 selectE4E7E9F",
+      "child extend ../../pyproject.toml",
+      "extend-select I preserves root selections",
+      "per-file-ignores __init__.py F401",
+      "extend-exclude generated force-exclude true",
+      "format quote-style single",
+      "closest config no implicit merging",
+      "extend path relative to child config",
+      "check and format commands",
+      "citations"
+    ]
+  },
+  {
+    "id": "ruff-isolated-ci-config",
+    "repo": "ruff",
+    "task": "Design a reproducible Ruff CI setup for a project with a root pyproject.toml and conflicting nested config files. Give root configuration selecting E4/E7/E9/F and import sorting, with line length 100 and single-quote formatting. The project requires Python >=3.10; explain target-version inference when no explicit Ruff target is set. Give commands from the root that force this one config for the whole src tree, run lint without modifying code, and check formatting without modifying code. Explain the difference between lint --fix and formatting, whether E501 is automatically enabled by line-length, and the precedence among .ruff.toml, ruff.toml and pyproject.toml in one directory. Cite source sections. Do not execute or edit anything.",
+    "checks": [
+      "rootselect E4E7E9F I length100 quotesingle",
+      "requires-python inference py310",
+      "--config pyproject.toml both commands bypass nested",
+      "ruff check src nofix",
+      "ruff format --check src",
+      "lint fixes versus formatting distinction",
+      "line-length alone doesnotenable E501",
+      ".ruff.toml over ruff.toml over pyproject",
+      "citations"
+    ]
+  },
+  {
+    "id": "httpx-shared-auth-client",
+    "repo": "httpx",
+    "task": "Implement build_client() returning an httpx.AsyncClient for a service. Use basic authentication for user alice/password example-secret; configure a 30 second default timeout with a 2 second pool timeout; allow twenty total connections and four keep-alive connections with a ten second expiry. Disable trust in proxy/certificate environment variables. Register async request and response hooks: the request hook sets X-Audit: yes; the response hook must await the body before using its bytes. Explain why this instance should be shared and how it is closed, which environment-dependent behavior is disabled, and how Basic authentication is supplied. Include a minimal local test with MockTransport and no outbound requests. Cite the original documentation.",
+    "checks": [
+      "returns AsyncClient",
+      "BasicAuth alice example-secret",
+      "timeoutsconnect30read30write30pool2",
+      "maxconnections20 maxkeepalive4 expiry10",
+      "trustenvFalse",
+      "async requesthook setsXAudit",
+      "async responsehook awaitsaread",
+      "sharedandclosed",
+      "localMockTransport test executable",
+      "citations"
+    ]
+  },
+  {
+    "id": "starlette-shared-lifespan-state",
+    "repo": "starlette",
+    "task": "Implement make_app() for a Starlette service with lifespan state containing one AsyncClient and a shared list named events. GET /record/{value} should append the path value to that shared list and return the accumulated list as JSON without making any outbound requests. Explain the shallow-copy semantics of request state and why mutating the list can persist across requests even though replacing a request-state binding is different. Include a TestClient context-manager test performing two requests and checking the accumulated values. Show cleanup of the single shared client on shutdown and cite the exact lifespan and request sections. Return complete minimal executable Python.",
+    "checks": [
+      "make_app validStarlette",
+      "asynccontextmanager lifespan",
+      "singleAsyncClient stateandshutdownclose",
+      "shared events list",
+      "path parameter access and JSONResponse",
+      "two requests accumulatedvalues",
+      "state shallow copy mutationversusrebinding",
+      "TestClient context triggers lifespan",
+      "executable localtest nooutbound",
+      "citations"
+    ]
+  }
+]

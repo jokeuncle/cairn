@@ -1,0 +1,3 @@
+# Preserve Archify viewer output byte-for-byte with its provenance receipt.
+/docs/architecture-current.html linguist-generated=true -whitespace
+/docs/assets/cairn-architecture-*.svg linguist-generated=true -whitespace

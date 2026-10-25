@@ -21,10 +21,9 @@ import re
 import shutil
 from datetime import UTC, datetime
 from pathlib import Path
+from threading import Lock
 from typing import Any, Final
 
-import lancedb
-import pyarrow as pa
 from pydantic import BaseModel, ConfigDict, Field
 
 from cairn.core.errors import IndexBuildError, IndexNotFoundError
@@ -158,6 +157,9 @@ class VectorBuilder:
         ids: list[str],
         vectors: list[list[float]],
     ) -> None:
+        import lancedb
+        import pyarrow as pa
+
         # Full rebuild: clear any previous table data for a clean schema state.
         if db_dir.exists():
             shutil.rmtree(db_dir)
@@ -185,8 +187,11 @@ class Vectors:
         doc_id: str,
         embedder: str,
         dim: int,
+        db_dir: Path | None = None,
     ) -> None:
         self._table = table
+        self._db_dir = db_dir
+        self._load_lock = Lock()
         self.doc_id = doc_id
         self.embedder = embedder
         self.dim = dim
@@ -214,14 +219,25 @@ class Vectors:
             )
             raise IndexNotFoundError(msg, details={"path": str(manifest_path)})
 
-        db = lancedb.connect(str(db_dir))
-        table = db.open_table(VECTORS_TABLE_NAME)
         return cls(
-            table,
+            None,
             doc_id=manifest["doc_id"],
             embedder=manifest["embedder"],
             dim=manifest["dim"],
+            db_dir=db_dir,
         )
+
+    def _get_table(self) -> Any:
+        """Open heavy storage only on a vector operation, in the caller's worker thread."""
+        if self._table is None:
+            with self._load_lock:
+                if self._table is None:
+                    if self._db_dir is None:
+                        raise IndexNotFoundError("vector database path is unavailable")
+                    import lancedb
+
+                    self._table = lancedb.connect(str(self._db_dir)).open_table(VECTORS_TABLE_NAME)
+        return self._table
 
     async def search(
         self,
@@ -257,7 +273,7 @@ class Vectors:
         k: int,
         scope_prefix: str | None,
     ) -> list[VectorHit]:
-        q = self._table.search(vec).distance_type("cosine")
+        q = self._get_table().search(vec).distance_type("cosine")
         if scope_prefix is not None:
             predicate = f"id = '{scope_prefix}' OR id LIKE '{scope_prefix}/%'"
             q = q.where(predicate, prefilter=True)
@@ -272,7 +288,10 @@ class Vectors:
 
     async def count(self) -> int:
         """Total number of indexed sections."""
-        return await asyncio.to_thread(self._table.count_rows)
+        return await asyncio.to_thread(self._sync_count)
+
+    def _sync_count(self) -> int:
+        return int(self._get_table().count_rows())
 
     async def entries(self) -> list[VectorEntry]:
         """Return every stored vector.
@@ -284,7 +303,7 @@ class Vectors:
         return await asyncio.to_thread(self._sync_entries)
 
     def _sync_entries(self) -> list[VectorEntry]:
-        rows = self._table.to_arrow().to_pylist()
+        rows = self._get_table().to_arrow().to_pylist()
         return [
             VectorEntry(
                 id=str(row["id"]),

@@ -52,7 +52,7 @@ from cairn.summarize.base import Summarizer, SummaryLevel
 from cairn.summarize.cache import SummaryCache
 from cairn.xref.base import XRefExtractor
 
-_TREE_BUILDER_VERSION = 1
+_TREE_BUILDER_VERSION = 2
 
 
 @dataclass(frozen=True)
@@ -141,6 +141,7 @@ class Indexer:
             document,
             out_dir=out_dir,
             summary_levels=summary_levels,
+            reuse_summaries=not force,
         )
         return IndexResult(manifest_path=manifest_path, rebuilt=True)
 
@@ -154,6 +155,7 @@ class Indexer:
             SummaryLevel.SYNOPSIS,
             SummaryLevel.DIGEST,
         ),
+        reuse_summaries: bool = True,
     ) -> Path:
         """Run every configured builder against an already-parsed Document."""
         out_dir.mkdir(parents=True, exist_ok=True)
@@ -168,7 +170,7 @@ class Indexer:
             concurrency=self.summary_concurrency,
             batch_size=self.summary_batch_size,
             progress=lambda done, total: self._emit(f"summaries: {done}/{total}"),
-        ).build(document, out_dir=out_dir, levels=summary_levels)
+        ).build(document, out_dir=out_dir, levels=summary_levels, reuse_existing=reuse_summaries)
         self._emit("summaries: done")
         self._emit("vectors: starting")
         await VectorBuilder(self.embedder, batch_size=self.embed_batch_size).build(

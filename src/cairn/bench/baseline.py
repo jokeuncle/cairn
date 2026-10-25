@@ -25,7 +25,7 @@ import pyarrow as pa
 from pydantic import BaseModel, ConfigDict
 
 from cairn.core.types import Document, SectionNode
-from cairn.embed.base import Embedder
+from cairn.embed.base import Embedder, embed_query_texts
 from cairn.index.vectors import l2_normalize
 
 _WORD = re.compile(r"\S+")
@@ -200,7 +200,7 @@ class NaiveRAG:
         if k < 1:
             msg = f"k must be >= 1; got {k}"
             raise ValueError(msg)
-        embedded = await self.embedder.embed([query])
+        embedded = await embed_query_texts(self.embedder, [query])
         if not embedded:
             return []
         query_vec = l2_normalize(embedded[0])

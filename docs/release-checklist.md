@@ -78,11 +78,9 @@ docsgraph mcp config --client codex --fake
 docsgraph bench benchmarks/architecture.toml --fake
 ```
 
-Expected current dogfood:
-
-- Cairn repo: 19/19 docs indexed, 0 errors.
-- Starter benchmark: Cairn recall@8 equals naive with 37.7% of naive tokens
-  under the deterministic fake embedder.
+Treat fake-plugin dogfood as CLI/index wiring verification. Document counts and
+serialization ratios depend on the checkout; record the current run rather than
+reusing historical numbers as product quality or Agent token evidence.
 
 ## External Repository Smoke Tests
 
@@ -92,18 +90,13 @@ The current public-readiness smoke set:
 - `https://github.com/modelcontextprotocol/python-sdk`
 - `https://github.com/fastapi/full-stack-fastapi-template`
 
-Expected current results with fake plugins:
-
-- `pydantic/pydantic-ai`: 178/178 docs indexed, 0 errors; 8-case deep
-  eval top1 6/8, top3 8/8, top5 8/8, drilldown 8/8.
-- `uv`: 89/89 docs indexed, 0 errors; 16-case deep eval top1 15/16,
-  top3 16/16, top5 16/16, drilldown 16/16.
-- `modelcontextprotocol/python-sdk`: 57/57 docs indexed, 0 errors; 4-case
-  deep eval top1 4/4, top3 4/4, top5 4/4, drilldown 4/4.
-- `fastapi/full-stack-fastapi-template`: 7/7 docs indexed, 0 errors; 4-case
-  deep eval top1 4/4, drilldown 4/4.
-- `scripts/smoke_many_repos.py --limit 37`: 3054 docs indexed across 37
-  repos, 0 sync failures, 185/185 searches with hits, 185/185 drilldowns.
+The0.1.0a13 release gate indexed3,754 documents across37 pinned repositories,
+with zero sync failures,185/185 searches with hits and185/185 drilldowns.
+The32-query development gate scored top1 29/32, top3/top5/drilldown32/32;
+thresholds remain aggregate0.90/1.0/1.0/1.0. These fake-plugin checks are not
+semantic quality or real Agent cost evidence. Source revisions, original failures,
+targeted oracle corrections and limitations are published in
+[release validation](research/2026-10-25-release-validation.md).
 
 Do not tune ranking solely to one repository. Treat failures as signals about
 general discovery, evidence, ranking, or drilldown quality.

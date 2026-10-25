@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -39,6 +40,18 @@ class AlternateFakeSummarizer(FakeSummarizer):
 
 
 class TestIndexer:
+    async def test_old_tree_producer_rebuilds_unchanged_source(
+        self, indexer: Indexer, tmp_path: Path, fixture_md: Path
+    ) -> None:
+        out = tmp_path / "doc"
+        await indexer.index_path(fixture_md, out_dir=out)
+        path = out / MANIFEST_FILENAME
+        manifest = json.loads(path.read_text())
+        manifest["subindexes"]["tree"]["builder_version"] = 1
+        path.write_text(json.dumps(manifest))
+        assert (await indexer.index_path(fixture_md, out_dir=out)).rebuilt
+        assert not (await indexer.index_path(fixture_md, out_dir=out)).rebuilt
+
     async def test_index_path_writes_all_artifacts(
         self, indexer: Indexer, tmp_path: Path, fixture_md: Path
     ) -> None:

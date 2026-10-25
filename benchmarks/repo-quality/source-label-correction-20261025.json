@@ -1,0 +1,110 @@
+{
+  "frozen_at": "2026-10-25T09:07:49.834900+00:00",
+  "kind": "targeted source-oracle correction on a development gate; not new product performance or blind generalization",
+  "original_gate": {
+    "top1": 27,
+    "top3": 31,
+    "top5": 32,
+    "total": 32
+  },
+  "original_release_control": {
+    "top1": 29,
+    "top3": 32,
+    "top5": 32,
+    "total": 32
+  },
+  "selection_disclosure": "Three suspected false-negative UV aliases and one client/server negative-control question chosen after seeing development failures; reviewer is blind to ranks, scores and historical labels",
+  "reviewer": {
+    "model": "gpt-6.1-sol",
+    "effort": "high",
+    "answer_sha256": "ecee14a7cc89d310c6d6826937598f4c078b7bdabddcaf93e2eac235cecebb9a",
+    "prompt_sha256": "367480a193678f02148e17afdb8d5b02e069da7e9d65b5e12519fabe57f532ef",
+    "command_events": 6,
+    "failed_events": 1,
+    "usage": {
+      "input_tokens": 237281,
+      "cached_input_tokens": 203520,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 2384,
+      "reasoning_output_tokens": 427
+    },
+    "audit": "Parent reviewed all six commands: source listing and original-line reads only; one missing-python command is retained, then python3 recovery. No benchmark, rank, score, historical labels, index, unrelated data, network, writes or delegation."
+  },
+  "corrections": [
+    {
+      "case_id": "tools-run",
+      "added_acceptable_doc": "docs-index",
+      "original_acceptable": [
+        "docs-concepts-tools",
+        "docs-guides-tools",
+        "readme"
+      ],
+      "source": "uv/docs/index.md",
+      "source_sha256": "ec5621ac4593267c2032bcdc178004cc183ea1dc2cfb49d768a752e0c8c3ba38",
+      "evidence_lines": [
+        121,
+        142
+      ],
+      "source_reason": "Explains ephemeral tool execution with uvx, identifies its uv tool run equivalence, and demonstrates passing arguments to pycowsay."
+    },
+    {
+      "case_id": "tools-install",
+      "added_acceptable_doc": "docs-index",
+      "original_acceptable": [
+        "docs-concepts-tools",
+        "docs-guides-tools",
+        "docs-reference-storage",
+        "readme"
+      ],
+      "source": "uv/docs/index.md",
+      "source_sha256": "ec5621ac4593267c2032bcdc178004cc183ea1dc2cfb49d768a752e0c8c3ba38",
+      "evidence_lines": [
+        144,
+        155
+      ],
+      "source_reason": "Demonstrates uv tool install ruff and then directly invokes the installed executable to verify availability."
+    },
+    {
+      "case_id": "auth-cli",
+      "added_acceptable_doc": "docs-guides-integration-bazel",
+      "original_acceptable": [
+        "docs-concepts-authentication-cli",
+        "docs-concepts-authentication-http",
+        "docs-concepts-authentication-index"
+      ],
+      "source": "uv/docs/guides/integration/bazel.md",
+      "source_sha256": "853d9934ce1e0b7b6ec2fa579c986fcd804afb62ea63c79fe32c897ff84ecfe2",
+      "evidence_lines": [
+        12,
+        31
+      ],
+      "source_reason": "Interpreting the question as authenticating an index host using the named command, this section explicitly instructs uv auth login for a package host and identifies index/file hosts. Its subsequent Bazel integration does not negate that concrete login instruction."
+    }
+  ],
+  "negative_controls": {
+    "tls_certificate_guide_rejected_for_login": true,
+    "mcp_client_rejected_for_exposing_agent_as_server": true
+  },
+  "unchanged": {
+    "queries": true,
+    "all_existing_labels": true,
+    "minimum_top1_rate": 0.9,
+    "minimum_top3_rate": 1.0,
+    "minimum_top5_rate": 1.0,
+    "minimum_drilldown_rate": 1.0
+  },
+  "source_revisions": {
+    "uv": "6fe4f0f5cfa8322e97af4479cbfb3d53a3ce9596",
+    "pydantic-ai": "4ee11516b5be6b767654304ec8fe346b81369597"
+  },
+  "original_logs_preserved": [
+    "public-eval.log",
+    "baseline-eval.log"
+  ],
+  "rejected_diagnostic_families": [
+    "stop-word/short-token changes",
+    "breadcrumb/title phrase confidence",
+    "all-term identity and broad two-token namespace bonuses"
+  ],
+  "product_fix": "Only bounded literal whole-token command/identifier source-namespace confidence using existing cap; keep full source/BM25 and all fusion weights"
+}

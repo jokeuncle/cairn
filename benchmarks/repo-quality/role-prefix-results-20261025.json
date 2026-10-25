@@ -1,0 +1,723 @@
+{
+  "runs": [
+    {
+      "case_id": "httpx-refresh",
+      "arm": "prefix",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 153.485682833998,
+      "tool_invocations": 10,
+      "usage_events": [
+        {
+          "input_tokens": 328132,
+          "cached_input_tokens": 280832,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 7132,
+          "reasoning_output_tokens": 1627
+        }
+      ],
+      "input_tokens": 328132,
+      "cached_input_tokens": 280832,
+      "output_tokens": 7132,
+      "final_answer_exists": true,
+      "review": {
+        "runtime": {
+          "passed": true,
+          "checks": [
+            "client_base_headers_redirect_timeout",
+            "json_response_and_input_purity",
+            "one_refresh_exact_endpoint_and_retry",
+            "request_method_query_and_json_preserved",
+            "initial_and_refreshed_auth_and_client_header",
+            "refresh_body_without_resource_authorization",
+            "validated_token_persists_for_followup",
+            "separate_auth_instances_do_not_share_tokens",
+            "second401_has_no_second_refresh_and_raises",
+            "bad_refresh_preserves_old_token_(500, {'access_token': 'bad'}, None)",
+            "bad_refresh_preserves_old_token_(200, {}, None)",
+            "bad_refresh_preserves_old_token_(200, {'access_token': None}, None)",
+            "bad_refresh_preserves_old_token_(200, {'access_token': 42}, None)",
+            "bad_refresh_preserves_old_token_(200, {'access_token': ''}, None)",
+            "bad_refresh_preserves_old_token_(200, {'access_token': '  '}, None)",
+            "bad_refresh_preserves_old_token_(200, [], None)",
+            "bad_refresh_preserves_old_token_(200, None, b'not JSON')",
+            "stream_request_body_and_other_headers_replayed",
+            "context_manager_closes_supplied_transport",
+            "same_auth_async_flow_and_streamed_refresh_body"
+          ]
+        },
+        "manual": {
+          "answer_sha256": "60869c7c949e6ccc537ed9f6fb4e3f6ba6d22834b62c9f920193c10b136ef871",
+          "safe_complete_module": true,
+          "source_access_within_protocol": true,
+          "requirements_and_explanation_match_source": true,
+          "cross_requirement_interactions_checked": true,
+          "notes": "Audited pure HTTPX module, all documentation/skill/test commands and source claims. One-refresh generator, both body flags, failure-before-state-replacement, supplied transport and preserved body/query/headers verified."
+        },
+        "citations": [
+          {
+            "label": "Multi-request authentication and request/response body loading",
+            "target": "cairn://docs-advanced-authentication/custom-authentication-schemes",
+            "source": "docs/advanced/authentication.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Client configuration",
+            "target": "cairn://docs-advanced-clients/sharing-configuration-across-requests",
+            "source": "docs/advanced/clients.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "merging",
+            "target": "cairn://docs-advanced-clients/merging-of-configuration",
+            "source": "docs/advanced/clients.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "base URLs",
+            "target": "cairn://docs-advanced-clients/other-client-only-configuration-options",
+            "source": "docs/advanced/clients.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "context-manager cleanup",
+            "target": "cairn://docs-advanced-clients/usage",
+            "source": "docs/advanced/clients.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Connect/read/write/pool timeouts",
+            "target": "cairn://docs-advanced-timeouts/fine-tuning-the-configuration",
+            "source": "docs/advanced/timeouts.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "MockTransport",
+            "target": "cairn://docs-advanced-transports/mock-transports",
+            "source": "docs/advanced/transports.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "status handling with HTTPStatusError",
+            "target": "cairn://docs-quickstart/quickstart/response-status-codes",
+            "source": "docs/quickstart.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Repeated query parameters",
+            "target": "cairn://docs-quickstart/quickstart/passing-parameters-in-urls",
+            "source": "docs/quickstart.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "JSON requests",
+            "target": "cairn://docs-quickstart/quickstart/sending-json-encoded-data",
+            "source": "docs/quickstart.md",
+            "resolves_in_selected_source": true
+          }
+        ],
+        "documentation_cli_calls": 4,
+        "process_skill_calls": 3,
+        "documentation_cli_errors": 0,
+        "accepted": true
+      },
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/role-prefix-20261025/runs/r00"
+    },
+    {
+      "case_id": "httpx-refresh",
+      "arm": "raw",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 114.9666322500052,
+      "tool_invocations": 4,
+      "usage_events": [
+        {
+          "input_tokens": 142602,
+          "cached_input_tokens": 126208,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 5560,
+          "reasoning_output_tokens": 1404
+        }
+      ],
+      "input_tokens": 142602,
+      "cached_input_tokens": 126208,
+      "output_tokens": 5560,
+      "final_answer_exists": true,
+      "review": {
+        "runtime": {
+          "passed": true,
+          "checks": [
+            "client_base_headers_redirect_timeout",
+            "json_response_and_input_purity",
+            "one_refresh_exact_endpoint_and_retry",
+            "request_method_query_and_json_preserved",
+            "initial_and_refreshed_auth_and_client_header",
+            "refresh_body_without_resource_authorization",
+            "validated_token_persists_for_followup",
+            "separate_auth_instances_do_not_share_tokens",
+            "second401_has_no_second_refresh_and_raises",
+            "bad_refresh_preserves_old_token_(500, {'access_token': 'bad'}, None)",
+            "bad_refresh_preserves_old_token_(200, {}, None)",
+            "bad_refresh_preserves_old_token_(200, {'access_token': None}, None)",
+            "bad_refresh_preserves_old_token_(200, {'access_token': 42}, None)",
+            "bad_refresh_preserves_old_token_(200, {'access_token': ''}, None)",
+            "bad_refresh_preserves_old_token_(200, {'access_token': '  '}, None)",
+            "bad_refresh_preserves_old_token_(200, [], None)",
+            "bad_refresh_preserves_old_token_(200, None, b'not JSON')",
+            "stream_request_body_and_other_headers_replayed",
+            "context_manager_closes_supplied_transport",
+            "same_auth_async_flow_and_streamed_refresh_body"
+          ]
+        },
+        "manual": {
+          "answer_sha256": "7dd7a9e04fcbc14a41e791044df1b2efbcbfa2d4d296d4bdd3ec15ecaff41e92",
+          "safe_complete_module": true,
+          "source_access_within_protocol": true,
+          "requirements_and_explanation_match_source": true,
+          "cross_requirement_interactions_checked": true,
+          "notes": "Audited pure HTTPX module, all documentation/skill/test commands and source claims. One-refresh generator, both body flags, failure-before-state-replacement, supplied transport and preserved body/query/headers verified."
+        },
+        "citations": [
+          {
+            "label": "Multi-request auth and request/response body loading, lines 96\u2013172",
+            "target": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/role-prefix-20261025/runs/r01/workspace/docs/advanced/authentication.md:96",
+            "source": "docs/advanced/authentication.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Client cleanup, configuration merging and base URL, lines 34\u2013139",
+            "target": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/role-prefix-20261025/runs/r01/workspace/docs/advanced/clients.md:34",
+            "source": "docs/advanced/clients.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Connect/read/write/pool timeouts, lines 43\u201368",
+            "target": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/role-prefix-20261025/runs/r01/workspace/docs/advanced/timeouts.md:43",
+            "source": "docs/advanced/timeouts.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "MockTransport, lines 246\u2013265",
+            "target": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/role-prefix-20261025/runs/r01/workspace/docs/advanced/transports.md:246",
+            "source": "docs/advanced/transports.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Status validation and parsed JSON, lines 278\u2013302",
+            "target": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/role-prefix-20261025/runs/r01/workspace/docs/quickstart.md:278",
+            "source": "docs/quickstart.md",
+            "resolves_in_selected_source": true
+          }
+        ],
+        "documentation_cli_calls": 0,
+        "process_skill_calls": 0,
+        "documentation_cli_errors": 0,
+        "accepted": true
+      },
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/role-prefix-20261025/runs/r01"
+    },
+    {
+      "case_id": "httpx-refresh",
+      "arm": "stock",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 127.12782279100065,
+      "tool_invocations": 5,
+      "usage_events": [
+        {
+          "input_tokens": 162693,
+          "cached_input_tokens": 148096,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 7417,
+          "reasoning_output_tokens": 1030
+        }
+      ],
+      "input_tokens": 162693,
+      "cached_input_tokens": 148096,
+      "output_tokens": 7417,
+      "final_answer_exists": true,
+      "review": {
+        "runtime": {
+          "passed": true,
+          "checks": [
+            "client_base_headers_redirect_timeout",
+            "json_response_and_input_purity",
+            "one_refresh_exact_endpoint_and_retry",
+            "request_method_query_and_json_preserved",
+            "initial_and_refreshed_auth_and_client_header",
+            "refresh_body_without_resource_authorization",
+            "validated_token_persists_for_followup",
+            "separate_auth_instances_do_not_share_tokens",
+            "second401_has_no_second_refresh_and_raises",
+            "bad_refresh_preserves_old_token_(500, {'access_token': 'bad'}, None)",
+            "bad_refresh_preserves_old_token_(200, {}, None)",
+            "bad_refresh_preserves_old_token_(200, {'access_token': None}, None)",
+            "bad_refresh_preserves_old_token_(200, {'access_token': 42}, None)",
+            "bad_refresh_preserves_old_token_(200, {'access_token': ''}, None)",
+            "bad_refresh_preserves_old_token_(200, {'access_token': '  '}, None)",
+            "bad_refresh_preserves_old_token_(200, [], None)",
+            "bad_refresh_preserves_old_token_(200, None, b'not JSON')",
+            "stream_request_body_and_other_headers_replayed",
+            "context_manager_closes_supplied_transport",
+            "same_auth_async_flow_and_streamed_refresh_body"
+          ]
+        },
+        "manual": {
+          "answer_sha256": "1b4d64c4a83ac1de3d95b09b847da8ac288a03e8b28334ff2400a72d4fa7d508",
+          "safe_complete_module": true,
+          "source_access_within_protocol": true,
+          "requirements_and_explanation_match_source": true,
+          "cross_requirement_interactions_checked": true,
+          "notes": "Audited pure HTTPX module, all documentation/skill/test commands and source claims. One-refresh generator, both body flags, failure-before-state-replacement, supplied transport and preserved body/query/headers verified."
+        },
+        "citations": [
+          {
+            "label": "multi-request auth and request/response body-loading flags",
+            "target": "cairn://docs-advanced-authentication/custom-authentication-schemes",
+            "source": "docs/advanced/authentication.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "client configuration",
+            "target": "cairn://docs-advanced-clients/sharing-configuration-across-requests",
+            "source": "docs/advanced/clients.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "configuration merging",
+            "target": "cairn://docs-advanced-clients/merging-of-configuration",
+            "source": "docs/advanced/clients.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "base URLs",
+            "target": "cairn://docs-advanced-clients/other-client-only-configuration-options",
+            "source": "docs/advanced/clients.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "four timeout settings",
+            "target": "cairn://docs-advanced-timeouts/fine-tuning-the-configuration",
+            "source": "docs/advanced/timeouts.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "status handling",
+            "target": "cairn://docs-quickstart/quickstart/response-status-codes",
+            "source": "docs/quickstart.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "context-manager cleanup",
+            "target": "cairn://docs-advanced-clients/usage",
+            "source": "docs/advanced/clients.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "MockTransport tests",
+            "target": "cairn://docs-advanced-transports/mock-transports",
+            "source": "docs/advanced/transports.md",
+            "resolves_in_selected_source": true
+          }
+        ],
+        "documentation_cli_calls": 4,
+        "process_skill_calls": 0,
+        "documentation_cli_errors": 1,
+        "accepted": true
+      },
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/role-prefix-20261025/runs/r02"
+    },
+    {
+      "case_id": "starlette-request-id",
+      "arm": "stock",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 117.47142241700203,
+      "tool_invocations": 11,
+      "usage_events": [
+        {
+          "input_tokens": 273037,
+          "cached_input_tokens": 246528,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 5877,
+          "reasoning_output_tokens": 1320
+        }
+      ],
+      "input_tokens": 273037,
+      "cached_input_tokens": 246528,
+      "output_tokens": 5877,
+      "final_answer_exists": true,
+      "review": {
+        "runtime": {
+          "passed": true,
+          "checks": [
+            "id_validation_'abc_17.X-y'",
+            "id_validation_'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'",
+            "id_validation_''",
+            "id_validation_'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'",
+            "id_validation_'has space'",
+            "id_validation_'bad/slash'",
+            "missing_id_generated",
+            "duplicate_id_headers_generated",
+            "replace_conflicting_id_preserve_both_cookies",
+            "cors_and_id_status_500",
+            "cors_and_id_status_404",
+            "cors_and_id_status_405",
+            "cors_and_id_status_200",
+            "preflight_has_cors_and_id",
+            "unapproved_origin_not_allowed",
+            "overlapping_requests_are_isolated_and_headers_preserved",
+            "context_reset_in_finally_after_exception",
+            "unchanged_non_http_lifespan",
+            "unchanged_non_http_websocket",
+            "caller_context_restored_after_all_checks"
+          ]
+        },
+        "manual": {
+          "answer_sha256": "8d2b92a10d86dd5f8f7cb6629de592d5f14eb84743202cf06b4d4bb005f7b2cc",
+          "safe_complete_module": true,
+          "source_access_within_protocol": true,
+          "requirements_and_explanation_match_source": true,
+          "cross_requirement_interactions_checked": true,
+          "notes": "Audited complete pure ASGI module, command history and source claims. ASCII/duplicate-header guard, request-local closure, finally reset, unchanged non-HTTP passthrough, cookie list preservation and CORS wrapper order checked."
+        },
+        "citations": [
+          {
+            "label": "BaseHTTPMiddleware contextvars limitations",
+            "target": "cairn://docs-middleware/basehttpmiddleware/limitations",
+            "source": "docs/middleware.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "send interception pattern",
+            "target": "cairn://docs-middleware/pure-asgi-middleware/common-patterns/inspecting-or-modifying-the-response",
+            "source": "docs/middleware.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "global error coverage",
+            "target": "cairn://docs-middleware/corsmiddleware/corsmiddleware-global-enforcement",
+            "source": "docs/middleware.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "CORS options",
+            "target": "cairn://docs-middleware/corsmiddleware",
+            "source": "docs/middleware.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "cookies",
+            "target": "cairn://docs-responses/response/set-cookie",
+            "source": "docs/responses.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "route methods",
+            "target": "cairn://docs-routing/handling-http-methods",
+            "source": "docs/routing.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "TestClient with `raise_server_exceptions=False`",
+            "target": "cairn://docs-testclient/document-introduction",
+            "source": "docs/testclient.md",
+            "resolves_in_selected_source": true
+          }
+        ],
+        "documentation_cli_calls": 8,
+        "process_skill_calls": 2,
+        "documentation_cli_errors": 2,
+        "accepted": true
+      },
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/role-prefix-20261025/runs/r03"
+    },
+    {
+      "case_id": "starlette-request-id",
+      "arm": "raw",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 118.01638366700354,
+      "tool_invocations": 5,
+      "usage_events": [
+        {
+          "input_tokens": 171295,
+          "cached_input_tokens": 155392,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 7661,
+          "reasoning_output_tokens": 947
+        }
+      ],
+      "input_tokens": 171295,
+      "cached_input_tokens": 155392,
+      "output_tokens": 7661,
+      "final_answer_exists": true,
+      "review": {
+        "runtime": {
+          "passed": true,
+          "checks": [
+            "id_validation_'abc_17.X-y'",
+            "id_validation_'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'",
+            "id_validation_''",
+            "id_validation_'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'",
+            "id_validation_'has space'",
+            "id_validation_'bad/slash'",
+            "missing_id_generated",
+            "duplicate_id_headers_generated",
+            "replace_conflicting_id_preserve_both_cookies",
+            "cors_and_id_status_500",
+            "cors_and_id_status_404",
+            "cors_and_id_status_405",
+            "cors_and_id_status_200",
+            "preflight_has_cors_and_id",
+            "unapproved_origin_not_allowed",
+            "overlapping_requests_are_isolated_and_headers_preserved",
+            "context_reset_in_finally_after_exception",
+            "unchanged_non_http_lifespan",
+            "unchanged_non_http_websocket",
+            "caller_context_restored_after_all_checks"
+          ]
+        },
+        "manual": {
+          "answer_sha256": "5c3151ee2af55eecb211bd58877b9badd249eac0532514c4495d7f97e0f31101",
+          "safe_complete_module": true,
+          "source_access_within_protocol": true,
+          "requirements_and_explanation_match_source": true,
+          "cross_requirement_interactions_checked": true,
+          "notes": "Audited complete pure ASGI module, command history and source claims. ASCII/duplicate-header guard, request-local closure, finally reset, unchanged non-HTTP passthrough, cookie list preservation and CORS wrapper order checked."
+        },
+        "citations": [
+          {
+            "label": "Pure ASGI and BaseHTTPMiddleware/contextvars limitations",
+            "target": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/role-prefix-20261025/runs/r04/workspace/docs/middleware.md:309",
+            "source": "docs/middleware.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Wrapping send to modify response-start headers",
+            "target": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/role-prefix-20261025/runs/r04/workspace/docs/middleware.md:574",
+            "source": "docs/middleware.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "CORS global enforcement for unhandled errors",
+            "target": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/role-prefix-20261025/runs/r04/workspace/docs/middleware.md:104",
+            "source": "docs/middleware.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Cookie API",
+            "target": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/role-prefix-20261025/runs/r04/workspace/docs/responses.md:32",
+            "source": "docs/responses.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Route method declarations",
+            "target": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/role-prefix-20261025/runs/r04/workspace/docs/routing.md:94",
+            "source": "docs/routing.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "TestClient inspection of error responses",
+            "target": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/role-prefix-20261025/runs/r04/workspace/docs/testclient.md:74",
+            "source": "docs/testclient.md",
+            "resolves_in_selected_source": true
+          }
+        ],
+        "documentation_cli_calls": 0,
+        "process_skill_calls": 0,
+        "documentation_cli_errors": 0,
+        "accepted": true
+      },
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/role-prefix-20261025/runs/r04"
+    },
+    {
+      "case_id": "starlette-request-id",
+      "arm": "prefix",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 142.68584129100054,
+      "tool_invocations": 9,
+      "usage_events": [
+        {
+          "input_tokens": 362651,
+          "cached_input_tokens": 333440,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 5979,
+          "reasoning_output_tokens": 1308
+        }
+      ],
+      "input_tokens": 362651,
+      "cached_input_tokens": 333440,
+      "output_tokens": 5979,
+      "final_answer_exists": true,
+      "review": {
+        "runtime": {
+          "passed": true,
+          "checks": [
+            "id_validation_'abc_17.X-y'",
+            "id_validation_'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'",
+            "id_validation_''",
+            "id_validation_'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'",
+            "id_validation_'has space'",
+            "id_validation_'bad/slash'",
+            "missing_id_generated",
+            "duplicate_id_headers_generated",
+            "replace_conflicting_id_preserve_both_cookies",
+            "cors_and_id_status_500",
+            "cors_and_id_status_404",
+            "cors_and_id_status_405",
+            "cors_and_id_status_200",
+            "preflight_has_cors_and_id",
+            "unapproved_origin_not_allowed",
+            "overlapping_requests_are_isolated_and_headers_preserved",
+            "context_reset_in_finally_after_exception",
+            "unchanged_non_http_lifespan",
+            "unchanged_non_http_websocket",
+            "caller_context_restored_after_all_checks"
+          ]
+        },
+        "manual": {
+          "answer_sha256": "75e426a0f097553a405e370086d46e4ec60aff9df2104e61bee83477bb6e0fc0",
+          "safe_complete_module": true,
+          "source_access_within_protocol": true,
+          "requirements_and_explanation_match_source": true,
+          "cross_requirement_interactions_checked": true,
+          "notes": "Audited complete pure ASGI module, command history and source claims. ASCII/duplicate-header guard, request-local closure, finally reset, unchanged non-HTTP passthrough, cookie list preservation and CORS wrapper order checked."
+        },
+        "citations": [
+          {
+            "label": "BaseHTTPMiddleware/contextvars limitations",
+            "target": "cairn://docs-middleware/basehttpmiddleware/limitations",
+            "source": "docs/middleware.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "request-local state",
+            "target": "cairn://docs-middleware/pure-asgi-middleware/gotchas/asgi-middleware-should-be-stateless",
+            "source": "docs/middleware.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Wrapping `send`",
+            "target": "cairn://docs-middleware/pure-asgi-middleware/common-patterns/inspecting-or-modifying-the-response",
+            "source": "docs/middleware.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Global CORS enforcement",
+            "target": "cairn://docs-middleware/corsmiddleware/corsmiddleware-global-enforcement",
+            "source": "docs/middleware.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "CORS options",
+            "target": "cairn://docs-middleware/corsmiddleware",
+            "source": "docs/middleware.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "Cookies",
+            "target": "cairn://docs-responses/response/set-cookie",
+            "source": "docs/responses.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "route methods",
+            "target": "cairn://docs-routing/handling-http-methods",
+            "source": "docs/routing.md",
+            "resolves_in_selected_source": true
+          },
+          {
+            "label": "error-aware TestClient",
+            "target": "cairn://docs-testclient/document-introduction",
+            "source": "docs/testclient.md",
+            "resolves_in_selected_source": true
+          }
+        ],
+        "documentation_cli_calls": 5,
+        "process_skill_calls": 2,
+        "documentation_cli_errors": 1,
+        "accepted": true
+      },
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/role-prefix-20261025/runs/r05"
+    }
+  ],
+  "aggregates": [
+    {
+      "arm": "prefix",
+      "sessions": 2,
+      "accepted": 2,
+      "input_tokens": 690783,
+      "cached_input_tokens": 614272,
+      "output_tokens": 13111,
+      "tool_invocations": 19,
+      "seconds": 296.17152412499854,
+      "uncached_input_tokens": 76511,
+      "documentation_cli_calls": 9,
+      "process_skill_calls": 5,
+      "documentation_cli_errors": 1
+    },
+    {
+      "arm": "stock",
+      "sessions": 2,
+      "accepted": 2,
+      "input_tokens": 435730,
+      "cached_input_tokens": 394624,
+      "output_tokens": 13294,
+      "tool_invocations": 16,
+      "seconds": 244.59924520800269,
+      "uncached_input_tokens": 41106,
+      "documentation_cli_calls": 12,
+      "process_skill_calls": 2,
+      "documentation_cli_errors": 3
+    },
+    {
+      "arm": "raw",
+      "sessions": 2,
+      "accepted": 2,
+      "input_tokens": 313897,
+      "cached_input_tokens": 281600,
+      "output_tokens": 13221,
+      "tool_invocations": 9,
+      "seconds": 232.98301591700874,
+      "uncached_input_tokens": 32297,
+      "documentation_cli_calls": 0,
+      "process_skill_calls": 0,
+      "documentation_cli_errors": 0
+    }
+  ],
+  "phase": "role-prefix-20261025",
+  "primary": "prefix",
+  "unique_tasktexts": 2,
+  "development_cases_reused": true,
+  "primary_gate_passed": false,
+  "frozen_files_verified": 116,
+  "protocol_path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/role-prefix-20261025/protocol-frozen.json",
+  "decision": "Retain explicit opt-in model-role integration for independently verified model-input correctness; do not promote as a cheaper default or claim it fixes the Agent-cost gap",
+  "product_verification": {
+    "tests_passed": 592,
+    "mypy_source_files": 74,
+    "installed_product_python_files": 73,
+    "ruff_passed": true
+  },
+  "limitations": [
+    "Known tasks, one session per task/arm; no heldout generalization or causal estimate",
+    "Prefix arm has more skill reads and different local tests than raw; all costs retained",
+    "Four separate real Nomic768 indexes with controlled extractive summaries and warm server, not default cold LLM-summary cost",
+    "Correct model instructions are separate from end-to-end success and cost",
+    "No cold-start/indexing/embedding-query resource costs in Agent-token price formulas"
+  ]
+}

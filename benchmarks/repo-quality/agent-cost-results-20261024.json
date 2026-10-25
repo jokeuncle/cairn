@@ -1,0 +1,933 @@
+{
+  "date": "2026-10-24",
+  "scope": "Two development tasks, three arms, two iterations; 12 valid sessions, NOT 12 independent tasks. No commercial or generalization claim.",
+  "model": "gpt-6.1-sol",
+  "runtime": "codex-cli 0.164.0",
+  "reasoning_effort": "high",
+  "usage_units": "CLI turn.completed token counters; uncached=input-cached; no dollar billing inferred",
+  "source_snapshot_manifests": {
+    "codex-candidate-source-sha256.json": {
+      "src/cairn/repo_search.py": "3fe15e0d470a4593f61583fc383f2dff79d7bb4396f30f31e53386a36c5f3a3a",
+      "src/cairn/__init__.py": "4975a3e97aad175b1155206322ba4ed3f1418f948db57a867bfa8b747b296b80",
+      "src/cairn/inspection.py": "2c762e9920bc1bdc45c61e8279ba10c133c2327d1274ebe1fb8420756f4d19df",
+      "src/cairn/providers.py": "ff842c46b112043444545e369de2a13f592fc7b38070847b45f9ff83f0c4035c",
+      "src/cairn/repo.py": "a80612fac27c63130bc20f69fab816989385a74e92c93579a0616e19d22a6d40",
+      "src/cairn/agent_guidance.py": "ed396110c729b0c1ea2ace722fa391f00fe750d867f6819b4ea4a28d63cec51e",
+      "src/cairn/xref/fake.py": "f2fb4026baeeb28eb92f6fc4e6e1d56631202d1505b2f39c95393ca74b68b1bd",
+      "src/cairn/xref/__init__.py": "4829c30ba5562f43fef3e82cf2e91484ffab95dec9913ad9c9531dfba679d545",
+      "src/cairn/xref/base.py": "7a603b112e0529545ef47e77afbd7e1b0a737891241f338201b55a41e2c5856a",
+      "src/cairn/xref/heuristic.py": "b234cd12f758c40dfac24fbe3f735708156d895cc68d5a4ac100299f1bc800c2",
+      "src/cairn/bench/metrics.py": "9cebcee11b5b8e9e2eb40435fe5941eff81efa31038ab7b662f2bfda47edb8a5",
+      "src/cairn/bench/runner.py": "0a44ba791dde41024ee889321fa01cd4bd4db624c6a5adcf6d67c0b49daa0925",
+      "src/cairn/bench/baseline.py": "102f0ecf42fcf2b83c3c253d731338b40523a9ad8cb32262a97ebdfaf4730b98",
+      "src/cairn/bench/__init__.py": "6eefb5df8d97dbcbba95c13cff3a77fb5ebda4154ab086a06623062375acd9b1",
+      "src/cairn/bench/dataset.py": "bc7f147940dedc8f03b16d78c04e25ded591e5358ac482118ffc5a876e9bf08f",
+      "src/cairn/bench/judge.py": "0dce5bb0ed842449814919b6bd38f8a33d56976bc435a79a9a2962ff3a074d6c",
+      "src/cairn/bench/report.py": "c2fbc8890891db7c861c26c7af017532e98b20d13dbf6955f69e5445f62727b6",
+      "src/cairn/tools/search_semantic.py": "c078e9c4721e9f0e9f51b5e9c787004e22fb5f2ed0b9ee82d5ce49bcc74403c1",
+      "src/cairn/tools/read_range.py": "950914a9aa12ddf366ccbd9bd26a18ef6c188a3e326a108ec320fce2d00032c3",
+      "src/cairn/tools/search_keyword.py": "7d1917d60469204ac9c0a2d5fc36f39d9f695a5168bf40c423c662eeb7caba97",
+      "src/cairn/tools/find_mentions.py": "b2dd69ee779c454a94cc69a707b2bfa0e8917c49a42461a1c1c41635dd6e9651",
+      "src/cairn/tools/__init__.py": "ad17995a7e6cc108ba83dd49a6d8b65a293968fde0a66601583d33299d26edfa",
+      "src/cairn/tools/get_related.py": "f275a2e778aa96a088a71c152f071e4ea22da9a5b14f15cba9914a4fae55b162",
+      "src/cairn/tools/outline.py": "ed557e2865ddbd9a11b9ca31ec06b4605c6c4dbe3fc8f212f654d14e452a504e",
+      "src/cairn/tools/get_section.py": "c6b594a10e40851b0b3eb8e3dbb7b31f14d2ee9e2ae1704becd92873354eb6a2",
+      "src/cairn/tools/base.py": "da1b46a1fad634eda53481b161e1077ec00ca385749bba5da3a42e8520104ce9",
+      "src/cairn/core/config.py": "0988f686b585bb266207c0cd976741e4d3ceae0fbb68a31095cee91cf7ef74fc",
+      "src/cairn/core/__init__.py": "55b20f63537926c009e0dd4fd57e1de6cb3f87d289a0ac47a177305badf9d1b8",
+      "src/cairn/core/types.py": "925db60bd1139d5cb4eb4dae401edc9b8481caed52f0897db1cd433e30947e83",
+      "src/cairn/core/errors.py": "a05de597f07140b65d6e2aa17ddb6766e9c76a89434bab2a99285659aadb4613",
+      "src/cairn/embed/fake.py": "87847e19e4574c19bd271a55091525314375f3273911e36c4cf1f54a63450b47",
+      "src/cairn/embed/openai_compatible.py": "c76e01422eb24ab60c6f0f84108227d0046408deb24df1e19f3d29dec909aaea",
+      "src/cairn/embed/__init__.py": "39c5945e10f3beb9144cb81d6b693ae7a9103a7c90c0e6f8d74e379d030a2158",
+      "src/cairn/embed/doubao.py": "5bb7467424ec6214f9735a19d0e4ae37b1ab2a6b4a880039a442ccc72991c612",
+      "src/cairn/embed/base.py": "f05b76deb60d038beea75bb207dabaf4d3ced9fe2479f18f91b109f1683c7b0d",
+      "src/cairn/embed/windowed.py": "df44bb06b045f0306cde46d86f723f2ff83ebc5d9eb9fd6226adaffa61c15ec6",
+      "src/cairn/entity/fake.py": "0e72510cd52c6b389472e7ec9f9330648c385a70db70925d4465ceb653da921a",
+      "src/cairn/entity/__init__.py": "9d226d39cab1f8a295b6e2b284eea2148bbb7c544085b33adf9955ad89b06f73",
+      "src/cairn/entity/base.py": "c4309984df6c98c12e5500c52f515fd7eddd368a70fba0edc0c5db7abbae3435",
+      "src/cairn/entity/heuristic.py": "5b996baa78427fe6b5a97a4a0a129694af6affcb2a23622d3b42f31133320555",
+      "src/cairn/ingest/__init__.py": "dad837ad362acd07a40d5891c8d64935915fa4cb13658022eedd4ea7e2fd2a7f",
+      "src/cairn/ingest/pdf.py": "87e9b16d547ec6017ee957ec1c98b21e97743bf2a9680abf3eb4b09bc1de7e96",
+      "src/cairn/ingest/markitdown.py": "f3dbd4fcb118a8525d3985e1e81148a95f6bb99dc16faeec1cdc18b1cafa7b58",
+      "src/cairn/ingest/markdown.py": "7b78c69399bf3dafbb060161e9ecbca5f08024ade0e88b38a81fdacb587ecfd2",
+      "src/cairn/ingest/base.py": "0d97d8b952dc7088886ad304dc116fb9b91afaec12afeb1bf52f7fb5d53989d2",
+      "src/cairn/summarize/fake.py": "3e07105efaa0c5210c2c835c8dc1e3dd36ef8a922c93e523dd451262888a11e8",
+      "src/cairn/summarize/openai_compatible.py": "67ece30a351e681a05bc33769428868b5d35eb5e8d25c0fde4850b3514eafbb1",
+      "src/cairn/summarize/cache.py": "8d5daa8cfbdb9c7d679ef4c2ff31a2a920bc95fa898861f5a5b27665c5e6f4b6",
+      "src/cairn/summarize/__init__.py": "22aef718f2e5e709b31ce21d069383308ed5e286aead8143121f2034f7e73acc",
+      "src/cairn/summarize/prompts.py": "accaff220bdd9e7392fcab43b8b262cc6588f243705af339c59041f6147ee532",
+      "src/cairn/summarize/base.py": "919c68e8b7aa781b0965cf57470107ae442fd60c1a167e0ea995ba5be0bf2589",
+      "src/cairn/mcp/server.py": "30262462719b6aa5f46b9aaf061578f9b6e0362ee3d5ccfb4712b4ab3bf2ada0",
+      "src/cairn/mcp/__init__.py": "182e2496b6fb3ae9bbdd04e245d282426e18d1e9481cde853c5f8bcf7ce5ee06",
+      "src/cairn/mcp/schemas.py": "811cfc894daa67d2b2799083c1bcb21c7cabd256123ef18c12a2edb88bd25b3c",
+      "src/cairn/cli/config.py": "e835a4bda78f7f71b3ead748fcfd99003665cae10bc069a74f6aaa2aff82349d",
+      "src/cairn/cli/__init__.py": "12167b938c079bed1dc70fe8e9bdb444f1a3b9bc9075c64737ac8d6121ae0767",
+      "src/cairn/cli/app.py": "ce12c66976350b82c0c7472618455b264eb6ee19a0f8ff61ac490bac3bc7466f",
+      "src/cairn/index/vectors.py": "c598a4055a3dfb1dc3cb895dfb4b776c3e3c27ce0dbd270d8d255a9e97707c0d",
+      "src/cairn/index/tree.py": "13ef29a32ee9cd990fbbed69bbcc51270f646ddf04c74a6018d68bb2a52deeee",
+      "src/cairn/index/__init__.py": "93bf140dd9b0b6754f1e4a93872bd8b870420d33f588feebf63d1533e90c3295",
+      "src/cairn/index/entities.py": "eef3b823781ee542cd2ded19ad05942321802af55412291fcf41354a686e4064",
+      "src/cairn/index/summaries.py": "f459357287d5290d6733a655e07e5496007d76061c34f61e2af4e993d68dece6",
+      "src/cairn/index/xrefs.py": "0e48b57417817e47305d5c1653d00e0b5736e90696881b3d33ef9d447c6254bc",
+      "src/cairn/engine/manifest.py": "2cde1bb70de751c36b20f1f32bac04fddc820675b98d471f3663c20b5c4e0c6d",
+      "src/cairn/engine/__init__.py": "305ed7ffc9512688765620b03b9002b0cd2b63baeac11533a52e76051b82ac6c",
+      "src/cairn/engine/indexer.py": "51d078d22f26e970730bf9e607635af43b3aba1b6c76ac583a2c8deb502f83a9",
+      "src/cairn/client/server.py": "ded430660f9ee5ced05f3a3ec3665456bd58a409ae6beedbf1cd8e2acd7fbb4d",
+      "src/cairn/client/__init__.py": "d844deb2886bdf7495c47ccc8c7417867f3b65b28c4f2bd1ad299bf4bf177bf6",
+      "src/cairn/client/static/__init__.py": "0f90031cf0900f6ad827cd9823928f23574f5b941bd79cc5ba8f0731535ba785"
+    },
+    "codex-compact-source-sha256.json": {
+      "src/cairn/repo_search.py": "3fe15e0d470a4593f61583fc383f2dff79d7bb4396f30f31e53386a36c5f3a3a",
+      "src/cairn/__init__.py": "4975a3e97aad175b1155206322ba4ed3f1418f948db57a867bfa8b747b296b80",
+      "src/cairn/inspection.py": "2c762e9920bc1bdc45c61e8279ba10c133c2327d1274ebe1fb8420756f4d19df",
+      "src/cairn/providers.py": "ff842c46b112043444545e369de2a13f592fc7b38070847b45f9ff83f0c4035c",
+      "src/cairn/repo.py": "a80612fac27c63130bc20f69fab816989385a74e92c93579a0616e19d22a6d40",
+      "src/cairn/agent_guidance.py": "ed396110c729b0c1ea2ace722fa391f00fe750d867f6819b4ea4a28d63cec51e",
+      "src/cairn/xref/fake.py": "f2fb4026baeeb28eb92f6fc4e6e1d56631202d1505b2f39c95393ca74b68b1bd",
+      "src/cairn/xref/__init__.py": "4829c30ba5562f43fef3e82cf2e91484ffab95dec9913ad9c9531dfba679d545",
+      "src/cairn/xref/base.py": "7a603b112e0529545ef47e77afbd7e1b0a737891241f338201b55a41e2c5856a",
+      "src/cairn/xref/heuristic.py": "b234cd12f758c40dfac24fbe3f735708156d895cc68d5a4ac100299f1bc800c2",
+      "src/cairn/bench/metrics.py": "9cebcee11b5b8e9e2eb40435fe5941eff81efa31038ab7b662f2bfda47edb8a5",
+      "src/cairn/bench/runner.py": "0a44ba791dde41024ee889321fa01cd4bd4db624c6a5adcf6d67c0b49daa0925",
+      "src/cairn/bench/baseline.py": "102f0ecf42fcf2b83c3c253d731338b40523a9ad8cb32262a97ebdfaf4730b98",
+      "src/cairn/bench/__init__.py": "6eefb5df8d97dbcbba95c13cff3a77fb5ebda4154ab086a06623062375acd9b1",
+      "src/cairn/bench/dataset.py": "bc7f147940dedc8f03b16d78c04e25ded591e5358ac482118ffc5a876e9bf08f",
+      "src/cairn/bench/judge.py": "0dce5bb0ed842449814919b6bd38f8a33d56976bc435a79a9a2962ff3a074d6c",
+      "src/cairn/bench/report.py": "c2fbc8890891db7c861c26c7af017532e98b20d13dbf6955f69e5445f62727b6",
+      "src/cairn/tools/search_semantic.py": "c078e9c4721e9f0e9f51b5e9c787004e22fb5f2ed0b9ee82d5ce49bcc74403c1",
+      "src/cairn/tools/read_range.py": "950914a9aa12ddf366ccbd9bd26a18ef6c188a3e326a108ec320fce2d00032c3",
+      "src/cairn/tools/search_keyword.py": "7d1917d60469204ac9c0a2d5fc36f39d9f695a5168bf40c423c662eeb7caba97",
+      "src/cairn/tools/find_mentions.py": "b2dd69ee779c454a94cc69a707b2bfa0e8917c49a42461a1c1c41635dd6e9651",
+      "src/cairn/tools/__init__.py": "ad17995a7e6cc108ba83dd49a6d8b65a293968fde0a66601583d33299d26edfa",
+      "src/cairn/tools/get_related.py": "f275a2e778aa96a088a71c152f071e4ea22da9a5b14f15cba9914a4fae55b162",
+      "src/cairn/tools/outline.py": "ed557e2865ddbd9a11b9ca31ec06b4605c6c4dbe3fc8f212f654d14e452a504e",
+      "src/cairn/tools/get_section.py": "c6b594a10e40851b0b3eb8e3dbb7b31f14d2ee9e2ae1704becd92873354eb6a2",
+      "src/cairn/tools/base.py": "da1b46a1fad634eda53481b161e1077ec00ca385749bba5da3a42e8520104ce9",
+      "src/cairn/core/config.py": "0988f686b585bb266207c0cd976741e4d3ceae0fbb68a31095cee91cf7ef74fc",
+      "src/cairn/core/__init__.py": "55b20f63537926c009e0dd4fd57e1de6cb3f87d289a0ac47a177305badf9d1b8",
+      "src/cairn/core/types.py": "925db60bd1139d5cb4eb4dae401edc9b8481caed52f0897db1cd433e30947e83",
+      "src/cairn/core/errors.py": "a05de597f07140b65d6e2aa17ddb6766e9c76a89434bab2a99285659aadb4613",
+      "src/cairn/embed/fake.py": "87847e19e4574c19bd271a55091525314375f3273911e36c4cf1f54a63450b47",
+      "src/cairn/embed/openai_compatible.py": "c76e01422eb24ab60c6f0f84108227d0046408deb24df1e19f3d29dec909aaea",
+      "src/cairn/embed/__init__.py": "39c5945e10f3beb9144cb81d6b693ae7a9103a7c90c0e6f8d74e379d030a2158",
+      "src/cairn/embed/doubao.py": "5bb7467424ec6214f9735a19d0e4ae37b1ab2a6b4a880039a442ccc72991c612",
+      "src/cairn/embed/base.py": "f05b76deb60d038beea75bb207dabaf4d3ced9fe2479f18f91b109f1683c7b0d",
+      "src/cairn/embed/windowed.py": "df44bb06b045f0306cde46d86f723f2ff83ebc5d9eb9fd6226adaffa61c15ec6",
+      "src/cairn/entity/fake.py": "0e72510cd52c6b389472e7ec9f9330648c385a70db70925d4465ceb653da921a",
+      "src/cairn/entity/__init__.py": "9d226d39cab1f8a295b6e2b284eea2148bbb7c544085b33adf9955ad89b06f73",
+      "src/cairn/entity/base.py": "c4309984df6c98c12e5500c52f515fd7eddd368a70fba0edc0c5db7abbae3435",
+      "src/cairn/entity/heuristic.py": "5b996baa78427fe6b5a97a4a0a129694af6affcb2a23622d3b42f31133320555",
+      "src/cairn/ingest/__init__.py": "dad837ad362acd07a40d5891c8d64935915fa4cb13658022eedd4ea7e2fd2a7f",
+      "src/cairn/ingest/pdf.py": "87e9b16d547ec6017ee957ec1c98b21e97743bf2a9680abf3eb4b09bc1de7e96",
+      "src/cairn/ingest/markitdown.py": "f3dbd4fcb118a8525d3985e1e81148a95f6bb99dc16faeec1cdc18b1cafa7b58",
+      "src/cairn/ingest/markdown.py": "7b78c69399bf3dafbb060161e9ecbca5f08024ade0e88b38a81fdacb587ecfd2",
+      "src/cairn/ingest/base.py": "0d97d8b952dc7088886ad304dc116fb9b91afaec12afeb1bf52f7fb5d53989d2",
+      "src/cairn/summarize/fake.py": "3e07105efaa0c5210c2c835c8dc1e3dd36ef8a922c93e523dd451262888a11e8",
+      "src/cairn/summarize/openai_compatible.py": "67ece30a351e681a05bc33769428868b5d35eb5e8d25c0fde4850b3514eafbb1",
+      "src/cairn/summarize/cache.py": "8d5daa8cfbdb9c7d679ef4c2ff31a2a920bc95fa898861f5a5b27665c5e6f4b6",
+      "src/cairn/summarize/__init__.py": "22aef718f2e5e709b31ce21d069383308ed5e286aead8143121f2034f7e73acc",
+      "src/cairn/summarize/prompts.py": "accaff220bdd9e7392fcab43b8b262cc6588f243705af339c59041f6147ee532",
+      "src/cairn/summarize/base.py": "919c68e8b7aa781b0965cf57470107ae442fd60c1a167e0ea995ba5be0bf2589",
+      "src/cairn/mcp/server.py": "2736a2916730ce3341a8416b3a734e98f9fdba3d123c7f56b0858caf33c580c2",
+      "src/cairn/mcp/__init__.py": "182e2496b6fb3ae9bbdd04e245d282426e18d1e9481cde853c5f8bcf7ce5ee06",
+      "src/cairn/mcp/schemas.py": "c93d316a479fa2e8b4ebca338687efde40e2a0096f878e87d8f4131de55751fe",
+      "src/cairn/cli/config.py": "e835a4bda78f7f71b3ead748fcfd99003665cae10bc069a74f6aaa2aff82349d",
+      "src/cairn/cli/__init__.py": "12167b938c079bed1dc70fe8e9bdb444f1a3b9bc9075c64737ac8d6121ae0767",
+      "src/cairn/cli/app.py": "ce12c66976350b82c0c7472618455b264eb6ee19a0f8ff61ac490bac3bc7466f",
+      "src/cairn/index/vectors.py": "c598a4055a3dfb1dc3cb895dfb4b776c3e3c27ce0dbd270d8d255a9e97707c0d",
+      "src/cairn/index/tree.py": "13ef29a32ee9cd990fbbed69bbcc51270f646ddf04c74a6018d68bb2a52deeee",
+      "src/cairn/index/__init__.py": "93bf140dd9b0b6754f1e4a93872bd8b870420d33f588feebf63d1533e90c3295",
+      "src/cairn/index/entities.py": "eef3b823781ee542cd2ded19ad05942321802af55412291fcf41354a686e4064",
+      "src/cairn/index/summaries.py": "f459357287d5290d6733a655e07e5496007d76061c34f61e2af4e993d68dece6",
+      "src/cairn/index/xrefs.py": "0e48b57417817e47305d5c1653d00e0b5736e90696881b3d33ef9d447c6254bc",
+      "src/cairn/engine/manifest.py": "2cde1bb70de751c36b20f1f32bac04fddc820675b98d471f3663c20b5c4e0c6d",
+      "src/cairn/engine/__init__.py": "305ed7ffc9512688765620b03b9002b0cd2b63baeac11533a52e76051b82ac6c",
+      "src/cairn/engine/indexer.py": "51d078d22f26e970730bf9e607635af43b3aba1b6c76ac583a2c8deb502f83a9",
+      "src/cairn/client/server.py": "ded430660f9ee5ced05f3a3ec3665456bd58a409ae6beedbf1cd8e2acd7fbb4d",
+      "src/cairn/client/__init__.py": "d844deb2886bdf7495c47ccc8c7417867f3b65b28c4f2bd1ad299bf4bf177bf6",
+      "src/cairn/client/static/__init__.py": "0f90031cf0900f6ad827cd9823928f23574f5b941bd79cc5ba8f0731535ba785"
+    }
+  },
+  "protocol": {
+    "1": {
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high (matches existing user configuration)",
+      "runtime": "codex-cli 0.164.0, ephemeral fresh sessions, existing ChatGPT auth; no API-key copying",
+      "scope": "2 frozen composed tasks x 3 retrieval arms; one valid attempt each",
+      "arms": [
+        "cairn",
+        "bm25",
+        "raw source files + rg"
+      ],
+      "tool_budget": 24,
+      "per_session_wall_time_limit_seconds": 900,
+      "final_output_request": "<=1800 tokens (prompt limit, not a decoder setting)",
+      "source_version": "codex-candidate/src (adds lazy vector storage to the Qwen candidate; no retrieval/evidence algorithm change)",
+      "coding_tools": "same read-only shell, local Python tests allowed, no network requests or source edits",
+      "source_evidence": "MCP only for Cairn/BM25; curated copied docs and rg for raw arm",
+      "known_cases": "HTTPX development task; Ruff frozen composition reused across models. Round 2 follows inspection of round 1 and is development, not unseen validation.",
+      "usage": "CLI turn.completed totals, including cached_input_tokens and output_tokens; not dollar billing or cross-model comparable token counts"
+    },
+    "2": {
+      "model": "gpt-6.1-sol",
+      "reasoning_effort": "high (matches existing user configuration)",
+      "runtime": "codex-cli 0.164.0, ephemeral fresh sessions, existing ChatGPT auth; no API-key copying",
+      "scope": "2 frozen composed tasks x 3 retrieval arms; one valid attempt each",
+      "arms": [
+        "cairn",
+        "bm25",
+        "raw source files + rg"
+      ],
+      "tool_budget": 24,
+      "per_session_wall_time_limit_seconds": 900,
+      "final_output_request": "<=1800 tokens (prompt limit, not a decoder setting)",
+      "source_version": "codex-compact-candidate/src",
+      "coding_tools": "same read-only shell, local Python tests allowed, no network requests or source edits",
+      "source_evidence": "MCP only for Cairn/BM25; curated copied docs and rg for raw arm",
+      "known_cases": "HTTPX development task; Ruff frozen composition reused across models. Round 2 follows inspection of round 1 and is development, not unseen validation.",
+      "usage": "CLI turn.completed totals, including cached_input_tokens and output_tokens; not dollar billing or cross-model comparable token counts",
+      "round": "second development iteration, not a new held-out score",
+      "changes": [
+        "MCP search source view omits ranking diagnostics by default; explicit details remain",
+        "existing read_range exposed alongside previous five tools",
+        "server guidance explains adjacent-section batching"
+      ],
+      "unchanged": [
+        "model",
+        "reasoning effort",
+        "case text",
+        "coding permissions",
+        "tool and time budgets",
+        "raw/BM25 source servers"
+      ],
+      "attempt_selection": "All three arms rerun once; retain all first-round and second-round outputs. Do not select only favorable repeats."
+    }
+  },
+  "runs": [
+    {
+      "case_id": "httpx-service-client",
+      "arm": "bm25",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 149.0472276249984,
+      "tool_invocations": 19,
+      "usage_events": [
+        {
+          "input_tokens": 318186,
+          "cached_input_tokens": 288000,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 4763,
+          "reasoning_output_tokens": 1533
+        }
+      ],
+      "input_tokens": 318186,
+      "cached_input_tokens": 288000,
+      "output_tokens": 4763,
+      "final_answer_exists": true,
+      "round": 1,
+      "uncached_input_tokens": 30186,
+      "answer_sha256": "91bfc9d441f4ed7c8be4714a7f74001d91499ff5a1a598fc4e460871440d5aaf",
+      "complete_task_accepted": true,
+      "acceptance": "Independent Python execution or actual Ruff fixture execution, plus manual deliverable and source review. Live networking excluded.",
+      "artifact": "codex/runs/httpx-service-client-bm25"
+    },
+    {
+      "case_id": "httpx-service-client",
+      "arm": "cairn",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 128.06923199999983,
+      "tool_invocations": 21,
+      "usage_events": [
+        {
+          "input_tokens": 339251,
+          "cached_input_tokens": 296576,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 4444,
+          "reasoning_output_tokens": 794
+        }
+      ],
+      "input_tokens": 339251,
+      "cached_input_tokens": 296576,
+      "output_tokens": 4444,
+      "final_answer_exists": true,
+      "round": 1,
+      "uncached_input_tokens": 42675,
+      "answer_sha256": "c3413e5862e1efc8456267ef9c2c6b2475e981231f7b35d0af6b15fd482255c8",
+      "complete_task_accepted": true,
+      "acceptance": "Independent Python execution or actual Ruff fixture execution, plus manual deliverable and source review. Live networking excluded.",
+      "artifact": "codex/runs/httpx-service-client-cairn"
+    },
+    {
+      "case_id": "httpx-service-client",
+      "arm": "raw",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 168.28533075000087,
+      "tool_invocations": 6,
+      "usage_events": [
+        {
+          "input_tokens": 199272,
+          "cached_input_tokens": 172416,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 7205,
+          "reasoning_output_tokens": 1283
+        }
+      ],
+      "input_tokens": 199272,
+      "cached_input_tokens": 172416,
+      "output_tokens": 7205,
+      "final_answer_exists": true,
+      "round": 1,
+      "uncached_input_tokens": 26856,
+      "answer_sha256": "5b0d14ef539e021a0e5893cbca278a9098ef24340acc8857372e6f264eb0fd4a",
+      "complete_task_accepted": true,
+      "acceptance": "Independent Python execution or actual Ruff fixture execution, plus manual deliverable and source review. Live networking excluded.",
+      "artifact": "codex/runs/httpx-service-client-raw"
+    },
+    {
+      "case_id": "ruff-isolated-ci-config",
+      "arm": "bm25",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 70.71036874999845,
+      "tool_invocations": 17,
+      "usage_events": [
+        {
+          "input_tokens": 252379,
+          "cached_input_tokens": 213120,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 2001,
+          "reasoning_output_tokens": 348
+        }
+      ],
+      "input_tokens": 252379,
+      "cached_input_tokens": 213120,
+      "output_tokens": 2001,
+      "final_answer_exists": true,
+      "round": 1,
+      "uncached_input_tokens": 39259,
+      "answer_sha256": "127b62a587095d1a05708fb83df6ccd67ebb779e3a4e37d087a660b6a50307a6",
+      "complete_task_accepted": true,
+      "acceptance": "Independent Python execution or actual Ruff fixture execution, plus manual deliverable and source review. Live networking excluded.",
+      "artifact": "codex/runs/ruff-isolated-ci-config-bm25"
+    },
+    {
+      "case_id": "ruff-isolated-ci-config",
+      "arm": "cairn",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 89.80364995799937,
+      "tool_invocations": 15,
+      "usage_events": [
+        {
+          "input_tokens": 253892,
+          "cached_input_tokens": 199680,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 2087,
+          "reasoning_output_tokens": 405
+        }
+      ],
+      "input_tokens": 253892,
+      "cached_input_tokens": 199680,
+      "output_tokens": 2087,
+      "final_answer_exists": true,
+      "round": 1,
+      "uncached_input_tokens": 54212,
+      "answer_sha256": "aee63e8271b514cbdeddee861c68cdeea5a3b56b68c6065be5951f46f5b85454",
+      "complete_task_accepted": true,
+      "acceptance": "Independent Python execution or actual Ruff fixture execution, plus manual deliverable and source review. Live networking excluded.",
+      "artifact": "codex/runs/ruff-isolated-ci-config-cairn"
+    },
+    {
+      "case_id": "ruff-isolated-ci-config",
+      "arm": "raw",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 79.43714579100015,
+      "tool_invocations": 7,
+      "usage_events": [
+        {
+          "input_tokens": 136728,
+          "cached_input_tokens": 107776,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 2270,
+          "reasoning_output_tokens": 759
+        }
+      ],
+      "input_tokens": 136728,
+      "cached_input_tokens": 107776,
+      "output_tokens": 2270,
+      "final_answer_exists": true,
+      "round": 1,
+      "uncached_input_tokens": 28952,
+      "answer_sha256": "6ef804d4ebce011565593a78965b8b58d6f28d0a4f2c1b8778202e814f7b2529",
+      "complete_task_accepted": true,
+      "acceptance": "Independent Python execution or actual Ruff fixture execution, plus manual deliverable and source review. Live networking excluded.",
+      "artifact": "codex/runs/ruff-isolated-ci-config-raw"
+    },
+    {
+      "case_id": "httpx-service-client",
+      "arm": "bm25",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 141.18080737499986,
+      "tool_invocations": 17,
+      "usage_events": [
+        {
+          "input_tokens": 236512,
+          "cached_input_tokens": 212992,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 4804,
+          "reasoning_output_tokens": 1193
+        }
+      ],
+      "input_tokens": 236512,
+      "cached_input_tokens": 212992,
+      "output_tokens": 4804,
+      "final_answer_exists": true,
+      "round": 2,
+      "uncached_input_tokens": 23520,
+      "answer_sha256": "b2052eb30d9ce5d5ae2d3ae58a56084d0ccc4ac8fb8f1c92a77947f136e103f2",
+      "complete_task_accepted": true,
+      "acceptance": "Independent Python execution or actual Ruff fixture execution, plus manual deliverable and source review. Live networking excluded.",
+      "artifact": "codex/round2/httpx-service-client-bm25"
+    },
+    {
+      "case_id": "httpx-service-client",
+      "arm": "cairn",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 124.16999716699866,
+      "tool_invocations": 20,
+      "usage_events": [
+        {
+          "input_tokens": 363338,
+          "cached_input_tokens": 322176,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 4320,
+          "reasoning_output_tokens": 862
+        }
+      ],
+      "input_tokens": 363338,
+      "cached_input_tokens": 322176,
+      "output_tokens": 4320,
+      "final_answer_exists": true,
+      "round": 2,
+      "uncached_input_tokens": 41162,
+      "answer_sha256": "3de14ea76430b1a35910602f11a042fb022df6fcc3a8c038cba87c759f3854cb",
+      "complete_task_accepted": true,
+      "acceptance": "Independent Python execution or actual Ruff fixture execution, plus manual deliverable and source review. Live networking excluded.",
+      "artifact": "codex/round2/httpx-service-client-cairn"
+    },
+    {
+      "case_id": "httpx-service-client",
+      "arm": "raw",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 120.8676448749975,
+      "tool_invocations": 8,
+      "usage_events": [
+        {
+          "input_tokens": 236642,
+          "cached_input_tokens": 212864,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 4529,
+          "reasoning_output_tokens": 1045
+        }
+      ],
+      "input_tokens": 236642,
+      "cached_input_tokens": 212864,
+      "output_tokens": 4529,
+      "final_answer_exists": true,
+      "round": 2,
+      "uncached_input_tokens": 23778,
+      "answer_sha256": "0f2136a89b626fd9a8a385c97274e9fe12732408b5160b98621e8260a953dfe9",
+      "complete_task_accepted": true,
+      "acceptance": "Independent Python execution or actual Ruff fixture execution, plus manual deliverable and source review. Live networking excluded.",
+      "artifact": "codex/round2/httpx-service-client-raw"
+    },
+    {
+      "case_id": "ruff-isolated-ci-config",
+      "arm": "bm25",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 53.93495558400173,
+      "tool_invocations": 13,
+      "usage_events": [
+        {
+          "input_tokens": 201537,
+          "cached_input_tokens": 164480,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 1792,
+          "reasoning_output_tokens": 555
+        }
+      ],
+      "input_tokens": 201537,
+      "cached_input_tokens": 164480,
+      "output_tokens": 1792,
+      "final_answer_exists": true,
+      "round": 2,
+      "uncached_input_tokens": 37057,
+      "answer_sha256": "3e5164bf2f0eb34d1872de6363adc9e8e0eee322f62ca764f5ec04591718b199",
+      "complete_task_accepted": true,
+      "acceptance": "Independent Python execution or actual Ruff fixture execution, plus manual deliverable and source review. Live networking excluded.",
+      "artifact": "codex/round2/ruff-isolated-ci-config-bm25"
+    },
+    {
+      "case_id": "ruff-isolated-ci-config",
+      "arm": "cairn",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 75.44085404200086,
+      "tool_invocations": 13,
+      "usage_events": [
+        {
+          "input_tokens": 219501,
+          "cached_input_tokens": 178432,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 2421,
+          "reasoning_output_tokens": 698
+        }
+      ],
+      "input_tokens": 219501,
+      "cached_input_tokens": 178432,
+      "output_tokens": 2421,
+      "final_answer_exists": true,
+      "round": 2,
+      "uncached_input_tokens": 41069,
+      "answer_sha256": "02fa0c55e9d497fac8943d3205628444666f38c8ae2e062eed7e17c7ceb0fde2",
+      "complete_task_accepted": true,
+      "acceptance": "Independent Python execution or actual Ruff fixture execution, plus manual deliverable and source review. Live networking excluded.",
+      "artifact": "codex/round2/ruff-isolated-ci-config-cairn"
+    },
+    {
+      "case_id": "ruff-isolated-ci-config",
+      "arm": "raw",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli 0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 54.808503958000074,
+      "tool_invocations": 3,
+      "usage_events": [
+        {
+          "input_tokens": 89610,
+          "cached_input_tokens": 67456,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 1714,
+          "reasoning_output_tokens": 330
+        }
+      ],
+      "input_tokens": 89610,
+      "cached_input_tokens": 67456,
+      "output_tokens": 1714,
+      "final_answer_exists": true,
+      "round": 2,
+      "uncached_input_tokens": 22154,
+      "answer_sha256": "25634d67ef67318ec584eff751a72f39d44b77ea310574e6912206bb3e47dedf",
+      "complete_task_accepted": true,
+      "acceptance": "Independent Python execution or actual Ruff fixture execution, plus manual deliverable and source review. Live networking excluded.",
+      "artifact": "codex/round2/ruff-isolated-ci-config-raw"
+    }
+  ],
+  "aggregates": [
+    {
+      "round": 1,
+      "arm": "cairn",
+      "accepted": 2,
+      "tasks": 2,
+      "input_tokens": 593143,
+      "cached_input_tokens": 496256,
+      "uncached_input_tokens": 96887,
+      "output_tokens": 6531,
+      "tool_invocations": 36,
+      "seconds": 217.8728819579992
+    },
+    {
+      "round": 1,
+      "arm": "bm25",
+      "accepted": 2,
+      "tasks": 2,
+      "input_tokens": 570565,
+      "cached_input_tokens": 501120,
+      "uncached_input_tokens": 69445,
+      "output_tokens": 6764,
+      "tool_invocations": 36,
+      "seconds": 219.75759637499687
+    },
+    {
+      "round": 1,
+      "arm": "raw",
+      "accepted": 2,
+      "tasks": 2,
+      "input_tokens": 336000,
+      "cached_input_tokens": 280192,
+      "uncached_input_tokens": 55808,
+      "output_tokens": 9475,
+      "tool_invocations": 13,
+      "seconds": 247.72247654100101
+    },
+    {
+      "round": 2,
+      "arm": "cairn",
+      "accepted": 2,
+      "tasks": 2,
+      "input_tokens": 582839,
+      "cached_input_tokens": 500608,
+      "uncached_input_tokens": 82231,
+      "output_tokens": 6741,
+      "tool_invocations": 33,
+      "seconds": 199.61085120899952
+    },
+    {
+      "round": 2,
+      "arm": "bm25",
+      "accepted": 2,
+      "tasks": 2,
+      "input_tokens": 438049,
+      "cached_input_tokens": 377472,
+      "uncached_input_tokens": 60577,
+      "output_tokens": 6596,
+      "tool_invocations": 30,
+      "seconds": 195.1157629590016
+    },
+    {
+      "round": 2,
+      "arm": "raw",
+      "accepted": 2,
+      "tasks": 2,
+      "input_tokens": 326252,
+      "cached_input_tokens": 280320,
+      "uncached_input_tokens": 45932,
+      "output_tokens": 6243,
+      "tool_invocations": 11,
+      "seconds": 175.67614883299757
+    }
+  ],
+  "limitations": [
+    "One attempt per task/arm/iteration; two tasks are too few for reliable population estimates.",
+    "HTTPX is a development task; Ruff composition reused across models and then across iterations.",
+    "Cairn/BM25 use a controlled MCP subset, raw uses actual rg over the same curated documents.",
+    "Shared shell permits execution feedback; user/global skills add common but variable overhead.",
+    "Qwen and Codex protocols differ; their results are not a controlled model comparison.",
+    "Indexing, cold-start and amortization costs excluded from CLI usage totals."
+  ],
+  "tasks": [
+    {
+      "id": "httpx-service-client",
+      "repo": "httpx",
+      "task": "Design a production-style async HTTP client configuration from this repository's documentation. Requirements: a shared AsyncClient rather than one client per request; allow sixty seconds for connection establishment and ten seconds for other timeout operations; at most ten total connections and five idle keep-alive connections with five-second expiry; ignore proxy and certificate environment configuration; opportunistically enable HTTP/2, explain fallback and how to inspect the actual protocol; register an asynchronous response hook that reads the response body before further processing. Explain which failures the transport retry option covers and whether it retries HTTP 503 or read/write failures. Include installation requirements and cleanup. Provide a Python function build_client() returning the configured AsyncClient, the hook, and a short explanation with source citations. Do not send real requests.",
+      "checks": [
+        "valid timeout object with 60 connect and 10 read/write/pool",
+        "limits total10 keepalive5 expiry5",
+        "trust_env False",
+        "http2 enabled plus dependency/fallback/protocol inspection",
+        "async body hook awaits aread",
+        "connection-only retry scope",
+        "shared client and eventual aclose",
+        "source citations"
+      ]
+    },
+    {
+      "id": "ruff-isolated-ci-config",
+      "repo": "ruff",
+      "task": "Design a reproducible Ruff CI setup for a project with a root pyproject.toml and conflicting nested config files. Give root configuration selecting E4/E7/E9/F and import sorting, with line length 100 and single-quote formatting. The project requires Python >=3.10; explain target-version inference when no explicit Ruff target is set. Give commands from the root that force this one config for the whole src tree, run lint without modifying code, and check formatting without modifying code. Explain the difference between lint --fix and formatting, whether E501 is automatically enabled by line-length, and the precedence among .ruff.toml, ruff.toml and pyproject.toml in one directory. Cite source sections. Do not execute or edit anything.",
+      "checks": [
+        "rootselect E4E7E9F I length100 quotesingle",
+        "requires-python inference py310",
+        "--config pyproject.toml both commands bypass nested",
+        "ruff check src nofix",
+        "ruff format --check src",
+        "lint fixes versus formatting distinction",
+        "line-length alone doesnotenable E501",
+        ".ruff.toml over ruff.toml over pyproject",
+        "citations"
+      ]
+    }
+  ],
+  "independent_acceptance": {
+    "httpx_round2": {
+      "cairn": {
+        "case_id": "httpx-service-client",
+        "answer": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/round2/httpx-service-client-cairn/answer.txt",
+        "answer_sha256": "3de14ea76430b1a35910602f11a042fb022df6fcc3a8c038cba87c759f3854cb",
+        "python_blocks": 1,
+        "runtime_attempted": true,
+        "manual_source_and_deliverable_review_required": true,
+        "compiled": true,
+        "required_interface_declared": true,
+        "runtime_checks": {
+          "timeouts": true,
+          "actual_timeouts": [
+            60.0,
+            10.0,
+            10.0,
+            10.0
+          ],
+          "trust_env": true,
+          "pool_limits": true,
+          "http2": true,
+          "async_response_hook": true,
+          "body_read_awaited": true,
+          "closed": true
+        },
+        "runtime_constraints_passed": true,
+        "generated_stdout": ""
+      },
+      "bm25": {
+        "case_id": "httpx-service-client",
+        "answer": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/round2/httpx-service-client-bm25/answer.txt",
+        "answer_sha256": "b2052eb30d9ce5d5ae2d3ae58a56084d0ccc4ac8fb8f1c92a77947f136e103f2",
+        "python_blocks": 1,
+        "runtime_attempted": true,
+        "manual_source_and_deliverable_review_required": true,
+        "compiled": true,
+        "required_interface_declared": true,
+        "runtime_checks": {
+          "timeouts": true,
+          "actual_timeouts": [
+            60.0,
+            10.0,
+            10.0,
+            10.0
+          ],
+          "trust_env": true,
+          "pool_limits": true,
+          "http2": true,
+          "async_response_hook": true,
+          "body_read_awaited": true,
+          "closed": true
+        },
+        "runtime_constraints_passed": true,
+        "generated_stdout": ""
+      },
+      "raw": {
+        "case_id": "httpx-service-client",
+        "answer": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/round2/httpx-service-client-raw/answer.txt",
+        "answer_sha256": "0f2136a89b626fd9a8a385c97274e9fe12732408b5160b98621e8260a953dfe9",
+        "python_blocks": 2,
+        "runtime_attempted": true,
+        "manual_source_and_deliverable_review_required": true,
+        "compiled": true,
+        "required_interface_declared": true,
+        "runtime_checks": {
+          "timeouts": true,
+          "actual_timeouts": [
+            60.0,
+            10.0,
+            10.0,
+            10.0
+          ],
+          "trust_env": true,
+          "pool_limits": true,
+          "http2": true,
+          "async_response_hook": true,
+          "body_read_awaited": true,
+          "closed": true
+        },
+        "runtime_constraints_passed": true,
+        "generated_stdout": ""
+      }
+    },
+    "ruff_round2": [
+      {
+        "arm": "cairn",
+        "review": {
+          "toml_parse_errors": [],
+          "toml_blocks": 1,
+          "files_modified": "temporary fixture only",
+          "root_config": {
+            "line-length": 100,
+            "target-version": "py310",
+            "lint": {
+              "select": [
+                "E4",
+                "E7",
+                "E9",
+                "F",
+                "I"
+              ]
+            },
+            "format": {
+              "quote-style": "single"
+            }
+          },
+          "unused_import": {
+            "exit": 1,
+            "codes": [
+              "F401"
+            ],
+            "error": ""
+          },
+          "import_sorting": {
+            "exit": 1,
+            "codes": [
+              "I001"
+            ],
+            "error": ""
+          },
+          "formatter_output": "word = 'hello'\n",
+          "formatter_error": "",
+          "checks": {
+            "root_line_length": true,
+            "unused_import_linted": true,
+            "import_sorting_enabled": true,
+            "single_quotes": true
+          },
+          "config_passed": true
+        },
+        "manual_deliverable_and_citation_review": "passed; explicit root config, recursive readonly CI commands, version inference caveat, E501 and precedence checked against selected sources"
+      },
+      {
+        "arm": "bm25",
+        "review": {
+          "toml_parse_errors": [],
+          "toml_blocks": 1,
+          "files_modified": "temporary fixture only",
+          "root_config": {
+            "line-length": 100,
+            "target-version": "py310",
+            "lint": {
+              "select": [
+                "E4",
+                "E7",
+                "E9",
+                "F",
+                "I"
+              ]
+            },
+            "format": {
+              "quote-style": "single"
+            }
+          },
+          "unused_import": {
+            "exit": 1,
+            "codes": [
+              "F401"
+            ],
+            "error": ""
+          },
+          "import_sorting": {
+            "exit": 1,
+            "codes": [
+              "I001"
+            ],
+            "error": ""
+          },
+          "formatter_output": "word = 'hello'\n",
+          "formatter_error": "",
+          "checks": {
+            "root_line_length": true,
+            "unused_import_linted": true,
+            "import_sorting_enabled": true,
+            "single_quotes": true
+          },
+          "config_passed": true
+        },
+        "manual_deliverable_and_citation_review": "passed; explicit root config, recursive readonly CI commands, version inference caveat, E501 and precedence checked against selected sources"
+      },
+      {
+        "arm": "raw",
+        "review": {
+          "toml_parse_errors": [],
+          "toml_blocks": 1,
+          "files_modified": "temporary fixture only",
+          "root_config": {
+            "line-length": 100,
+            "target-version": "py310",
+            "lint": {
+              "select": [
+                "E4",
+                "E7",
+                "E9",
+                "F",
+                "I"
+              ]
+            },
+            "format": {
+              "quote-style": "single"
+            }
+          },
+          "unused_import": {
+            "exit": 1,
+            "codes": [
+              "F401"
+            ],
+            "error": ""
+          },
+          "import_sorting": {
+            "exit": 1,
+            "codes": [
+              "I001"
+            ],
+            "error": ""
+          },
+          "formatter_output": "word = 'hello'\n",
+          "formatter_error": "",
+          "checks": {
+            "root_line_length": true,
+            "unused_import_linted": true,
+            "import_sorting_enabled": true,
+            "single_quotes": true
+          },
+          "config_passed": true
+        },
+        "manual_deliverable_and_citation_review": "passed; explicit root config, recursive readonly CI commands, version inference caveat, E501 and precedence checked against selected sources"
+      }
+    ],
+    "python_oracle_controls_after_run": [
+      {
+        "control": "positive",
+        "expected_accept": true,
+        "observed_accept": true,
+        "control_passed": true,
+        "verifier_exit": 0
+      },
+      {
+        "control": "wrong_connect",
+        "expected_accept": false,
+        "observed_accept": false,
+        "control_passed": true,
+        "verifier_exit": 0
+      },
+      {
+        "control": "wrong_pool",
+        "expected_accept": false,
+        "observed_accept": false,
+        "control_passed": true,
+        "verifier_exit": 0
+      },
+      {
+        "control": "wrong_environment",
+        "expected_accept": false,
+        "observed_accept": false,
+        "control_passed": true,
+        "verifier_exit": 0
+      }
+    ]
+  }
+}

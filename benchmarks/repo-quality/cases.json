@@ -1,0 +1,624 @@
+{
+  "httpx": {
+    "repository": "https://github.com/encode/httpx",
+    "revision": "b5addb64f0161ff6bfe94c124ef76f6a1fba5254",
+    "docs": [
+      "advanced/authentication.md",
+      "advanced/event-hooks.md",
+      "advanced/resource-limits.md",
+      "advanced/timeouts.md",
+      "advanced/transports.md",
+      "advanced/proxies.md",
+      "advanced/ssl.md",
+      "async.md",
+      "environment_variables.md",
+      "http2.md"
+    ],
+    "qa_stride": 2,
+    "cases": [
+      {
+        "id": "timeout-default",
+        "q": "After how many seconds of network inactivity does HTTPX time out by default?",
+        "source": [
+          "advanced/timeouts.md"
+        ],
+        "facts": [
+          [
+            "5 seconds",
+            "5s",
+            "5-second",
+            "5 second"
+          ]
+        ]
+      },
+      {
+        "id": "pool-limits",
+        "q": "What are the default maximum total connections, idle keep-alive connections, and keep-alive expiry in HTTPX?",
+        "source": [
+          "advanced/resource-limits.md"
+        ],
+        "facts": [
+          [
+            "100"
+          ],
+          [
+            "20"
+          ],
+          [
+            "5"
+          ]
+        ]
+      },
+      {
+        "id": "timeout-tuning",
+        "q": "How can I allow sixty seconds to establish a connection but only ten seconds for other operations?",
+        "source": [
+          "advanced/timeouts.md"
+        ],
+        "facts": [
+          [
+            "connect=60",
+            "connect = 60"
+          ],
+          [
+            "Timeout(10",
+            "Timeout(10.0"
+          ]
+        ]
+      },
+      {
+        "id": "timeout-disable",
+        "q": "How do I disable time limits for all outgoing calls made by one HTTPX client?",
+        "source": [
+          "advanced/timeouts.md"
+        ],
+        "facts": [
+          [
+            "timeout=None",
+            "timeout = None"
+          ]
+        ]
+      },
+      {
+        "id": "hook-body",
+        "q": "In a response event hook, how can I access the response body for synchronous and asynchronous clients?",
+        "source": [
+          "advanced/event-hooks.md"
+        ],
+        "facts": [
+          [
+            "response.read()"
+          ],
+          [
+            "response.aread()"
+          ]
+        ]
+      },
+      {
+        "id": "hook-async",
+        "q": "Can an AsyncClient event hook be a regular synchronous function? What kind must it be?",
+        "source": [
+          "advanced/event-hooks.md"
+        ],
+        "facts": [
+          [
+            "async functions",
+            "async function",
+            "async def",
+            "asynchronous"
+          ]
+        ]
+      },
+      {
+        "id": "hook-errors",
+        "q": "How can I make a client raise HTTPStatusError automatically for every 4xx or 5xx response?",
+        "source": [
+          "advanced/event-hooks.md"
+        ],
+        "facts": [
+          [
+            "raise_for_status"
+          ],
+          [
+            "event_hooks",
+            "event hook",
+            "response hook"
+          ]
+        ]
+      },
+      {
+        "id": "http2-enable",
+        "q": "What extra package installation and client option are needed to enable HTTP/2?",
+        "source": [
+          "http2.md"
+        ],
+        "facts": [
+          [
+            "httpx[http2]"
+          ],
+          [
+            "http2=True",
+            "http2 = True"
+          ]
+        ]
+      },
+      {
+        "id": "http2-fallback",
+        "q": "If I enable HTTP/2 but the remote server only speaks HTTP/1.1, what happens and how can I inspect the negotiated protocol?",
+        "source": [
+          "http2.md"
+        ],
+        "facts": [
+          [
+            "HTTP/1.1"
+          ],
+          [
+            "http_version"
+          ]
+        ]
+      },
+      {
+        "id": "ignore-env",
+        "q": "My machine exports proxy settings. How can I tell HTTPX not to inherit environment configuration?",
+        "source": [
+          "environment_variables.md"
+        ],
+        "facts": [
+          [
+            "trust_env=False",
+            "trust_env = False"
+          ]
+        ]
+      },
+      {
+        "id": "cert-dir",
+        "q": "What environment variable selects a directory of CA certificates and what preparation command does its layout require?",
+        "source": [
+          "environment_variables.md",
+          "advanced/ssl.md"
+        ],
+        "facts": [
+          [
+            "SSL_CERT_DIR"
+          ],
+          [
+            "c_rehash"
+          ]
+        ]
+      },
+      {
+        "id": "proxy-scheme",
+        "q": "For HTTPS destinations, should the proxy URL in the mounts mapping normally start with http:// or https://?",
+        "source": [
+          "advanced/proxies.md"
+        ],
+        "facts": [
+          [
+            "http://"
+          ]
+        ]
+      },
+      {
+        "id": "socks",
+        "q": "How do I install support for SOCKS proxies and configure a SOCKS5 address?",
+        "source": [
+          "advanced/proxies.md"
+        ],
+        "facts": [
+          [
+            "httpx[socks]"
+          ],
+          [
+            "socks5://"
+          ]
+        ]
+      },
+      {
+        "id": "netrc",
+        "q": "How can HTTPX read authentication credentials from a netrc path supplied by the NETRC environment variable?",
+        "source": [
+          "advanced/authentication.md"
+        ],
+        "facts": [
+          [
+            "NetRCAuth"
+          ],
+          [
+            "NETRC"
+          ]
+        ]
+      },
+      {
+        "id": "auth-response-body",
+        "q": "My custom authentication flow needs to inspect response JSON before refreshing a token. What class flag must I set?",
+        "source": [
+          "advanced/authentication.md"
+        ],
+        "facts": [
+          [
+            "requires_response_body"
+          ]
+        ]
+      },
+      {
+        "id": "asgi-lifespan",
+        "q": "Does ASGITransport trigger application startup and shutdown events, and what helper is recommended?",
+        "source": [
+          "advanced/transports.md"
+        ],
+        "facts": [
+          [
+            "LifespanManager"
+          ],
+          [
+            "not",
+            "doesn't",
+            "does not",
+            "won't",
+            "不"
+          ]
+        ]
+      },
+      {
+        "id": "transport-retries",
+        "q": "Which exception types are retried by HTTPTransport(retries=1)? Does this also cover HTTP 503 or read/write failures?",
+        "source": [
+          "advanced/transports.md"
+        ],
+        "facts": [
+          [
+            "ConnectError"
+          ],
+          [
+            "ConnectTimeout"
+          ],
+          [
+            "tenacity",
+            "not",
+            "only"
+          ]
+        ]
+      },
+      {
+        "id": "asgi-errors",
+        "q": "When testing an ASGI app, how can I inspect its HTTP 500 response rather than have the transport raise the application exception?",
+        "source": [
+          "advanced/transports.md"
+        ],
+        "facts": [
+          [
+            "raise_app_exceptions=False",
+            "raise_app_exceptions = False"
+          ]
+        ]
+      },
+      {
+        "id": "hot-loop",
+        "q": "Why should I avoid constructing an AsyncClient inside a frequently executed loop, and what lifecycle is recommended instead?",
+        "source": [
+          "async.md"
+        ],
+        "facts": [
+          [
+            "pool",
+            "reuse"
+          ],
+          [
+            "single",
+            "global",
+            "scoped",
+            "reus"
+          ]
+        ]
+      },
+      {
+        "id": "manual-stream",
+        "q": "When forwarding a streamed response using client.send(stream=True), who must release resources and which response method is required?",
+        "source": [
+          "async.md"
+        ],
+        "facts": [
+          [
+            "aclose"
+          ],
+          [
+            "developer",
+            "your",
+            "you",
+            "caller",
+            "responsib"
+          ]
+        ]
+      },
+      {
+        "id": "pool-vs-read",
+        "q": "How does waiting for an available pooled connection differ from waiting for the next chunk of response data? Give both timeout exception names.",
+        "source": [
+          "advanced/timeouts.md"
+        ],
+        "facts": [
+          [
+            "PoolTimeout"
+          ],
+          [
+            "ReadTimeout"
+          ]
+        ]
+      },
+      {
+        "id": "cn-stream",
+        "q": "使用异步客户端手动转发流式响应后，应该调用哪个方法关闭响应，避免连接泄漏？",
+        "source": [
+          "async.md"
+        ],
+        "facts": [
+          [
+            "aclose"
+          ]
+        ]
+      },
+      {
+        "id": "cn-netrc",
+        "q": "自定义认证流程需要读取请求体来计算签名，要声明哪个属性？",
+        "source": [
+          "advanced/authentication.md"
+        ],
+        "facts": [
+          [
+            "requires_request_body"
+          ]
+        ]
+      },
+      {
+        "id": "cn-ca",
+        "q": "用哪个环境变量指定自定义 CA 证书文件，替代默认的证书来源？",
+        "source": [
+          "environment_variables.md",
+          "advanced/ssl.md"
+        ],
+        "facts": [
+          [
+            "SSL_CERT_FILE"
+          ]
+        ]
+      }
+    ]
+  },
+  "starlette": {
+    "docs": [
+      "threadpool.md",
+      "background.md",
+      "lifespan.md",
+      "requests.md"
+    ],
+    "cases": [
+      {
+        "id": "thread-capacity",
+        "q": "How many tokens does the default thread pool allow and how can I increase that number to one hundred?",
+        "source": [
+          "threadpool.md"
+        ],
+        "facts": [
+          [
+            "40"
+          ],
+          [
+            "current_default_thread_limiter"
+          ],
+          [
+            "total_tokens"
+          ]
+        ]
+      },
+      {
+        "id": "background-failure",
+        "q": "When do response background tasks run, in what order, and what happens to later tasks if an earlier task raises?",
+        "source": [
+          "background.md"
+        ],
+        "facts": [
+          [
+            "response"
+          ],
+          [
+            "order",
+            "sequential"
+          ],
+          [
+            "not",
+            "stop",
+            "won't"
+          ]
+        ]
+      },
+      {
+        "id": "lifespan-test",
+        "q": "How should TestClient be used so startup and shutdown lifecycle code actually runs in a test?",
+        "source": [
+          "lifespan.md"
+        ],
+        "facts": [
+          [
+            "with TestClient",
+            "context manager",
+            "context-managed"
+          ]
+        ]
+      },
+      {
+        "id": "state-copy",
+        "q": "Is request lifespan state a shallow copy or a deep copy?",
+        "source": [
+          "lifespan.md"
+        ],
+        "facts": [
+          [
+            "shallow"
+          ]
+        ]
+      },
+      {
+        "id": "request-json",
+        "q": "What async method reads a request body as parsed JSON, and what async method returns its bytes?",
+        "source": [
+          "requests.md"
+        ],
+        "facts": [
+          [
+            "request.json()"
+          ],
+          [
+            "request.body()"
+          ]
+        ]
+      },
+      {
+        "id": "multipart-limits",
+        "q": "Which three request.form parameters limit file count, field count and the size of each non-file part, and what are their defaults?",
+        "source": [
+          "requests.md"
+        ],
+        "facts": [
+          [
+            "max_files"
+          ],
+          [
+            "max_fields"
+          ],
+          [
+            "max_part_size"
+          ],
+          [
+            "1000"
+          ],
+          [
+            "1024",
+            "1MB",
+            "1 MB"
+          ]
+        ]
+      }
+    ],
+    "repository": "https://github.com/encode/starlette",
+    "revision": "a85a5c36d7797f8a0816cc8a4de87a28938891e3",
+    "qa_stride": 1
+  },
+  "mkdocs": {
+    "docs": [
+      "user-guide/configuration.md",
+      "user-guide/deploying-your-docs.md"
+    ],
+    "cases": [
+      {
+        "id": "project-pages",
+        "q": "Which command deploys project documentation to GitHub Pages, and which branch does it push by default?",
+        "source": [
+          "user-guide/deploying-your-docs.md"
+        ],
+        "facts": [
+          [
+            "mkdocs gh-deploy"
+          ],
+          [
+            "gh-pages"
+          ]
+        ]
+      },
+      {
+        "id": "custom-domain",
+        "q": "Where should a custom domain CNAME file live so it survives the next documentation deployment?",
+        "source": [
+          "user-guide/deploying-your-docs.md"
+        ],
+        "facts": [
+          [
+            "CNAME"
+          ],
+          [
+            "docs_dir",
+            "documentation source"
+          ]
+        ]
+      },
+      {
+        "id": "strict-build",
+        "q": "How can I make the documentation build stop on warnings, and what is the default value of that setting?",
+        "source": [
+          "user-guide/configuration.md"
+        ],
+        "facts": [
+          [
+            "strict"
+          ],
+          [
+            "true",
+            "True"
+          ],
+          [
+            "false",
+            "False"
+          ]
+        ]
+      },
+      {
+        "id": "file-urls",
+        "q": "What URL configuration should I use when opening generated pages directly from disk, and why?",
+        "source": [
+          "user-guide/configuration.md"
+        ],
+        "facts": [
+          [
+            "use_directory_urls"
+          ],
+          [
+            "false",
+            "False"
+          ],
+          [
+            ".html",
+            "file"
+          ]
+        ]
+      },
+      {
+        "id": "build-dirs",
+        "q": "Which configuration keys control source and output directories, and what are their defaults?",
+        "source": [
+          "user-guide/configuration.md"
+        ],
+        "facts": [
+          [
+            "docs_dir"
+          ],
+          [
+            "site_dir"
+          ],
+          [
+            "docs"
+          ],
+          [
+            "site"
+          ]
+        ]
+      },
+      {
+        "id": "inherit-config",
+        "q": "How do I inherit a parent YAML configuration file named base.yml from the parent directory?",
+        "source": [
+          "user-guide/configuration.md"
+        ],
+        "facts": [
+          [
+            "INHERIT"
+          ],
+          [
+            "../base.yml"
+          ]
+        ]
+      }
+    ],
+    "repository": "https://github.com/mkdocs/mkdocs",
+    "revision": "2862536793b3c67d9d83c33e0dd6d50a791928f8",
+    "qa_stride": 1
+  }
+}

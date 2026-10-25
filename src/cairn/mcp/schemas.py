@@ -135,7 +135,7 @@ _GET_SECTION_SCHEMA: Final[dict[str, Any]] = {
     "properties": {
         "id": {
             "type": "string",
-            "description": "Section id (hierarchical, slug-based).",
+            "description": "Section id or returned cairn://doc/section citation URI.",
         },
         "level": {
             "enum": ["gist", "synopsis", "digest", "full"],
@@ -217,7 +217,10 @@ _GET_RELATED_SCHEMA: Final[dict[str, Any]] = {
     "additionalProperties": False,
     "required": ["id"],
     "properties": {
-        "id": {"type": "string", "description": "Section id to find neighbors of."},
+        "id": {
+            "type": "string",
+            "description": "Section id or cairn://doc/section citation to find neighbors of.",
+        },
         "kinds": {
             "type": "array",
             "items": {"enum": ["xref", "sibling", "parent", "child"]},
@@ -266,7 +269,9 @@ CAIRN_TOOLS: Final[list[Tool]] = [
         description=(
             "Read one known section at the level you need: gist (one line), "
             "synopsis (default), or full text. Use after outline/search to "
-            "drill in; request full only when exact wording matters."
+            "drill in; request full only when exact wording matters. Full text "
+            "is this section's own body, excluding descendants. Follow the "
+            "returned navigation links to relevant children and siblings."
         ),
         inputSchema=_GET_SECTION_SCHEMA,
         outputSchema=_ENVELOPE_OUTPUT_SCHEMA,
@@ -353,9 +358,7 @@ def _with_doc(schema: dict[str, Any]) -> dict[str, Any]:
     properties["doc"] = {
         "type": ["string", "null"],
         "default": None,
-        "description": (
-            "Repository document id. Omit to use the configured primary doc."
-        ),
+        "description": ("Repository document id. Omit to use the configured primary doc."),
     }
     return out
 
@@ -398,6 +401,20 @@ _SEARCH_DOCUMENTS_SCHEMA: Final[dict[str, Any]] = {
     "additionalProperties": False,
     "required": ["query"],
     "properties": {
+        "retrieval": {
+            "enum": ["hybrid", "lexical"],
+            "default": "hybrid",
+            "description": (
+                "lexical searches cached BM25/structure without query embeddings or vector reads. "
+                "Requires an existing index; semantic matches may be missed. No automatic fallback."
+            ),
+        },
+        "include_details": {
+            "type": "boolean",
+            "default": False,
+            "description": "Include ranking diagnostics and the legacy detailed payload. "
+            "Default returns cited source evidence with fewer tokens.",
+        },
         "query": {
             "type": "string",
             "minLength": 1,
@@ -429,12 +446,28 @@ _REPO_CONTEXT_SCHEMA: Final[dict[str, Any]] = {
     "additionalProperties": False,
     "required": ["query"],
     "properties": {
+        "retrieval": {
+            "enum": ["hybrid", "lexical"],
+            "default": "hybrid",
+            "description": (
+                "lexical searches cached BM25/structure without query embeddings or vector reads. "
+                "Requires an existing index; semantic matches may be missed. No automatic fallback."
+            ),
+        },
+        "include_details": {
+            "type": "boolean",
+            "default": False,
+            "description": (
+                "Include the legacy diagnostic hits, score explanations and expanded "
+                "relationship map. Default returns cited sections and verbatim evidence once."
+            ),
+        },
         "query": {
             "type": "string",
             "minLength": 1,
             "description": (
                 "Conceptual query. Cairn returns a compact context pack with "
-                "ranked hits, selected section content, and a relationship map."
+                "cited section summaries and bounded original evidence."
             ),
         },
         "k": {"type": "integer", "minimum": 1, "maximum": 32, "default": 5},
@@ -452,15 +485,41 @@ _REPO_CONTEXT_SCHEMA: Final[dict[str, Any]] = {
             "description": "Related sections to attach per selected hit.",
         },
         "level": {
-            "enum": ["gist", "synopsis", "full"],
+            "enum": ["gist", "synopsis", "full", "evidence"],
             "default": "synopsis",
-            "description": "Content granularity for context_sections.",
+            "description": (
+                "evidence selects bounded original paragraphs/examples with source spans, "
+                "neighboring prose and explicit omissions. full returns whole section bodies "
+                "up to max_section_chars. Ancestor/descendant bodies are separate."
+            ),
         },
         "max_section_chars": {
             "type": "integer",
             "minimum": 200,
             "maximum": 8000,
             "default": 1600,
+        },
+        "max_context_chars": {
+            "type": "integer",
+            "minimum": 1000,
+            "maximum": 32000,
+            "default": 8000,
+            "description": (
+                "Only for level=evidence: total original-source character budget across "
+                "sections; excludes metadata. Not a token budget."
+            ),
+        },
+        "queries": {
+            "type": ["array", "null"],
+            "minItems": 1,
+            "maxItems": 8,
+            "items": {"type": "string", "minLength": 1, "maxLength": 1000},
+            "default": None,
+            "description": (
+                "Only for evidence: 2-6 focused queries for separate information needs "
+                "can be searched together, deduplicated and packed under one budget. "
+                "Later dependent queries can follow after reading. No automatic decomposition."
+            ),
         },
     },
 }
@@ -470,6 +529,13 @@ _REPO_GRAPH_SCHEMA: Final[dict[str, Any]] = {
     "type": "object",
     "additionalProperties": False,
     "properties": {
+        "view": {
+            "type": "string", "enum": ["sections", "documents"], "default": "sections",
+            "description": "Section/entity graph or explicit cached Markdown document links.",
+        },
+        "max_documents": {"type": "integer", "minimum": 1, "maximum": 500, "default": 100},
+        "max_references": {"type": "integer", "minimum": 1, "maximum": 2000, "default": 200},
+        "include_evidence": {"type": "boolean", "default": False},
         "doc": {
             "type": ["string", "null"],
             "default": None,
@@ -498,6 +564,16 @@ _REPO_IMPACT_SCHEMA: Final[dict[str, Any]] = {
     "additionalProperties": False,
     "required": ["doc"],
     "properties": {
+        "view": {
+            "type": "string", "enum": ["artifacts", "references"], "default": "artifacts",
+            "description": "Artifact/entity impact or deterministic document-reference analysis.",
+        },
+        "entry": {
+            "type": ["string", "null"], "default": None,
+            "description": "Reference view: entry document id/source for deletion reachability.",
+        },
+        "max_hops": {"type": "integer", "minimum": 1, "maximum": 8, "default": 3},
+        "max_witnesses": {"type": "integer", "minimum": 1, "maximum": 2000, "default": 200},
         "doc": {
             "type": "string",
             "minLength": 1,
@@ -539,6 +615,8 @@ REPO_TOOLS: Final[list[Tool]] = [
         description=(
             "Use to find which docs and sections are relevant to a query across "
             "the whole repo. Returns globally ranked, cited hits with doc ids; "
+            "source evidence is compact by default; include_details=true adds "
+            "ranking diagnostics. "
             "follow up with get_section on the winners. Use before reading raw "
             "README/docs/spec files for project knowledge. Prefer for "
             "documentation, product, architecture, setup, naming, protocols, "
@@ -553,9 +631,13 @@ REPO_TOOLS: Final[list[Tool]] = [
         annotations=_read_only("Cairn Repo Context"),
         description=(
             "START HERE for a question about this repo's docs. One call returns "
-            "ranked hits, ready-to-read section content, related sections, and a "
-            "relationship map -- enough to answer without further drilling in "
-            "most cases. Use before reading raw README/docs/spec files for "
+            "cited summaries and verbatim evidence without repeated ranking metadata. "
+            "For multi-part exact questions use level='evidence' for budgeted original "
+            "blocks, preserving fitting examples and nearby prose. Omissions are explicit. "
+            "Provide queries for distinct information needs to avoid one broad topic match. "
+            "Use level='full' for whole bodies; avoid re-reading already supplied evidence. "
+            "Pass include_details=true for diagnostic hits and relationships. "
+            "Use before reading raw README/docs/spec files for "
             f"project knowledge. Use first when an agent needs context for {_PREFER_CAIRN}. "
             "Do not use as a mandatory pre-step "
             "for small code edits, tests, or exact literal search."

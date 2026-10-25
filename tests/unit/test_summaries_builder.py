@@ -68,9 +68,7 @@ class BatchCountingSummarizer(CountingSummarizer):
 
 
 class TestSummaryBuilder:
-    async def test_writes_summaries_json(
-        self, tmp_path: Path, parsed_simple: Document
-    ) -> None:
+    async def test_writes_summaries_json(self, tmp_path: Path, parsed_simple: Document) -> None:
         out = tmp_path / "doc"
         path = await SummaryBuilder(FakeSummarizer()).build(parsed_simple, out_dir=out)
         assert path == out / SUMMARIES_FILENAME
@@ -84,9 +82,7 @@ class TestSummaryBuilder:
         payload = json.loads((out / SUMMARIES_FILENAME).read_text())
         assert payload["format_version"] == SUMMARIES_FORMAT_VERSION
 
-    async def test_one_record_per_section(
-        self, tmp_path: Path, parsed_simple: Document
-    ) -> None:
+    async def test_one_record_per_section(self, tmp_path: Path, parsed_simple: Document) -> None:
         out = tmp_path / "doc"
         await SummaryBuilder(FakeSummarizer()).build(parsed_simple, out_dir=out)
         payload = json.loads((out / SUMMARIES_FILENAME).read_text())
@@ -118,15 +114,11 @@ class TestSummaryBuilder:
         payload = json.loads((out / SUMMARIES_FILENAME).read_text())
         assert all(r["digest"] is not None for r in payload["summaries"])
 
-    async def test_section_hash_recorded(
-        self, tmp_path: Path, parsed_simple: Document
-    ) -> None:
+    async def test_section_hash_recorded(self, tmp_path: Path, parsed_simple: Document) -> None:
         out = tmp_path / "doc"
         await SummaryBuilder(FakeSummarizer()).build(parsed_simple, out_dir=out)
         payload = json.loads((out / SUMMARIES_FILENAME).read_text())
-        for record, section in zip(
-            payload["summaries"], parsed_simple.sections, strict=True
-        ):
+        for record, section in zip(payload["summaries"], parsed_simple.sections, strict=True):
             assert record["section_hash"] == section_hash(section)
 
     async def test_levels_deduplicated_preserving_order(
@@ -141,13 +133,9 @@ class TestSummaryBuilder:
         payload = json.loads((out / SUMMARIES_FILENAME).read_text())
         assert payload["levels"] == ["synopsis", "gist"]
 
-    async def test_empty_levels_rejected(
-        self, tmp_path: Path, parsed_simple: Document
-    ) -> None:
+    async def test_empty_levels_rejected(self, tmp_path: Path, parsed_simple: Document) -> None:
         with pytest.raises(IndexBuildError):
-            await SummaryBuilder(FakeSummarizer()).build(
-                parsed_simple, out_dir=tmp_path, levels=()
-            )
+            await SummaryBuilder(FakeSummarizer()).build(parsed_simple, out_dir=tmp_path, levels=())
 
     def test_concurrency_zero_rejected(self) -> None:
         with pytest.raises(IndexBuildError):
@@ -174,6 +162,41 @@ class TestSummaryBuilder:
 
 
 class TestSummaryBuilderCache:
+    async def test_rebuild_reuses_only_unchanged_stored_sections(self, tmp_path: Path) -> None:
+        parser = MarkdownParser()
+        original = parser.parse("# One\n\nOriginal.\n\n# Two\n\nUnchanged.\n", doc_id="d")
+        changed = parser.parse("# One\n\nEdited.\n\n# Two\n\nUnchanged.\n", doc_id="d")
+        counter = CountingSummarizer()
+        builder = SummaryBuilder(counter)
+        await builder.build(original, out_dir=tmp_path)
+        assert counter.calls == 6
+        await builder.build(original, out_dir=tmp_path)
+        assert counter.calls == 6
+        await builder.build(changed, out_dir=tmp_path)
+        assert counter.calls == 9
+        counter.name = "fake:different-model"
+        await builder.build(changed, out_dir=tmp_path)
+        assert counter.calls == 15
+        await builder.build(changed, out_dir=tmp_path, reuse_existing=False)
+        assert counter.calls == 21
+
+    async def test_missing_stored_levels_are_generated(
+        self, tmp_path: Path, parsed_simple: Document
+    ) -> None:
+        counter = CountingSummarizer()
+        builder = SummaryBuilder(counter)
+        await builder.build(parsed_simple, out_dir=tmp_path, levels=(SummaryLevel.SYNOPSIS,))
+        await builder.build(parsed_simple, out_dir=tmp_path)
+        assert counter.calls == len(parsed_simple.sections) * 3
+
+    async def test_corrupt_stored_json_is_rebuilt(
+        self, tmp_path: Path, parsed_simple: Document
+    ) -> None:
+        (tmp_path / "summaries.json").write_text("{broken")
+        counter = CountingSummarizer()
+        await SummaryBuilder(counter).build(parsed_simple, out_dir=tmp_path)
+        assert counter.calls == len(parsed_simple.sections) * 3
+
     async def test_cache_persists_results_across_runs(
         self, tmp_path: Path, parsed_simple: Document
     ) -> None:
@@ -189,9 +212,7 @@ class TestSummaryBuilderCache:
         await SummaryBuilder(counter, cache=cache).build(parsed_simple, out_dir=out_b)
         assert counter.calls == first_calls  # zero additional calls
 
-    async def test_cache_invalidates_when_section_changes(
-        self, tmp_path: Path
-    ) -> None:
+    async def test_cache_invalidates_when_section_changes(self, tmp_path: Path) -> None:
         # Two docs that differ ONLY in the Introduction's body. Sibling
         # sections must be byte-identical so their raw_text (and thus
         # section_hash) is unchanged.
@@ -217,16 +238,12 @@ class TestSummaryBuilderCache:
 
         cache = SummaryCache(tmp_path / "cache")
         counter = CountingSummarizer()
-        await SummaryBuilder(counter, cache=cache).build(
-            original, out_dir=tmp_path / "out"
-        )
+        await SummaryBuilder(counter, cache=cache).build(original, out_dir=tmp_path / "out")
         first_calls = counter.calls
         # 3 sections x 3 levels (default since v0.2.4 includes digest).
         assert first_calls == 3 * 3
 
-        await SummaryBuilder(counter, cache=cache).build(
-            modified, out_dir=tmp_path / "out2"
-        )
+        await SummaryBuilder(counter, cache=cache).build(modified, out_dir=tmp_path / "out2")
         # Only Introduction's section_hash differs → 3 new calls (one per level).
         assert counter.calls == first_calls + 3
 

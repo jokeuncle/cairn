@@ -1,0 +1,959 @@
+{
+  "date": "2026-10-25",
+  "kind": "two new author-curated document-reference tasktexts, six completed real Codex sessions; no broad/generalization certification",
+  "aggregates": [
+    {
+      "arm": "cairn",
+      "sessions": 2,
+      "accepted": 2,
+      "input_tokens": 284571,
+      "cached_input_tokens": 240000,
+      "uncached_input_tokens": 44571,
+      "output_tokens": 11277,
+      "seconds": 199.26234024899895,
+      "tool_invocations": 9,
+      "skill_command_events": 4,
+      "failed_command_events": 0,
+      "returned_skill_characters": 17944
+    },
+    {
+      "arm": "helper",
+      "sessions": 2,
+      "accepted": 2,
+      "input_tokens": 298338,
+      "cached_input_tokens": 254848,
+      "uncached_input_tokens": 43490,
+      "output_tokens": 9865,
+      "seconds": 189.13716433400987,
+      "tool_invocations": 9,
+      "skill_command_events": 4,
+      "failed_command_events": 0,
+      "returned_skill_characters": 31002
+    },
+    {
+      "arm": "raw",
+      "sessions": 2,
+      "accepted": 2,
+      "input_tokens": 349245,
+      "cached_input_tokens": 290560,
+      "uncached_input_tokens": 58685,
+      "output_tokens": 10730,
+      "seconds": 269.93051670800196,
+      "tool_invocations": 8,
+      "skill_command_events": 1,
+      "failed_command_events": 0,
+      "returned_skill_characters": 10771
+    }
+  ],
+  "comparisons": {
+    "helper": {
+      "delta_percent": {
+        "input_tokens": -4.614564688373591,
+        "uncached_input_tokens": 2.4856288802023396,
+        "output_tokens": 14.313228585909776
+      },
+      "normalized_cost_delta": {
+        "constant_U": 1081,
+        "cache_ratio_r_coefficient": -14848,
+        "output_ratio_q_coefficient": 1412
+      },
+      "componentwise_gate_passed": false
+    },
+    "raw": {
+      "delta_percent": {
+        "input_tokens": -18.51823218657389,
+        "uncached_input_tokens": -24.050438783334748,
+        "output_tokens": 5.097856477166829
+      },
+      "normalized_cost_delta": {
+        "constant_U": -14114,
+        "cache_ratio_r_coefficient": -50560,
+        "output_ratio_q_coefficient": 547
+      },
+      "componentwise_gate_passed": false
+    }
+  },
+  "runs": [
+    {
+      "case_id": "httpx-document-change",
+      "arm": "cairn",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 71.83105716599675,
+      "tool_invocations": 4,
+      "usage_events": [
+        {
+          "input_tokens": 139037,
+          "cached_input_tokens": 115328,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 4413,
+          "reasoning_output_tokens": 496
+        }
+      ],
+      "input_tokens": 139037,
+      "cached_input_tokens": 115328,
+      "output_tokens": 4413,
+      "final_answer_exists": true,
+      "accepted": true,
+      "source_and_answer_checks": {
+        "direct_referrers": true,
+        "reverse_within_3": true,
+        "target_scc": true,
+        "lost_from_entry_after_delete": true,
+        "exact_fields": true,
+        "witness_edge_set_and_order": true,
+        "all_witness_citations": true
+      },
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/document-links-20261025/recovery-round/runs/r00",
+      "answer_sha256": "aeaebe82443fb843e2255342e9eb286265cd2d1322e3066db57b69d5988a9331",
+      "uncached_input_tokens": 23709,
+      "skill_command_events": 1,
+      "failed_command_events": 0,
+      "returned_skill_characters": 7173
+    },
+    {
+      "case_id": "httpx-document-change",
+      "arm": "helper",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 69.63581925000472,
+      "tool_invocations": 4,
+      "usage_events": [
+        {
+          "input_tokens": 135312,
+          "cached_input_tokens": 120576,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 4071,
+          "reasoning_output_tokens": 554
+        }
+      ],
+      "input_tokens": 135312,
+      "cached_input_tokens": 120576,
+      "output_tokens": 4071,
+      "final_answer_exists": true,
+      "accepted": true,
+      "source_and_answer_checks": {
+        "direct_referrers": true,
+        "reverse_within_3": true,
+        "target_scc": true,
+        "lost_from_entry_after_delete": true,
+        "exact_fields": true,
+        "witness_edge_set_and_order": true,
+        "all_witness_citations": true
+      },
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/document-links-20261025/recovery-round/runs/r01",
+      "answer_sha256": "9332891007577e75436327ad1ae944537dd4e890191a6c25874369fd897bf0a8",
+      "uncached_input_tokens": 14736,
+      "skill_command_events": 2,
+      "failed_command_events": 0,
+      "returned_skill_characters": 15501
+    },
+    {
+      "case_id": "httpx-document-change",
+      "arm": "raw",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 114.22559891600395,
+      "tool_invocations": 4,
+      "usage_events": [
+        {
+          "input_tokens": 136964,
+          "cached_input_tokens": 107776,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 4159,
+          "reasoning_output_tokens": 1053
+        }
+      ],
+      "input_tokens": 136964,
+      "cached_input_tokens": 107776,
+      "output_tokens": 4159,
+      "final_answer_exists": true,
+      "accepted": true,
+      "source_and_answer_checks": {
+        "direct_referrers": true,
+        "reverse_within_3": true,
+        "target_scc": true,
+        "lost_from_entry_after_delete": true,
+        "exact_fields": true,
+        "witness_edge_set_and_order": true,
+        "all_witness_citations": true
+      },
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/document-links-20261025/recovery-round/runs/r02",
+      "answer_sha256": "f33dffb268b4072ec38b133771836db910c6e11ec40e3fd7af193233c8ae7846",
+      "uncached_input_tokens": 29188,
+      "skill_command_events": 1,
+      "failed_command_events": 0,
+      "returned_skill_characters": 10771
+    },
+    {
+      "case_id": "mkdocs-document-change",
+      "arm": "raw",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 155.704917791998,
+      "tool_invocations": 4,
+      "usage_events": [
+        {
+          "input_tokens": 212281,
+          "cached_input_tokens": 182784,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 6571,
+          "reasoning_output_tokens": 1286
+        }
+      ],
+      "input_tokens": 212281,
+      "cached_input_tokens": 182784,
+      "output_tokens": 6571,
+      "final_answer_exists": true,
+      "accepted": true,
+      "source_and_answer_checks": {
+        "direct_referrers": true,
+        "reverse_within_3": true,
+        "target_scc": true,
+        "lost_from_entry_after_delete": true,
+        "exact_fields": true,
+        "witness_edge_set_and_order": true,
+        "all_witness_citations": true
+      },
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/document-links-20261025/recovery-round/runs/r03",
+      "answer_sha256": "5eb1435ba9533f6a8a43176b7e82467838bff57405183f0d1580349e2d0034bd",
+      "uncached_input_tokens": 29497,
+      "skill_command_events": 0,
+      "failed_command_events": 0,
+      "returned_skill_characters": 0
+    },
+    {
+      "case_id": "mkdocs-document-change",
+      "arm": "cairn",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 127.4312830830022,
+      "tool_invocations": 5,
+      "usage_events": [
+        {
+          "input_tokens": 145534,
+          "cached_input_tokens": 124672,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 6864,
+          "reasoning_output_tokens": 739
+        }
+      ],
+      "input_tokens": 145534,
+      "cached_input_tokens": 124672,
+      "output_tokens": 6864,
+      "final_answer_exists": true,
+      "accepted": true,
+      "source_and_answer_checks": {
+        "direct_referrers": true,
+        "reverse_within_3": true,
+        "target_scc": true,
+        "lost_from_entry_after_delete": true,
+        "exact_fields": true,
+        "witness_edge_set_and_order": true,
+        "all_witness_citations": true
+      },
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/document-links-20261025/recovery-round/runs/r04",
+      "answer_sha256": "c0c50ab3ce13fddd2a21633e6ab22d53d904c265c7fd97b089e92773dbd0294f",
+      "uncached_input_tokens": 20862,
+      "skill_command_events": 3,
+      "failed_command_events": 0,
+      "returned_skill_characters": 10771
+    },
+    {
+      "case_id": "mkdocs-document-change",
+      "arm": "helper",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 119.50134508400515,
+      "tool_invocations": 5,
+      "usage_events": [
+        {
+          "input_tokens": 163026,
+          "cached_input_tokens": 134272,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 5794,
+          "reasoning_output_tokens": 966
+        }
+      ],
+      "input_tokens": 163026,
+      "cached_input_tokens": 134272,
+      "output_tokens": 5794,
+      "final_answer_exists": true,
+      "accepted": true,
+      "source_and_answer_checks": {
+        "direct_referrers": true,
+        "reverse_within_3": true,
+        "target_scc": true,
+        "lost_from_entry_after_delete": true,
+        "exact_fields": true,
+        "witness_edge_set_and_order": true,
+        "all_witness_citations": true
+      },
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/document-links-20261025/recovery-round/runs/r05",
+      "answer_sha256": "16ebdcf7881bfd8fa8c8e54637fa3b02c70d44f2aa25a11c60c53d7dcee6241f",
+      "uncached_input_tokens": 28754,
+      "skill_command_events": 2,
+      "failed_command_events": 0,
+      "returned_skill_characters": 15501
+    }
+  ],
+  "primary_gate_passed": false,
+  "infrastructure_failure": {
+    "classified_at": "2026-10-25T07:21:16.846691+00:00",
+    "status": "infrastructure_aborted",
+    "reason": "Evaluation adapter basename httpx.py shadows dependency httpx during Python script import. Actual product CLI had passed module invocation offline; adapter invocation was not qualified. No product change.",
+    "attempt": "runs/r00",
+    "partial_events_sha256": "aeb962785b834edb8ccc5052931aeef84bfac4e73a15a86772acd4f7ac84f1e7",
+    "comparative_task_result": null,
+    "usage": "No completed turn usage available; do not count as zero tokens or an accepted/comparative task.",
+    "recovery": "Preserve original frozen matrix and partial trace. Qualify non-shadowing adapters then freeze fresh six-session comparison in recovery-round."
+  },
+  "graph_qualification": {
+    "httpx": {
+      "complete": true,
+      "expected_pairs": 23,
+      "observed_pairs": 23,
+      "pair_and_occurrence_equality": true,
+      "missing": [],
+      "extra": []
+    },
+    "mkdocs": {
+      "complete": true,
+      "expected_pairs": 57,
+      "observed_pairs": 57,
+      "pair_and_occurrence_equality": true,
+      "missing": [],
+      "extra": []
+    }
+  },
+  "offline_qualification": {
+    "owned_server_stopped": true,
+    "server_pid": 68093,
+    "previous_command": "",
+    "endpoint_refused": true,
+    "checks": [
+      {
+        "tool": "repo_graph",
+        "exit_code": 0,
+        "ok": true,
+        "seconds": 0.42134333300055005,
+        "provider": "deliberately-invalid"
+      },
+      {
+        "tool": "repo_context",
+        "exit_code": 0,
+        "ok": true,
+        "seconds": 0.534262959001353,
+        "provider": "deliberately-invalid"
+      },
+      {
+        "tool": "get_section",
+        "exit_code": 0,
+        "ok": true,
+        "seconds": 0.2907319579971954,
+        "provider": "deliberately-invalid"
+      },
+      {
+        "tool": "search_documents",
+        "strategy": "hybrid",
+        "exit_code": 1,
+        "ok": false,
+        "seconds": 1.8601682910084492,
+        "error": {
+          "code": "INDEX_BUILD_FAILED",
+          "message": "embedder request failed: All connection attempts failed",
+          "details": {
+            "model": "nomic-embed-text-v1.5.Q4_K_M",
+            "base_url": "http://127.0.0.1:18082/v1",
+            "error_type": "ConnectError",
+            "attempts": 3
+          }
+        }
+      }
+    ]
+  },
+  "index_setup": {
+    "httpx": {
+      "seconds": 3.6429117499938,
+      "source_bytes": 128253,
+      "index_bytes": 1496056,
+      "documents": [
+        {
+          "id": "docs-advanced-authentication",
+          "source": "docs/advanced/authentication.md",
+          "doc_dir": ".cairn/documents/docs-advanced-authentication",
+          "state": "indexed",
+          "section_count": 5,
+          "source_hash": "490c0393f5af1bdcf70ed5dc6e296d75f4a4035d1916f2262102de61c623dc04",
+          "indexed_hash": "490c0393f5af1bdcf70ed5dc6e296d75f4a4035d1916f2262102de61c623dc04",
+          "source_file_hash": "490c0393f5af1bdcf70ed5dc6e296d75f4a4035d1916f2262102de61c623dc04",
+          "indexed_source_file_hash": "490c0393f5af1bdcf70ed5dc6e296d75f4a4035d1916f2262102de61c623dc04",
+          "indexed_at": "2026-10-25T07:14:22.910832Z",
+          "error": null
+        },
+        {
+          "id": "docs-advanced-clients",
+          "source": "docs/advanced/clients.md",
+          "doc_dir": ".cairn/documents/docs-advanced-clients",
+          "state": "indexed",
+          "section_count": 11,
+          "source_hash": "80d0496f33dc995d40ebb573301b0de360fbe90dffd4a0641a078701e5abaac0",
+          "indexed_hash": "80d0496f33dc995d40ebb573301b0de360fbe90dffd4a0641a078701e5abaac0",
+          "source_file_hash": "80d0496f33dc995d40ebb573301b0de360fbe90dffd4a0641a078701e5abaac0",
+          "indexed_source_file_hash": "80d0496f33dc995d40ebb573301b0de360fbe90dffd4a0641a078701e5abaac0",
+          "indexed_at": "2026-10-25T07:14:23.151767Z",
+          "error": null
+        },
+        {
+          "id": "docs-advanced-event-hooks",
+          "source": "docs/advanced/event-hooks.md",
+          "doc_dir": ".cairn/documents/docs-advanced-event-hooks",
+          "state": "indexed",
+          "section_count": 1,
+          "source_hash": "96d292f95b3412c54f7f862fd38a569b0efb2bd51a6cacdd5b391072262b9558",
+          "indexed_hash": "96d292f95b3412c54f7f862fd38a569b0efb2bd51a6cacdd5b391072262b9558",
+          "source_file_hash": "96d292f95b3412c54f7f862fd38a569b0efb2bd51a6cacdd5b391072262b9558",
+          "indexed_source_file_hash": "96d292f95b3412c54f7f862fd38a569b0efb2bd51a6cacdd5b391072262b9558",
+          "indexed_at": "2026-10-25T07:14:23.207930Z",
+          "error": null
+        },
+        {
+          "id": "docs-advanced-extensions",
+          "source": "docs/advanced/extensions.md",
+          "doc_dir": ".cairn/documents/docs-advanced-extensions",
+          "state": "indexed",
+          "section_count": 11,
+          "source_hash": "b0fb02059b00203114478faa48a808fd16a8b004e6c50cab672a7d63ee6c496f",
+          "indexed_hash": "b0fb02059b00203114478faa48a808fd16a8b004e6c50cab672a7d63ee6c496f",
+          "source_file_hash": "b0fb02059b00203114478faa48a808fd16a8b004e6c50cab672a7d63ee6c496f",
+          "indexed_source_file_hash": "b0fb02059b00203114478faa48a808fd16a8b004e6c50cab672a7d63ee6c496f",
+          "indexed_at": "2026-10-25T07:14:23.434299Z",
+          "error": null
+        },
+        {
+          "id": "docs-advanced-proxies",
+          "source": "docs/advanced/proxies.md",
+          "doc_dir": ".cairn/documents/docs-advanced-proxies",
+          "state": "indexed",
+          "section_count": 7,
+          "source_hash": "38f3be3b3babe015f9b9878c8ed207144e860a572b5c1dbf8eb7924d4a738960",
+          "indexed_hash": "38f3be3b3babe015f9b9878c8ed207144e860a572b5c1dbf8eb7924d4a738960",
+          "source_file_hash": "38f3be3b3babe015f9b9878c8ed207144e860a572b5c1dbf8eb7924d4a738960",
+          "indexed_source_file_hash": "38f3be3b3babe015f9b9878c8ed207144e860a572b5c1dbf8eb7924d4a738960",
+          "indexed_at": "2026-10-25T07:14:23.525387Z",
+          "error": null
+        },
+        {
+          "id": "docs-advanced-resource-limits",
+          "source": "docs/advanced/resource-limits.md",
+          "doc_dir": ".cairn/documents/docs-advanced-resource-limits",
+          "state": "indexed",
+          "section_count": 1,
+          "source_hash": "48463dfbcc09e28b174cf07695a937119da537436dc534421b64dcca7a024559",
+          "indexed_hash": "48463dfbcc09e28b174cf07695a937119da537436dc534421b64dcca7a024559",
+          "source_file_hash": "48463dfbcc09e28b174cf07695a937119da537436dc534421b64dcca7a024559",
+          "indexed_source_file_hash": "48463dfbcc09e28b174cf07695a937119da537436dc534421b64dcca7a024559",
+          "indexed_at": "2026-10-25T07:14:23.561993Z",
+          "error": null
+        },
+        {
+          "id": "docs-advanced-ssl",
+          "source": "docs/advanced/ssl.md",
+          "doc_dir": ".cairn/documents/docs-advanced-ssl",
+          "state": "indexed",
+          "section_count": 6,
+          "source_hash": "96dc8e954c5965bcf2ee68f436a143bcc8dab3cd647aa1631c1190593d241831",
+          "indexed_hash": "96dc8e954c5965bcf2ee68f436a143bcc8dab3cd647aa1631c1190593d241831",
+          "source_file_hash": "96dc8e954c5965bcf2ee68f436a143bcc8dab3cd647aa1631c1190593d241831",
+          "indexed_source_file_hash": "96dc8e954c5965bcf2ee68f436a143bcc8dab3cd647aa1631c1190593d241831",
+          "indexed_at": "2026-10-25T07:14:23.658856Z",
+          "error": null
+        },
+        {
+          "id": "docs-advanced-text-encodings",
+          "source": "docs/advanced/text-encodings.md",
+          "doc_dir": ".cairn/documents/docs-advanced-text-encodings",
+          "state": "indexed",
+          "section_count": 4,
+          "source_hash": "6810e718430df5676d2102cbc35ea3388f2c0fb442f8162bf9548c9596f741cc",
+          "indexed_hash": "6810e718430df5676d2102cbc35ea3388f2c0fb442f8162bf9548c9596f741cc",
+          "source_file_hash": "6810e718430df5676d2102cbc35ea3388f2c0fb442f8162bf9548c9596f741cc",
+          "indexed_source_file_hash": "6810e718430df5676d2102cbc35ea3388f2c0fb442f8162bf9548c9596f741cc",
+          "indexed_at": "2026-10-25T07:14:23.735609Z",
+          "error": null
+        },
+        {
+          "id": "docs-advanced-timeouts",
+          "source": "docs/advanced/timeouts.md",
+          "doc_dir": ".cairn/documents/docs-advanced-timeouts",
+          "state": "indexed",
+          "section_count": 4,
+          "source_hash": "48959a587ecc6430f9051ab1b1c76fcebc3f3e95ec01199281aab813a2dcfaa1",
+          "indexed_hash": "48959a587ecc6430f9051ab1b1c76fcebc3f3e95ec01199281aab813a2dcfaa1",
+          "source_file_hash": "48959a587ecc6430f9051ab1b1c76fcebc3f3e95ec01199281aab813a2dcfaa1",
+          "indexed_source_file_hash": "48959a587ecc6430f9051ab1b1c76fcebc3f3e95ec01199281aab813a2dcfaa1",
+          "indexed_at": "2026-10-25T07:14:23.814809Z",
+          "error": null
+        },
+        {
+          "id": "docs-advanced-transports",
+          "source": "docs/advanced/transports.md",
+          "doc_dir": ".cairn/documents/docs-advanced-transports",
+          "state": "indexed",
+          "section_count": 20,
+          "source_hash": "55648dd15c551f151f538aa79c8d2934bb581528d85bcc0fe3d810ac4a5ca382",
+          "indexed_hash": "55648dd15c551f151f538aa79c8d2934bb581528d85bcc0fe3d810ac4a5ca382",
+          "source_file_hash": "55648dd15c551f151f538aa79c8d2934bb581528d85bcc0fe3d810ac4a5ca382",
+          "indexed_source_file_hash": "55648dd15c551f151f538aa79c8d2934bb581528d85bcc0fe3d810ac4a5ca382",
+          "indexed_at": "2026-10-25T07:14:24.106066Z",
+          "error": null
+        },
+        {
+          "id": "docs-api",
+          "source": "docs/api.md",
+          "doc_dir": ".cairn/documents/docs-api",
+          "state": "indexed",
+          "section_count": 9,
+          "source_hash": "125c23b40867cea7c40da59d129515e0964b4ea80e2994293e850f12fb067a6e",
+          "indexed_hash": "125c23b40867cea7c40da59d129515e0964b4ea80e2994293e850f12fb067a6e",
+          "source_file_hash": "125c23b40867cea7c40da59d129515e0964b4ea80e2994293e850f12fb067a6e",
+          "indexed_source_file_hash": "125c23b40867cea7c40da59d129515e0964b4ea80e2994293e850f12fb067a6e",
+          "indexed_at": "2026-10-25T07:14:24.244072Z",
+          "error": null
+        },
+        {
+          "id": "docs-async",
+          "source": "docs/async.md",
+          "doc_dir": ".cairn/documents/docs-async",
+          "state": "indexed",
+          "section_count": 13,
+          "source_hash": "dd32e675ef994bb136e5414e5a2636db6e75418ce557ee6f731fddb924e47e4e",
+          "indexed_hash": "dd32e675ef994bb136e5414e5a2636db6e75418ce557ee6f731fddb924e47e4e",
+          "source_file_hash": "dd32e675ef994bb136e5414e5a2636db6e75418ce557ee6f731fddb924e47e4e",
+          "indexed_source_file_hash": "dd32e675ef994bb136e5414e5a2636db6e75418ce557ee6f731fddb924e47e4e",
+          "indexed_at": "2026-10-25T07:14:24.406481Z",
+          "error": null
+        },
+        {
+          "id": "docs-code-of-conduct",
+          "source": "docs/code_of_conduct.md",
+          "doc_dir": ".cairn/documents/docs-code-of-conduct",
+          "state": "indexed",
+          "section_count": 5,
+          "source_hash": "711021e871cb55ba15ae4fc040e404e5edece35f649fcbe517126382e7e4f30f",
+          "indexed_hash": "711021e871cb55ba15ae4fc040e404e5edece35f649fcbe517126382e7e4f30f",
+          "source_file_hash": "711021e871cb55ba15ae4fc040e404e5edece35f649fcbe517126382e7e4f30f",
+          "indexed_source_file_hash": "711021e871cb55ba15ae4fc040e404e5edece35f649fcbe517126382e7e4f30f",
+          "indexed_at": "2026-10-25T07:14:24.493309Z",
+          "error": null
+        },
+        {
+          "id": "docs-compatibility",
+          "source": "docs/compatibility.md",
+          "doc_dir": ".cairn/documents/docs-compatibility",
+          "state": "indexed",
+          "section_count": 22,
+          "source_hash": "e30d0a254fc89e5a891739607e289432b48930ac68be285810dd4e540f304776",
+          "indexed_hash": "e30d0a254fc89e5a891739607e289432b48930ac68be285810dd4e540f304776",
+          "source_file_hash": "e30d0a254fc89e5a891739607e289432b48930ac68be285810dd4e540f304776",
+          "indexed_source_file_hash": "e30d0a254fc89e5a891739607e289432b48930ac68be285810dd4e540f304776",
+          "indexed_at": "2026-10-25T07:14:24.727364Z",
+          "error": null
+        },
+        {
+          "id": "docs-contributing",
+          "source": "docs/contributing.md",
+          "doc_dir": ".cairn/documents/docs-contributing",
+          "state": "indexed",
+          "section_count": 11,
+          "source_hash": "88182650dd83fc38ac39de2fa8cadbee937ff72afdbdd7d4721f4e84aef2f520",
+          "indexed_hash": "88182650dd83fc38ac39de2fa8cadbee937ff72afdbdd7d4721f4e84aef2f520",
+          "source_file_hash": "88182650dd83fc38ac39de2fa8cadbee937ff72afdbdd7d4721f4e84aef2f520",
+          "indexed_source_file_hash": "88182650dd83fc38ac39de2fa8cadbee937ff72afdbdd7d4721f4e84aef2f520",
+          "indexed_at": "2026-10-25T07:14:24.894233Z",
+          "error": null
+        },
+        {
+          "id": "docs-environment-variables",
+          "source": "docs/environment_variables.md",
+          "doc_dir": ".cairn/documents/docs-environment-variables",
+          "state": "indexed",
+          "section_count": 4,
+          "source_hash": "d0cdf4d740dc3ed8b21c4ee45735551e05d4e57d0fda05a2f18c4684197a27eb",
+          "indexed_hash": "d0cdf4d740dc3ed8b21c4ee45735551e05d4e57d0fda05a2f18c4684197a27eb",
+          "source_file_hash": "d0cdf4d740dc3ed8b21c4ee45735551e05d4e57d0fda05a2f18c4684197a27eb",
+          "indexed_source_file_hash": "d0cdf4d740dc3ed8b21c4ee45735551e05d4e57d0fda05a2f18c4684197a27eb",
+          "indexed_at": "2026-10-25T07:14:24.959504Z",
+          "error": null
+        },
+        {
+          "id": "docs-exceptions",
+          "source": "docs/exceptions.md",
+          "doc_dir": ".cairn/documents/docs-exceptions",
+          "state": "indexed",
+          "section_count": 3,
+          "source_hash": "5e59ac5575373f359c45b8685cfb5813ba8d3a834052c7c0427789b32722324f",
+          "indexed_hash": "5e59ac5575373f359c45b8685cfb5813ba8d3a834052c7c0427789b32722324f",
+          "source_file_hash": "5e59ac5575373f359c45b8685cfb5813ba8d3a834052c7c0427789b32722324f",
+          "indexed_source_file_hash": "5e59ac5575373f359c45b8685cfb5813ba8d3a834052c7c0427789b32722324f",
+          "indexed_at": "2026-10-25T07:14:25.019573Z",
+          "error": null
+        },
+        {
+          "id": "docs-http2",
+          "source": "docs/http2.md",
+          "doc_dir": ".cairn/documents/docs-http2",
+          "state": "indexed",
+          "section_count": 3,
+          "source_hash": "51010101b5aff566dcdfdf94cb5e0ef644caf5411b84749753a9da79d28caaf7",
+          "indexed_hash": "51010101b5aff566dcdfdf94cb5e0ef644caf5411b84749753a9da79d28caaf7",
+          "source_file_hash": "51010101b5aff566dcdfdf94cb5e0ef644caf5411b84749753a9da79d28caaf7",
+          "indexed_source_file_hash": "51010101b5aff566dcdfdf94cb5e0ef644caf5411b84749753a9da79d28caaf7",
+          "indexed_at": "2026-10-25T07:14:25.098798Z",
+          "error": null
+        },
+        {
+          "id": "docs-index",
+          "source": "docs/index.md",
+          "doc_dir": ".cairn/documents/docs-index",
+          "state": "indexed",
+          "section_count": 5,
+          "source_hash": "07edc3ef5d9d5c5e404b25abe5762f83c6c25a68cf7e556e5c52f4c86387c36b",
+          "indexed_hash": "07edc3ef5d9d5c5e404b25abe5762f83c6c25a68cf7e556e5c52f4c86387c36b",
+          "source_file_hash": "07edc3ef5d9d5c5e404b25abe5762f83c6c25a68cf7e556e5c52f4c86387c36b",
+          "indexed_source_file_hash": "07edc3ef5d9d5c5e404b25abe5762f83c6c25a68cf7e556e5c52f4c86387c36b",
+          "indexed_at": "2026-10-25T07:14:25.203209Z",
+          "error": null
+        },
+        {
+          "id": "docs-logging",
+          "source": "docs/logging.md",
+          "doc_dir": ".cairn/documents/docs-logging",
+          "state": "indexed",
+          "section_count": 1,
+          "source_hash": "cf128dd9d45561d57807fb34c00c2fff63071dbbfcb3990df00c7061bea88195",
+          "indexed_hash": "cf128dd9d45561d57807fb34c00c2fff63071dbbfcb3990df00c7061bea88195",
+          "source_file_hash": "cf128dd9d45561d57807fb34c00c2fff63071dbbfcb3990df00c7061bea88195",
+          "indexed_source_file_hash": "cf128dd9d45561d57807fb34c00c2fff63071dbbfcb3990df00c7061bea88195",
+          "indexed_at": "2026-10-25T07:14:25.317386Z",
+          "error": null
+        },
+        {
+          "id": "docs-quickstart",
+          "source": "docs/quickstart.md",
+          "doc_dir": ".cairn/documents/docs-quickstart",
+          "state": "indexed",
+          "section_count": 18,
+          "source_hash": "9f8351551dd18be0ed7e40dea2f1c231523a2e8833a0bb5c471630178ec2aea8",
+          "indexed_hash": "9f8351551dd18be0ed7e40dea2f1c231523a2e8833a0bb5c471630178ec2aea8",
+          "source_file_hash": "9f8351551dd18be0ed7e40dea2f1c231523a2e8833a0bb5c471630178ec2aea8",
+          "indexed_source_file_hash": "9f8351551dd18be0ed7e40dea2f1c231523a2e8833a0bb5c471630178ec2aea8",
+          "indexed_at": "2026-10-25T07:14:25.632610Z",
+          "error": null
+        },
+        {
+          "id": "docs-third-party-packages",
+          "source": "docs/third_party_packages.md",
+          "doc_dir": ".cairn/documents/docs-third-party-packages",
+          "state": "indexed",
+          "section_count": 17,
+          "source_hash": "211bc5d5c82adc4b38b882ac58b7387a828a3c65e1b348d5a245d3de48a0fd4e",
+          "indexed_hash": "211bc5d5c82adc4b38b882ac58b7387a828a3c65e1b348d5a245d3de48a0fd4e",
+          "source_file_hash": "211bc5d5c82adc4b38b882ac58b7387a828a3c65e1b348d5a245d3de48a0fd4e",
+          "indexed_source_file_hash": "211bc5d5c82adc4b38b882ac58b7387a828a3c65e1b348d5a245d3de48a0fd4e",
+          "indexed_at": "2026-10-25T07:14:25.761037Z",
+          "error": null
+        },
+        {
+          "id": "docs-troubleshooting",
+          "source": "docs/troubleshooting.md",
+          "doc_dir": ".cairn/documents/docs-troubleshooting",
+          "state": "indexed",
+          "section_count": 4,
+          "source_hash": "3a9f68c58a03575ac88ce94da22d2f7c93d2e88df54e7f9be1061ca6fafd3c96",
+          "indexed_hash": "3a9f68c58a03575ac88ce94da22d2f7c93d2e88df54e7f9be1061ca6fafd3c96",
+          "source_file_hash": "3a9f68c58a03575ac88ce94da22d2f7c93d2e88df54e7f9be1061ca6fafd3c96",
+          "indexed_source_file_hash": "3a9f68c58a03575ac88ce94da22d2f7c93d2e88df54e7f9be1061ca6fafd3c96",
+          "indexed_at": "2026-10-25T07:14:25.832959Z",
+          "error": null
+        }
+      ],
+      "provider": "openai-compat:nomic-embed-text-v1.5.Q4_K_M:task-prefix-v1:522ef75245b5d4657069a3f1:utf8-window-v1:1500:weighted-unit-mean",
+      "setup": "actual installed production factory; controlled extractive summaries; real warm Nomic768; task prefixes on every physical window"
+    },
+    "mkdocs": {
+      "seconds": 5.94224899999972,
+      "source_bytes": 284354,
+      "index_bytes": 2745270,
+      "documents": [
+        {
+          "id": "docs-about-contributing",
+          "source": "docs/about/contributing.md",
+          "doc_dir": ".cairn/documents/docs-about-contributing",
+          "state": "indexed",
+          "section_count": 1,
+          "source_hash": "e6872f1e4c41a31120d8fefbdaa4be9f6cef9ed0331bb45044a8fe0d4f131f82",
+          "indexed_hash": "e6872f1e4c41a31120d8fefbdaa4be9f6cef9ed0331bb45044a8fe0d4f131f82",
+          "source_file_hash": "e6872f1e4c41a31120d8fefbdaa4be9f6cef9ed0331bb45044a8fe0d4f131f82",
+          "indexed_source_file_hash": "e6872f1e4c41a31120d8fefbdaa4be9f6cef9ed0331bb45044a8fe0d4f131f82",
+          "indexed_at": "2026-10-25T07:14:26.038261Z",
+          "error": null
+        },
+        {
+          "id": "docs-about-license",
+          "source": "docs/about/license.md",
+          "doc_dir": ".cairn/documents/docs-about-license",
+          "state": "indexed",
+          "section_count": 3,
+          "source_hash": "9263c69ea49f938516831e56f7f62372d67004b1a74648a0b59b13aacf40a701",
+          "indexed_hash": "9263c69ea49f938516831e56f7f62372d67004b1a74648a0b59b13aacf40a701",
+          "source_file_hash": "9263c69ea49f938516831e56f7f62372d67004b1a74648a0b59b13aacf40a701",
+          "indexed_source_file_hash": "9263c69ea49f938516831e56f7f62372d67004b1a74648a0b59b13aacf40a701",
+          "indexed_at": "2026-10-25T07:14:26.085207Z",
+          "error": null
+        },
+        {
+          "id": "docs-about-release-notes",
+          "source": "docs/about/release-notes.md",
+          "doc_dir": ".cairn/documents/docs-about-release-notes",
+          "state": "indexed",
+          "section_count": 175,
+          "source_hash": "bef5bffed63dfea1be5e6f086864166a84fb0e3f33eeb80b0bc28533e3c75d81",
+          "indexed_hash": "bef5bffed63dfea1be5e6f086864166a84fb0e3f33eeb80b0bc28533e3c75d81",
+          "source_file_hash": "bef5bffed63dfea1be5e6f086864166a84fb0e3f33eeb80b0bc28533e3c75d81",
+          "indexed_source_file_hash": "bef5bffed63dfea1be5e6f086864166a84fb0e3f33eeb80b0bc28533e3c75d81",
+          "indexed_at": "2026-10-25T07:14:28.408461Z",
+          "error": null
+        },
+        {
+          "id": "docs-dev-guide-readme",
+          "source": "docs/dev-guide/README.md",
+          "doc_dir": ".cairn/documents/docs-dev-guide-readme",
+          "state": "indexed",
+          "section_count": 1,
+          "source_hash": "365859997540c07679c46dffd2c1b065dcdeeea61de0bb979a2d862481edb279",
+          "indexed_hash": "365859997540c07679c46dffd2c1b065dcdeeea61de0bb979a2d862481edb279",
+          "source_file_hash": "365859997540c07679c46dffd2c1b065dcdeeea61de0bb979a2d862481edb279",
+          "indexed_source_file_hash": "365859997540c07679c46dffd2c1b065dcdeeea61de0bb979a2d862481edb279",
+          "indexed_at": "2026-10-25T07:14:28.438388Z",
+          "error": null
+        },
+        {
+          "id": "docs-dev-guide-api",
+          "source": "docs/dev-guide/api.md",
+          "doc_dir": ".cairn/documents/docs-dev-guide-api",
+          "state": "indexed",
+          "section_count": 1,
+          "source_hash": "6437c0b4f048512bf2d4f0ba864f9dd5c18120b79ab1f3cd054f47850942f454",
+          "indexed_hash": "6437c0b4f048512bf2d4f0ba864f9dd5c18120b79ab1f3cd054f47850942f454",
+          "source_file_hash": "6437c0b4f048512bf2d4f0ba864f9dd5c18120b79ab1f3cd054f47850942f454",
+          "indexed_source_file_hash": "6437c0b4f048512bf2d4f0ba864f9dd5c18120b79ab1f3cd054f47850942f454",
+          "indexed_at": "2026-10-25T07:14:28.467560Z",
+          "error": null
+        },
+        {
+          "id": "docs-dev-guide-plugins",
+          "source": "docs/dev-guide/plugins.md",
+          "doc_dir": ".cairn/documents/docs-dev-guide-plugins",
+          "state": "indexed",
+          "section_count": 48,
+          "source_hash": "c6f985b10e432c31fdbca36ee9f569b2b860dcee1c94be1847257325f546b97b",
+          "indexed_hash": "c6f985b10e432c31fdbca36ee9f569b2b860dcee1c94be1847257325f546b97b",
+          "source_file_hash": "c6f985b10e432c31fdbca36ee9f569b2b860dcee1c94be1847257325f546b97b",
+          "indexed_source_file_hash": "c6f985b10e432c31fdbca36ee9f569b2b860dcee1c94be1847257325f546b97b",
+          "indexed_at": "2026-10-25T07:14:28.924971Z",
+          "error": null
+        },
+        {
+          "id": "docs-dev-guide-themes",
+          "source": "docs/dev-guide/themes.md",
+          "doc_dir": ".cairn/documents/docs-dev-guide-themes",
+          "state": "indexed",
+          "section_count": 42,
+          "source_hash": "d5699d1699fad81cfbf918c90da24c22292bfa3b47bdbdd0a7e0d84e3ebd0674",
+          "indexed_hash": "d5699d1699fad81cfbf918c90da24c22292bfa3b47bdbdd0a7e0d84e3ebd0674",
+          "source_file_hash": "d5699d1699fad81cfbf918c90da24c22292bfa3b47bdbdd0a7e0d84e3ebd0674",
+          "indexed_source_file_hash": "d5699d1699fad81cfbf918c90da24c22292bfa3b47bdbdd0a7e0d84e3ebd0674",
+          "indexed_at": "2026-10-25T07:14:29.621729Z",
+          "error": null
+        },
+        {
+          "id": "docs-dev-guide-translations",
+          "source": "docs/dev-guide/translations.md",
+          "doc_dir": ".cairn/documents/docs-dev-guide-translations",
+          "state": "indexed",
+          "section_count": 11,
+          "source_hash": "1bbcf58f2c09248a64a9a16a29271c9609f235452257d8d6f95aaf944fa37665",
+          "indexed_hash": "1bbcf58f2c09248a64a9a16a29271c9609f235452257d8d6f95aaf944fa37665",
+          "source_file_hash": "1bbcf58f2c09248a64a9a16a29271c9609f235452257d8d6f95aaf944fa37665",
+          "indexed_source_file_hash": "1bbcf58f2c09248a64a9a16a29271c9609f235452257d8d6f95aaf944fa37665",
+          "indexed_at": "2026-10-25T07:14:29.794749Z",
+          "error": null
+        },
+        {
+          "id": "docs-getting-started",
+          "source": "docs/getting-started.md",
+          "doc_dir": ".cairn/documents/docs-getting-started",
+          "state": "indexed",
+          "section_count": 10,
+          "source_hash": "ae84eec620f2648c7e6ee7f19d9a75bda390a97e029b347028e1dfe9e06ed944",
+          "indexed_hash": "ae84eec620f2648c7e6ee7f19d9a75bda390a97e029b347028e1dfe9e06ed944",
+          "source_file_hash": "ae84eec620f2648c7e6ee7f19d9a75bda390a97e029b347028e1dfe9e06ed944",
+          "indexed_source_file_hash": "ae84eec620f2648c7e6ee7f19d9a75bda390a97e029b347028e1dfe9e06ed944",
+          "indexed_at": "2026-10-25T07:14:29.937839Z",
+          "error": null
+        },
+        {
+          "id": "docs-index",
+          "source": "docs/index.md",
+          "doc_dir": ".cairn/documents/docs-index",
+          "state": "indexed",
+          "section_count": 1,
+          "source_hash": "937e7fd0cb40463b99e7929230b11df754b6c15274ae8da5706fdd666750748a",
+          "indexed_hash": "937e7fd0cb40463b99e7929230b11df754b6c15274ae8da5706fdd666750748a",
+          "source_file_hash": "937e7fd0cb40463b99e7929230b11df754b6c15274ae8da5706fdd666750748a",
+          "indexed_source_file_hash": "937e7fd0cb40463b99e7929230b11df754b6c15274ae8da5706fdd666750748a",
+          "indexed_at": "2026-10-25T07:14:30.016146Z",
+          "error": null
+        },
+        {
+          "id": "docs-user-guide-readme",
+          "source": "docs/user-guide/README.md",
+          "doc_dir": ".cairn/documents/docs-user-guide-readme",
+          "state": "indexed",
+          "section_count": 1,
+          "source_hash": "0c64f3b74b9abf96cf53b829495d3c2735749ff2f6dda30f5d8e35a837ed8cde",
+          "indexed_hash": "0c64f3b74b9abf96cf53b829495d3c2735749ff2f6dda30f5d8e35a837ed8cde",
+          "source_file_hash": "0c64f3b74b9abf96cf53b829495d3c2735749ff2f6dda30f5d8e35a837ed8cde",
+          "indexed_source_file_hash": "0c64f3b74b9abf96cf53b829495d3c2735749ff2f6dda30f5d8e35a837ed8cde",
+          "indexed_at": "2026-10-25T07:14:30.046215Z",
+          "error": null
+        },
+        {
+          "id": "docs-user-guide-choosing-your-theme",
+          "source": "docs/user-guide/choosing-your-theme.md",
+          "doc_dir": ".cairn/documents/docs-user-guide-choosing-your-theme",
+          "state": "indexed",
+          "section_count": 4,
+          "source_hash": "dbbb1744f875c313a53e1e53884e54c73a3b514dd33667e4dd4336f6101f91fa",
+          "indexed_hash": "dbbb1744f875c313a53e1e53884e54c73a3b514dd33667e4dd4336f6101f91fa",
+          "source_file_hash": "dbbb1744f875c313a53e1e53884e54c73a3b514dd33667e4dd4336f6101f91fa",
+          "indexed_source_file_hash": "dbbb1744f875c313a53e1e53884e54c73a3b514dd33667e4dd4336f6101f91fa",
+          "indexed_at": "2026-10-25T07:14:30.208752Z",
+          "error": null
+        },
+        {
+          "id": "docs-user-guide-cli",
+          "source": "docs/user-guide/cli.md",
+          "doc_dir": ".cairn/documents/docs-user-guide-cli",
+          "state": "indexed",
+          "section_count": 1,
+          "source_hash": "660c9d2faff0244070496332c9966958d0325ad89daec0424c8b3ea66ab02a9f",
+          "indexed_hash": "660c9d2faff0244070496332c9966958d0325ad89daec0424c8b3ea66ab02a9f",
+          "source_file_hash": "660c9d2faff0244070496332c9966958d0325ad89daec0424c8b3ea66ab02a9f",
+          "indexed_source_file_hash": "660c9d2faff0244070496332c9966958d0325ad89daec0424c8b3ea66ab02a9f",
+          "indexed_at": "2026-10-25T07:14:30.234734Z",
+          "error": null
+        },
+        {
+          "id": "docs-user-guide-configuration",
+          "source": "docs/user-guide/configuration.md",
+          "doc_dir": ".cairn/documents/docs-user-guide-configuration",
+          "state": "indexed",
+          "section_count": 57,
+          "source_hash": "18ef4f7e72a22b07130a8daa42be00fec836b748419b83d3bd035266e0e6e4fb",
+          "indexed_hash": "18ef4f7e72a22b07130a8daa42be00fec836b748419b83d3bd035266e0e6e4fb",
+          "source_file_hash": "18ef4f7e72a22b07130a8daa42be00fec836b748419b83d3bd035266e0e6e4fb",
+          "indexed_source_file_hash": "18ef4f7e72a22b07130a8daa42be00fec836b748419b83d3bd035266e0e6e4fb",
+          "indexed_at": "2026-10-25T07:14:31.096131Z",
+          "error": null
+        },
+        {
+          "id": "docs-user-guide-customizing-your-theme",
+          "source": "docs/user-guide/customizing-your-theme.md",
+          "doc_dir": ".cairn/documents/docs-user-guide-customizing-your-theme",
+          "state": "indexed",
+          "section_count": 5,
+          "source_hash": "df97ab2b1bc3b515818a1d1af8bb39d73625cc7af58aba2ab31848c619d2593c",
+          "indexed_hash": "df97ab2b1bc3b515818a1d1af8bb39d73625cc7af58aba2ab31848c619d2593c",
+          "source_file_hash": "df97ab2b1bc3b515818a1d1af8bb39d73625cc7af58aba2ab31848c619d2593c",
+          "indexed_source_file_hash": "df97ab2b1bc3b515818a1d1af8bb39d73625cc7af58aba2ab31848c619d2593c",
+          "indexed_at": "2026-10-25T07:14:31.238174Z",
+          "error": null
+        },
+        {
+          "id": "docs-user-guide-deploying-your-docs",
+          "source": "docs/user-guide/deploying-your-docs.md",
+          "doc_dir": ".cairn/documents/docs-user-guide-deploying-your-docs",
+          "state": "indexed",
+          "section_count": 9,
+          "source_hash": "f18c58d56a1e4b0cf5ebf5b6d55f4985af544b63803deae305a5f8ba1fffb390",
+          "indexed_hash": "f18c58d56a1e4b0cf5ebf5b6d55f4985af544b63803deae305a5f8ba1fffb390",
+          "source_file_hash": "f18c58d56a1e4b0cf5ebf5b6d55f4985af544b63803deae305a5f8ba1fffb390",
+          "indexed_source_file_hash": "f18c58d56a1e4b0cf5ebf5b6d55f4985af544b63803deae305a5f8ba1fffb390",
+          "indexed_at": "2026-10-25T07:14:31.400841Z",
+          "error": null
+        },
+        {
+          "id": "docs-user-guide-installation",
+          "source": "docs/user-guide/installation.md",
+          "doc_dir": ".cairn/documents/docs-user-guide-installation",
+          "state": "indexed",
+          "section_count": 5,
+          "source_hash": "bf3520a6736e9f34a2f759e805c48d73db873639d4192e613aeea4b48989da7f",
+          "indexed_hash": "bf3520a6736e9f34a2f759e805c48d73db873639d4192e613aeea4b48989da7f",
+          "source_file_hash": "bf3520a6736e9f34a2f759e805c48d73db873639d4192e613aeea4b48989da7f",
+          "indexed_source_file_hash": "bf3520a6736e9f34a2f759e805c48d73db873639d4192e613aeea4b48989da7f",
+          "indexed_at": "2026-10-25T07:14:31.484314Z",
+          "error": null
+        },
+        {
+          "id": "docs-user-guide-localizing-your-theme",
+          "source": "docs/user-guide/localizing-your-theme.md",
+          "doc_dir": ".cairn/documents/docs-user-guide-localizing-your-theme",
+          "state": "indexed",
+          "section_count": 5,
+          "source_hash": "095c69dca5cae8c36514f2e3aa0ad1311b47c73ab94ae7f6dffa84d591ec572d",
+          "indexed_hash": "095c69dca5cae8c36514f2e3aa0ad1311b47c73ab94ae7f6dffa84d591ec572d",
+          "source_file_hash": "095c69dca5cae8c36514f2e3aa0ad1311b47c73ab94ae7f6dffa84d591ec572d",
+          "indexed_source_file_hash": "095c69dca5cae8c36514f2e3aa0ad1311b47c73ab94ae7f6dffa84d591ec572d",
+          "indexed_at": "2026-10-25T07:14:31.543913Z",
+          "error": null
+        },
+        {
+          "id": "docs-user-guide-writing-your-docs",
+          "source": "docs/user-guide/writing-your-docs.md",
+          "doc_dir": ".cairn/documents/docs-user-guide-writing-your-docs",
+          "state": "indexed",
+          "section_count": 14,
+          "source_hash": "a6b69d1318ae84455bae021b6655b71274f29c19ba43d021d872d100b7b38cba",
+          "indexed_hash": "a6b69d1318ae84455bae021b6655b71274f29c19ba43d021d872d100b7b38cba",
+          "source_file_hash": "a6b69d1318ae84455bae021b6655b71274f29c19ba43d021d872d100b7b38cba",
+          "indexed_source_file_hash": "a6b69d1318ae84455bae021b6655b71274f29c19ba43d021d872d100b7b38cba",
+          "indexed_at": "2026-10-25T07:14:31.845788Z",
+          "error": null
+        }
+      ],
+      "provider": "openai-compat:nomic-embed-text-v1.5.Q4_K_M:task-prefix-v1:522ef75245b5d4657069a3f1:utf8-window-v1:1500:weighted-unit-mean",
+      "setup": "actual installed production factory; controlled extractive summaries; real warm Nomic768; task prefixes on every physical window"
+    }
+  },
+  "frozen_verification": {
+    "verified_at": "2026-10-25T07:34:27.523993+00:00",
+    "passed": true,
+    "files": 770
+  },
+  "artifact_root": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/document-links-20261025/recovery-round"
+}

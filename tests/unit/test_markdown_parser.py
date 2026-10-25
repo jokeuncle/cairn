@@ -6,6 +6,8 @@ import hashlib
 from pathlib import Path
 
 import pytest
+from hypothesis import given
+from hypothesis import strategies as st
 
 from cairn.core.errors import ParseError
 from cairn.ingest.markdown import MarkdownParser
@@ -161,15 +163,53 @@ class TestRawTextAndSpans:
 
 
 class TestEdgeCases:
+    @given(st.text(alphabet="abcXYZ012 中文文档\n ", min_size=1).filter(lambda s: bool(s.strip())))
+    def test_headingless_prose_roundtrips(self, prose: str) -> None:
+        doc = MarkdownParser().parse(prose, doc_id="unicode-prose")
+        assert len(doc.sections) == 1
+        assert doc.sections[0].raw_text == prose
+        assert doc.sections[0].span.end == len(prose.encode("utf-8"))
+
     def test_empty_document(self, parser: MarkdownParser, empty_md: str) -> None:
         doc = parser.parse(empty_md, doc_id="empty")
         assert doc.sections == ()
 
-    def test_no_headings_yields_no_sections(
+    def test_headingless_prose_is_preserved(
         self, parser: MarkdownParser, no_headings_md: str
     ) -> None:
         doc = parser.parse(no_headings_md, doc_id="prose")
-        assert doc.sections == ()
+        assert len(doc.sections) == 1
+        assert doc.sections[0].raw_text == no_headings_md
+        assert doc.sections[0].span.start == 0
+        assert doc.sections[0].span.end == len(no_headings_md.encode("utf-8"))
+
+    def test_preamble_preserves_existing_anchors_and_utf8_spans(
+        self, parser: MarkdownParser
+    ) -> None:
+        body = "默认行为: 等待五秒。\n\n"
+        headings = "# Guide\n\nGuide body.\n\n## Details\n\nDetails body.\n"
+        before = parser.parse(headings, doc_id="guide")
+        after = parser.parse(body + headings, doc_id="guide")
+        assert [n.id for n in after.sections[1:]] == [n.id for n in before.sections]
+        assert [n.parent for n in after.sections[1:]] == [n.parent for n in before.sections]
+        assert after.sections[0].raw_text == body
+        span = after.sections[0].span
+        assert (body + headings).encode()[span.start : span.end].decode() == body
+
+    def test_frontmatter_is_metadata_not_preamble(self, parser: MarkdownParser) -> None:
+        text = "---\ntitle: Field Guide\n---\nBefore headings.\n\n# Install\nSetup.\n"
+        doc = parser.parse(text, doc_id="guide")
+        assert len(doc.sections) == 2
+        assert doc.sections[0].raw_text == "Before headings.\n\n"
+        assert doc.sections[0].metadata == {"title": "Field Guide"}
+        assert doc.sections[1].metadata == {}
+        metadata_only = parser.parse("---\ntitle: Field Guide\n---\n", doc_id="metadata")
+        assert metadata_only.sections == ()
+
+    def test_synthetic_anchor_does_not_shadow_real_heading(self, parser: MarkdownParser) -> None:
+        doc = parser.parse("Preamble.\n# Document Introduction\nReal heading.\n", doc_id="guide")
+        assert len({n.id for n in doc.sections}) == 2
+        assert doc.sections[1].id == "document-introduction"
 
     def test_front_matter_is_skipped(
         self, parser: MarkdownParser, with_frontmatter_md: str

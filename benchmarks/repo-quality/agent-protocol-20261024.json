@@ -1,0 +1,23 @@
+{
+  "cases": "heldout-cases.json",
+  "one_attempt_per_arm_task": true,
+  "arms": [
+    "cairn",
+    "bm25",
+    "raw"
+  ],
+  "same_model_and_common_prompt": true,
+  "context": 32768,
+  "tool_rounds": 16,
+  "calls": 24,
+  "max_output": 1800,
+  "seed": 42,
+  "temperature": 0,
+  "order": "rotate arms by task",
+  "scope": "selected docs; 4 tasks over new Uvicorn/Ruff corpora and 2 new compositions over known HTTPX/Starlette docs",
+  "no_execution_tool": "Generated Python is audited/executed after final answer; no grader feedback enters the agent",
+  "cairn_snapshot": "candidate/src",
+  "new_corpora_adapter": "explicit 1500-byte windows for indexing and querying",
+  "grading": "task acceptance and independent local execution, not literal fact-marker rate",
+  "duration_limits": "3h wait for development runs; each model request 240s, 16 rounds per case; each task once"
+}

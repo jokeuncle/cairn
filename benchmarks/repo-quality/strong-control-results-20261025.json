@@ -1,0 +1,1696 @@
+{
+  "date": "2026-10-25",
+  "status": "Fixed10sessions complete; alltaskspass, newproject price-independentparity fails; commercial gate unmet",
+  "protocol": {
+    "goal": "Preserve complex real-Agent task success, test Cairn cost advantage against strong inexpensive source-link retrieval",
+    "classification": "Local reversible spike; product source unchanged; continued optimization explicitly authorized",
+    "target": "Independent correctness, citations and full-session I/K/U/O; no commercial claim from a small screen",
+    "stage1": "Two known synthetic alias tasks x frozenCairnCLI/independent BM25+linksCLI,4sessions",
+    "stage2": "Two new public project task texts x Cairn/helper/actualraw,6sessions; source and graders frozen before model answers",
+    "invariants": [
+      "No hidden oracle or expected code enters model prompts/index",
+      "No Cairn imports in independent helper, no vector/model/index build",
+      "Same CLI protocol and source budget where possible; same model and permissions",
+      "Executable graders qualified using positive and incorrect-code controls before answers",
+      "Every valid failure and infrastructure failure retained; no score-based replacement",
+      "No product source/default changes, no global config/auth edits or publication"
+    ],
+    "stop": "Fixed10sessions; no retrieval/source/protocol tuning after agent answers; infrastructure recovery only as separate qualified attempts",
+    "frozen": true,
+    "model": "gpt-6.1-sol high; CodexCLI0.164 ephemeral existing auth",
+    "permissions": "Per-command :read-only+127.0.0.1-only proxy profile, same all arms; inherited prior negative controls; exact Cairn backend sandbox query qualified again",
+    "cases_sha256": "25f8bb115cd448d48883594f743e8534bc45d3bd0a5eb27a19cf1a281f7adf62",
+    "blind_interface": "a/b adapters have identical prompt documentation and fullJSON source; a=Cairn b=independent helper, human evaluator knows mapping",
+    "summary_provider": "controlled extractive source words, actual nomic768d document/query prefixes +1500bytewindows",
+    "budgets": "24calls900sec<=1800finaltokens request",
+    "acceptance": "Source-span and pure helper controls; qualified runtime oracles + manual full module and source/citation review; all attempts counted",
+    "source_scope": "7PydanticMarkdown and9TyperMarkdown docs with official snippet expansion, same selected source for all arms; new task texts but public API model priors remain",
+    "raw_control": "Actual shell/rg over selected derived docs copied to isolatedworkspace. Helper is independent ephemeral BM25+explicitlinks overrawsource, no vector/LLM/persistent index.",
+    "fixed_model_sessions": 10
+  },
+  "frozen_python_sha256": {
+    "candidate/src/cairn/__init__.py": "4975a3e97aad175b1155206322ba4ed3f1418f948db57a867bfa8b747b296b80",
+    "candidate/src/cairn/agent_guidance.py": "ed396110c729b0c1ea2ace722fa391f00fe750d867f6819b4ea4a28d63cec51e",
+    "candidate/src/cairn/bench/__init__.py": "6eefb5df8d97dbcbba95c13cff3a77fb5ebda4154ab086a06623062375acd9b1",
+    "candidate/src/cairn/bench/baseline.py": "102f0ecf42fcf2b83c3c253d731338b40523a9ad8cb32262a97ebdfaf4730b98",
+    "candidate/src/cairn/bench/dataset.py": "bc7f147940dedc8f03b16d78c04e25ded591e5358ac482118ffc5a876e9bf08f",
+    "candidate/src/cairn/bench/judge.py": "0dce5bb0ed842449814919b6bd38f8a33d56976bc435a79a9a2962ff3a074d6c",
+    "candidate/src/cairn/bench/metrics.py": "9cebcee11b5b8e9e2eb40435fe5941eff81efa31038ab7b662f2bfda47edb8a5",
+    "candidate/src/cairn/bench/report.py": "c2fbc8890891db7c861c26c7af017532e98b20d13dbf6955f69e5445f62727b6",
+    "candidate/src/cairn/bench/runner.py": "0a44ba791dde41024ee889321fa01cd4bd4db624c6a5adcf6d67c0b49daa0925",
+    "candidate/src/cairn/cli/__init__.py": "12167b938c079bed1dc70fe8e9bdb444f1a3b9bc9075c64737ac8d6121ae0767",
+    "candidate/src/cairn/cli/app.py": "ce12c66976350b82c0c7472618455b264eb6ee19a0f8ff61ac490bac3bc7466f",
+    "candidate/src/cairn/cli/config.py": "e835a4bda78f7f71b3ead748fcfd99003665cae10bc069a74f6aaa2aff82349d",
+    "candidate/src/cairn/client/__init__.py": "d844deb2886bdf7495c47ccc8c7417867f3b65b28c4f2bd1ad299bf4bf177bf6",
+    "candidate/src/cairn/client/server.py": "ded430660f9ee5ced05f3a3ec3665456bd58a409ae6beedbf1cd8e2acd7fbb4d",
+    "candidate/src/cairn/client/static/__init__.py": "0f90031cf0900f6ad827cd9823928f23574f5b941bd79cc5ba8f0731535ba785",
+    "candidate/src/cairn/core/__init__.py": "55b20f63537926c009e0dd4fd57e1de6cb3f87d289a0ac47a177305badf9d1b8",
+    "candidate/src/cairn/core/config.py": "0988f686b585bb266207c0cd976741e4d3ceae0fbb68a31095cee91cf7ef74fc",
+    "candidate/src/cairn/core/errors.py": "a05de597f07140b65d6e2aa17ddb6766e9c76a89434bab2a99285659aadb4613",
+    "candidate/src/cairn/core/types.py": "925db60bd1139d5cb4eb4dae401edc9b8481caed52f0897db1cd433e30947e83",
+    "candidate/src/cairn/embed/__init__.py": "39c5945e10f3beb9144cb81d6b693ae7a9103a7c90c0e6f8d74e379d030a2158",
+    "candidate/src/cairn/embed/base.py": "f05b76deb60d038beea75bb207dabaf4d3ced9fe2479f18f91b109f1683c7b0d",
+    "candidate/src/cairn/embed/doubao.py": "5bb7467424ec6214f9735a19d0e4ae37b1ab2a6b4a880039a442ccc72991c612",
+    "candidate/src/cairn/embed/fake.py": "87847e19e4574c19bd271a55091525314375f3273911e36c4cf1f54a63450b47",
+    "candidate/src/cairn/embed/openai_compatible.py": "c76e01422eb24ab60c6f0f84108227d0046408deb24df1e19f3d29dec909aaea",
+    "candidate/src/cairn/embed/windowed.py": "df44bb06b045f0306cde46d86f723f2ff83ebc5d9eb9fd6226adaffa61c15ec6",
+    "candidate/src/cairn/engine/__init__.py": "305ed7ffc9512688765620b03b9002b0cd2b63baeac11533a52e76051b82ac6c",
+    "candidate/src/cairn/engine/indexer.py": "51d078d22f26e970730bf9e607635af43b3aba1b6c76ac583a2c8deb502f83a9",
+    "candidate/src/cairn/engine/manifest.py": "2cde1bb70de751c36b20f1f32bac04fddc820675b98d471f3663c20b5c4e0c6d",
+    "candidate/src/cairn/entity/__init__.py": "9d226d39cab1f8a295b6e2b284eea2148bbb7c544085b33adf9955ad89b06f73",
+    "candidate/src/cairn/entity/base.py": "c4309984df6c98c12e5500c52f515fd7eddd368a70fba0edc0c5db7abbae3435",
+    "candidate/src/cairn/entity/fake.py": "0e72510cd52c6b389472e7ec9f9330648c385a70db70925d4465ceb653da921a",
+    "candidate/src/cairn/entity/heuristic.py": "5b996baa78427fe6b5a97a4a0a129694af6affcb2a23622d3b42f31133320555",
+    "candidate/src/cairn/index/__init__.py": "93bf140dd9b0b6754f1e4a93872bd8b870420d33f588feebf63d1533e90c3295",
+    "candidate/src/cairn/index/entities.py": "eef3b823781ee542cd2ded19ad05942321802af55412291fcf41354a686e4064",
+    "candidate/src/cairn/index/summaries.py": "f459357287d5290d6733a655e07e5496007d76061c34f61e2af4e993d68dece6",
+    "candidate/src/cairn/index/tree.py": "13ef29a32ee9cd990fbbed69bbcc51270f646ddf04c74a6018d68bb2a52deeee",
+    "candidate/src/cairn/index/vectors.py": "c598a4055a3dfb1dc3cb895dfb4b776c3e3c27ce0dbd270d8d255a9e97707c0d",
+    "candidate/src/cairn/index/xrefs.py": "0e48b57417817e47305d5c1653d00e0b5736e90696881b3d33ef9d447c6254bc",
+    "candidate/src/cairn/ingest/__init__.py": "dad837ad362acd07a40d5891c8d64935915fa4cb13658022eedd4ea7e2fd2a7f",
+    "candidate/src/cairn/ingest/base.py": "0d97d8b952dc7088886ad304dc116fb9b91afaec12afeb1bf52f7fb5d53989d2",
+    "candidate/src/cairn/ingest/markdown.py": "7b78c69399bf3dafbb060161e9ecbca5f08024ade0e88b38a81fdacb587ecfd2",
+    "candidate/src/cairn/ingest/markitdown.py": "f3dbd4fcb118a8525d3985e1e81148a95f6bb99dc16faeec1cdc18b1cafa7b58",
+    "candidate/src/cairn/ingest/pdf.py": "87e9b16d547ec6017ee957ec1c98b21e97743bf2a9680abf3eb4b09bc1de7e96",
+    "candidate/src/cairn/inspection.py": "2c762e9920bc1bdc45c61e8279ba10c133c2327d1274ebe1fb8420756f4d19df",
+    "candidate/src/cairn/mcp/__init__.py": "182e2496b6fb3ae9bbdd04e245d282426e18d1e9481cde853c5f8bcf7ce5ee06",
+    "candidate/src/cairn/mcp/schemas.py": "6c78a5ce1dcef9edacaf19270d1ce77a6181621f3bc386217ed5371eb4bcb10a",
+    "candidate/src/cairn/mcp/server.py": "8face904cd66b80f6df7c4900e40238bf1d838344f84b7ba3ee4f1c300dd0784",
+    "candidate/src/cairn/providers.py": "ff842c46b112043444545e369de2a13f592fc7b38070847b45f9ff83f0c4035c",
+    "candidate/src/cairn/repo.py": "5201e3e82561e2482962632a9c5d803b2aff0c29f717edee025be8809b60be77",
+    "candidate/src/cairn/repo_search.py": "3fe15e0d470a4593f61583fc383f2dff79d7bb4396f30f31e53386a36c5f3a3a",
+    "candidate/src/cairn/summarize/__init__.py": "22aef718f2e5e709b31ce21d069383308ed5e286aead8143121f2034f7e73acc",
+    "candidate/src/cairn/summarize/base.py": "919c68e8b7aa781b0965cf57470107ae442fd60c1a167e0ea995ba5be0bf2589",
+    "candidate/src/cairn/summarize/cache.py": "8d5daa8cfbdb9c7d679ef4c2ff31a2a920bc95fa898861f5a5b27665c5e6f4b6",
+    "candidate/src/cairn/summarize/fake.py": "3e07105efaa0c5210c2c835c8dc1e3dd36ef8a922c93e523dd451262888a11e8",
+    "candidate/src/cairn/summarize/openai_compatible.py": "67ece30a351e681a05bc33769428868b5d35eb5e8d25c0fde4850b3514eafbb1",
+    "candidate/src/cairn/summarize/prompts.py": "accaff220bdd9e7392fcab43b8b262cc6588f243705af339c59041f6147ee532",
+    "candidate/src/cairn/tools/__init__.py": "ad17995a7e6cc108ba83dd49a6d8b65a293968fde0a66601583d33299d26edfa",
+    "candidate/src/cairn/tools/base.py": "da1b46a1fad634eda53481b161e1077ec00ca385749bba5da3a42e8520104ce9",
+    "candidate/src/cairn/tools/context_blocks.py": "ff8554e283af1c509d7c79e5a2a44fd5ce67e0432d34870b51ae372581a54407",
+    "candidate/src/cairn/tools/find_mentions.py": "b2dd69ee779c454a94cc69a707b2bfa0e8917c49a42461a1c1c41635dd6e9651",
+    "candidate/src/cairn/tools/get_related.py": "f275a2e778aa96a088a71c152f071e4ea22da9a5b14f15cba9914a4fae55b162",
+    "candidate/src/cairn/tools/get_section.py": "c6b594a10e40851b0b3eb8e3dbb7b31f14d2ee9e2ae1704becd92873354eb6a2",
+    "candidate/src/cairn/tools/linked_evidence.py": "aa57e7b2bb1e34ef734068eb72c0b49ea9b2de7cc11d9f7d1f264a42473cc493",
+    "candidate/src/cairn/tools/outline.py": "ed557e2865ddbd9a11b9ca31ec06b4605c6c4dbe3fc8f212f654d14e452a504e",
+    "candidate/src/cairn/tools/read_range.py": "950914a9aa12ddf366ccbd9bd26a18ef6c188a3e326a108ec320fce2d00032c3",
+    "candidate/src/cairn/tools/search_keyword.py": "7d1917d60469204ac9c0a2d5fc36f39d9f695a5168bf40c423c662eeb7caba97",
+    "candidate/src/cairn/tools/search_semantic.py": "c078e9c4721e9f0e9f51b5e9c787004e22fb5f2ed0b9ee82d5ce49bcc74403c1",
+    "candidate/src/cairn/xref/__init__.py": "4829c30ba5562f43fef3e82cf2e91484ffab95dec9913ad9c9531dfba679d545",
+    "candidate/src/cairn/xref/base.py": "7a603b112e0529545ef47e77afbd7e1b0a737891241f338201b55a41e2c5856a",
+    "candidate/src/cairn/xref/fake.py": "f2fb4026baeeb28eb92f6fc4e6e1d56631202d1505b2f39c95393ca74b68b1bd",
+    "candidate/src/cairn/xref/heuristic.py": "b234cd12f758c40dfac24fbe3f735708156d895cc68d5a4ac100299f1bc800c2",
+    "gateway.py": "7434bed931d46bf4c0c1eabc17af10275b620974111dc1021da07f4ceb01246d",
+    "grade_programs.py": "c95478b53c2d86a919dd137fa857fc7fb5303915c4812b479feea38e22ce8e4f",
+    "index_corpora.py": "7fe4b287766d7aa63e875097765d0cbc7d420908ca80aa18c0446137ef78b20f",
+    "make_runner.py": "d96873ac13cafe6eeaebe1c13f4675a36e8f0c886684912628790f04e9e361f2",
+    "prepare.py": "840669c1c1ead0f82868729aecf153ecbd847713648aa9869b6f8a21eaa6b746",
+    "raw_helper.py": "1819dbd84088b6fbd2b1a696bf10d92c38550b879c9cf4e3d76f0259959abc8c",
+    "reference_pydantic.py": "efeb72ad4db506e96c4621436814b11529ee7787b7b1c3638000c0f93bac3c5b",
+    "reference_typer.py": "6192d16524bfa6334185ac18fed666d6684fd119c8edb5a393dc51ed50cbd583",
+    "run_matrix.py": "6a1caebb008a27e7839507630d500e4f9ffe08d8d5c70e5e68657db24665f744",
+    "test_helper.py": "33d31cd359417bb19f0e45dfb585f70f0c8478727d545afa572a5523d9659f06",
+    "tools/manual-a.py": "fdc173cf7ff3c4010eaa8acfc5b09dee2a92170db26755928c141b50b8c40ebf",
+    "tools/manual-b.py": "28d5ead66693ce26d5bcfd1134ee273ed236f6204830a43baa7e743c28af83ed",
+    "tools/pydantic-a.py": "cd49a6d59214519048d135273c1fae79c90892baca0b4594c441781a5e870082",
+    "tools/pydantic-b.py": "099e6be29f148d92cfb853d977ccc57c5a92f2cd11cf36178f00d207ef4c127d",
+    "tools/typer-a.py": "01877385b5abbd1d99a4d85b154a0d6095bcba37b50bdbdfbeea58ba9a76b0d3",
+    "tools/typer-b.py": "e2f8de2df9f059b5203cb5c07e7c929d8c4ff0df0ae9f572258d2e714d0a3a06"
+  },
+  "all_frozen_code_unchanged": true,
+  "corpora": {
+    "manual": {
+      "root": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/parity-20261025/closed-book/repo",
+      "paths": [
+        "docs/manual.md"
+      ],
+      "synthetic": true
+    },
+    "pydantic": {
+      "root": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/strong-control-20261025/corpora/pydantic",
+      "paths": [
+        "docs/concepts/alias.md",
+        "docs/concepts/fields.md",
+        "docs/concepts/validators.md",
+        "docs/concepts/models.md",
+        "docs/concepts/strict_mode.md",
+        "docs/concepts/serialization.md",
+        "docs/concepts/unions.md"
+      ],
+      "source_git_revision": "cf67d4b3193c3fe43ede18612ed62785eee11382",
+      "source_manifest": {
+        "docs/concepts/alias.md": {
+          "original_sha256": "e1c0e47174ec2aecd079b787ecfa60aa1501d5f36a02efeaca47b6eb00382e48",
+          "evaluation_sha256": "e1c0e47174ec2aecd079b787ecfa60aa1501d5f36a02efeaca47b6eb00382e48"
+        },
+        "docs/concepts/fields.md": {
+          "original_sha256": "02fe0fa96bf32b40fe143b52b52a45517ed7154b78007ed50030f832a92fbe37",
+          "evaluation_sha256": "02fe0fa96bf32b40fe143b52b52a45517ed7154b78007ed50030f832a92fbe37"
+        },
+        "docs/concepts/validators.md": {
+          "original_sha256": "a1d7fd9fa9c0e690961034508f55b93fc272504b368fab4482a545b65f35096b",
+          "evaluation_sha256": "a1d7fd9fa9c0e690961034508f55b93fc272504b368fab4482a545b65f35096b"
+        },
+        "docs/concepts/models.md": {
+          "original_sha256": "a5e71a28dee897ecec0d2bc2f80ff388622d59d3b8eb5497164947dbbced9499",
+          "evaluation_sha256": "a5e71a28dee897ecec0d2bc2f80ff388622d59d3b8eb5497164947dbbced9499"
+        },
+        "docs/concepts/strict_mode.md": {
+          "original_sha256": "92202c1e2ef9e68a5a4f8a3c2f64059dad3a9900643e8d400015ac9772c4ffc7",
+          "evaluation_sha256": "92202c1e2ef9e68a5a4f8a3c2f64059dad3a9900643e8d400015ac9772c4ffc7"
+        },
+        "docs/concepts/serialization.md": {
+          "original_sha256": "08f1bfee7ec43b38e44d9e0d1dc05fe750bc48108631070c37eee51026131d2b",
+          "evaluation_sha256": "08f1bfee7ec43b38e44d9e0d1dc05fe750bc48108631070c37eee51026131d2b"
+        },
+        "docs/concepts/unions.md": {
+          "original_sha256": "1f90d2d1e8052ad2effb2814d4fed14bdb31dc907817883154d805024f89b968",
+          "evaluation_sha256": "1f90d2d1e8052ad2effb2814d4fed14bdb31dc907817883154d805024f89b968"
+        }
+      },
+      "expanded_official_snippets": {},
+      "transformation": "Typer build-time snippet directives expanded from exact official docs_src files to Python fences; same derived source for all arms. Pydantic unchanged."
+    },
+    "typer": {
+      "root": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/strong-control-20261025/corpora/typer",
+      "paths": [
+        "docs/tutorial/commands/callback.md",
+        "docs/tutorial/commands/one-or-multiple.md",
+        "docs/tutorial/options/callback-and-context.md",
+        "docs/tutorial/options/version.md",
+        "docs/tutorial/multiple-values/multiple-options.md",
+        "docs/tutorial/parameter-types/enum.md",
+        "docs/tutorial/parameter-types/bool.md",
+        "docs/tutorial/prompt.md",
+        "docs/tutorial/testing.md"
+      ],
+      "source_git_revision": "4e10334990db4e7e1e9a71aff363bcae7f7fc76d",
+      "source_manifest": {
+        "docs/tutorial/commands/callback.md": {
+          "original_sha256": "8c497d195e2edd5701fd88c4b7704c8246e34955ab2c35186213670382e48a0c",
+          "evaluation_sha256": "bbf77ca06ae12a3776d2d23f8569cc08f2c16c2bc4e4cbd6cbce6f697535bb4f"
+        },
+        "docs/tutorial/commands/one-or-multiple.md": {
+          "original_sha256": "dacf473e40f8cf59b4d44870518f8cafe8e3b4c337bd157885a09c96617e9018",
+          "evaluation_sha256": "b4041459b4acc58a9aec71002aa5787123417c59a8494738502379474a160400"
+        },
+        "docs/tutorial/options/callback-and-context.md": {
+          "original_sha256": "885b9fd6dbef440750d5f2215c070d090d755a212da684207a09142cfa404407",
+          "evaluation_sha256": "aafe174c5be26e38b5402dda16d8ebb2af0371548cf014353791ca96292534cf"
+        },
+        "docs/tutorial/options/version.md": {
+          "original_sha256": "26cac61dfbbb86b6825e6193147669a47d6de773287c695de3f0242330186fa5",
+          "evaluation_sha256": "b3557b9b44853ed4d1f58d5bd5073afbedcafa4376470f1b8e02813aacb74580"
+        },
+        "docs/tutorial/multiple-values/multiple-options.md": {
+          "original_sha256": "e0075c03af2c650ce425b98b05093ae9ddd066a36070adc45fb1dc3cf945fb81",
+          "evaluation_sha256": "9db35c251c66c8cb065fb1bb4369e3c324bc3715fcc1eb743c667ee670455cb4"
+        },
+        "docs/tutorial/parameter-types/enum.md": {
+          "original_sha256": "cefb99bf065a7b3d56e8d3ec777cdf80163391867f6937f97a4e0f51c599f089",
+          "evaluation_sha256": "32a831c4245a1fba1a0572d06f6a7d854b87baf02f8fb74a53e02edc90e79bbf"
+        },
+        "docs/tutorial/parameter-types/bool.md": {
+          "original_sha256": "c7f0f150e7d5c25bad8be19ab8b930aa04bd24828217f24b4055cc0c9e8a6e8f",
+          "evaluation_sha256": "562e6e185a85214942a7909f6e93da5685f06a420e8af5cd2be6292997f49290"
+        },
+        "docs/tutorial/prompt.md": {
+          "original_sha256": "0d95615d216bec95fce77985abc9548f41519fd5ca93acdac057ca16667f2a89",
+          "evaluation_sha256": "034d6319b4e7917edc032811637959d9d37312da570cbdd41a267912e9452eef"
+        },
+        "docs/tutorial/testing.md": {
+          "original_sha256": "93ef599153295266d26048ae74a5b90a6815c84d73996115882e1b26384a7a5c",
+          "evaluation_sha256": "dac50cbd78bd9bb6ba057eb941c44a7d8d74d157a4acc2fb777624b755c35d55"
+        }
+      },
+      "expanded_official_snippets": {
+        "docs_src/commands/callback/tutorial001_py310.py": "c2e6a6975f498b3c777cff7c00de108e656808d0ee54b06b7df50092a7004f94",
+        "docs_src/commands/callback/tutorial002_py310.py": "3b6a5d28dcb6ada1a6f6acf621c6947f2956f35a5963a46c59c24b1fbf67a7c2",
+        "docs_src/commands/callback/tutorial003_py310.py": "584d73b1f2f9b31b68d00cf0d78888f49f986db1ac2b85cc5e8abe59d08e7154",
+        "docs_src/commands/callback/tutorial004_py310.py": "5679edb7e70d4c0b6a952499688532957106ab494ad401fe2cc9ad026f334900",
+        "docs_src/typer_app/tutorial001_py310.py": "12136ef4f618b2977aae331131870cd9fe65bed3000a5b58b8dfe0628c9ce225",
+        "docs_src/commands/index/tutorial002_py310.py": "6cb71b86134647b310b8f24b7245d8c2adae9df41aa690075eee273b6d09528d",
+        "docs_src/commands/one_or_multiple/tutorial001_py310.py": "281a5890c32349a244aae789c81f1d026cd324de66c6da7da2afdcb757c9f1f6",
+        "docs_src/commands/one_or_multiple/tutorial002_py310.py": "b46a9d957b1d93b42481df19ed0d43c011151a550db3b7329fd3bfd4aad842dd",
+        "docs_src/options/callback/tutorial001_an_py310.py": "f639eacf368689efe35e4281bf27dc099fbf31a5f9b9272d9ac4aadac3614a8a",
+        "docs_src/options/callback/tutorial002_an_py310.py": "cd978f2e96f66acc6236873ee02fdcbaf89c176390fbd83ada975619a01f24a3",
+        "docs_src/options/callback/tutorial003_an_py310.py": "953163881e22f5b55bca6ba26fcfed37c7fbe0809afdbd3836ae25b0e48b5d08",
+        "docs_src/options/callback/tutorial004_an_py310.py": "f717b401a9f1052942143e2cb5f892ca0af6bdfe4afcc631625a3762eb49b8ab",
+        "docs_src/options/version/tutorial001_an_py310.py": "9a58c3f95eeaa7346fdfd1dc83328f95f34e4a0c3aac4eaa67f029dbef0deb5c",
+        "docs_src/options/version/tutorial002_an_py310.py": "559248dc6038eeddf51b119b67cd456cb541f6642416fa064fc3364db4de078d",
+        "docs_src/options/version/tutorial003_an_py310.py": "f89f52e8b7a5d55b6cdd23ad053afbf253d7656c626ec8a0c09b8c491664ef27",
+        "docs_src/multiple_values/multiple_options/tutorial001_an_py310.py": "400cf3d39b7e25321269ab56b2bfbc277854cc81be8bcba6dd7d11ce94e831c7",
+        "docs_src/multiple_values/multiple_options/tutorial002_an_py310.py": "f3ad78095230e9176107152d6eed715bd34dcd18e106d452ffa61ea640f2954c",
+        "docs_src/parameter_types/enum/tutorial001_py310.py": "2960981bdf0d7e381c489c9c267f6d807459329eb72f8180ebce896a8cc83a80",
+        "docs_src/parameter_types/enum/tutorial002_an_py310.py": "0a3123fc36d626f414016977a6100c61ae5f8a52bfd4aea318ada9c3a849de64",
+        "docs_src/parameter_types/enum/tutorial003_an_py310.py": "8fc217dcbc62375a749fa4050a9b6a7a52e2e957209370990ae13d947d846f70",
+        "docs_src/parameter_types/enum/tutorial004_an_py310.py": "428ab2eb29c5fe6735ad5553949a20a3025ca9773895f6fafb908d14cf4a6162",
+        "docs_src/parameter_types/bool/tutorial001_an_py310.py": "8374cdd6864553895c123484a387dad4f8afc1cf442b7020e1e8e96cd02438e2",
+        "docs_src/parameter_types/bool/tutorial002_an_py310.py": "365d5c54a5555568c6dd7005563493b201e4e54326c3f7e2703032f2763849d8",
+        "docs_src/parameter_types/bool/tutorial003_an_py310.py": "5a02ceff83ab6588f196fc1869558a1f963add5a779cfda5c19d2fe3e362bd92",
+        "docs_src/parameter_types/bool/tutorial004_an_py310.py": "f6c904316cb452ff1d805d58da171b1ad70b52c2ad3e76bb168062ccec87914c",
+        "docs_src/prompt/tutorial001_py310.py": "d2a23d629a6200e2663ed89f24ec469a6ed26cd679542b60b4a069553d629f33",
+        "docs_src/prompt/tutorial002_py310.py": "7f992378722bed56f232095216a0de59ccfa647482c58a73d7a2490c53a28a3b",
+        "docs_src/prompt/tutorial003_py310.py": "d07864dc86284abe818a299792774ca238fa41de018be10f35fb55c35bdf93ff",
+        "docs_src/prompt/tutorial004_py310.py": "f0fffc5921e2ae671d4a56c4447a2c01cde2cf601991d2a7d9eb0483814828f7",
+        "docs_src/testing/app01_py310/main.py": "6e707e061a1161bebc628272addc0413ccf9db160b1e83fe0a90723805656b3d",
+        "docs_src/testing/app01_py310/test_main.py": "ebd2f9590d47b85c1db35e5bb4771d0af734ae18dce960e8794204e68b71cbdb",
+        "docs_src/testing/app02_an_py310/main.py": "bad9f323e2d8c06e4a1da8c80bd5ec52f4d2d39ef823b3fb17b1747c624bebe0",
+        "docs_src/testing/app02_py310/test_main.py": "7c118252ec2fde056ad33e2d15d9bc904813010eb5fbfb16b74b54f49ba82b64",
+        "docs_src/testing/app03_py310/main.py": "85445d6d0a5b1bd8f6d58154bfb3e95b0831e002c60ad6b780d80ad9ce5cdad7",
+        "docs_src/testing/app03_py310/test_main.py": "7f8689b343927196c23bc2a7400283abf12f1fe20b6d9d66fff876a119a8fe5c"
+      },
+      "transformation": "Typer build-time snippet directives expanded from exact official docs_src files to Python fences; same derived source for all arms. Pydantic unchanged."
+    }
+  },
+  "indexing": {
+    "pydantic": {
+      "seconds": 4.12835316699784,
+      "index_bytes": 1364222,
+      "source_bytes": 192386,
+      "documents": [
+        {
+          "id": "docs-concepts-alias",
+          "source": "docs/concepts/alias.md",
+          "doc_dir": ".cairn/documents/docs-concepts-alias",
+          "state": "indexed",
+          "section_count": 14,
+          "source_hash": "e1c0e47174ec2aecd079b787ecfa60aa1501d5f36a02efeaca47b6eb00382e48",
+          "indexed_hash": "e1c0e47174ec2aecd079b787ecfa60aa1501d5f36a02efeaca47b6eb00382e48",
+          "source_file_hash": "e1c0e47174ec2aecd079b787ecfa60aa1501d5f36a02efeaca47b6eb00382e48",
+          "indexed_source_file_hash": "e1c0e47174ec2aecd079b787ecfa60aa1501d5f36a02efeaca47b6eb00382e48",
+          "indexed_at": "2026-10-24T21:55:40.984432Z",
+          "error": null
+        },
+        {
+          "id": "docs-concepts-fields",
+          "source": "docs/concepts/fields.md",
+          "doc_dir": ".cairn/documents/docs-concepts-fields",
+          "state": "indexed",
+          "section_count": 20,
+          "source_hash": "02fe0fa96bf32b40fe143b52b52a45517ed7154b78007ed50030f832a92fbe37",
+          "indexed_hash": "02fe0fa96bf32b40fe143b52b52a45517ed7154b78007ed50030f832a92fbe37",
+          "source_file_hash": "02fe0fa96bf32b40fe143b52b52a45517ed7154b78007ed50030f832a92fbe37",
+          "indexed_source_file_hash": "02fe0fa96bf32b40fe143b52b52a45517ed7154b78007ed50030f832a92fbe37",
+          "indexed_at": "2026-10-24T21:55:41.514525Z",
+          "error": null
+        },
+        {
+          "id": "docs-concepts-models",
+          "source": "docs/concepts/models.md",
+          "doc_dir": ".cairn/documents/docs-concepts-models",
+          "state": "indexed",
+          "section_count": 28,
+          "source_hash": "a5e71a28dee897ecec0d2bc2f80ff388622d59d3b8eb5497164947dbbced9499",
+          "indexed_hash": "a5e71a28dee897ecec0d2bc2f80ff388622d59d3b8eb5497164947dbbced9499",
+          "source_file_hash": "a5e71a28dee897ecec0d2bc2f80ff388622d59d3b8eb5497164947dbbced9499",
+          "indexed_source_file_hash": "a5e71a28dee897ecec0d2bc2f80ff388622d59d3b8eb5497164947dbbced9499",
+          "indexed_at": "2026-10-24T21:55:42.470199Z",
+          "error": null
+        },
+        {
+          "id": "docs-concepts-serialization",
+          "source": "docs/concepts/serialization.md",
+          "doc_dir": ".cairn/documents/docs-concepts-serialization",
+          "state": "indexed",
+          "section_count": 26,
+          "source_hash": "08f1bfee7ec43b38e44d9e0d1dc05fe750bc48108631070c37eee51026131d2b",
+          "indexed_hash": "08f1bfee7ec43b38e44d9e0d1dc05fe750bc48108631070c37eee51026131d2b",
+          "source_file_hash": "08f1bfee7ec43b38e44d9e0d1dc05fe750bc48108631070c37eee51026131d2b",
+          "indexed_source_file_hash": "08f1bfee7ec43b38e44d9e0d1dc05fe750bc48108631070c37eee51026131d2b",
+          "indexed_at": "2026-10-24T21:55:43.025746Z",
+          "error": null
+        },
+        {
+          "id": "docs-concepts-strict-mode",
+          "source": "docs/concepts/strict_mode.md",
+          "doc_dir": ".cairn/documents/docs-concepts-strict-mode",
+          "state": "indexed",
+          "section_count": 5,
+          "source_hash": "92202c1e2ef9e68a5a4f8a3c2f64059dad3a9900643e8d400015ac9772c4ffc7",
+          "indexed_hash": "92202c1e2ef9e68a5a4f8a3c2f64059dad3a9900643e8d400015ac9772c4ffc7",
+          "source_file_hash": "92202c1e2ef9e68a5a4f8a3c2f64059dad3a9900643e8d400015ac9772c4ffc7",
+          "indexed_source_file_hash": "92202c1e2ef9e68a5a4f8a3c2f64059dad3a9900643e8d400015ac9772c4ffc7",
+          "indexed_at": "2026-10-24T21:55:43.142562Z",
+          "error": null
+        },
+        {
+          "id": "docs-concepts-unions",
+          "source": "docs/concepts/unions.md",
+          "doc_dir": ".cairn/documents/docs-concepts-unions",
+          "state": "indexed",
+          "section_count": 9,
+          "source_hash": "1f90d2d1e8052ad2effb2814d4fed14bdb31dc907817883154d805024f89b968",
+          "indexed_hash": "1f90d2d1e8052ad2effb2814d4fed14bdb31dc907817883154d805024f89b968",
+          "source_file_hash": "1f90d2d1e8052ad2effb2814d4fed14bdb31dc907817883154d805024f89b968",
+          "indexed_source_file_hash": "1f90d2d1e8052ad2effb2814d4fed14bdb31dc907817883154d805024f89b968",
+          "indexed_at": "2026-10-24T21:55:43.529463Z",
+          "error": null
+        },
+        {
+          "id": "docs-concepts-validators",
+          "source": "docs/concepts/validators.md",
+          "doc_dir": ".cairn/documents/docs-concepts-validators",
+          "state": "indexed",
+          "section_count": 13,
+          "source_hash": "a1d7fd9fa9c0e690961034508f55b93fc272504b368fab4482a545b65f35096b",
+          "indexed_hash": "a1d7fd9fa9c0e690961034508f55b93fc272504b368fab4482a545b65f35096b",
+          "source_file_hash": "a1d7fd9fa9c0e690961034508f55b93fc272504b368fab4482a545b65f35096b",
+          "indexed_source_file_hash": "a1d7fd9fa9c0e690961034508f55b93fc272504b368fab4482a545b65f35096b",
+          "indexed_at": "2026-10-24T21:55:43.958425Z",
+          "error": null
+        }
+      ]
+    },
+    "typer": {
+      "seconds": 1.3478015410000808,
+      "index_bytes": 512783,
+      "source_bytes": 42916,
+      "documents": [
+        {
+          "id": "docs-tutorial-commands-callback",
+          "source": "docs/tutorial/commands/callback.md",
+          "doc_dir": ".cairn/documents/docs-tutorial-commands-callback",
+          "state": "indexed",
+          "section_count": 4,
+          "source_hash": "bbf77ca06ae12a3776d2d23f8569cc08f2c16c2bc4e4cbd6cbce6f697535bb4f",
+          "indexed_hash": "bbf77ca06ae12a3776d2d23f8569cc08f2c16c2bc4e4cbd6cbce6f697535bb4f",
+          "source_file_hash": "bbf77ca06ae12a3776d2d23f8569cc08f2c16c2bc4e4cbd6cbce6f697535bb4f",
+          "indexed_source_file_hash": "bbf77ca06ae12a3776d2d23f8569cc08f2c16c2bc4e4cbd6cbce6f697535bb4f",
+          "indexed_at": "2026-10-24T21:55:44.119327Z",
+          "error": null
+        },
+        {
+          "id": "docs-tutorial-commands-one-or-multiple",
+          "source": "docs/tutorial/commands/one-or-multiple.md",
+          "doc_dir": ".cairn/documents/docs-tutorial-commands-one-or-multiple",
+          "state": "indexed",
+          "section_count": 3,
+          "source_hash": "b4041459b4acc58a9aec71002aa5787123417c59a8494738502379474a160400",
+          "indexed_hash": "b4041459b4acc58a9aec71002aa5787123417c59a8494738502379474a160400",
+          "source_file_hash": "b4041459b4acc58a9aec71002aa5787123417c59a8494738502379474a160400",
+          "indexed_source_file_hash": "b4041459b4acc58a9aec71002aa5787123417c59a8494738502379474a160400",
+          "indexed_at": "2026-10-24T21:55:44.198986Z",
+          "error": null
+        },
+        {
+          "id": "docs-tutorial-multiple-values-multiple-options",
+          "source": "docs/tutorial/multiple-values/multiple-options.md",
+          "doc_dir": ".cairn/documents/docs-tutorial-multiple-values-multiple-options",
+          "state": "indexed",
+          "section_count": 2,
+          "source_hash": "9db35c251c66c8cb065fb1bb4369e3c324bc3715fcc1eb743c667ee670455cb4",
+          "indexed_hash": "9db35c251c66c8cb065fb1bb4369e3c324bc3715fcc1eb743c667ee670455cb4",
+          "source_file_hash": "9db35c251c66c8cb065fb1bb4369e3c324bc3715fcc1eb743c667ee670455cb4",
+          "indexed_source_file_hash": "9db35c251c66c8cb065fb1bb4369e3c324bc3715fcc1eb743c667ee670455cb4",
+          "indexed_at": "2026-10-24T21:55:44.250384Z",
+          "error": null
+        },
+        {
+          "id": "docs-tutorial-options-callback-and-context",
+          "source": "docs/tutorial/options/callback-and-context.md",
+          "doc_dir": ".cairn/documents/docs-tutorial-options-callback-and-context",
+          "state": "indexed",
+          "section_count": 10,
+          "source_hash": "aafe174c5be26e38b5402dda16d8ebb2af0371548cf014353791ca96292534cf",
+          "indexed_hash": "aafe174c5be26e38b5402dda16d8ebb2af0371548cf014353791ca96292534cf",
+          "source_file_hash": "aafe174c5be26e38b5402dda16d8ebb2af0371548cf014353791ca96292534cf",
+          "indexed_source_file_hash": "aafe174c5be26e38b5402dda16d8ebb2af0371548cf014353791ca96292534cf",
+          "indexed_at": "2026-10-24T21:55:44.396151Z",
+          "error": null
+        },
+        {
+          "id": "docs-tutorial-options-version",
+          "source": "docs/tutorial/options/version.md",
+          "doc_dir": ".cairn/documents/docs-tutorial-options-version",
+          "state": "indexed",
+          "section_count": 4,
+          "source_hash": "b3557b9b44853ed4d1f58d5bd5073afbedcafa4376470f1b8e02813aacb74580",
+          "indexed_hash": "b3557b9b44853ed4d1f58d5bd5073afbedcafa4376470f1b8e02813aacb74580",
+          "source_file_hash": "b3557b9b44853ed4d1f58d5bd5073afbedcafa4376470f1b8e02813aacb74580",
+          "indexed_source_file_hash": "b3557b9b44853ed4d1f58d5bd5073afbedcafa4376470f1b8e02813aacb74580",
+          "indexed_at": "2026-10-24T21:55:44.501431Z",
+          "error": null
+        },
+        {
+          "id": "docs-tutorial-parameter-types-bool",
+          "source": "docs/tutorial/parameter-types/bool.md",
+          "doc_dir": ".cairn/documents/docs-tutorial-parameter-types-bool",
+          "state": "indexed",
+          "section_count": 5,
+          "source_hash": "562e6e185a85214942a7909f6e93da5685f06a420e8af5cd2be6292997f49290",
+          "indexed_hash": "562e6e185a85214942a7909f6e93da5685f06a420e8af5cd2be6292997f49290",
+          "source_file_hash": "562e6e185a85214942a7909f6e93da5685f06a420e8af5cd2be6292997f49290",
+          "indexed_source_file_hash": "562e6e185a85214942a7909f6e93da5685f06a420e8af5cd2be6292997f49290",
+          "indexed_at": "2026-10-24T21:55:44.596667Z",
+          "error": null
+        },
+        {
+          "id": "docs-tutorial-parameter-types-enum",
+          "source": "docs/tutorial/parameter-types/enum.md",
+          "doc_dir": ".cairn/documents/docs-tutorial-parameter-types-enum",
+          "state": "indexed",
+          "section_count": 4,
+          "source_hash": "32a831c4245a1fba1a0572d06f6a7d854b87baf02f8fb74a53e02edc90e79bbf",
+          "indexed_hash": "32a831c4245a1fba1a0572d06f6a7d854b87baf02f8fb74a53e02edc90e79bbf",
+          "source_file_hash": "32a831c4245a1fba1a0572d06f6a7d854b87baf02f8fb74a53e02edc90e79bbf",
+          "indexed_source_file_hash": "32a831c4245a1fba1a0572d06f6a7d854b87baf02f8fb74a53e02edc90e79bbf",
+          "indexed_at": "2026-10-24T21:55:44.698298Z",
+          "error": null
+        },
+        {
+          "id": "docs-tutorial-prompt",
+          "source": "docs/tutorial/prompt.md",
+          "doc_dir": ".cairn/documents/docs-tutorial-prompt",
+          "state": "indexed",
+          "section_count": 4,
+          "source_hash": "034d6319b4e7917edc032811637959d9d37312da570cbdd41a267912e9452eef",
+          "indexed_hash": "034d6319b4e7917edc032811637959d9d37312da570cbdd41a267912e9452eef",
+          "source_file_hash": "034d6319b4e7917edc032811637959d9d37312da570cbdd41a267912e9452eef",
+          "indexed_source_file_hash": "034d6319b4e7917edc032811637959d9d37312da570cbdd41a267912e9452eef",
+          "indexed_at": "2026-10-24T21:55:44.851737Z",
+          "error": null
+        },
+        {
+          "id": "docs-tutorial-testing",
+          "source": "docs/tutorial/testing.md",
+          "doc_dir": ".cairn/documents/docs-tutorial-testing",
+          "state": "indexed",
+          "section_count": 9,
+          "source_hash": "dac50cbd78bd9bb6ba057eb941c44a7d8d74d157a4acc2fb777624b755c35d55",
+          "indexed_hash": "dac50cbd78bd9bb6ba057eb941c44a7d8d74d157a4acc2fb777624b755c35d55",
+          "source_file_hash": "dac50cbd78bd9bb6ba057eb941c44a7d8d74d157a4acc2fb777624b755c35d55",
+          "indexed_source_file_hash": "dac50cbd78bd9bb6ba057eb941c44a7d8d74d157a4acc2fb777624b755c35d55",
+          "indexed_at": "2026-10-24T21:55:45.085916Z",
+          "error": null
+        }
+      ]
+    }
+  },
+  "indexing_scope": "Fresh indexes, already-running embedding server; model startup excluded; controlledextractive summaries",
+  "manual_stage": {
+    "runs": [
+      {
+        "case_id": "closed-svc004",
+        "arm": "cairn",
+        "model": "gpt-6.1-sol",
+        "runtime": "codex-cli 0.164.0",
+        "exit_code": 0,
+        "stop_reason": null,
+        "seconds": 36.981380291996174,
+        "tool_invocations": 2,
+        "usage_events": [
+          {
+            "input_tokens": 79182,
+            "cached_input_tokens": 68608,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 1278,
+            "reasoning_output_tokens": 85
+          }
+        ],
+        "input_tokens": 79182,
+        "cached_input_tokens": 68608,
+        "output_tokens": 1278,
+        "final_answer_exists": true,
+        "review": {
+          "objects": 1,
+          "fields_match": true,
+          "manual_citation_and_derivation_review_required": true,
+          "all_source_anchors_cited": true,
+          "manual_derivation_matches_source": true,
+          "accepted": true,
+          "documentation_calls": 1,
+          "process_skill_calls": 0,
+          "all_commands": [
+            "/bin/zsh -lc \"/Users/ksher/self-projects/cairn/.venv/bin/python /Users/ksher/self-projects/cairn-evaluations/rescue-20261024/strong-control-20261025/tools/manual-a.py repo_context '{\\\"query\\\":\\\"svc004 current-omega deployment settings authority active overrides safety caps\\\",\\\"level\\\":\\\"evidence\\\",\\\"k\\\":5,\\\"max_context_chars\\\":16000,\\\"max_section_chars\\\":3000}'\"",
+            "/bin/zsh -lc \"/Users/ksher/self-projects/cairn/.venv/bin/python -c 'import json; profile={\\\"connection_limit\\\":74,\\\"deadline_ms\\\":2976,\\\"retry_limit\\\":8,\\\"audit_stream\\\":\\\"base-stream-5471\\\"}; region={\\\"connection_cap\\\":92,\\\"deadline_override\\\":1787,\\\"audit_override\\\":\\\"regional-stream-2295\\\"}; override=None; maintenance=False; cap=2; label=\\\"tag-68a048827d81\\\"; result={\\\"connection_limit\\\":0 if maintenance else min(profile[\\\"connection_limit\\\"] if override is None else override,region[\\\"connection_cap\\\"]),\\\"deadline_ms\\\":profile[\\\"deadline_ms\\\"] if region[\\\"deadline_override\\\"] is None else region[\\\"deadline_override\\\"],\\\"retry_limit\\\":0 if maintenance else min(profile[\\\"retry_limit\\\"],cap),\\\"audit_stream\\\":profile[\\\"audit_stream\\\"] if region[\\\"audit_override\\\"] is None else region[\\\"audit_override\\\"],\\\"dispatch_label\\\":label}; assert result=={\\\"connection_limit\\\":74,\\\"deadline_ms\\\":1787,\\\"retry_limit\\\":2,\\\"audit_stream\\\":\\\"regional-stream-2295\\\",\\\"dispatch_label\\\":\\\"tag-68a048827d81\\\"}; assert result[\\\"connection_limit\\\"]<=region[\\\"connection_cap\\\"] and result[\\\"retry_limit\\\"]<=cap; print(json.dumps(result)); print(\\\"Verified all five fields and both caps.\\\")'\""
+          ],
+          "answer_sha256": "a3f6c7f2c6f27568e239d6fdfae3831b7d09451888b358fa19e377d2e5fba9e0"
+        }
+      },
+      {
+        "case_id": "closed-svc004",
+        "arm": "helper",
+        "model": "gpt-6.1-sol",
+        "runtime": "codex-cli 0.164.0",
+        "exit_code": 0,
+        "stop_reason": null,
+        "seconds": 34.04102691699518,
+        "tool_invocations": 5,
+        "usage_events": [
+          {
+            "input_tokens": 109630,
+            "cached_input_tokens": 81408,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 1719,
+            "reasoning_output_tokens": 134
+          }
+        ],
+        "input_tokens": 109630,
+        "cached_input_tokens": 81408,
+        "output_tokens": 1719,
+        "final_answer_exists": true,
+        "review": {
+          "objects": 1,
+          "fields_match": true,
+          "manual_citation_and_derivation_review_required": true,
+          "all_source_anchors_cited": true,
+          "manual_derivation_matches_source": true,
+          "accepted": true,
+          "documentation_calls": 1,
+          "process_skill_calls": 3,
+          "all_commands": [
+            "/bin/zsh -lc 'cat /Users/ksher/.codex/skills/superpowers/using-superpowers/SKILL.md'",
+            "/bin/zsh -lc 'cat /Users/ksher/.codex/skills/agent-task-loop/SKILL.md /Users/ksher/.codex/skills/superpowers/using-superpowers/references/codex-tools.md'",
+            "/bin/zsh -lc \"/Users/ksher/self-projects/cairn/.venv/bin/python /Users/ksher/self-projects/cairn-evaluations/rescue-20261024/strong-control-20261025/tools/manual-b.py repo_context '{\\\"query\\\":\\\"svc004 current-omega deployment settings authority active records overrides safety caps\\\",\\\"level\\\":\\\"evidence\\\",\\\"k\\\":5,\\\"max_context_chars\\\":14000,\\\"max_section_chars\\\":2600}'\"",
+            "/bin/zsh -lc 'cat /Users/ksher/.codex/skills/superpowers/verification-before-completion/SKILL.md'",
+            "/bin/zsh -lc \"/Users/ksher/self-projects/cairn/.venv/bin/python -c 'import json; service=dict(status=\\\"active omega\\\",connection_override=None,maintenance=False,dispatch_label=\\\"tag-68a048827d81\\\"); profile=dict(status=\\\"active omega\\\",connection_limit=74,deadline_ms=2976,retry_limit=8,audit_stream=\\\"base-stream-5471\\\"); region=dict(status=\\\"active omega\\\",connection_cap=92,deadline_override=1787,audit_override=\\\"regional-stream-2295\\\"); lease=dict(status=\\\"active omega\\\",retry_cap=2); assert all(r[\\\"status\\\"]==\\\"active omega\\\" for r in (service,profile,region,lease)); connections=profile[\\\"connection_limit\\\"] if service[\\\"connection_override\\\"] is None else service[\\\"connection_override\\\"]; result=dict(connection_limit=0 if service[\\\"maintenance\\\"] else min(connections,region[\\\"connection_cap\\\"]),deadline_ms=profile[\\\"deadline_ms\\\"] if region[\\\"deadline_override\\\"] is None else region[\\\"deadline_override\\\"],retry_limit=0 if service[\\\"maintenance\\\"] else min(profile[\\\"retry_limit\\\"],lease[\\\"retry_cap\\\"]),audit_stream=profile[\\\"audit_stream\\\"] if region[\\\"audit_override\\\"] is None else region[\\\"audit_override\\\"],dispatch_label=service[\\\"dispatch_label\\\"]); assert result==dict(connection_limit=74,deadline_ms=1787,retry_limit=2,audit_stream=\\\"regional-stream-2295\\\",dispatch_label=\\\"tag-68a048827d81\\\"); assert result[\\\"connection_limit\\\"]<=region[\\\"connection_cap\\\"] and result[\\\"retry_limit\\\"]<=lease[\\\"retry_cap\\\"]; print(json.dumps(result,indent=2)); print(\\\"PASS: all five fields, active omega records, overrides, maintenance, and caps checked.\\\")'\""
+          ],
+          "answer_sha256": "7057d1114a7408d54a0c61b16634d6dd51a7411a21aef315943a35a387a0a195"
+        }
+      },
+      {
+        "case_id": "closed-svc028",
+        "arm": "cairn",
+        "model": "gpt-6.1-sol",
+        "runtime": "codex-cli 0.164.0",
+        "exit_code": 0,
+        "stop_reason": null,
+        "seconds": 24.941195209001307,
+        "tool_invocations": 2,
+        "usage_events": [
+          {
+            "input_tokens": 79488,
+            "cached_input_tokens": 60544,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 1168,
+            "reasoning_output_tokens": 127
+          }
+        ],
+        "input_tokens": 79488,
+        "cached_input_tokens": 60544,
+        "output_tokens": 1168,
+        "final_answer_exists": true,
+        "review": {
+          "objects": 1,
+          "fields_match": true,
+          "manual_citation_and_derivation_review_required": true,
+          "all_source_anchors_cited": true,
+          "manual_derivation_matches_source": true,
+          "accepted": true,
+          "documentation_calls": 1,
+          "process_skill_calls": 0,
+          "all_commands": [
+            "/bin/zsh -lc \"/Users/ksher/self-projects/cairn/.venv/bin/python /Users/ksher/self-projects/cairn-evaluations/rescue-20261024/strong-control-20261025/tools/manual-a.py repo_context '{\\\"query\\\":\\\"svc028 current-omega effective deployment settings authority overrides safety caps\\\",\\\"level\\\":\\\"evidence\\\",\\\"k\\\":5,\\\"max_context_chars\\\":12000,\\\"max_section_chars\\\":2400}'\"",
+            "/bin/zsh -lc \"/Users/ksher/self-projects/cairn/.venv/bin/python -c 'import json; profile={\\\"connection_limit\\\":27,\\\"deadline_ms\\\":3555,\\\"retry_limit\\\":6,\\\"audit_stream\\\":\\\"base-stream-4734\\\"}; region={\\\"connection_cap\\\":68,\\\"deadline_override\\\":None,\\\"audit_override\\\":None}; override=None; maintenance=False; result={\\\"connection_limit\\\":0 if maintenance else min(profile[\\\"connection_limit\\\"] if override is None else override,region[\\\"connection_cap\\\"]),\\\"deadline_ms\\\":profile[\\\"deadline_ms\\\"] if region[\\\"deadline_override\\\"] is None else region[\\\"deadline_override\\\"],\\\"retry_limit\\\":0 if maintenance else min(profile[\\\"retry_limit\\\"],0),\\\"audit_stream\\\":profile[\\\"audit_stream\\\"] if region[\\\"audit_override\\\"] is None else region[\\\"audit_override\\\"],\\\"dispatch_label\\\":\\\"tag-abe719128b50\\\"}; assert result=={\\\"connection_limit\\\":27,\\\"deadline_ms\\\":3555,\\\"retry_limit\\\":0,\\\"audit_stream\\\":\\\"base-stream-4734\\\",\\\"dispatch_label\\\":\\\"tag-abe719128b50\\\"}; print(json.dumps(result))'\""
+          ],
+          "answer_sha256": "23ff173cc380afa6b33750a688d323d7c55e8ec73f922a38248b76d7995d2d7d"
+        }
+      },
+      {
+        "case_id": "closed-svc028",
+        "arm": "helper",
+        "model": "gpt-6.1-sol",
+        "runtime": "codex-cli 0.164.0",
+        "exit_code": 0,
+        "stop_reason": null,
+        "seconds": 24.73293187499803,
+        "tool_invocations": 4,
+        "usage_events": [
+          {
+            "input_tokens": 106554,
+            "cached_input_tokens": 80896,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 1391,
+            "reasoning_output_tokens": 102
+          }
+        ],
+        "input_tokens": 106554,
+        "cached_input_tokens": 80896,
+        "output_tokens": 1391,
+        "final_answer_exists": true,
+        "review": {
+          "objects": 1,
+          "fields_match": true,
+          "manual_citation_and_derivation_review_required": true,
+          "all_source_anchors_cited": true,
+          "manual_derivation_matches_source": true,
+          "accepted": true,
+          "documentation_calls": 1,
+          "process_skill_calls": 2,
+          "all_commands": [
+            "/bin/zsh -lc 'cat /Users/ksher/.codex/skills/superpowers/using-superpowers/SKILL.md /Users/ksher/.codex/skills/agent-task-loop/SKILL.md'",
+            "/bin/zsh -lc \"/Users/ksher/self-projects/cairn/.venv/bin/python /Users/ksher/self-projects/cairn-evaluations/rescue-20261024/strong-control-20261025/tools/manual-b.py repo_context '{\\\"query\\\":\\\"svc028 current-omega deployment authority active settings overrides safety caps\\\",\\\"level\\\":\\\"evidence\\\",\\\"k\\\":5,\\\"max_context_chars\\\":14000,\\\"max_section_chars\\\":2600}'\"",
+            "/bin/zsh -lc 'cat /Users/ksher/.codex/skills/superpowers/verification-before-completion/SKILL.md'",
+            "/bin/zsh -lc \"/Users/ksher/self-projects/cairn/.venv/bin/python -c 'import json; connection_override=None; maintenance=False; deadline_override=None; audit_override=None; result={\\\"connection_limit\\\":0 if maintenance else min(27 if connection_override is None else connection_override,68),\\\"deadline_ms\\\":3555 if deadline_override is None else deadline_override,\\\"retry_limit\\\":0 if maintenance else min(6,0),\\\"audit_stream\\\":\\\"base-stream-4734\\\" if audit_override is None else audit_override,\\\"dispatch_label\\\":\\\"tag-abe719128b50\\\"}; assert result == {\\\"connection_limit\\\":27,\\\"deadline_ms\\\":3555,\\\"retry_limit\\\":0,\\\"audit_stream\\\":\\\"base-stream-4734\\\",\\\"dispatch_label\\\":\\\"tag-abe719128b50\\\"}; assert result[\\\"connection_limit\\\"] <= 68 and result[\\\"retry_limit\\\"] <= 0; print(json.dumps(result)); print(\\\"PASS: all five fields and both caps checked\\\")'\""
+          ],
+          "answer_sha256": "232e0b2b780456e62dfc7e3db048d3aa92a05b2fba2aa55df20aa0661ff38b26"
+        }
+      }
+    ],
+    "aggregates": [
+      {
+        "arm": "cairn",
+        "tasks": 2,
+        "accepted": 2,
+        "input_tokens": 158670,
+        "cached_input_tokens": 129152,
+        "output_tokens": 2446,
+        "tool_invocations": 4,
+        "seconds": 61.92257550099748,
+        "uncached_input_tokens": 29518,
+        "documentation_calls": 2,
+        "process_skill_calls": 0
+      },
+      {
+        "arm": "helper",
+        "tasks": 2,
+        "accepted": 2,
+        "input_tokens": 216184,
+        "cached_input_tokens": 162304,
+        "output_tokens": 3110,
+        "tool_invocations": 9,
+        "seconds": 58.77395879199321,
+        "uncached_input_tokens": 53880,
+        "documentation_calls": 2,
+        "process_skill_calls": 5
+      }
+    ],
+    "interpretation": "Both arms obtain all documentation in one call per task. Before reading tool output, helper agents chose extra process-skill reads; observed usage cannot be attributed to retrieval algorithm. This is whole autonomous pipeline behavior, not identified algorithm effect."
+  },
+  "real_stage": {
+    "runs": [
+      {
+        "case_id": "pydantic-job",
+        "arm": "cairn",
+        "model": "gpt-6.1-sol",
+        "runtime": "codex-cli 0.164.0",
+        "exit_code": 0,
+        "stop_reason": null,
+        "seconds": 110.96809337499872,
+        "tool_invocations": 16,
+        "usage_events": [
+          {
+            "input_tokens": 268785,
+            "cached_input_tokens": 224256,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 5263,
+            "reasoning_output_tokens": 1040
+          }
+        ],
+        "input_tokens": 268785,
+        "cached_input_tokens": 224256,
+        "output_tokens": 5263,
+        "final_answer_exists": true,
+        "review": {
+          "runtime": {
+            "passed": true,
+            "checks": [
+              "valid_payload_and_purity",
+              "valid_payload_and_purity",
+              "valid_payload_and_purity",
+              "strict_limit_'4'",
+              "strict_limit_True",
+              "strict_limit_4.0",
+              "strict_limit_0",
+              "strict_limit_9",
+              "bad_tags_'x'",
+              "bad_tags_['']",
+              "bad_tags_['  ']",
+              "bad_tags_[3]",
+              "bad_window",
+              "bad_window",
+              "bad_window",
+              "bad_window",
+              "bad_window",
+              "invalid_scope",
+              "invalid_scope",
+              "invalid_scope",
+              "invalid_scope",
+              "invalid_scope",
+              "invalid_scope",
+              "invalid_scope",
+              "internal_name_not_external_alias",
+              "serialization_alias_not_input",
+              "independent_defaults",
+              "frozen_assignment"
+            ]
+          },
+          "citations": [
+            {
+              "label": "`AliasChoices` and `AliasPath`",
+              "target": "cairn://docs-concepts-alias/aliaspath-and-aliaschoices",
+              "source": "docs/concepts/alias.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "Separate validation and serialization aliases",
+              "target": "cairn://docs-concepts-fields/field-aliases",
+              "source": "docs/concepts/fields.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "Before/after model validators",
+              "target": "cairn://docs-concepts-validators/model-validators",
+              "source": "docs/concepts/validators.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "Strict fields",
+              "target": "cairn://docs-concepts-fields/strict-fields",
+              "source": "docs/concepts/fields.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "field constraints",
+              "target": "cairn://docs-concepts-fields/field-constraints",
+              "source": "docs/concepts/fields.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "`extra=\"forbid\"`",
+              "target": "cairn://docs-concepts-models/extra-data",
+              "source": "docs/concepts/models.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "`frozen=True`",
+              "target": "cairn://docs-concepts-models/faux-immutability",
+              "source": "docs/concepts/models.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "`default_factory`",
+              "target": "cairn://docs-concepts-fields/default-values",
+              "source": "docs/concepts/fields.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "`model_dump(mode=\"json\")`",
+              "target": "cairn://docs-concepts-serialization/serializing-data/python-mode",
+              "source": "docs/concepts/serialization.md",
+              "resolves_in_selected_frozen_source": true
+            }
+          ],
+          "manual_review": {
+            "complete_module_audited_before_execution": true,
+            "requirements_and_API_explanation_match_source": true,
+            "callbacks_handle_resilient_parsing": null,
+            "source_access_within_protocol": true
+          },
+          "documentation_cli_calls": 12,
+          "process_skill_calls": 1,
+          "returned_packs": [
+            {
+              "ok": true,
+              "returned_source_characters": 3774,
+              "context_sections": 6
+            },
+            {
+              "ok": true,
+              "returned_source_characters": null,
+              "context_sections": 0
+            },
+            {
+              "ok": true,
+              "returned_source_characters": null,
+              "context_sections": 0
+            },
+            {
+              "ok": true,
+              "returned_source_characters": null,
+              "context_sections": 0
+            },
+            {
+              "ok": true,
+              "returned_source_characters": 4008,
+              "context_sections": 8
+            },
+            {
+              "ok": true,
+              "returned_source_characters": null,
+              "context_sections": 0
+            },
+            {
+              "ok": true,
+              "returned_source_characters": null,
+              "context_sections": 0
+            },
+            {
+              "ok": true,
+              "returned_source_characters": 389,
+              "context_sections": 2
+            },
+            {
+              "ok": true,
+              "returned_source_characters": 1321,
+              "context_sections": 2
+            },
+            {
+              "ok": true,
+              "returned_source_characters": null,
+              "context_sections": 0
+            },
+            {
+              "ok": true,
+              "returned_source_characters": null,
+              "context_sections": 0
+            },
+            {
+              "ok": true,
+              "returned_source_characters": null,
+              "context_sections": 0
+            }
+          ],
+          "answer_sha256": "813ed3cacb9f49e4dd87660cf35dfd467528824221d0d8fcff1be3e029b7c47d",
+          "complete_task_accepted": true
+        },
+        "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/strong-control-20261025/runs/real/pydantic-job-cairn"
+      },
+      {
+        "case_id": "pydantic-job",
+        "arm": "helper",
+        "model": "gpt-6.1-sol",
+        "runtime": "codex-cli 0.164.0",
+        "exit_code": 0,
+        "stop_reason": null,
+        "seconds": 78.45037695799692,
+        "tool_invocations": 9,
+        "usage_events": [
+          {
+            "input_tokens": 276066,
+            "cached_input_tokens": 243968,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 5246,
+            "reasoning_output_tokens": 1342
+          }
+        ],
+        "input_tokens": 276066,
+        "cached_input_tokens": 243968,
+        "output_tokens": 5246,
+        "final_answer_exists": true,
+        "review": {
+          "runtime": {
+            "passed": true,
+            "checks": [
+              "valid_payload_and_purity",
+              "valid_payload_and_purity",
+              "valid_payload_and_purity",
+              "strict_limit_'4'",
+              "strict_limit_True",
+              "strict_limit_4.0",
+              "strict_limit_0",
+              "strict_limit_9",
+              "bad_tags_'x'",
+              "bad_tags_['']",
+              "bad_tags_['  ']",
+              "bad_tags_[3]",
+              "bad_window",
+              "bad_window",
+              "bad_window",
+              "bad_window",
+              "bad_window",
+              "invalid_scope",
+              "invalid_scope",
+              "invalid_scope",
+              "invalid_scope",
+              "invalid_scope",
+              "invalid_scope",
+              "invalid_scope",
+              "internal_name_not_external_alias",
+              "serialization_alias_not_input",
+              "independent_defaults",
+              "frozen_assignment"
+            ]
+          },
+          "citations": [
+            {
+              "label": "Alias choices and paths",
+              "target": "cairn://docs-concepts-alias/aliaspath-and-aliaschoices",
+              "source": "docs/concepts/alias.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "Before/after validators",
+              "target": "cairn://docs-concepts-validators/model-validators",
+              "source": "docs/concepts/validators.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "validation errors",
+              "target": "cairn://docs-concepts-validators/raising-validation-errors",
+              "source": "docs/concepts/validators.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "Strict configuration",
+              "target": "cairn://docs-concepts-strict-mode/as-a-configuration-value",
+              "source": "docs/concepts/strict_mode.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "`extra=\"forbid\"`",
+              "target": "cairn://docs-concepts-models/extra-data",
+              "source": "docs/concepts/models.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "`default_factory`",
+              "target": "cairn://docs-concepts-fields/default-values",
+              "source": "docs/concepts/fields.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "`frozen=True`",
+              "target": "cairn://docs-concepts-models/faux-immutability",
+              "source": "docs/concepts/models.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "`model_dump(mode=\"json\", by_alias=True)`",
+              "target": "cairn://docs-concepts-serialization/serializing-data/python-mode",
+              "source": "docs/concepts/serialization.md",
+              "resolves_in_selected_frozen_source": true
+            }
+          ],
+          "manual_review": {
+            "complete_module_audited_before_execution": true,
+            "requirements_and_API_explanation_match_source": true,
+            "callbacks_handle_resilient_parsing": null,
+            "source_access_within_protocol": true
+          },
+          "documentation_cli_calls": 7,
+          "process_skill_calls": 0,
+          "returned_packs": [
+            {
+              "ok": true,
+              "returned_source_characters": 10198,
+              "context_sections": 6
+            },
+            {
+              "ok": true,
+              "returned_source_characters": 18205,
+              "context_sections": 10
+            },
+            {
+              "ok": true,
+              "returned_source_characters": 12171,
+              "context_sections": 8
+            },
+            {
+              "ok": true,
+              "returned_source_characters": null,
+              "context_sections": 0
+            },
+            {
+              "ok": true,
+              "returned_source_characters": 4301,
+              "context_sections": 3
+            },
+            {
+              "ok": true,
+              "returned_source_characters": null,
+              "context_sections": 0
+            },
+            {
+              "ok": true,
+              "returned_source_characters": null,
+              "context_sections": 0
+            }
+          ],
+          "answer_sha256": "ef8441407096ba51c8c4d41466f7fda89cb4b26df49f751fa51f550df7f83d42",
+          "complete_task_accepted": true
+        },
+        "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/strong-control-20261025/runs/real/pydantic-job-helper"
+      },
+      {
+        "case_id": "pydantic-job",
+        "arm": "raw",
+        "model": "gpt-6.1-sol",
+        "runtime": "codex-cli 0.164.0",
+        "exit_code": 0,
+        "stop_reason": null,
+        "seconds": 146.6369421660056,
+        "tool_invocations": 8,
+        "usage_events": [
+          {
+            "input_tokens": 197969,
+            "cached_input_tokens": 174208,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 6948,
+            "reasoning_output_tokens": 2689
+          }
+        ],
+        "input_tokens": 197969,
+        "cached_input_tokens": 174208,
+        "output_tokens": 6948,
+        "final_answer_exists": true,
+        "review": {
+          "runtime": {
+            "passed": true,
+            "checks": [
+              "valid_payload_and_purity",
+              "valid_payload_and_purity",
+              "valid_payload_and_purity",
+              "strict_limit_'4'",
+              "strict_limit_True",
+              "strict_limit_4.0",
+              "strict_limit_0",
+              "strict_limit_9",
+              "bad_tags_'x'",
+              "bad_tags_['']",
+              "bad_tags_['  ']",
+              "bad_tags_[3]",
+              "bad_window",
+              "bad_window",
+              "bad_window",
+              "bad_window",
+              "bad_window",
+              "invalid_scope",
+              "invalid_scope",
+              "invalid_scope",
+              "invalid_scope",
+              "invalid_scope",
+              "invalid_scope",
+              "invalid_scope",
+              "internal_name_not_external_alias",
+              "serialization_alias_not_input",
+              "independent_defaults",
+              "frozen_assignment"
+            ]
+          },
+          "citations": [
+            {
+              "label": "`AliasPath` and ordered `AliasChoices`",
+              "target": "docs/concepts/alias.md#aliaspath-and-aliaschoices",
+              "source": "docs/concepts/alias.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "Alias-only validation",
+              "target": "docs/concepts/alias.md#validation",
+              "source": "docs/concepts/alias.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "Before/after validators",
+              "target": "docs/concepts/validators.md#model-validators",
+              "source": "docs/concepts/validators.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "Strict configuration",
+              "target": "docs/concepts/strict_mode.md#as-a-configuration-value",
+              "source": "docs/concepts/strict_mode.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "field constraints",
+              "target": "docs/concepts/fields.md#field-constraints",
+              "source": "docs/concepts/fields.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "`default_factory`",
+              "target": "docs/concepts/fields.md#default-values",
+              "source": "docs/concepts/fields.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "`frozen=True`",
+              "target": "docs/concepts/models.md#faux-immutability",
+              "source": "docs/concepts/models.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "`model_dump`",
+              "target": "docs/concepts/serialization.md#python-mode",
+              "source": "docs/concepts/serialization.md",
+              "resolves_in_selected_frozen_source": true
+            }
+          ],
+          "manual_review": {
+            "complete_module_audited_before_execution": true,
+            "requirements_and_API_explanation_match_source": true,
+            "callbacks_handle_resilient_parsing": null,
+            "source_access_within_protocol": true
+          },
+          "documentation_cli_calls": 0,
+          "process_skill_calls": 1,
+          "returned_packs": [],
+          "answer_sha256": "12dbd1d9711d5cb45a83f5c929fe2612cd51f8c3ca70d64dadd2abd08656af69",
+          "complete_task_accepted": true
+        },
+        "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/strong-control-20261025/runs/real/pydantic-job-raw"
+      },
+      {
+        "case_id": "typer-release",
+        "arm": "cairn",
+        "model": "gpt-6.1-sol",
+        "runtime": "codex-cli 0.164.0",
+        "exit_code": 0,
+        "stop_reason": null,
+        "seconds": 123.59361933299806,
+        "tool_invocations": 6,
+        "usage_events": [
+          {
+            "input_tokens": 199404,
+            "cached_input_tokens": 164096,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 4339,
+            "reasoning_output_tokens": 1052
+          }
+        ],
+        "input_tokens": 199404,
+        "cached_input_tokens": 164096,
+        "output_tokens": 4339,
+        "final_answer_exists": true,
+        "review": {
+          "runtime": {
+            "passed": true,
+            "checks": [
+              "eager_version_without_required_root_option",
+              "eager_version_before_invalid_profile",
+              "repeat_invocation_context_alpha",
+              "repeat_invocation_context_beta",
+              "invalid_tag_bad",
+              "invalid_tag_=x",
+              "invalid_tag_k=",
+              "required_profile",
+              "invalid_mode",
+              "confirmation_reject_aborts",
+              "confirmation_accept_default_mode"
+            ]
+          },
+          "citations": [
+            {
+              "label": "Root callbacks",
+              "target": "cairn://docs-tutorial-commands-callback/typer-callback",
+              "source": "docs/tutorial/commands/callback.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "context and resilient parsing",
+              "target": "cairn://docs-tutorial-options-callback-and-context/cli-option-callback-and-context/handling-completion/fix-completion-using-the-context",
+              "source": "docs/tutorial/options/callback-and-context.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "Eager version handling",
+              "target": "cairn://docs-tutorial-options-version/version-cli-option-is-eager/previous-parameters-and-is-eager/fix-with-is-eager",
+              "source": "docs/tutorial/options/version.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "Enum case handling",
+              "target": "cairn://docs-tutorial-parameter-types-enum/enum-choices/case-insensitive-enum-choices",
+              "source": "docs/tutorial/parameter-types/enum.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "Repeated options",
+              "target": "cairn://docs-tutorial-multiple-values-multiple-options/multiple-cli-options",
+              "source": "docs/tutorial/multiple-values/multiple-options.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "parameter callbacks",
+              "target": "cairn://docs-tutorial-options-callback-and-context/cli-option-callback-and-context/using-the-callbackparam-object",
+              "source": "docs/tutorial/options/callback-and-context.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "Confirmation and abort",
+              "target": "cairn://docs-tutorial-prompt/ask-with-prompt/confirm",
+              "source": "docs/tutorial/prompt.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "CliRunner invocation",
+              "target": "cairn://docs-tutorial-testing/testing/test-the-app/call-the-app",
+              "source": "docs/tutorial/testing.md",
+              "resolves_in_selected_frozen_source": true
+            }
+          ],
+          "manual_review": {
+            "complete_module_audited_before_execution": true,
+            "requirements_and_API_explanation_match_source": true,
+            "callbacks_handle_resilient_parsing": true,
+            "source_access_within_protocol": true
+          },
+          "documentation_cli_calls": 3,
+          "process_skill_calls": 1,
+          "returned_packs": [
+            {
+              "ok": true,
+              "returned_source_characters": 4954,
+              "context_sections": 8
+            },
+            {
+              "ok": true,
+              "returned_source_characters": 5134,
+              "context_sections": 3
+            },
+            {
+              "ok": true,
+              "returned_source_characters": 5145,
+              "context_sections": 6
+            }
+          ],
+          "answer_sha256": "d86e00248c931424e4cb7fe8ee12bab4f53bcd64071b23a6b8593c4e54d69316",
+          "complete_task_accepted": true
+        },
+        "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/strong-control-20261025/runs/real/typer-release-cairn"
+      },
+      {
+        "case_id": "typer-release",
+        "arm": "helper",
+        "model": "gpt-6.1-sol",
+        "runtime": "codex-cli 0.164.0",
+        "exit_code": 0,
+        "stop_reason": null,
+        "seconds": 80.87337208299869,
+        "tool_invocations": 12,
+        "usage_events": [
+          {
+            "input_tokens": 313002,
+            "cached_input_tokens": 277760,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 4450,
+            "reasoning_output_tokens": 501
+          }
+        ],
+        "input_tokens": 313002,
+        "cached_input_tokens": 277760,
+        "output_tokens": 4450,
+        "final_answer_exists": true,
+        "review": {
+          "runtime": {
+            "passed": true,
+            "checks": [
+              "eager_version_without_required_root_option",
+              "eager_version_before_invalid_profile",
+              "repeat_invocation_context_alpha",
+              "repeat_invocation_context_beta",
+              "invalid_tag_bad",
+              "invalid_tag_=x",
+              "invalid_tag_k=",
+              "required_profile",
+              "invalid_mode",
+              "confirmation_reject_aborts",
+              "confirmation_accept_default_mode"
+            ]
+          },
+          "citations": [
+            {
+              "label": "Root callbacks",
+              "target": "cairn://docs-tutorial-commands-callback/typer-callback",
+              "source": "docs/tutorial/commands/callback.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "context and resilient parsing",
+              "target": "cairn://docs-tutorial-options-callback-and-context/cli-option-callback-and-context/handling-completion/fix-completion-using-the-context",
+              "source": "docs/tutorial/options/callback-and-context.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "Eager version handling",
+              "target": "cairn://docs-tutorial-options-version/version-cli-option-is-eager/previous-parameters-and-is-eager/fix-with-is-eager",
+              "source": "docs/tutorial/options/version.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "Case-insensitive enums",
+              "target": "cairn://docs-tutorial-parameter-types-enum/enum-choices/case-insensitive-enum-choices",
+              "source": "docs/tutorial/parameter-types/enum.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "Repeated list options",
+              "target": "cairn://docs-tutorial-multiple-values-multiple-options/multiple-cli-options",
+              "source": "docs/tutorial/multiple-values/multiple-options.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "validation callbacks",
+              "target": "cairn://docs-tutorial-options-callback-and-context/cli-option-callback-and-context/validate-cli-parameters",
+              "source": "docs/tutorial/options/callback-and-context.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "Confirmation with abort",
+              "target": "cairn://docs-tutorial-prompt/ask-with-prompt/confirm-or-abort",
+              "source": "docs/tutorial/prompt.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "CliRunner",
+              "target": "cairn://docs-tutorial-testing/testing/test-the-app/import-and-create-a-clirunner",
+              "source": "docs/tutorial/testing.md",
+              "resolves_in_selected_frozen_source": true
+            }
+          ],
+          "manual_review": {
+            "complete_module_audited_before_execution": true,
+            "requirements_and_API_explanation_match_source": true,
+            "callbacks_handle_resilient_parsing": true,
+            "source_access_within_protocol": true
+          },
+          "documentation_cli_calls": 8,
+          "process_skill_calls": 2,
+          "returned_packs": [
+            {
+              "ok": true,
+              "returned_source_characters": 7961,
+              "context_sections": 7
+            },
+            {
+              "ok": true,
+              "returned_source_characters": 6684,
+              "context_sections": 8
+            },
+            {
+              "ok": true,
+              "returned_source_characters": 4336,
+              "context_sections": 4
+            },
+            {
+              "ok": true,
+              "returned_source_characters": null,
+              "context_sections": 0
+            },
+            {
+              "ok": true,
+              "returned_source_characters": null,
+              "context_sections": 0
+            },
+            {
+              "ok": true,
+              "returned_source_characters": null,
+              "context_sections": 0
+            },
+            {
+              "ok": true,
+              "returned_source_characters": null,
+              "context_sections": 0
+            },
+            {
+              "ok": true,
+              "returned_source_characters": null,
+              "context_sections": 0
+            }
+          ],
+          "answer_sha256": "47bd51b48cff5b41ae065fae34a0dc40f187ee1627e56a994552d8df05524d2c",
+          "complete_task_accepted": true
+        },
+        "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/strong-control-20261025/runs/real/typer-release-helper"
+      },
+      {
+        "case_id": "typer-release",
+        "arm": "raw",
+        "model": "gpt-6.1-sol",
+        "runtime": "codex-cli 0.164.0",
+        "exit_code": 0,
+        "stop_reason": null,
+        "seconds": 119.06258662500477,
+        "tool_invocations": 7,
+        "usage_events": [
+          {
+            "input_tokens": 331359,
+            "cached_input_tokens": 291712,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 5721,
+            "reasoning_output_tokens": 1552
+          }
+        ],
+        "input_tokens": 331359,
+        "cached_input_tokens": 291712,
+        "output_tokens": 5721,
+        "final_answer_exists": true,
+        "review": {
+          "runtime": {
+            "passed": true,
+            "checks": [
+              "eager_version_without_required_root_option",
+              "eager_version_before_invalid_profile",
+              "repeat_invocation_context_alpha",
+              "repeat_invocation_context_beta",
+              "invalid_tag_bad",
+              "invalid_tag_=x",
+              "invalid_tag_k=",
+              "required_profile",
+              "invalid_mode",
+              "confirmation_reject_aborts",
+              "confirmation_accept_default_mode"
+            ]
+          },
+          "citations": [
+            {
+              "label": "`@app.callback()`",
+              "target": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/strong-control-20261025/runs/real/typer-release-raw/workspace/docs/tutorial/commands/callback.md:11",
+              "source": "docs/tutorial/commands/callback.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "`Context` and resilient parsing",
+              "target": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/strong-control-20261025/runs/real/typer-release-raw/workspace/docs/tutorial/options/callback-and-context.md:171",
+              "source": "docs/tutorial/options/callback-and-context.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "`is_eager=True`",
+              "target": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/strong-control-20261025/runs/real/typer-release-raw/workspace/docs/tutorial/options/version.md:161",
+              "source": "docs/tutorial/options/version.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "Enum case handling",
+              "target": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/strong-control-20261025/runs/real/typer-release-raw/workspace/docs/tutorial/parameter-types/enum.md:78",
+              "source": "docs/tutorial/parameter-types/enum.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "Repeated options",
+              "target": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/strong-control-20261025/runs/real/typer-release-raw/workspace/docs/tutorial/multiple-values/multiple-options.md:3",
+              "source": "docs/tutorial/multiple-values/multiple-options.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "validation callbacks and `BadParameter`",
+              "target": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/strong-control-20261025/runs/real/typer-release-raw/workspace/docs/tutorial/options/callback-and-context.md:37",
+              "source": "docs/tutorial/options/callback-and-context.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "`confirm(..., abort=True)`",
+              "target": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/strong-control-20261025/runs/real/typer-release-raw/workspace/docs/tutorial/prompt.md:88",
+              "source": "docs/tutorial/prompt.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "CliRunner invocation/assertions",
+              "target": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/strong-control-20261025/runs/real/typer-release-raw/workspace/docs/tutorial/testing.md:46",
+              "source": "docs/tutorial/testing.md",
+              "resolves_in_selected_frozen_source": true
+            },
+            {
+              "label": "simulated prompt input",
+              "target": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/strong-control-20261025/runs/real/typer-release-raw/workspace/docs/tutorial/testing.md:212",
+              "source": "docs/tutorial/testing.md",
+              "resolves_in_selected_frozen_source": true
+            }
+          ],
+          "manual_review": {
+            "complete_module_audited_before_execution": true,
+            "requirements_and_API_explanation_match_source": true,
+            "callbacks_handle_resilient_parsing": true,
+            "source_access_within_protocol": true
+          },
+          "documentation_cli_calls": 0,
+          "process_skill_calls": 4,
+          "returned_packs": [],
+          "answer_sha256": "9c58a94f9307241b34f83ce3882caaa905bb4cbe871d45549a6c34d2fbbc9aeb",
+          "complete_task_accepted": true
+        },
+        "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/strong-control-20261025/runs/real/typer-release-raw"
+      }
+    ],
+    "aggregates": [
+      {
+        "arm": "cairn",
+        "tasks": 2,
+        "accepted": 2,
+        "input_tokens": 468189,
+        "cached_input_tokens": 388352,
+        "output_tokens": 9602,
+        "tool_invocations": 22,
+        "seconds": 234.56171270799678,
+        "uncached_input_tokens": 79837,
+        "documentation_cli_calls": 15,
+        "process_skill_calls": 2
+      },
+      {
+        "arm": "helper",
+        "tasks": 2,
+        "accepted": 2,
+        "input_tokens": 589068,
+        "cached_input_tokens": 521728,
+        "output_tokens": 9696,
+        "tool_invocations": 21,
+        "seconds": 159.3237490409956,
+        "uncached_input_tokens": 67340,
+        "documentation_cli_calls": 15,
+        "process_skill_calls": 2
+      },
+      {
+        "arm": "raw",
+        "tasks": 2,
+        "accepted": 2,
+        "input_tokens": 529328,
+        "cached_input_tokens": 465920,
+        "output_tokens": 12669,
+        "tool_invocations": 15,
+        "seconds": 265.6995287910104,
+        "uncached_input_tokens": 63408,
+        "documentation_cli_calls": 0,
+        "process_skill_calls": 5
+      }
+    ]
+  },
+  "oracle_qualification": [
+    {
+      "case": "pydantic-job",
+      "positive": {
+        "passed": true,
+        "checks": [
+          "valid_payload_and_purity",
+          "valid_payload_and_purity",
+          "valid_payload_and_purity",
+          "strict_limit_'4'",
+          "strict_limit_True",
+          "strict_limit_4.0",
+          "strict_limit_0",
+          "strict_limit_9",
+          "bad_tags_'x'",
+          "bad_tags_['']",
+          "bad_tags_['  ']",
+          "bad_tags_[3]",
+          "bad_window",
+          "bad_window",
+          "bad_window",
+          "bad_window",
+          "bad_window",
+          "invalid_scope",
+          "invalid_scope",
+          "invalid_scope",
+          "invalid_scope",
+          "invalid_scope",
+          "invalid_scope",
+          "invalid_scope",
+          "internal_name_not_external_alias",
+          "serialization_alias_not_input",
+          "independent_defaults",
+          "frozen_assignment"
+        ]
+      },
+      "negative_controls": [
+        {
+          "passed": false,
+          "error": "AssertionError: assignment must fail"
+        },
+        {
+          "passed": false,
+          "error": "AssertionError: accepted invalid bad_tags_['']"
+        }
+      ]
+    },
+    {
+      "case": "typer-release",
+      "positive": {
+        "passed": true,
+        "checks": [
+          "eager_version_without_required_root_option",
+          "eager_version_before_invalid_profile",
+          "repeat_invocation_context_alpha",
+          "repeat_invocation_context_beta",
+          "invalid_tag_bad",
+          "invalid_tag_=x",
+          "invalid_tag_k=",
+          "required_profile",
+          "invalid_mode",
+          "confirmation_reject_aborts",
+          "confirmation_accept_default_mode"
+        ]
+      },
+      "negative_controls": [
+        {
+          "passed": false,
+          "error": "AssertionError: (\"Usage: root [OPTIONS] COMMAND [ARGS]...\\nTry 'root --help' for help.\\n\u256d\u2500 Error \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\\n\u2502 Invalid value for '--profile': 'INVALID' is not one of 'alpha', 'beta'.      \u2502\\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\\n\", SystemExit(2))"
+        },
+        {
+          "passed": false,
+          "error": "AssertionError: ('bad', '{\"profile\": \"alpha\", \"mode\": \"safe\", \"tags\": [\"bad\"]}\\n')"
+        }
+      ]
+    }
+  ],
+  "source_audit_correction": {
+    "url": "https://pydantic.dev/docs/validation/latest/concepts/alias/",
+    "validation_anchor_present": true,
+    "validation_1_anchor_present": false,
+    "headings_with_validation": [
+      "validation",
+      "validation-1"
+    ],
+    "qualification": "Raw HTML fragment exists when the heading slug has at least one occurrence. First duplicate heading owns the unsuffixed anchor; hierarchical AST uniqueness is a different requirement. No runtime/task requirement weakened.",
+    "positive_controls": [
+      "raw#validation valid despite two ASTleafnames",
+      "Cairn full hierarchical IDs must remain unique"
+    ],
+    "negative_controls": [
+      "raw#does-not-exist absent"
+    ],
+    "version_limit": "Official versioned URL redirects to latest; only anchor existence verified live. Task content remains pinned Git source and local runtime."
+  },
+  "product_input_repair": {
+    "script": "scripts/materialize_doc_snippets.py",
+    "script_sha256": "7a0ec964bbe1b905b1fa062aba7709177b5622d7bc1356f1a2575974f7a67b7b",
+    "unit_tests": 10,
+    "real_source_verification": {
+      "cli_exit_code": 0,
+      "summary": {
+        "output": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/strong-control-20261025/materialized-typer",
+        "documents": 9,
+        "snippets": 37,
+        "manifest": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/strong-control-20261025/materialized-typer/snippet-manifest.json"
+      },
+      "all_original_snippets_exact_span_roundtrip": true,
+      "matches_previously_frozen_official_snippet_hashes": true,
+      "source_git_diff": "",
+      "snippets": 37
+    },
+    "full_suite": "565passed5PDFwarnings",
+    "strict_mypy": "123sourcefilespassed",
+    "default_retrieval_unchanged": true,
+    "agent_test_of_new_script_itself": false
+  },
+  "parity_gates": {
+    "new_tasks_vs_helper": false,
+    "new_tasks_vs_raw": false
+  },
+  "cost_sensitivity": {
+    "definitions": "r=cached/uncachedinputprice; q=output/uncachedinputprice; no actualprice or invoice; excludesindex/querycompute/latency/storage",
+    "cairn_minus_helper": "12497 - 133376*r - 94*q",
+    "cairn_minus_raw": "16429 - 77568*r - 3067*q"
+  },
+  "limitations": [
+    "Only2newpublicAPI tasktexts,1attempt percasearm,selecteddocs,modelpriors possible",
+    "Not actualcustomer tasks,whole-repository retrieval orlargeindependentheldoutbenchmark",
+    "Process/TDD/skills/selftests differ; no one-componentalgorithmcausalclaim",
+    "Singlepasslatencies andwarmembeddingserverindexingtimes are not SLAs",
+    "OriginalTyperAPIcodecomesfromexplicitexpandedofficialsnippets; parentprotocolfrozenbeforeanswers, newproductscript notswappedinto completedruns",
+    "Source-auditrawduplicateheadingfalse rejection corrected and appliedallarms; originalauditretained",
+    "Externalretrievalprototype71filesnotmerged; product70Pythonfilesunchanged"
+  ]
+}

@@ -8,13 +8,17 @@ import os
 import re
 import sys
 from collections.abc import Iterable
+from contextlib import redirect_stdout
 from pathlib import Path
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 
 import typer
 
 from cairn import __version__
+from cairn.cli_output import compact_json, render_tool_text
 from cairn.core.config import load_embed_config, load_index_config, load_llm_config
+from cairn.core.errors import CairnError
+from cairn.dispatch import dispatch_repo_tool
 from cairn.embed.base import Embedder
 from cairn.engine.indexer import Indexer
 from cairn.entity.heuristic import HeuristicExtractor
@@ -675,6 +679,91 @@ async def _run_search_repo(
     typer.echo(json.dumps(resp["data"], ensure_ascii=False, indent=2))
 
 
+RepoReadTool = Literal[
+    "repo_context",
+    "search_documents",
+    "get_section",
+    "get_related",
+    "outline",
+    "read_range",
+    "search_keyword",
+    "list_documents",
+    "repo_graph",
+    "repo_impact",
+]
+
+
+@query_app.command("tool")
+def query_repo_tool(
+    name: Annotated[RepoReadTool, typer.Argument(help="Read-only repository tool.")],
+    parameters: Annotated[str, typer.Argument(help="JSON object of tool arguments.")] = "{}",
+    repo: Annotated[Path | None, typer.Option("--repo", file_okay=False)] = None,
+    retrieval: Annotated[
+        Literal["hybrid", "lexical"] | None,
+        typer.Option(
+            help="Search strategy for search_documents/repo_context; reads are unchanged."
+        ),
+    ] = None,
+    output_format: Annotated[
+        Literal["json", "text"],
+        typer.Option("--format", help="Complete JSON or compact source text."),
+    ] = "json",
+    fake: Annotated[
+        bool | None, typer.Option("--fake/--real", help="Provider override for hybrid search only.")
+    ] = None,
+    include_trace: Annotated[
+        bool, typer.Option("--trace", help="Include dispatch diagnostics.")
+    ] = False,
+) -> None:
+    """Run a repository tool without an MCP client. Cached reads need no model."""
+    try:
+        arguments = json.loads(parameters)
+        if not isinstance(arguments, dict):
+            raise ValueError("tool arguments must be a JSON object")
+        if "projectPath" in arguments:
+            raise ValueError("select the repository with --repo, not projectPath")
+        if name in {"repo_context", "search_documents"}:
+            if not isinstance(arguments.get("query"), str) or not arguments["query"].strip():
+                raise ValueError("query must be a nonempty string")
+            if retrieval is not None:
+                if arguments.get("retrieval", retrieval) != retrieval:
+                    raise ValueError("conflicting retrieval choices")
+                arguments["retrieval"] = retrieval
+            if arguments.get("retrieval", "hybrid") not in {"hybrid", "lexical"}:
+                raise ValueError("retrieval must be 'hybrid' or 'lexical'")
+            queries = arguments.get("queries")
+            if queries is not None and (
+                not isinstance(queries, list) or any(not isinstance(q, str) for q in queries)
+            ):
+                raise ValueError("queries must be an array of strings")
+        # Backend progress/log output must not corrupt the tool-result stream.
+        with redirect_stdout(sys.stderr):
+            payload = asyncio.run(_run_repo_tool(name, arguments, repo, fake))
+    except CairnError as exc:
+        payload = {"ok": False, "error": exc.to_envelope()}
+    except (ValueError, TypeError) as exc:
+        payload = {"ok": False, "error": {"code": "INVALID_INPUT", "message": str(exc)}}
+    if not include_trace:
+        payload.pop("trace", None)
+    rendered = render_tool_text(payload) if output_format == "text" else compact_json(payload)
+    typer.echo(rendered, nl=not rendered.endswith("\n"))
+    if not payload.get("ok"):
+        raise typer.Exit(code=1)
+
+
+async def _run_repo_tool(
+    name: str, arguments: dict[str, Any], repo: Path | None, use_fake: bool | None
+) -> dict[str, Any]:
+    root = find_repo_root(repo)
+    needs_model = name in {"repo_context", "search_documents"} and (
+        arguments.get("retrieval", "hybrid") == "hybrid"
+    )
+    embedder = _make_embedder(_use_fake_for_repo(root, use_fake)) if needs_model else None
+    if embedder is not None:
+        validate_repo_embedder_compatibility(root, embedder)
+    return await dispatch_repo_tool(name, arguments, root, embedder)
+
+
 @query_app.command("keyword")
 def query_keyword(
     doc_dir: Annotated[
@@ -1061,11 +1150,7 @@ def _format_query_embedder_check(
             query_embedder=query_embedder,
         )
     indexed_dims = sorted(
-        {
-            dim
-            for info in index_infos
-            if isinstance((dim := info.get("dim")), int)
-        }
+        {dim for info in index_infos if isinstance((dim := info.get("dim")), int)}
     )
     return f"query dim={query_dim}, indexed dims={indexed_dims}"
 

@@ -20,10 +20,11 @@ This is **v0.1-frozen for the included tools**; tools listed but marked
 
 ### Tokens and budgets
 
-Every tool result includes `tokens_returned: int` so an agent can budget its
-context. The count is for the **textual content** in the response (excluding
-JSON envelope and `trace`). It is an estimate using the indexing-time tokenizer;
-agents should treat it as accurate to within ±10%.
+Every tool result includes `tokens_returned: int`, a rough whitespace-based
+estimate of textual payload content. It excludes JSON envelope/keys and `trace`,
+and can undercount code, identifiers and non-English text. It is neither an
+exact tokenizer count nor a hard context cap. Use actual model usage or the
+model's tokenizer for complete-response and whole-session cost comparisons.
 
 ### Trace
 
@@ -75,6 +76,20 @@ The instruction text lives beside the server in `src/cairn/mcp/server.py`
 (`DOCUMENT_INSTRUCTIONS`, `REPO_INSTRUCTIONS`). Per-tool `description` strings
 are intent-first ("Use when …") for the same reason: tool selection is driven by
 intent-to-description matching.
+
+Section reads explicitly state that the body excludes descendants. Bounded
+`navigation` metadata lists up to eight direct children and eight siblings with
+stable citations, total counts and an `outline` call for the complete map.
+These are optional navigation choices, not an exhaustive reading checklist.
+Root sections share an implicit document parent for sibling navigation. The
+section token estimate includes these metadata strings (ADR-0005).
+
+Compact `repo_context` selects source-supported candidates using query-wide
+BM25 evidence and marginal query-term coverage. Semantic/hybrid ranking remains
+the fallback when lexical evidence is absent; document-discovery ranking and
+diagnostic context remain unchanged (ADR-0006). Fitting fenced examples remain
+whole within the configured excerpt budget. `evidence.truncated_code=true`
+explicitly marks an oversized partial example that needs a full section read.
 
 ### Errors
 
@@ -192,6 +207,11 @@ examples such as `node_modules/**`, `dist/**`, `build/**`, and `coverage/**`.
 
 ### Repository-only tool: `search_documents`
 
+MCP responses return cited source hits and requested text fields by default.
+Set `include_details=true` for scores, explanations and ranker bookkeeping.
+Candidate ranking and source evidence are identical between views. The Python
+library search API remains detailed and does not take this MCP-only flag.
+
 `search_documents` is advertised only by repo-scoped MCP servers. It searches
 every indexed repository document and returns globally ranked section hits with
 their `doc` ids so clients can immediately drill down with normal tools.
@@ -201,11 +221,12 @@ Inputs:
 | Param | Type | Default | Description |
 |---|---|---|---|
 | `query` | `string` | required | Conceptual query to search across indexed repo docs. |
+| `include_details` | `bool` | `false` | MCP-only: include ranking diagnostics and the legacy detailed envelope data. |
 | `k` | `int` (1–32) | `8` | Number of globally ranked section hits to return. |
 | `sections_per_doc` | `int \| null` (1–8) | `.cairn/config.toml search_sections_per_doc` (`1` by default) | Maximum section hits per document. Omit it for the repository default; override it per query when you need either wider document discovery or deeper hits from one doc. |
 | `include` | `list["synopsis"\|"head"\|"evidence"]` | `["synopsis", "head", "evidence"]` | Fields to attach to each hit. |
 
-Output:
+Detailed output (`include_details=true`):
 
 ```json
 {
@@ -279,7 +300,7 @@ Semantics:
   explanation ranker. Small repositories stay in `full` mode. The `ranker`
   object reports `mode`, `total_sections`, `compatible_sections`, and
   `scored_sections` for observability.
-- Every hit includes raw signal scores plus an `explanation` object with the
+- With `include_details=true`, every hit includes raw signal scores plus an `explanation` object with the
   dominant signal, matched query terms, configured signal weights, rank
   adjustments, and short notes. This makes repo search debuggable by agents,
   CLI users, and benchmark reports.
@@ -304,11 +325,60 @@ Semantics:
 
 ---
 
+Section identifiers in MCP inputs (`id`, `start_id`, `end_id`, `focus`, `scope`)
+also accept returned `cairn://doc/section` citation URIs. In repository mode the
+URI selects the indexed document when `doc` is omitted. Explicit `doc` values,
+multiple URI inputs, and document-scoped servers must agree on the document
+namespace; conflicting or malformed anchors return a tool error. Plain section
+IDs remain supported.
+
 ### Repository-only tool: `repo_context`
 
+Repository `search_documents` and `repo_context` also accept
+`retrieval="hybrid" | "lexical"` (default hybrid; ADR-0013). Lexical mode reuses
+cached BM25/field/structure scoring without query embeddings or vector entries.
+It still needs an existing index, may miss semantic matches, reports its mode
+and retains stale/skipped signals. No automatic semantic fallback is performed.
+The [read-only CLI](../cli-retrieval.md) exposes the same handlers; MCP transport
+and existing default views remain unchanged.
+
 `repo_context` is a composite retrieval tool for agents that need a ready-to-read
-context pack rather than a list of hits. It runs repo search, attaches compact
-section content, adds local relationships, and returns a small relationship map.
+context pack rather than a list of hits. By default each cited section appears
+once, with a precomputed summary and bounded verbatim evidence. Diagnostic
+ranking information and expanded relationships are opt-in (ADR-0004).
+
+Request `level="full"` to combine discovery and reading original section bodies.
+Each full section reports `content_scope="section_body_only"`,
+`source_characters` (Unicode characters before the cap), and `truncated`.
+Descendant bodies are separate even if `truncated=false`. Complete bodies can
+be reused directly; expand truncated content or unmet requirements rather than
+automatically re-reading every source. The existing 200-8000 character cap
+still applies. This does not certify that all task requirements are covered
+(ADR-0011).
+
+Experimental `level="evidence"` (ADR-0012) returns `evidence_blocks` instead of
+`content`: whole original Markdown blocks, fitting examples and neighboring prose,
+each with a section-relative Unicode-character span. Recognizable CLI help is
+split by options while retaining usage/group context; arbitrary code is atomic.
+`omitted_content` is explicit. Ancestor and descendant bodies are separate, and
+the tool does not certify that all task requirements are covered.
+
+`max_context_chars` (1000-32000, default 8000) bounds the total original-source
+characters in this evidence view; `max_section_chars` also applies per section.
+Metadata is excluded, so this is not an exact model-token budget. Sections that
+could not contribute fitting blocks are listed in `sections_without_blocks`.
+Request full text for missing conditions or oversized examples. The evidence
+view requires `include_details=false`; non-default global budgets with other
+levels fail explicitly. Existing default summary views remain unchanged.
+
+For multiple information needs, evidence mode also accepts `queries` (1-8
+nonempty strings, each at most 1000 characters). The agent supplies focused
+queries; Cairn performs no automatic decomposition. Candidate hits are fused,
+deduplicated and jointly packed under one budget, with at most `k` returned
+sections and the document cap. Later queries may depend on evidence already
+read. Non-evidence views reject this argument. `sections_without_blocks` supplies
+bounded recovery anchors if no whole block can be returned; otherwise unselected
+candidate sections are counted, rather than emitted as a navigation checklist.
 
 Inputs:
 
@@ -316,10 +386,11 @@ Inputs:
 |---|---|---|---|
 | `query` | `string` | required | Conceptual query to search across indexed repo docs. |
 | `k` | `int` (1-32) | `5` | Number of ranked hits to include. |
-| `sections_per_doc` | `int \| null` (1-8) | repo config | Diversity override passed through to `search_documents`. |
-| `related_k` | `int` (0-12) | `3` | Related sections to attach per selected hit. |
+| `sections_per_doc` | `int \| null` (1-8) | `null` | Compact context permits up to three sections per document; explicit values override. Diagnostic mode retains repo-config document diversity. |
+| `related_k` | `int` (0-12) | `3` | Related sections per hit when `include_details=true`. |
 | `level` | `"gist"\|"synopsis"\|"full"` | `"synopsis"` | Content granularity for `context_sections`. |
 | `max_section_chars` | `int` (200-8000) | `1600` | Hard character cap per selected section. |
+| `include_details` | `bool` | `false` | Return the previous diagnostic shape, including full hits and expanded relationships. |
 
 Output shape:
 
@@ -328,27 +399,19 @@ Output shape:
   "ok": true,
   "data": {
     "query": "where are tools configured?",
-    "hits": [{"doc": "docs-tools", "id": "tools/configuration"}],
     "context_sections": [
       {
-        "rank": 1,
         "doc": "docs-tools",
+        "source": "docs/tools.md",
         "id": "tools/configuration",
+        "title": "Configuration",
+        "anchor": "cairn://docs-tools/tools/configuration",
         "level": "synopsis",
         "content": "Tools are configured...",
-        "hit": {"score": 0.91, "explanation": {"dominant_signal": "lexical"}},
-        "relationships": [
-          {"id": "tools/install", "kind": "parent", "confidence": 1.0}
-        ]
+        "evidence": {"text": "An original excerpt...", "matched_terms": [], "span": {"start": 0, "end": 22}}
       }
     ],
-    "relationship_map": {"nodes": [], "edges": []},
-    "stale_documents": [],
-    "skipped_documents": [],
-    "codegraph_bridge": {
-      "status": "not_invoked",
-      "note": "Cairn does not parse source code..."
-    }
+    "next_step": "Verify exact values with get_section(doc,id,level='full'). For missing parts use get_related/outline; excerpts are not exhaustive."
   }
 }
 ```
@@ -358,8 +421,16 @@ Semantics:
 - This is the preferred one-call context builder for documentation and
   project-knowledge questions.
 - It propagates `stale_documents` and `skipped_documents` from
-  `search_documents`.
-- The relationship map covers documentation nodes only. For source-code symbols,
+  `search_documents` when nonempty, and propagates embedding mismatch recovery.
+- `level="full"` explicitly requests original text, capped at `max_section_chars`.
+- Evidence spans are character offsets into the stripped section body, not byte
+  offsets into the original file. The cited section provides the source boundary.
+- Compact evidence budgets prioritize the first ranked hit (up to 1,600
+  characters) and bound remaining excerpts to 400 characters each, all capped
+  by `max_section_chars`. A short excerpt is not proof that a topic is absent.
+- Consumers of `hits`, nested `hit`, `relationships`, `relationship_map`, or
+  `codegraph_bridge` must pass `include_details=true` for the previous shape.
+- The optional relationship map covers documentation nodes only. For source-code symbols,
   callers/callees, and code impact, pair the result with the CodeGraph MCP server.
 
 ---
@@ -379,6 +450,10 @@ Inputs:
 | `max_entities` | `int` (0-200) | `40` | Maximum entity nodes to include. |
 | `include_entities` | `boolean` | `true` | Include entity nodes and mention edges. |
 | `include_xrefs` | `boolean` | `true` | Include xref edges when available. |
+| `view` | `"sections" \| "documents"` | `"sections"` | Legacy section/entity graph, or explicit document references. |
+| `max_documents` | `int` (1-500) | `100` | Document-view source universe cap. |
+| `max_references` | `int` (1-2000) | `200` | Document-view document-pair edge cap. |
+| `include_evidence` | `boolean` | `false` | Document-view verbatim source-block excerpt, at most 240 characters. |
 
 Output nodes use stable ids such as `doc:readme`,
 `section:readme:introduction`, and `entity:code:runcontext`. Edge kinds include
@@ -386,11 +461,32 @@ Output nodes use stable ids such as `doc:readme`,
 
 Semantics:
 
-- `repo_graph` is a documentation graph, not a source-code graph. Structural and
+- The default section view is a documentation graph, not a source-code graph. Structural and
   xref edges are document-local today; cross-document connectivity is represented
   through shared entity nodes and `mentions` edges.
-- The response includes `codegraph_bridge.status = "external"` to make that
+- The default response includes `codegraph_bridge.status = "external"` to make that
   boundary explicit.
+
+With `view="documents"`, nodes are documents and `document_link` edges represent
+explicit CommonMark hyperlinks in cached Markdown section bodies. Relative and
+repository-root paths resolve only to selected indexed files. Reference-style
+definitions can live in other sections of the same document. Headings, code,
+HTML links, external/unindexed targets and self-links are excluded. Fragments
+are preserved in `href`, without checking their existence. No semantic/code
+impact is inferred, and no model or original source body is read at query time
+(normal repository freshness hashing still runs).
+
+One edge per directed document pair carries `reference_count`, the first parsed
+`href`, a stable `source_anchor` and a containing-block `source_span` measured in
+cached section characters. Optional `evidence` is a verbatim prefix of that
+block; its precise `evidence_span` and `evidence_complete` flag distinguish it
+from the whole block. Retrieve the source anchor for full evidence. A `doc`
+filter retains edges incident to that document in either direction, within the
+selected universe. Section/entity flags and budgets apply to the section view;
+document/reference budgets and evidence apply to the document view. The focus
+document is selected first under the document cap. Output declares scope,
+stale/skipped/unavailable documents, caps and `complete`; completeness refers
+only to this defined link scope. See [ADR-0016](../decisions/0016-explicit-document-reference-view.md).
 
 ---
 
@@ -407,6 +503,31 @@ Inputs:
 | `doc` | `string` | required | Repository document id. |
 | `id` | `string \| null` | `null` | Optional section id. Omit for document-level impact. |
 | `max_results` | `int` (1-100) | `24` | Maximum impacted sections/documents to return. |
+| `view` | `"artifacts" \| "references"` | `"artifacts"` | Existing artifact/entity impact, or deterministic explicit-link analysis. |
+| `entry` | `string \| null` | `null` | Reference view: indexed document ID or source path for deletion reachability. |
+| `max_hops` | `int` (1-8) | `3` | Reference view: inclusive reverse shortest-path depth. |
+| `max_witnesses` | `int` (1-2000) | `200` | Reference view: maximum distinct proof edges. |
+
+In `view="references"`, `doc` accepts an indexed document ID or exact source
+path, and `id` must be omitted. Return direct incoming references,
+`reverse_references` (source, distance, full forward path to target),
+`strongly_connected_documents` and optional `disconnected_documents` after
+deleting the target and incident edges from entry reachability. No entry means
+`disconnected_documents=null`, not an empty/negative result. Paths minimize
+distance then the whole source-path sequence lexicographically. Traversal runs
+locally without a model; it covers explicit document links rather than semantic
+or code impact. Metadata uses source paths, with source-section anchors on
+`witnesses`. Proofs cover selected shortest paths and internal component edges;
+optional original text is fetched separately with `get_section`.
+
+This view analyzes at most500 cached documents/2000 directed document pairs.
+`max_results` caps each node collection (nearest reverse paths first; output
+sorted by source), and `max_witnesses` caps the proof-edge union. Total counts,
+source-graph stats, limits and `complete` expose truncation and stale/skipped/
+unavailable data. Incomplete input implies an incomplete analysis; absence in a
+partial graph is not evidence of absence in the full corpus. Original body
+files are never queried; repository freshness hashing remains in place. Default
+artifact/entity impact stays unchanged. See [ADR-0017](../decisions/0017-local-reference-impact-analysis.md).
 
 Semantics:
 

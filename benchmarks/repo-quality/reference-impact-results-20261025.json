@@ -1,0 +1,647 @@
+{
+  "date": "2026-10-25",
+  "kind": "two prospectively frozen new target instances of known reference-analysis template, known public corpora; eight real Codex sessions, not independent task-family generalization",
+  "aggregates": [
+    {
+      "arm": "native",
+      "sessions": 2,
+      "accepted": 2,
+      "input_tokens": 335890,
+      "cached_input_tokens": 294144,
+      "uncached_input_tokens": 41746,
+      "output_tokens": 11270,
+      "tool_invocations": 17,
+      "seconds": 228.08774258299673,
+      "skill_command_events": 4,
+      "failed_command_events": 0,
+      "returned_skill_characters": 26272
+    },
+    {
+      "arm": "graph",
+      "sessions": 2,
+      "accepted": 2,
+      "input_tokens": 251966,
+      "cached_input_tokens": 196608,
+      "uncached_input_tokens": 55358,
+      "output_tokens": 9988,
+      "tool_invocations": 7,
+      "seconds": 176.232100291003,
+      "skill_command_events": 3,
+      "failed_command_events": 0,
+      "returned_skill_characters": 17944
+    },
+    {
+      "arm": "matched",
+      "sessions": 2,
+      "accepted": 2,
+      "input_tokens": 324838,
+      "cached_input_tokens": 264192,
+      "uncached_input_tokens": 60646,
+      "output_tokens": 11858,
+      "tool_invocations": 10,
+      "seconds": 260.9883396660007,
+      "skill_command_events": 1,
+      "failed_command_events": 3,
+      "returned_skill_characters": 7173
+    },
+    {
+      "arm": "raw",
+      "sessions": 2,
+      "accepted": 2,
+      "input_tokens": 267647,
+      "cached_input_tokens": 224512,
+      "uncached_input_tokens": 43135,
+      "output_tokens": 9899,
+      "tool_invocations": 7,
+      "seconds": 248.36916537499928,
+      "skill_command_events": 0,
+      "failed_command_events": 0,
+      "returned_skill_characters": 0
+    }
+  ],
+  "comparisons": {
+    "graph": {
+      "delta_percent": {
+        "input_tokens": 33.30766849495568,
+        "uncached_input_tokens": -24.58903862133748,
+        "output_tokens": 12.835402482979585
+      },
+      "normalized_cost_delta": {
+        "constant_U": -13612,
+        "cache_ratio_r_coefficient": 97536,
+        "output_ratio_q_coefficient": 1282
+      },
+      "componentwise_gate_passed": false
+    },
+    "matched": {
+      "delta_percent": {
+        "input_tokens": 3.402311305943262,
+        "uncached_input_tokens": -31.164462619133992,
+        "output_tokens": -4.958677685950407
+      },
+      "normalized_cost_delta": {
+        "constant_U": -18900,
+        "cache_ratio_r_coefficient": 29952,
+        "output_ratio_q_coefficient": -588
+      },
+      "componentwise_gate_passed": false
+    },
+    "raw": {
+      "delta_percent": {
+        "input_tokens": 25.49739021920665,
+        "uncached_input_tokens": -3.2201228700591167,
+        "output_tokens": 13.849883826649156
+      },
+      "normalized_cost_delta": {
+        "constant_U": -1389,
+        "cache_ratio_r_coefficient": 69632,
+        "output_ratio_q_coefficient": 1371
+      },
+      "componentwise_gate_passed": false
+    }
+  },
+  "runs": [
+    {
+      "case_id": "httpx-reference-impact-new-target",
+      "arm": "native",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 94.37053991599532,
+      "tool_invocations": 12,
+      "usage_events": [
+        {
+          "input_tokens": 165021,
+          "cached_input_tokens": 142464,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 4644,
+          "reasoning_output_tokens": 817
+        }
+      ],
+      "input_tokens": 165021,
+      "cached_input_tokens": 142464,
+      "output_tokens": 4644,
+      "final_answer_exists": true,
+      "accepted": true,
+      "answer_sha256": "5716e57701434efa3616318f4c498e8afcbe64a66c6a2e3c66403ad68f5715f5",
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/reference-impact-20261025/runs/r00",
+      "source_and_answer_checks": {
+        "direct_referrers": true,
+        "reverse_within_3": true,
+        "target_scc": true,
+        "lost_from_entry_after_delete": true,
+        "exact_fields": true,
+        "witness_edge_set_and_order": true,
+        "all_witness_citations": true
+      },
+      "uncached_input_tokens": 22557,
+      "skill_command_events": 2,
+      "failed_command_events": 0,
+      "returned_skill_characters": 15501
+    },
+    {
+      "case_id": "httpx-reference-impact-new-target",
+      "arm": "raw",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 109.90190137500758,
+      "tool_invocations": 3,
+      "usage_events": [
+        {
+          "input_tokens": 104937,
+          "cached_input_tokens": 89088,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 3692,
+          "reasoning_output_tokens": 911
+        }
+      ],
+      "input_tokens": 104937,
+      "cached_input_tokens": 89088,
+      "output_tokens": 3692,
+      "final_answer_exists": true,
+      "accepted": true,
+      "answer_sha256": "19bb7b2d90efef166adf8a0f1cf0d6ffd21c3fa1353ae8bc3ee3139f91f169cf",
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/reference-impact-20261025/runs/r01",
+      "source_and_answer_checks": {
+        "direct_referrers": true,
+        "reverse_within_3": true,
+        "target_scc": true,
+        "lost_from_entry_after_delete": true,
+        "exact_fields": true,
+        "witness_edge_set_and_order": true,
+        "all_witness_citations": true
+      },
+      "uncached_input_tokens": 15849,
+      "skill_command_events": 0,
+      "failed_command_events": 0,
+      "returned_skill_characters": 0
+    },
+    {
+      "case_id": "httpx-reference-impact-new-target",
+      "arm": "matched",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 108.72224945800554,
+      "tool_invocations": 3,
+      "usage_events": [
+        {
+          "input_tokens": 105593,
+          "cached_input_tokens": 77952,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 4809,
+          "reasoning_output_tokens": 1030
+        }
+      ],
+      "input_tokens": 105593,
+      "cached_input_tokens": 77952,
+      "output_tokens": 4809,
+      "final_answer_exists": true,
+      "accepted": true,
+      "answer_sha256": "a0b50157ba407ac963d97e2db6a61dd237b9dc87e764c1aa93e5efc90747c9d7",
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/reference-impact-20261025/runs/r02",
+      "source_and_answer_checks": {
+        "direct_referrers": true,
+        "reverse_within_3": true,
+        "target_scc": true,
+        "lost_from_entry_after_delete": true,
+        "exact_fields": true,
+        "witness_edge_set_and_order": true,
+        "all_witness_citations": true
+      },
+      "uncached_input_tokens": 27641,
+      "skill_command_events": 0,
+      "failed_command_events": 1,
+      "returned_skill_characters": 0
+    },
+    {
+      "case_id": "httpx-reference-impact-new-target",
+      "arm": "graph",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 78.60223379099625,
+      "tool_invocations": 4,
+      "usage_events": [
+        {
+          "input_tokens": 121385,
+          "cached_input_tokens": 97664,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 4020,
+          "reasoning_output_tokens": 420
+        }
+      ],
+      "input_tokens": 121385,
+      "cached_input_tokens": 97664,
+      "output_tokens": 4020,
+      "final_answer_exists": true,
+      "accepted": true,
+      "answer_sha256": "5716e57701434efa3616318f4c498e8afcbe64a66c6a2e3c66403ad68f5715f5",
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/reference-impact-20261025/runs/r03",
+      "source_and_answer_checks": {
+        "direct_referrers": true,
+        "reverse_within_3": true,
+        "target_scc": true,
+        "lost_from_entry_after_delete": true,
+        "exact_fields": true,
+        "witness_edge_set_and_order": true,
+        "all_witness_citations": true
+      },
+      "uncached_input_tokens": 23721,
+      "skill_command_events": 2,
+      "failed_command_events": 0,
+      "returned_skill_characters": 10771
+    },
+    {
+      "case_id": "mkdocs-reference-impact-new-target",
+      "arm": "graph",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 97.62986650000676,
+      "tool_invocations": 3,
+      "usage_events": [
+        {
+          "input_tokens": 130581,
+          "cached_input_tokens": 98944,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 5968,
+          "reasoning_output_tokens": 764
+        }
+      ],
+      "input_tokens": 130581,
+      "cached_input_tokens": 98944,
+      "output_tokens": 5968,
+      "final_answer_exists": true,
+      "accepted": true,
+      "answer_sha256": "25b1f9ec911246381eee7975d97b232be74ff1b4c9a1d23ad1be425cc43e560b",
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/reference-impact-20261025/runs/r04",
+      "source_and_answer_checks": {
+        "direct_referrers": true,
+        "reverse_within_3": true,
+        "target_scc": true,
+        "lost_from_entry_after_delete": true,
+        "exact_fields": true,
+        "witness_edge_set_and_order": true,
+        "all_witness_citations": true
+      },
+      "uncached_input_tokens": 31637,
+      "skill_command_events": 1,
+      "failed_command_events": 0,
+      "returned_skill_characters": 7173
+    },
+    {
+      "case_id": "mkdocs-reference-impact-new-target",
+      "arm": "matched",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 152.26609020799515,
+      "tool_invocations": 7,
+      "usage_events": [
+        {
+          "input_tokens": 219245,
+          "cached_input_tokens": 186240,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 7049,
+          "reasoning_output_tokens": 1524
+        }
+      ],
+      "input_tokens": 219245,
+      "cached_input_tokens": 186240,
+      "output_tokens": 7049,
+      "final_answer_exists": true,
+      "accepted": true,
+      "answer_sha256": "274826a320d44bc2f3d75cdd415e2c802b0fc89b5a5c822ebc487c2109c68042",
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/reference-impact-20261025/runs/r05",
+      "source_and_answer_checks": {
+        "direct_referrers": true,
+        "reverse_within_3": true,
+        "target_scc": true,
+        "lost_from_entry_after_delete": true,
+        "exact_fields": true,
+        "witness_edge_set_and_order": true,
+        "all_witness_citations": true
+      },
+      "uncached_input_tokens": 33005,
+      "skill_command_events": 1,
+      "failed_command_events": 2,
+      "returned_skill_characters": 7173
+    },
+    {
+      "case_id": "mkdocs-reference-impact-new-target",
+      "arm": "raw",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 138.4672639999917,
+      "tool_invocations": 4,
+      "usage_events": [
+        {
+          "input_tokens": 162710,
+          "cached_input_tokens": 135424,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 6207,
+          "reasoning_output_tokens": 1040
+        }
+      ],
+      "input_tokens": 162710,
+      "cached_input_tokens": 135424,
+      "output_tokens": 6207,
+      "final_answer_exists": true,
+      "accepted": true,
+      "answer_sha256": "98380c7dff517af2035b803b7efd9bf0a710a06c989147e07985cd2f1d7f3772",
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/reference-impact-20261025/runs/r06",
+      "source_and_answer_checks": {
+        "direct_referrers": true,
+        "reverse_within_3": true,
+        "target_scc": true,
+        "lost_from_entry_after_delete": true,
+        "exact_fields": true,
+        "witness_edge_set_and_order": true,
+        "all_witness_citations": true
+      },
+      "uncached_input_tokens": 27286,
+      "skill_command_events": 0,
+      "failed_command_events": 0,
+      "returned_skill_characters": 0
+    },
+    {
+      "case_id": "mkdocs-reference-impact-new-target",
+      "arm": "native",
+      "model": "gpt-6.1-sol",
+      "runtime": "codex-cli0.164.0",
+      "exit_code": 0,
+      "stop_reason": null,
+      "seconds": 133.7172026670014,
+      "tool_invocations": 5,
+      "usage_events": [
+        {
+          "input_tokens": 170869,
+          "cached_input_tokens": 151680,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 6626,
+          "reasoning_output_tokens": 675
+        }
+      ],
+      "input_tokens": 170869,
+      "cached_input_tokens": 151680,
+      "output_tokens": 6626,
+      "final_answer_exists": true,
+      "accepted": true,
+      "answer_sha256": "e39f7b2dc8c55a06c0f445ee3633db88a4cab0070b016d0830903ba7d86bb489",
+      "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/reference-impact-20261025/runs/r07",
+      "source_and_answer_checks": {
+        "direct_referrers": true,
+        "reverse_within_3": true,
+        "target_scc": true,
+        "lost_from_entry_after_delete": true,
+        "exact_fields": true,
+        "witness_edge_set_and_order": true,
+        "all_witness_citations": true
+      },
+      "uncached_input_tokens": 19189,
+      "skill_command_events": 2,
+      "failed_command_events": 0,
+      "returned_skill_characters": 10771
+    }
+  ],
+  "primary_gate_passed": false,
+  "frozen_verification": {
+    "verified_at": "2026-10-25T08:06:33.540621+00:00",
+    "passed": true,
+    "files": 847
+  },
+  "all_target_qualification": {
+    "targets_checked": 42,
+    "checks": {
+      "httpx": [
+        {
+          "target": "docs/advanced/authentication.md",
+          "native_passed": true,
+          "matched_passed": true
+        },
+        {
+          "target": "docs/advanced/clients.md",
+          "native_passed": true,
+          "matched_passed": true
+        },
+        {
+          "target": "docs/advanced/event-hooks.md",
+          "native_passed": true,
+          "matched_passed": true
+        },
+        {
+          "target": "docs/advanced/extensions.md",
+          "native_passed": true,
+          "matched_passed": true
+        },
+        {
+          "target": "docs/advanced/proxies.md",
+          "native_passed": true,
+          "matched_passed": true
+        },
+        {
+          "target": "docs/advanced/resource-limits.md",
+          "native_passed": true,
+          "matched_passed": true
+        },
+        {
+          "target": "docs/advanced/ssl.md",
+          "native_passed": true,
+          "matched_passed": true
+        },
+        {
+          "target": "docs/advanced/text-encodings.md",
+          "native_passed": true,
+          "matched_passed": true
+        },
+        {
+          "target": "docs/advanced/timeouts.md",
+          "native_passed": true,
+          "matched_passed": true
+        },
+        {
+          "target": "docs/advanced/transports.md",
+          "native_passed": true,
+          "matched_passed": true
+        },
+        {
+          "target": "docs/api.md",
+          "native_passed": true,
+          "matched_passed": true
+        },
+        {
+          "target": "docs/async.md",
+          "native_passed": true,
+          "matched_passed": true
+        },
+        {
+          "target": "docs/code_of_conduct.md",
+          "native_passed": true,
+          "matched_passed": true
+        },
+        {
+          "target": "docs/compatibility.md",
+          "native_passed": true,
+          "matched_passed": true
+        },
+        {
+          "target": "docs/contributing.md",
+          "native_passed": true,
+          "matched_passed": true
+        },
+        {
+          "target": "docs/environment_variables.md",
+          "native_passed": true,
+          "matched_passed": true
+        },
+        {
+          "target": "docs/exceptions.md",
+          "native_passed": true,
+          "matched_passed": true
+        },
+        {
+          "target": "docs/http2.md",
+          "native_passed": true,
+          "matched_passed": true
+        },
+        {
+          "target": "docs/index.md",
+          "native_passed": true,
+          "matched_passed": true
+        },
+        {
+          "target": "docs/logging.md",
+          "native_passed": true,
+          "matched_passed": true
+        },
+        {
+          "target": "docs/quickstart.md",
+          "native_passed": true,
+          "matched_passed": true
+        },
+        {
+          "target": "docs/third_party_packages.md",
+          "native_passed": true,
+          "matched_passed": true
+        },
+        {
+          "target": "docs/troubleshooting.md",
+          "native_passed": true,
+          "matched_passed": true
+        }
+      ],
+      "mkdocs": [
+        {
+          "target": "docs/about/contributing.md",
+          "native_passed": true,
+          "matched_passed": true
+        },
+        {
+          "target": "docs/about/license.md",
+          "native_passed": true,
+          "matched_passed": true
+        },
+        {
+          "target": "docs/about/release-notes.md",
+          "native_passed": true,
+          "matched_passed": true
+        },
+        {
+          "target": "docs/dev-guide/README.md",
+          "native_passed": true,
+          "matched_passed": true
+        },
+        {
+          "target": "docs/dev-guide/api.md",
+          "native_passed": true,
+          "matched_passed": true
+        },
+        {
+          "target": "docs/dev-guide/plugins.md",
+          "native_passed": true,
+          "matched_passed": true
+        },
+        {
+          "target": "docs/dev-guide/themes.md",
+          "native_passed": true,
+          "matched_passed": true
+        },
+        {
+          "target": "docs/dev-guide/translations.md",
+          "native_passed": true,
+          "matched_passed": true
+        },
+        {
+          "target": "docs/getting-started.md",
+          "native_passed": true,
+          "matched_passed": true
+        },
+        {
+          "target": "docs/index.md",
+          "native_passed": true,
+          "matched_passed": true
+        },
+        {
+          "target": "docs/user-guide/README.md",
+          "native_passed": true,
+          "matched_passed": true
+        },
+        {
+          "target": "docs/user-guide/choosing-your-theme.md",
+          "native_passed": true,
+          "matched_passed": true
+        },
+        {
+          "target": "docs/user-guide/cli.md",
+          "native_passed": true,
+          "matched_passed": true
+        },
+        {
+          "target": "docs/user-guide/configuration.md",
+          "native_passed": true,
+          "matched_passed": true
+        },
+        {
+          "target": "docs/user-guide/customizing-your-theme.md",
+          "native_passed": true,
+          "matched_passed": true
+        },
+        {
+          "target": "docs/user-guide/deploying-your-docs.md",
+          "native_passed": true,
+          "matched_passed": true
+        },
+        {
+          "target": "docs/user-guide/installation.md",
+          "native_passed": true,
+          "matched_passed": true
+        },
+        {
+          "target": "docs/user-guide/localizing-your-theme.md",
+          "native_passed": true,
+          "matched_passed": true
+        },
+        {
+          "target": "docs/user-guide/writing-your-docs.md",
+          "native_passed": true,
+          "matched_passed": true
+        }
+      ]
+    },
+    "installed_product_sources_matched": 75,
+    "endpoint_refused": true,
+    "invalid_provider_script_entrypoints_passed": true,
+    "matched_helper_independent_of_cairn_or_oracle": true
+  },
+  "artifact_root": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/reference-impact-20261025"
+}

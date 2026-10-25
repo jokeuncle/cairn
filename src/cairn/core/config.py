@@ -16,7 +16,7 @@ from typing import Literal, cast
 
 from pydantic import BaseModel, ConfigDict
 
-EmbedProvider = Literal["openai-compatible", "doubao-vision"]
+EmbedProvider = Literal["openai-compatible", "windowed-openai-compatible", "doubao-vision"]
 
 
 class LLMConfig(BaseModel):
@@ -44,6 +44,8 @@ class EmbedConfig(BaseModel):
     timeout: float = 60.0
     max_retries: int = 2
     concurrency: int = 8
+    document_prefix: str = ""
+    query_prefix: str = ""
 
 
 class IndexConfig(BaseModel):
@@ -88,6 +90,8 @@ def load_embed_config() -> EmbedConfig:
         timeout=_float_env("CAIRN_EMBED_TIMEOUT", 60.0),
         max_retries=_int_env("CAIRN_EMBED_MAX_RETRIES", 2),
         concurrency=_int_env("CAIRN_EMBED_CONCURRENCY", 8),
+        document_prefix=os.environ.get("CAIRN_EMBED_DOCUMENT_PREFIX", ""),
+        query_prefix=os.environ.get("CAIRN_EMBED_QUERY_PREFIX", ""),
     )
 
 

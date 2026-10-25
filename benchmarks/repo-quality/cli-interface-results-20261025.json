@@ -1,0 +1,1468 @@
+{
+  "scope": "CLI interface diagnostic, two previously-used synthetic alias tasks repeated, exact frozen source; not independent real-domain/commercial validation",
+  "rounds": {
+    "cli-probe": {
+      "runs": [
+        {
+          "case_id": "closed-svc004",
+          "arm": "cli",
+          "model": "gpt-6.1-sol",
+          "runtime": "codex-cli 0.164.0",
+          "exit_code": 0,
+          "stop_reason": null,
+          "seconds": 23.179816916002892,
+          "tool_invocations": 2,
+          "usage_events": [
+            {
+              "input_tokens": 55673,
+              "cached_input_tokens": 37760,
+              "cache_write_input_tokens": 0,
+              "output_tokens": 553,
+              "reasoning_output_tokens": 123
+            }
+          ],
+          "input_tokens": 55673,
+          "cached_input_tokens": 37760,
+          "output_tokens": 553,
+          "final_answer_exists": true,
+          "review": {
+            "objects": 1,
+            "fields_match": false,
+            "manual_citation_and_derivation_review_required": true,
+            "citation_support": [
+              {
+                "id": "manual/authority",
+                "source_line_interval": [
+                  5,
+                  15
+                ],
+                "direct_anchor": false,
+                "local_line_in_section": false
+              },
+              {
+                "id": "manual/active-services/svc004",
+                "source_line_interval": [
+                  62,
+                  74
+                ],
+                "direct_anchor": false,
+                "local_line_in_section": false
+              },
+              {
+                "id": "manual/profiles/profile-p011",
+                "source_line_interval": [
+                  540,
+                  551
+                ],
+                "direct_anchor": false,
+                "local_line_in_section": false
+              },
+              {
+                "id": "manual/regions/region-r011",
+                "source_line_interval": [
+                  825,
+                  835
+                ],
+                "direct_anchor": false,
+                "local_line_in_section": false
+              },
+              {
+                "id": "manual/leases/lease-l004",
+                "source_line_interval": [
+                  881,
+                  889
+                ],
+                "direct_anchor": false,
+                "local_line_in_section": false
+              }
+            ],
+            "manual_review": {
+              "all_five_supporting_sources_cited": false,
+              "derivation_and_active_scope_match_original_source": false,
+              "evidence_access_within_protocol": true
+            },
+            "source_tool_calls": [
+              {
+                "interface": "CLI shell stdout",
+                "ok": false,
+                "returned_section_ids": [],
+                "returned_source_characters": null,
+                "error": {
+                  "code": "INDEX_BUILD_FAILED",
+                  "message": "embedder request failed: All connection attempts failed",
+                  "details": {
+                    "model": "nomic-embed-text-v1.5.Q4_K_M",
+                    "base_url": "http://127.0.0.1:18082/v1",
+                    "error_type": "ConnectError",
+                    "attempts": 3
+                  }
+                }
+              },
+              {
+                "interface": "CLI shell stdout",
+                "ok": false,
+                "returned_section_ids": [],
+                "returned_source_characters": null,
+                "error": {
+                  "code": "INDEX_BUILD_FAILED",
+                  "message": "embedder request failed: All connection attempts failed",
+                  "details": {
+                    "model": "nomic-embed-text-v1.5.Q4_K_M",
+                    "base_url": "http://127.0.0.1:18082/v1",
+                    "error_type": "ConnectError",
+                    "attempts": 3
+                  }
+                }
+              }
+            ],
+            "answer_sha256": "c625b5662432dffb9fe6346934451bc97fadc13fdfd401bc6e53cc2f46830b7b",
+            "complete_task_accepted": false
+          },
+          "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/cli-probe/closed-svc004-cli"
+        },
+        {
+          "case_id": "closed-svc004",
+          "arm": "raw",
+          "model": "gpt-6.1-sol",
+          "runtime": "codex-cli 0.164.0",
+          "exit_code": 0,
+          "stop_reason": null,
+          "seconds": 36.71517820900044,
+          "tool_invocations": 6,
+          "usage_events": [
+            {
+              "input_tokens": 171810,
+              "cached_input_tokens": 147328,
+              "cache_write_input_tokens": 0,
+              "output_tokens": 1576,
+              "reasoning_output_tokens": 32
+            }
+          ],
+          "input_tokens": 171810,
+          "cached_input_tokens": 147328,
+          "output_tokens": 1576,
+          "final_answer_exists": true,
+          "review": {
+            "objects": 1,
+            "fields_match": true,
+            "manual_citation_and_derivation_review_required": true,
+            "citation_support": [
+              {
+                "id": "manual/authority",
+                "source_line_interval": [
+                  5,
+                  15
+                ],
+                "direct_anchor": true,
+                "local_line_in_section": false
+              },
+              {
+                "id": "manual/active-services/svc004",
+                "source_line_interval": [
+                  62,
+                  74
+                ],
+                "direct_anchor": true,
+                "local_line_in_section": false
+              },
+              {
+                "id": "manual/profiles/profile-p011",
+                "source_line_interval": [
+                  540,
+                  551
+                ],
+                "direct_anchor": true,
+                "local_line_in_section": false
+              },
+              {
+                "id": "manual/regions/region-r011",
+                "source_line_interval": [
+                  825,
+                  835
+                ],
+                "direct_anchor": true,
+                "local_line_in_section": false
+              },
+              {
+                "id": "manual/leases/lease-l004",
+                "source_line_interval": [
+                  881,
+                  889
+                ],
+                "direct_anchor": true,
+                "local_line_in_section": false
+              }
+            ],
+            "manual_review": {
+              "all_five_supporting_sources_cited": true,
+              "derivation_and_active_scope_match_original_source": true,
+              "evidence_access_within_protocol": true
+            },
+            "source_tool_calls": [],
+            "answer_sha256": "d1407dc1fd61846e49c3f00d590063cb11e219f2f414ec18c309db8ebc31e5d6",
+            "complete_task_accepted": true
+          },
+          "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/cli-probe/closed-svc004-raw"
+        },
+        {
+          "case_id": "closed-svc028",
+          "arm": "cli",
+          "model": "gpt-6.1-sol",
+          "runtime": "codex-cli 0.164.0",
+          "exit_code": 0,
+          "stop_reason": null,
+          "seconds": 19.138391250002314,
+          "tool_invocations": 2,
+          "usage_events": [
+            {
+              "input_tokens": 55671,
+              "cached_input_tokens": 52736,
+              "cache_write_input_tokens": 0,
+              "output_tokens": 475,
+              "reasoning_output_tokens": 78
+            }
+          ],
+          "input_tokens": 55671,
+          "cached_input_tokens": 52736,
+          "output_tokens": 475,
+          "final_answer_exists": true,
+          "review": {
+            "objects": 1,
+            "fields_match": false,
+            "manual_citation_and_derivation_review_required": true,
+            "citation_support": [
+              {
+                "id": "manual/authority",
+                "source_line_interval": [
+                  5,
+                  15
+                ],
+                "direct_anchor": false,
+                "local_line_in_section": false
+              },
+              {
+                "id": "manual/active-services/svc028",
+                "source_line_interval": [
+                  374,
+                  386
+                ],
+                "direct_anchor": false,
+                "local_line_in_section": false
+              },
+              {
+                "id": "manual/profiles/profile-p010",
+                "source_line_interval": [
+                  528,
+                  539
+                ],
+                "direct_anchor": false,
+                "local_line_in_section": false
+              },
+              {
+                "id": "manual/regions/region-r004",
+                "source_line_interval": [
+                  748,
+                  758
+                ],
+                "direct_anchor": false,
+                "local_line_in_section": false
+              },
+              {
+                "id": "manual/leases/lease-l006",
+                "source_line_interval": [
+                  899,
+                  907
+                ],
+                "direct_anchor": false,
+                "local_line_in_section": false
+              }
+            ],
+            "manual_review": {
+              "all_five_supporting_sources_cited": false,
+              "derivation_and_active_scope_match_original_source": false,
+              "evidence_access_within_protocol": true
+            },
+            "source_tool_calls": [
+              {
+                "interface": "CLI shell stdout",
+                "ok": false,
+                "returned_section_ids": [],
+                "returned_source_characters": null,
+                "error": {
+                  "code": "INDEX_BUILD_FAILED",
+                  "message": "embedder request failed: All connection attempts failed",
+                  "details": {
+                    "model": "nomic-embed-text-v1.5.Q4_K_M",
+                    "base_url": "http://127.0.0.1:18082/v1",
+                    "error_type": "ConnectError",
+                    "attempts": 3
+                  }
+                }
+              },
+              {
+                "interface": "CLI shell stdout",
+                "ok": false,
+                "returned_section_ids": [],
+                "returned_source_characters": null,
+                "error": {
+                  "code": "INDEX_BUILD_FAILED",
+                  "message": "embedder request failed: All connection attempts failed",
+                  "details": {
+                    "model": "nomic-embed-text-v1.5.Q4_K_M",
+                    "base_url": "http://127.0.0.1:18082/v1",
+                    "error_type": "ConnectError",
+                    "attempts": 3
+                  }
+                }
+              }
+            ],
+            "answer_sha256": "d5ee384b93f53939730810173a343b077b39e9e24bebff69583d0cf8ac526d69",
+            "complete_task_accepted": false
+          },
+          "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/cli-probe/closed-svc028-cli"
+        },
+        {
+          "case_id": "closed-svc028",
+          "arm": "raw",
+          "model": "gpt-6.1-sol",
+          "runtime": "codex-cli 0.164.0",
+          "exit_code": 0,
+          "stop_reason": null,
+          "seconds": 42.82295620799778,
+          "tool_invocations": 4,
+          "usage_events": [
+            {
+              "input_tokens": 144935,
+              "cached_input_tokens": 126592,
+              "cache_write_input_tokens": 0,
+              "output_tokens": 2072,
+              "reasoning_output_tokens": 126
+            }
+          ],
+          "input_tokens": 144935,
+          "cached_input_tokens": 126592,
+          "output_tokens": 2072,
+          "final_answer_exists": true,
+          "review": {
+            "objects": 1,
+            "fields_match": true,
+            "manual_citation_and_derivation_review_required": true,
+            "citation_support": [
+              {
+                "id": "manual/authority",
+                "source_line_interval": [
+                  5,
+                  15
+                ],
+                "direct_anchor": false,
+                "local_line_in_section": true
+              },
+              {
+                "id": "manual/active-services/svc028",
+                "source_line_interval": [
+                  374,
+                  386
+                ],
+                "direct_anchor": false,
+                "local_line_in_section": true
+              },
+              {
+                "id": "manual/profiles/profile-p010",
+                "source_line_interval": [
+                  528,
+                  539
+                ],
+                "direct_anchor": false,
+                "local_line_in_section": true
+              },
+              {
+                "id": "manual/regions/region-r004",
+                "source_line_interval": [
+                  748,
+                  758
+                ],
+                "direct_anchor": false,
+                "local_line_in_section": true
+              },
+              {
+                "id": "manual/leases/lease-l006",
+                "source_line_interval": [
+                  899,
+                  907
+                ],
+                "direct_anchor": false,
+                "local_line_in_section": true
+              }
+            ],
+            "manual_review": {
+              "all_five_supporting_sources_cited": true,
+              "derivation_and_active_scope_match_original_source": true,
+              "evidence_access_within_protocol": true
+            },
+            "source_tool_calls": [],
+            "answer_sha256": "9cd583154d4260677ff30164924eee50d7c7fe49675566eea5dee595d475d92a",
+            "complete_task_accepted": true
+          },
+          "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/cli-probe/closed-svc028-raw"
+        }
+      ],
+      "aggregates": [
+        {
+          "arm": "cli",
+          "accepted": 0,
+          "tasks": 2,
+          "input_tokens": 111344,
+          "cached_input_tokens": 90496,
+          "output_tokens": 1028,
+          "tool_invocations": 4,
+          "seconds": 42.318208166005206,
+          "uncached_input_tokens": 20848
+        },
+        {
+          "arm": "raw",
+          "accepted": 2,
+          "tasks": 2,
+          "input_tokens": 316745,
+          "cached_input_tokens": 273920,
+          "output_tokens": 3648,
+          "tool_invocations": 10,
+          "seconds": 79.53813441699822,
+          "uncached_input_tokens": 42825
+        }
+      ]
+    },
+    "cli-loopback": {
+      "runs": [
+        {
+          "case_id": "closed-svc004",
+          "arm": "cli",
+          "model": "gpt-6.1-sol",
+          "runtime": "codex-cli 0.164.0",
+          "exit_code": 0,
+          "stop_reason": null,
+          "seconds": 23.90419083300003,
+          "tool_invocations": 2,
+          "usage_events": [
+            {
+              "input_tokens": 79901,
+              "cached_input_tokens": 68992,
+              "cache_write_input_tokens": 0,
+              "output_tokens": 1079,
+              "reasoning_output_tokens": 71
+            }
+          ],
+          "input_tokens": 79901,
+          "cached_input_tokens": 68992,
+          "output_tokens": 1079,
+          "final_answer_exists": true,
+          "review": {
+            "objects": 1,
+            "fields_match": true,
+            "manual_citation_and_derivation_review_required": true,
+            "citation_support": [
+              {
+                "id": "manual/authority",
+                "source_line_interval": [
+                  5,
+                  15
+                ],
+                "direct_anchor": true,
+                "local_line_in_section": false
+              },
+              {
+                "id": "manual/active-services/svc004",
+                "source_line_interval": [
+                  62,
+                  74
+                ],
+                "direct_anchor": true,
+                "local_line_in_section": false
+              },
+              {
+                "id": "manual/profiles/profile-p011",
+                "source_line_interval": [
+                  540,
+                  551
+                ],
+                "direct_anchor": true,
+                "local_line_in_section": false
+              },
+              {
+                "id": "manual/regions/region-r011",
+                "source_line_interval": [
+                  825,
+                  835
+                ],
+                "direct_anchor": true,
+                "local_line_in_section": false
+              },
+              {
+                "id": "manual/leases/lease-l004",
+                "source_line_interval": [
+                  881,
+                  889
+                ],
+                "direct_anchor": true,
+                "local_line_in_section": false
+              }
+            ],
+            "manual_review": {
+              "all_five_supporting_sources_cited": true,
+              "derivation_and_active_scope_match_original_source": true,
+              "evidence_access_within_protocol": true
+            },
+            "source_tool_calls": [
+              {
+                "interface": "CLI shell stdout",
+                "ok": true,
+                "returned_section_ids": [
+                  "manual/active-services/svc004",
+                  "manual/authority",
+                  "manual/profiles/profile-p011",
+                  "manual/regions/region-r011",
+                  "manual/leases/lease-l004"
+                ],
+                "returned_source_characters": 1555,
+                "error": null
+              }
+            ],
+            "answer_sha256": "41ea7efe2c720e36fb5a5db58c4eaef5edba7bc94e515ebebed992e9b7b8120e",
+            "complete_task_accepted": true
+          },
+          "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/cli-loopback/closed-svc004-cli"
+        },
+        {
+          "case_id": "closed-svc004",
+          "arm": "raw",
+          "model": "gpt-6.1-sol",
+          "runtime": "codex-cli 0.164.0",
+          "exit_code": 0,
+          "stop_reason": null,
+          "seconds": 41.42280145800032,
+          "tool_invocations": 5,
+          "usage_events": [
+            {
+              "input_tokens": 173506,
+              "cached_input_tokens": 153088,
+              "cache_write_input_tokens": 0,
+              "output_tokens": 1460,
+              "reasoning_output_tokens": 222
+            }
+          ],
+          "input_tokens": 173506,
+          "cached_input_tokens": 153088,
+          "output_tokens": 1460,
+          "final_answer_exists": true,
+          "review": {
+            "objects": 1,
+            "fields_match": true,
+            "manual_citation_and_derivation_review_required": true,
+            "citation_support": [
+              {
+                "id": "manual/authority",
+                "source_line_interval": [
+                  5,
+                  15
+                ],
+                "direct_anchor": false,
+                "local_line_in_section": true
+              },
+              {
+                "id": "manual/active-services/svc004",
+                "source_line_interval": [
+                  62,
+                  74
+                ],
+                "direct_anchor": false,
+                "local_line_in_section": true
+              },
+              {
+                "id": "manual/profiles/profile-p011",
+                "source_line_interval": [
+                  540,
+                  551
+                ],
+                "direct_anchor": false,
+                "local_line_in_section": true
+              },
+              {
+                "id": "manual/regions/region-r011",
+                "source_line_interval": [
+                  825,
+                  835
+                ],
+                "direct_anchor": false,
+                "local_line_in_section": true
+              },
+              {
+                "id": "manual/leases/lease-l004",
+                "source_line_interval": [
+                  881,
+                  889
+                ],
+                "direct_anchor": false,
+                "local_line_in_section": true
+              }
+            ],
+            "manual_review": {
+              "all_five_supporting_sources_cited": true,
+              "derivation_and_active_scope_match_original_source": true,
+              "evidence_access_within_protocol": true
+            },
+            "source_tool_calls": [],
+            "answer_sha256": "ddcef495b8f1c742cfdf1c2c1cb1cf1c37e3bf13da79bf6fd42452afdc90a50d",
+            "complete_task_accepted": true
+          },
+          "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/cli-loopback/closed-svc004-raw"
+        },
+        {
+          "case_id": "closed-svc028",
+          "arm": "cli",
+          "model": "gpt-6.1-sol",
+          "runtime": "codex-cli 0.164.0",
+          "exit_code": 0,
+          "stop_reason": null,
+          "seconds": 29.0847767080013,
+          "tool_invocations": 2,
+          "usage_events": [
+            {
+              "input_tokens": 80288,
+              "cached_input_tokens": 69248,
+              "cache_write_input_tokens": 0,
+              "output_tokens": 1304,
+              "reasoning_output_tokens": 103
+            }
+          ],
+          "input_tokens": 80288,
+          "cached_input_tokens": 69248,
+          "output_tokens": 1304,
+          "final_answer_exists": true,
+          "review": {
+            "objects": 1,
+            "fields_match": true,
+            "manual_citation_and_derivation_review_required": true,
+            "citation_support": [
+              {
+                "id": "manual/authority",
+                "source_line_interval": [
+                  5,
+                  15
+                ],
+                "direct_anchor": true,
+                "local_line_in_section": false
+              },
+              {
+                "id": "manual/active-services/svc028",
+                "source_line_interval": [
+                  374,
+                  386
+                ],
+                "direct_anchor": true,
+                "local_line_in_section": false
+              },
+              {
+                "id": "manual/profiles/profile-p010",
+                "source_line_interval": [
+                  528,
+                  539
+                ],
+                "direct_anchor": true,
+                "local_line_in_section": false
+              },
+              {
+                "id": "manual/regions/region-r004",
+                "source_line_interval": [
+                  748,
+                  758
+                ],
+                "direct_anchor": true,
+                "local_line_in_section": false
+              },
+              {
+                "id": "manual/leases/lease-l006",
+                "source_line_interval": [
+                  899,
+                  907
+                ],
+                "direct_anchor": true,
+                "local_line_in_section": false
+              }
+            ],
+            "manual_review": {
+              "all_five_supporting_sources_cited": true,
+              "derivation_and_active_scope_match_original_source": true,
+              "evidence_access_within_protocol": true
+            },
+            "source_tool_calls": [
+              {
+                "interface": "CLI shell stdout",
+                "ok": true,
+                "returned_section_ids": [
+                  "manual/active-services/svc028",
+                  "manual/authority",
+                  "manual/profiles/profile-p010",
+                  "manual/regions/region-r004",
+                  "manual/leases/lease-l006"
+                ],
+                "returned_source_characters": 1537,
+                "error": null
+              }
+            ],
+            "answer_sha256": "75cfc93d8b64124319853366f2f2470b1ddc7965249f9ca5b31e820e0d7a5578",
+            "complete_task_accepted": true
+          },
+          "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/cli-loopback/closed-svc028-cli"
+        },
+        {
+          "case_id": "closed-svc028",
+          "arm": "raw",
+          "model": "gpt-6.1-sol",
+          "runtime": "codex-cli 0.164.0",
+          "exit_code": 0,
+          "stop_reason": null,
+          "seconds": 35.67214141600198,
+          "tool_invocations": 5,
+          "usage_events": [
+            {
+              "input_tokens": 146696,
+              "cached_input_tokens": 139008,
+              "cache_write_input_tokens": 0,
+              "output_tokens": 1492,
+              "reasoning_output_tokens": 115
+            }
+          ],
+          "input_tokens": 146696,
+          "cached_input_tokens": 139008,
+          "output_tokens": 1492,
+          "final_answer_exists": true,
+          "review": {
+            "objects": 1,
+            "fields_match": true,
+            "manual_citation_and_derivation_review_required": true,
+            "citation_support": [
+              {
+                "id": "manual/authority",
+                "source_line_interval": [
+                  5,
+                  15
+                ],
+                "direct_anchor": true,
+                "local_line_in_section": false
+              },
+              {
+                "id": "manual/active-services/svc028",
+                "source_line_interval": [
+                  374,
+                  386
+                ],
+                "direct_anchor": true,
+                "local_line_in_section": false
+              },
+              {
+                "id": "manual/profiles/profile-p010",
+                "source_line_interval": [
+                  528,
+                  539
+                ],
+                "direct_anchor": true,
+                "local_line_in_section": false
+              },
+              {
+                "id": "manual/regions/region-r004",
+                "source_line_interval": [
+                  748,
+                  758
+                ],
+                "direct_anchor": true,
+                "local_line_in_section": false
+              },
+              {
+                "id": "manual/leases/lease-l006",
+                "source_line_interval": [
+                  899,
+                  907
+                ],
+                "direct_anchor": true,
+                "local_line_in_section": false
+              }
+            ],
+            "manual_review": {
+              "all_five_supporting_sources_cited": true,
+              "derivation_and_active_scope_match_original_source": true,
+              "evidence_access_within_protocol": true
+            },
+            "source_tool_calls": [],
+            "answer_sha256": "9b4a5f63eac9ffe1e9fbb344fd68348a8a3db06278233e3d9d6cf876bcd0f8e5",
+            "complete_task_accepted": true
+          },
+          "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/cli-loopback/closed-svc028-raw"
+        }
+      ],
+      "aggregates": [
+        {
+          "arm": "cli",
+          "accepted": 2,
+          "tasks": 2,
+          "input_tokens": 160189,
+          "cached_input_tokens": 138240,
+          "output_tokens": 2383,
+          "tool_invocations": 4,
+          "seconds": 52.98896754100133,
+          "uncached_input_tokens": 21949
+        },
+        {
+          "arm": "raw",
+          "accepted": 2,
+          "tasks": 2,
+          "input_tokens": 320202,
+          "cached_input_tokens": 292096,
+          "output_tokens": 2952,
+          "tool_invocations": 10,
+          "seconds": 77.0949428740023,
+          "uncached_input_tokens": 28106
+        }
+      ]
+    },
+    "cli-repeat": {
+      "runs": [
+        {
+          "case_id": "closed-svc004",
+          "arm": "cli",
+          "model": "gpt-6.1-sol",
+          "runtime": "codex-cli 0.164.0",
+          "exit_code": 0,
+          "stop_reason": null,
+          "seconds": 28.30168699999922,
+          "tool_invocations": 2,
+          "usage_events": [
+            {
+              "input_tokens": 80131,
+              "cached_input_tokens": 69248,
+              "cache_write_input_tokens": 0,
+              "output_tokens": 1212,
+              "reasoning_output_tokens": 87
+            }
+          ],
+          "input_tokens": 80131,
+          "cached_input_tokens": 69248,
+          "output_tokens": 1212,
+          "final_answer_exists": true,
+          "review": {
+            "objects": 1,
+            "fields_match": true,
+            "manual_citation_and_derivation_review_required": true,
+            "citation_support": [
+              {
+                "id": "manual/authority",
+                "source_line_interval": [
+                  5,
+                  15
+                ],
+                "direct_anchor": true,
+                "local_line_in_section": false
+              },
+              {
+                "id": "manual/active-services/svc004",
+                "source_line_interval": [
+                  62,
+                  74
+                ],
+                "direct_anchor": true,
+                "local_line_in_section": false
+              },
+              {
+                "id": "manual/profiles/profile-p011",
+                "source_line_interval": [
+                  540,
+                  551
+                ],
+                "direct_anchor": true,
+                "local_line_in_section": false
+              },
+              {
+                "id": "manual/regions/region-r011",
+                "source_line_interval": [
+                  825,
+                  835
+                ],
+                "direct_anchor": true,
+                "local_line_in_section": false
+              },
+              {
+                "id": "manual/leases/lease-l004",
+                "source_line_interval": [
+                  881,
+                  889
+                ],
+                "direct_anchor": true,
+                "local_line_in_section": false
+              }
+            ],
+            "manual_review": {
+              "all_five_supporting_sources_cited": true,
+              "derivation_and_active_scope_match_original_source": true,
+              "evidence_access_within_protocol": true
+            },
+            "source_tool_calls": [
+              {
+                "interface": "CLI shell stdout",
+                "ok": true,
+                "returned_section_ids": [
+                  "manual/active-services/svc004",
+                  "manual/authority",
+                  "manual/profiles/profile-p011",
+                  "manual/regions/region-r011",
+                  "manual/leases/lease-l004"
+                ],
+                "returned_source_characters": 1555,
+                "error": null
+              }
+            ],
+            "answer_sha256": "99c0217984993b9eefe916bce7819c6698a8a38bd8b18e39247042b7d33d950b",
+            "complete_task_accepted": true
+          },
+          "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/cli-repeat/closed-svc004-cli"
+        },
+        {
+          "case_id": "closed-svc004",
+          "arm": "raw",
+          "model": "gpt-6.1-sol",
+          "runtime": "codex-cli 0.164.0",
+          "exit_code": 0,
+          "stop_reason": null,
+          "seconds": 35.686743374997604,
+          "tool_invocations": 5,
+          "usage_events": [
+            {
+              "input_tokens": 139091,
+              "cached_input_tokens": 126720,
+              "cache_write_input_tokens": 0,
+              "output_tokens": 1764,
+              "reasoning_output_tokens": 33
+            }
+          ],
+          "input_tokens": 139091,
+          "cached_input_tokens": 126720,
+          "output_tokens": 1764,
+          "final_answer_exists": true,
+          "review": {
+            "objects": 1,
+            "fields_match": true,
+            "manual_citation_and_derivation_review_required": true,
+            "citation_support": [
+              {
+                "id": "manual/authority",
+                "source_line_interval": [
+                  5,
+                  15
+                ],
+                "direct_anchor": true,
+                "local_line_in_section": false
+              },
+              {
+                "id": "manual/active-services/svc004",
+                "source_line_interval": [
+                  62,
+                  74
+                ],
+                "direct_anchor": true,
+                "local_line_in_section": false
+              },
+              {
+                "id": "manual/profiles/profile-p011",
+                "source_line_interval": [
+                  540,
+                  551
+                ],
+                "direct_anchor": true,
+                "local_line_in_section": false
+              },
+              {
+                "id": "manual/regions/region-r011",
+                "source_line_interval": [
+                  825,
+                  835
+                ],
+                "direct_anchor": true,
+                "local_line_in_section": false
+              },
+              {
+                "id": "manual/leases/lease-l004",
+                "source_line_interval": [
+                  881,
+                  889
+                ],
+                "direct_anchor": true,
+                "local_line_in_section": false
+              }
+            ],
+            "manual_review": {
+              "all_five_supporting_sources_cited": true,
+              "derivation_and_active_scope_match_original_source": true,
+              "evidence_access_within_protocol": true
+            },
+            "source_tool_calls": [],
+            "answer_sha256": "850db2ca988c4b4482043febf9aafaf53aed4aba41243a07e2f792e85c25ee00",
+            "complete_task_accepted": true
+          },
+          "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/cli-repeat/closed-svc004-raw"
+        },
+        {
+          "case_id": "closed-svc028",
+          "arm": "cli",
+          "model": "gpt-6.1-sol",
+          "runtime": "codex-cli 0.164.0",
+          "exit_code": 0,
+          "stop_reason": null,
+          "seconds": 30.051458665999235,
+          "tool_invocations": 2,
+          "usage_events": [
+            {
+              "input_tokens": 81700,
+              "cached_input_tokens": 59136,
+              "cache_write_input_tokens": 0,
+              "output_tokens": 1247,
+              "reasoning_output_tokens": 68
+            }
+          ],
+          "input_tokens": 81700,
+          "cached_input_tokens": 59136,
+          "output_tokens": 1247,
+          "final_answer_exists": true,
+          "review": {
+            "objects": 1,
+            "fields_match": true,
+            "manual_citation_and_derivation_review_required": true,
+            "citation_support": [
+              {
+                "id": "manual/authority",
+                "source_line_interval": [
+                  5,
+                  15
+                ],
+                "direct_anchor": true,
+                "local_line_in_section": false
+              },
+              {
+                "id": "manual/active-services/svc028",
+                "source_line_interval": [
+                  374,
+                  386
+                ],
+                "direct_anchor": true,
+                "local_line_in_section": false
+              },
+              {
+                "id": "manual/profiles/profile-p010",
+                "source_line_interval": [
+                  528,
+                  539
+                ],
+                "direct_anchor": true,
+                "local_line_in_section": false
+              },
+              {
+                "id": "manual/regions/region-r004",
+                "source_line_interval": [
+                  748,
+                  758
+                ],
+                "direct_anchor": true,
+                "local_line_in_section": false
+              },
+              {
+                "id": "manual/leases/lease-l006",
+                "source_line_interval": [
+                  899,
+                  907
+                ],
+                "direct_anchor": true,
+                "local_line_in_section": false
+              }
+            ],
+            "manual_review": {
+              "all_five_supporting_sources_cited": true,
+              "derivation_and_active_scope_match_original_source": true,
+              "evidence_access_within_protocol": true
+            },
+            "source_tool_calls": [
+              {
+                "interface": "CLI shell stdout",
+                "ok": true,
+                "returned_section_ids": [
+                  "manual/active-services/svc028",
+                  "manual/authority",
+                  "manual/profiles/profile-p010",
+                  "manual/regions/region-r004",
+                  "manual/leases/lease-l006",
+                  "manual/active-services/svc029"
+                ],
+                "returned_source_characters": 1887,
+                "error": null
+              }
+            ],
+            "answer_sha256": "0fffc6524caae03be8a86e74183f72b0375c0be2e99c727c5077cd7e1af194d5",
+            "complete_task_accepted": true
+          },
+          "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/cli-repeat/closed-svc028-cli"
+        },
+        {
+          "case_id": "closed-svc028",
+          "arm": "raw",
+          "model": "gpt-6.1-sol",
+          "runtime": "codex-cli 0.164.0",
+          "exit_code": 0,
+          "stop_reason": null,
+          "seconds": 35.727367416999186,
+          "tool_invocations": 5,
+          "usage_events": [
+            {
+              "input_tokens": 167253,
+              "cached_input_tokens": 140928,
+              "cache_write_input_tokens": 0,
+              "output_tokens": 1543,
+              "reasoning_output_tokens": 128
+            }
+          ],
+          "input_tokens": 167253,
+          "cached_input_tokens": 140928,
+          "output_tokens": 1543,
+          "final_answer_exists": true,
+          "review": {
+            "objects": 1,
+            "fields_match": true,
+            "manual_citation_and_derivation_review_required": true,
+            "citation_support": [
+              {
+                "id": "manual/authority",
+                "source_line_interval": [
+                  5,
+                  15
+                ],
+                "direct_anchor": true,
+                "local_line_in_section": false
+              },
+              {
+                "id": "manual/active-services/svc028",
+                "source_line_interval": [
+                  374,
+                  386
+                ],
+                "direct_anchor": true,
+                "local_line_in_section": false
+              },
+              {
+                "id": "manual/profiles/profile-p010",
+                "source_line_interval": [
+                  528,
+                  539
+                ],
+                "direct_anchor": true,
+                "local_line_in_section": false
+              },
+              {
+                "id": "manual/regions/region-r004",
+                "source_line_interval": [
+                  748,
+                  758
+                ],
+                "direct_anchor": true,
+                "local_line_in_section": false
+              },
+              {
+                "id": "manual/leases/lease-l006",
+                "source_line_interval": [
+                  899,
+                  907
+                ],
+                "direct_anchor": true,
+                "local_line_in_section": false
+              }
+            ],
+            "manual_review": {
+              "all_five_supporting_sources_cited": true,
+              "derivation_and_active_scope_match_original_source": true,
+              "evidence_access_within_protocol": true
+            },
+            "source_tool_calls": [],
+            "answer_sha256": "1ce6edcd67f9b548b4bd04adecf8de8f58328b5ea5dd3fc44b95a00f42b11345",
+            "complete_task_accepted": true
+          },
+          "path": "/Users/ksher/self-projects/cairn-evaluations/rescue-20261024/navigation-round/codex/cli-repeat/closed-svc028-raw"
+        }
+      ],
+      "aggregates": [
+        {
+          "arm": "cli",
+          "accepted": 2,
+          "tasks": 2,
+          "input_tokens": 161831,
+          "cached_input_tokens": 128384,
+          "output_tokens": 2459,
+          "tool_invocations": 4,
+          "seconds": 58.353145665998454,
+          "uncached_input_tokens": 33447
+        },
+        {
+          "arm": "raw",
+          "accepted": 2,
+          "tasks": 2,
+          "input_tokens": 306344,
+          "cached_input_tokens": 267648,
+          "output_tokens": 3307,
+          "tool_invocations": 10,
+          "seconds": 71.41411079199679,
+          "uncached_input_tokens": 38696
+        }
+      ]
+    }
+  },
+  "qualified_rounds_pooled": [
+    {
+      "arm": "cli",
+      "accepted": 4,
+      "tasks": 4,
+      "input_tokens": 322020,
+      "cached_input_tokens": 266624,
+      "output_tokens": 4842,
+      "tool_invocations": 8,
+      "seconds": 111.34211320699978,
+      "uncached_input_tokens": 55396
+    },
+    {
+      "arm": "raw",
+      "accepted": 4,
+      "tasks": 4,
+      "input_tokens": 626546,
+      "cached_input_tokens": 559744,
+      "output_tokens": 6259,
+      "tool_invocations": 20,
+      "seconds": 148.5090536659991,
+      "uncached_input_tokens": 66802
+    }
+  ],
+  "gate_each_qualified_round": {
+    "cli-loopback": true,
+    "cli-repeat": true
+  },
+  "gate_pooled_qualified_rounds": true,
+  "original_failures_retained_not_counted_as_savings": true,
+  "protocols": {
+    "cli": {
+      "scope": "Four-session CLI interface diagnostic, two already-known aliases, fresh CLI/raw. Same backend full evidence payload via shell, not structured-only transport. No product command released.",
+      "model": "gpt-6.1-sol high, CodexCLI0.164 read-only same auth,24calls900sec",
+      "source_version": "link-spike frozen71 Python files unchanged",
+      "cases": [
+        "closed-svc004",
+        "closed-svc028"
+      ],
+      "arms": [
+        "external Cairn CLI adapter",
+        "actual rg/raw"
+      ],
+      "runner_sha256": "fcefc2a26432fb8dc5866f05ce5052de3cdb03bf500f49d41518a48e11013836",
+      "adapter_sha256": "5ae89e726c6b2c761604f7e7635a9920b8423aa6b1deefccfaf7d6a3a4b637d2",
+      "selection": "First two existing spike cases, both fresh arms, alternated order, no task-specific evidence in prompts. No source/oracle tuning. All four retained. Stop after four and report.",
+      "gate": "Both tasks accepted and compare cumulative I/U/O including all harness overhead; no noninferiority/generalization/dollar claim from two reused tasks.",
+      "limitations": [
+        "Known synthetic manual and already-used aliases",
+        "One attempt perpair",
+        "CLI prompt documents its interface instead of MCP schemas; whole interface/harness bundle differs, not a pure algorithm ablation",
+        "Adapter hardwires fixture and local embedding endpoint for diagnostic only; not portable product CLI",
+        "Startup, cache and skill behavior stochastic; no causal claim for one serialization detail"
+      ]
+    },
+    "cli-loopback": {
+      "scope": "Recovery diagnostic:four new sessions, same unchanged CLI backend and two known tasks; read-only filesystem and qualified127.0.0.1-only network profile matched in BOTH arms",
+      "model": "gpt-6.1-sol high, CodexCLI0.164 read-only same auth,24calls900sec",
+      "source_version": "link-spike frozen71 Python files unchanged",
+      "cases": [
+        "closed-svc004",
+        "closed-svc028"
+      ],
+      "arms": [
+        "external Cairn CLI adapter",
+        "actual rg/raw"
+      ],
+      "runner_sha256": "4e8370825bceb760c85a1856a9c3d32065de590506cd2cf776d1b2c21d3d8d8d",
+      "adapter_sha256": "5ae89e726c6b2c761604f7e7635a9920b8423aa6b1deefccfaf7d6a3a4b637d2",
+      "selection": "First two existing spike cases, both fresh arms, alternated order, no task-specific evidence in prompts. No source/oracle tuning. All four retained. Stop after four and report.",
+      "gate": "Both tasks accepted and compare cumulative I/U/O including all harness overhead; no noninferiority/generalization/dollar claim from two reused tasks.",
+      "limitations": [
+        "Known synthetic manual and already-used aliases",
+        "One attempt perpair",
+        "CLI prompt documents its interface instead of MCP schemas; whole interface/harness bundle differs, not a pure algorithm ablation",
+        "Adapter hardwires fixture and local embedding endpoint for diagnostic only; not portable product CLI",
+        "Startup, cache and skill behavior stochastic; no causal claim for one serialization detail"
+      ],
+      "prior_failures": "Retain cli-probe original0/2 infrastructure failures and raw2/2; do not replace them or count low failure tokens as savings",
+      "permissions": {
+        "source": "Codex0.164 sandbox command, no model call; exact CLI backend query qualified before new sessions",
+        "filesystem": "extends :read-only; write probe outside tmp rejected",
+        "network": "features.network_proxy=true; explicit allowlist127.0.0.1, GETlocalhosthealthpassed, actualembeddingPOST+contextpassed",
+        "external_negative_control": {
+          "url": "http://example.com",
+          "http_status": 403,
+          "host": "example.com",
+          "reason": "not_allowed",
+          "decision": "deny",
+          "source": "baseline_policy",
+          "message": "Domain not in allowlist."
+        },
+        "global_config_changes": false,
+        "auth_changes": false,
+        "permissions_approval_bypass": false,
+        "official_reference": "https://developers.openai.com/codex/config-reference/"
+      },
+      "attempts": "One new attempt perpair after qualified environment recovery, never overwrite old paths",
+      "escalation": "Stop after four sessions and report; no further source/protocol tuning"
+    },
+    "cli-repeat": {
+      "scope": "Unchanged four-session repeat of two known aliases; reverse percase arm order; not new domain validation",
+      "model": "gpt-6.1-sol high, CodexCLI0.164 read-only same auth,24calls900sec",
+      "source_version": "link-spike frozen71 Python files unchanged",
+      "cases": [
+        "closed-svc004",
+        "closed-svc028"
+      ],
+      "arms": [
+        "external Cairn CLI adapter",
+        "actual rg/raw"
+      ],
+      "runner_sha256": "302b4fe276c4fd7ada564e3f06824492448c94c04de3e54652fc3061741e01fb",
+      "adapter_sha256": "5ae89e726c6b2c761604f7e7635a9920b8423aa6b1deefccfaf7d6a3a4b637d2",
+      "selection": "All two tasks and both arms, no source/prompt/permissions/model/oracle changes; reverse CLI/raw ordering relative to first qualified round",
+      "gate": "Judge repeat and pooled two qualified rounds; retain all negative or infrastructure results; do not pick the better replicate.",
+      "limitations": [
+        "Known synthetic manual and already-used aliases",
+        "One attempt perpair",
+        "CLI prompt documents its interface instead of MCP schemas; whole interface/harness bundle differs, not a pure algorithm ablation",
+        "Adapter hardwires fixture and local embedding endpoint for diagnostic only; not portable product CLI",
+        "Startup, cache and skill behavior stochastic; no causal claim for one serialization detail"
+      ],
+      "prior_failures": "Retain cli-probe original0/2 infrastructure failures and raw2/2; do not replace them or count low failure tokens as savings",
+      "permissions": {
+        "source": "Codex0.164 sandbox command, no model call; exact CLI backend query qualified before new sessions",
+        "filesystem": "extends :read-only; write probe outside tmp rejected",
+        "network": "features.network_proxy=true; explicit allowlist127.0.0.1, GETlocalhosthealthpassed, actualembeddingPOST+contextpassed",
+        "external_negative_control": {
+          "url": "http://example.com",
+          "http_status": 403,
+          "host": "example.com",
+          "reason": "not_allowed",
+          "decision": "deny",
+          "source": "baseline_policy",
+          "message": "Domain not in allowlist."
+        },
+        "global_config_changes": false,
+        "auth_changes": false,
+        "permissions_approval_bypass": false,
+        "official_reference": "https://developers.openai.com/codex/config-reference/"
+      },
+      "attempts": "One new attempt perpair after qualified environment recovery, never overwrite old paths",
+      "escalation": "Stop after this fixed four-session repeat. No further trials in this phase."
+    }
+  },
+  "permissions_qualification": {
+    "source": "Codex0.164 sandbox command, no model call; exact CLI backend query qualified before new sessions",
+    "filesystem": "extends :read-only; write probe outside tmp rejected",
+    "network": "features.network_proxy=true; explicit allowlist127.0.0.1, GETlocalhosthealthpassed, actualembeddingPOST+contextpassed",
+    "external_negative_control": {
+      "url": "http://example.com",
+      "http_status": 403,
+      "host": "example.com",
+      "reason": "not_allowed",
+      "decision": "deny",
+      "source": "baseline_policy",
+      "message": "Domain not in allowlist."
+    },
+    "global_config_changes": false,
+    "auth_changes": false,
+    "permissions_approval_bypass": false,
+    "official_reference": "https://developers.openai.com/codex/config-reference/"
+  },
+  "frozen_source_sha256": {
+    "cairn/__init__.py": "4975a3e97aad175b1155206322ba4ed3f1418f948db57a867bfa8b747b296b80",
+    "cairn/agent_guidance.py": "ed396110c729b0c1ea2ace722fa391f00fe750d867f6819b4ea4a28d63cec51e",
+    "cairn/bench/__init__.py": "6eefb5df8d97dbcbba95c13cff3a77fb5ebda4154ab086a06623062375acd9b1",
+    "cairn/bench/baseline.py": "102f0ecf42fcf2b83c3c253d731338b40523a9ad8cb32262a97ebdfaf4730b98",
+    "cairn/bench/dataset.py": "bc7f147940dedc8f03b16d78c04e25ded591e5358ac482118ffc5a876e9bf08f",
+    "cairn/bench/judge.py": "0dce5bb0ed842449814919b6bd38f8a33d56976bc435a79a9a2962ff3a074d6c",
+    "cairn/bench/metrics.py": "9cebcee11b5b8e9e2eb40435fe5941eff81efa31038ab7b662f2bfda47edb8a5",
+    "cairn/bench/report.py": "c2fbc8890891db7c861c26c7af017532e98b20d13dbf6955f69e5445f62727b6",
+    "cairn/bench/runner.py": "0a44ba791dde41024ee889321fa01cd4bd4db624c6a5adcf6d67c0b49daa0925",
+    "cairn/cli/__init__.py": "12167b938c079bed1dc70fe8e9bdb444f1a3b9bc9075c64737ac8d6121ae0767",
+    "cairn/cli/app.py": "ce12c66976350b82c0c7472618455b264eb6ee19a0f8ff61ac490bac3bc7466f",
+    "cairn/cli/config.py": "e835a4bda78f7f71b3ead748fcfd99003665cae10bc069a74f6aaa2aff82349d",
+    "cairn/client/__init__.py": "d844deb2886bdf7495c47ccc8c7417867f3b65b28c4f2bd1ad299bf4bf177bf6",
+    "cairn/client/server.py": "ded430660f9ee5ced05f3a3ec3665456bd58a409ae6beedbf1cd8e2acd7fbb4d",
+    "cairn/client/static/__init__.py": "0f90031cf0900f6ad827cd9823928f23574f5b941bd79cc5ba8f0731535ba785",
+    "cairn/core/__init__.py": "55b20f63537926c009e0dd4fd57e1de6cb3f87d289a0ac47a177305badf9d1b8",
+    "cairn/core/config.py": "0988f686b585bb266207c0cd976741e4d3ceae0fbb68a31095cee91cf7ef74fc",
+    "cairn/core/errors.py": "a05de597f07140b65d6e2aa17ddb6766e9c76a89434bab2a99285659aadb4613",
+    "cairn/core/types.py": "925db60bd1139d5cb4eb4dae401edc9b8481caed52f0897db1cd433e30947e83",
+    "cairn/embed/__init__.py": "39c5945e10f3beb9144cb81d6b693ae7a9103a7c90c0e6f8d74e379d030a2158",
+    "cairn/embed/base.py": "f05b76deb60d038beea75bb207dabaf4d3ced9fe2479f18f91b109f1683c7b0d",
+    "cairn/embed/doubao.py": "5bb7467424ec6214f9735a19d0e4ae37b1ab2a6b4a880039a442ccc72991c612",
+    "cairn/embed/fake.py": "87847e19e4574c19bd271a55091525314375f3273911e36c4cf1f54a63450b47",
+    "cairn/embed/openai_compatible.py": "c76e01422eb24ab60c6f0f84108227d0046408deb24df1e19f3d29dec909aaea",
+    "cairn/embed/windowed.py": "df44bb06b045f0306cde46d86f723f2ff83ebc5d9eb9fd6226adaffa61c15ec6",
+    "cairn/engine/__init__.py": "305ed7ffc9512688765620b03b9002b0cd2b63baeac11533a52e76051b82ac6c",
+    "cairn/engine/indexer.py": "51d078d22f26e970730bf9e607635af43b3aba1b6c76ac583a2c8deb502f83a9",
+    "cairn/engine/manifest.py": "2cde1bb70de751c36b20f1f32bac04fddc820675b98d471f3663c20b5c4e0c6d",
+    "cairn/entity/__init__.py": "9d226d39cab1f8a295b6e2b284eea2148bbb7c544085b33adf9955ad89b06f73",
+    "cairn/entity/base.py": "c4309984df6c98c12e5500c52f515fd7eddd368a70fba0edc0c5db7abbae3435",
+    "cairn/entity/fake.py": "0e72510cd52c6b389472e7ec9f9330648c385a70db70925d4465ceb653da921a",
+    "cairn/entity/heuristic.py": "5b996baa78427fe6b5a97a4a0a129694af6affcb2a23622d3b42f31133320555",
+    "cairn/index/__init__.py": "93bf140dd9b0b6754f1e4a93872bd8b870420d33f588feebf63d1533e90c3295",
+    "cairn/index/entities.py": "eef3b823781ee542cd2ded19ad05942321802af55412291fcf41354a686e4064",
+    "cairn/index/summaries.py": "f459357287d5290d6733a655e07e5496007d76061c34f61e2af4e993d68dece6",
+    "cairn/index/tree.py": "13ef29a32ee9cd990fbbed69bbcc51270f646ddf04c74a6018d68bb2a52deeee",
+    "cairn/index/vectors.py": "c598a4055a3dfb1dc3cb895dfb4b776c3e3c27ce0dbd270d8d255a9e97707c0d",
+    "cairn/index/xrefs.py": "0e48b57417817e47305d5c1653d00e0b5736e90696881b3d33ef9d447c6254bc",
+    "cairn/ingest/__init__.py": "dad837ad362acd07a40d5891c8d64935915fa4cb13658022eedd4ea7e2fd2a7f",
+    "cairn/ingest/base.py": "0d97d8b952dc7088886ad304dc116fb9b91afaec12afeb1bf52f7fb5d53989d2",
+    "cairn/ingest/markdown.py": "7b78c69399bf3dafbb060161e9ecbca5f08024ade0e88b38a81fdacb587ecfd2",
+    "cairn/ingest/markitdown.py": "f3dbd4fcb118a8525d3985e1e81148a95f6bb99dc16faeec1cdc18b1cafa7b58",
+    "cairn/ingest/pdf.py": "87e9b16d547ec6017ee957ec1c98b21e97743bf2a9680abf3eb4b09bc1de7e96",
+    "cairn/inspection.py": "2c762e9920bc1bdc45c61e8279ba10c133c2327d1274ebe1fb8420756f4d19df",
+    "cairn/mcp/__init__.py": "182e2496b6fb3ae9bbdd04e245d282426e18d1e9481cde853c5f8bcf7ce5ee06",
+    "cairn/mcp/schemas.py": "6c78a5ce1dcef9edacaf19270d1ce77a6181621f3bc386217ed5371eb4bcb10a",
+    "cairn/mcp/server.py": "8face904cd66b80f6df7c4900e40238bf1d838344f84b7ba3ee4f1c300dd0784",
+    "cairn/providers.py": "ff842c46b112043444545e369de2a13f592fc7b38070847b45f9ff83f0c4035c",
+    "cairn/repo.py": "5201e3e82561e2482962632a9c5d803b2aff0c29f717edee025be8809b60be77",
+    "cairn/repo_search.py": "3fe15e0d470a4593f61583fc383f2dff79d7bb4396f30f31e53386a36c5f3a3a",
+    "cairn/summarize/__init__.py": "22aef718f2e5e709b31ce21d069383308ed5e286aead8143121f2034f7e73acc",
+    "cairn/summarize/base.py": "919c68e8b7aa781b0965cf57470107ae442fd60c1a167e0ea995ba5be0bf2589",
+    "cairn/summarize/cache.py": "8d5daa8cfbdb9c7d679ef4c2ff31a2a920bc95fa898861f5a5b27665c5e6f4b6",
+    "cairn/summarize/fake.py": "3e07105efaa0c5210c2c835c8dc1e3dd36ef8a922c93e523dd451262888a11e8",
+    "cairn/summarize/openai_compatible.py": "67ece30a351e681a05bc33769428868b5d35eb5e8d25c0fde4850b3514eafbb1",
+    "cairn/summarize/prompts.py": "accaff220bdd9e7392fcab43b8b262cc6588f243705af339c59041f6147ee532",
+    "cairn/tools/__init__.py": "ad17995a7e6cc108ba83dd49a6d8b65a293968fde0a66601583d33299d26edfa",
+    "cairn/tools/base.py": "da1b46a1fad634eda53481b161e1077ec00ca385749bba5da3a42e8520104ce9",
+    "cairn/tools/context_blocks.py": "ff8554e283af1c509d7c79e5a2a44fd5ce67e0432d34870b51ae372581a54407",
+    "cairn/tools/find_mentions.py": "b2dd69ee779c454a94cc69a707b2bfa0e8917c49a42461a1c1c41635dd6e9651",
+    "cairn/tools/get_related.py": "f275a2e778aa96a088a71c152f071e4ea22da9a5b14f15cba9914a4fae55b162",
+    "cairn/tools/get_section.py": "c6b594a10e40851b0b3eb8e3dbb7b31f14d2ee9e2ae1704becd92873354eb6a2",
+    "cairn/tools/linked_evidence.py": "aa57e7b2bb1e34ef734068eb72c0b49ea9b2de7cc11d9f7d1f264a42473cc493",
+    "cairn/tools/outline.py": "ed557e2865ddbd9a11b9ca31ec06b4605c6c4dbe3fc8f212f654d14e452a504e",
+    "cairn/tools/read_range.py": "950914a9aa12ddf366ccbd9bd26a18ef6c188a3e326a108ec320fce2d00032c3",
+    "cairn/tools/search_keyword.py": "7d1917d60469204ac9c0a2d5fc36f39d9f695a5168bf40c423c662eeb7caba97",
+    "cairn/tools/search_semantic.py": "c078e9c4721e9f0e9f51b5e9c787004e22fb5f2ed0b9ee82d5ce49bcc74403c1",
+    "cairn/xref/__init__.py": "4829c30ba5562f43fef3e82cf2e91484ffab95dec9913ad9c9531dfba679d545",
+    "cairn/xref/base.py": "7a603b112e0529545ef47e77afbd7e1b0a737891241f338201b55a41e2c5856a",
+    "cairn/xref/fake.py": "f2fb4026baeeb28eb92f6fc4e6e1d56631202d1505b2f39c95393ca74b68b1bd",
+    "cairn/xref/heuristic.py": "b234cd12f758c40dfac24fbe3f735708156d895cc68d5a4ac100299f1bc800c2"
+  },
+  "external_adapter_sha256": "5ae89e726c6b2c761604f7e7635a9920b8423aa6b1deefccfaf7d6a3a4b637d2",
+  "limitations": [
+    "Only two unique task texts in one synthetic manual, each repeated twice after qualification",
+    "Source/cases known; no held-out-domain/customer/generalization proof",
+    "CLI is an external adapter with hardwired fixture and endpoint, not released product command",
+    "Full interface/harness bundle differs, including schema delivery, guidance, serialization and skill-reading behavior; no one-component causal attribution",
+    "No actual dollar prices; index and query compute/storage costs not converted into token invoices",
+    "Two prior failed CLI sessions are infrastructure failures; across all three rounds acceptance is4/6CLI vs6/6raw, whereas qualified steady-state attempts are4/4each",
+    "Need stronger cheap raw link-bundling baseline and unfamiliar semantic tasks",
+    "Product source70files remains unchanged; external prototype71files is not merged"
+  ]
+}

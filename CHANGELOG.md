@@ -8,6 +8,84 @@ All notable changes to Cairn. Format follows
 
 No unreleased changes yet.
 
+## [0.1.0a13] — 2026-10-25
+
+### Added
+
+- Experimental explicit cached Markdown document graph via
+  `repo_graph(view="documents")`, including stable source anchors, occurrence
+  counts, opt-in source-block excerpts and completeness warnings (ADR-0016).
+- Experimental local reference analysis via `repo_impact(view="references")`:
+  bounded reverse shortest paths, cycle membership, entry reachability after
+  deletion and source proofs (ADR-0017). Default graph/impact views are unchanged.
+- Expose existing graph/impact handlers through `docsgraph query tool`.
+- Update public architecture diagrams, CLI contracts and frozen public-document
+  Agent reports. All14 new graph/analysis sessions pass task/source acceptance;
+  both studies fail their predeclared cost gates. No commercial-readiness or
+  savings claim.
+
+- Add explicit document/query embedding instructions with per-window application,
+  fingerprinted compatibility and an optional query-role provider extension.
+
+- Add opt-in provider-free lexical queries over existing repository indexes,
+  and `docsgraph query tool` for shared read-only handlers without an MCP client.
+  JSON/hybrid defaults remain; optional text output roundtrips complete results.
+
+- Add an explicit source-checkout utility to materialize local `docs_src/*.py`
+  Markdown directives into a separate, provenance-mapped snapshot. It never
+  executes snippets, rejects path escapes and oversized expansions, and leaves
+  default ingest behavior unchanged.
+
+### Fixed
+
+- Preserve bounded source-namespace confidence when action verbs precede literal
+  command/identifier phrases (ADR-0018); title/body-only and partial-token
+  occurrences do not receive that signal.
+- Preserve headingless Markdown and preambles, UTF-8 spans, frontmatter scope,
+  and existing heading anchors. Tree producer 2 causes a rebuild on next sync.
+- Mark obsolete tree producers stale and refresh catalog section counts after
+  rebuilds, including previously empty indexes whose source hash did not change.
+- Search complete section bodies and use query-wide sparse normalization.
+- Allow MCP section tools to reuse `cairn://doc/section` citations directly;
+  infer the document namespace and reject conflicts or malformed identifiers.
+- Return top-level document siblings from `get_related` and expose bounded
+  child/sibling navigation on section reads, explicitly excluding descendant bodies.
+- Keep fitting fenced examples intact in evidence snippets; mark partial long
+  code examples instead of silently presenting a cut constructor.
+- Reuse stored summaries with matching model/section fingerprints during normal
+  rebuilds, including embedding-only changes and retries after vector failures.
+- Report explicit truncation and original-body scope in full `repo_context`
+  packs; stop directing clients to re-read already complete source bodies.
+
+### Changed
+
+- Add experimental `repo_context(level="evidence")`: budgeted original Markdown
+  blocks, intact fitting examples, adjacent prose, exact source spans and explicit
+  omissions. Existing summary/full views remain available. Global source-character
+  budgets are explicit and do not claim to be model-token budgets.
+- `repo_context` now returns cited summaries and bounded original excerpts once
+  per selected section. Multiple relevant sections can come from one document.
+- Pass `include_details=true` for the previous diagnostic response fields.
+  Plain section IDs and explicit full-section reads remain supported.
+- Select complementary BM25-supported source evidence for compact context;
+  retain semantic fallback and existing document-discovery ranking.
+- Add opt-in `windowed-openai-compatible` embeddings: preserve every UTF-8
+  input window and pool one vector per section for short-context providers.
+
+### Validation
+
+- Publish targeted independent source-label adjudication, the original failed
+  gate and the corrected release gate separately. Label corrections are not
+  product gains; fake-provider checks are not Agent cost evidence.
+- Add frozen public-repository questions and a provider-configurable QA script
+  under `benchmarks/repo-quality/` and `scripts/eval_repo_quality.py`.
+- Record local-model comparisons, actual MCP transport checks and a bounded
+  agent navigation probe in `docs/retrieval-reliability.md`.
+- Add a reproducible real MCP-agent runner and independent section-BM25/literal
+  source servers for matched success and whole-session token comparisons.
+- Add a primary-paper review and frozen autonomous context/transfer experiments;
+  retain unfavorable cost results and distinguish parallel calls from model turns.
+
 ## [0.1.0a12] — 2026-07-04
 
 ### Changed

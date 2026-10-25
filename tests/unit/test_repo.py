@@ -3,19 +3,21 @@
 from __future__ import annotations
 
 import asyncio
+import json
 from pathlib import Path
-from typing import Any, cast
+from typing import Any, Literal, cast
 
 import pytest
 
 from cairn import repo_search as repo_search_module
 from cairn.cli.config import IndexConfig
-from cairn.core.errors import ConfigError, IndexNotFoundError
+from cairn.core.errors import ConfigError, IndexNotFoundError, ToolError
 from cairn.embed.fake import FakeEmbedder
 from cairn.engine.manifest import read_manifest
 from cairn.repo import (
     DEFAULT_EXCLUDE,
     RepoConfig,
+    _merge_context_queries,
     discover_document_surface,
     discover_documents,
     find_repo_root,
@@ -432,6 +434,45 @@ class TestRepoSync:
         assert readme.state == "stale"
         assert readme.source_file_hash != readme.indexed_source_file_hash
 
+    async def test_sync_upgrades_legacy_tree_and_refreshes_cached_catalog(
+        self, tmp_path: Path
+    ) -> None:
+        (tmp_path / "README.md").write_text("Connection capacity defaults to 100.\n")
+        write_default_config(tmp_path)
+        embedder = FakeEmbedder(dim=32)
+        settings = IndexConfig()
+        await sync_repo(
+            tmp_path, summarizer=FakeSummarizer(), embedder=embedder, index_config=settings
+        )
+        doc_dir = tmp_path / ".cairn" / "documents" / "readme"
+        manifest_path = doc_dir / "manifest.json"
+        manifest = json.loads(manifest_path.read_text())
+        manifest["subindexes"]["tree"]["builder_version"] = 1
+        manifest_path.write_text(json.dumps(manifest))
+        tree_path = doc_dir / "tree.json"
+        tree = json.loads(tree_path.read_text())
+        tree["sections"] = []
+        tree_path.write_text(json.dumps(tree))
+        catalog_path = tmp_path / ".cairn" / "manifest.json"
+        catalog = json.loads(catalog_path.read_text())
+        catalog["documents"][0]["section_count"] = 0
+        catalog_path.write_text(json.dumps(catalog))
+        assert repo_status(tmp_path).documents[0].state == "stale"
+        results = await sync_repo(
+            tmp_path, summarizer=FakeSummarizer(), embedder=embedder, index_config=settings
+        )
+        assert results[0].rebuilt
+        status = repo_status(tmp_path).documents[0]
+        assert status.state == "indexed" and status.section_count == 1
+        catalog = json.loads(catalog_path.read_text())
+        catalog["documents"][0]["section_count"] = 0
+        catalog_path.write_text(json.dumps(catalog))
+        assert repo_status(tmp_path).documents[0].section_count == 1
+        again = await sync_repo(
+            tmp_path, summarizer=FakeSummarizer(), embedder=embedder, index_config=settings
+        )
+        assert not again[0].rebuilt
+
     async def test_orphaned_status_hashes_relative_source_from_repo_root(
         self, tmp_path: Path
     ) -> None:
@@ -828,12 +869,184 @@ class TestRepoSearch:
             query="where is vector data stored",
             k=2,
             related_k=2,
+            include_details=True,
         )
 
         data = result["data"]
         assert data["context_sections"]
         assert data["relationship_map"]["nodes"]
         assert data["codegraph_bridge"]["status"] == "not_invoked"
+
+    async def test_compact_context_preserves_headingless_evidence(self, tmp_path: Path) -> None:
+        prose = "The quartz client releases handles with close_session().\n"
+        (tmp_path / "README.md").write_text(prose)
+        write_default_config(tmp_path)
+        embedder = FakeEmbedder(dim=32)
+        await sync_repo(
+            tmp_path, summarizer=FakeSummarizer(), embedder=embedder, index_config=IndexConfig()
+        )
+        result = await repo_context(tmp_path, embedder=embedder, query="release quartz handles")
+        data = result["data"]
+        assert "hits" not in data
+        assert "relationship_map" not in data
+        section = data["context_sections"][0]
+        assert section["source"] == "README.md"
+        assert section["anchor"].startswith("cairn://")
+        assert "close_session()" in section["evidence"]["text"]
+        assert "hit" not in section and "relationships" not in section
+        assert "truncated" not in section  # Default summaries keep their existing view.
+        assert "get_section" in data["next_step"]
+
+    @pytest.mark.parametrize("body", ["", "Exact option: quartz_timeout=17.", "条件🙂" * 150])
+    @pytest.mark.parametrize("include_details", [False, True])
+    async def test_full_context_reports_own_body_completeness(
+        self, tmp_path: Path, body: str, include_details: bool
+    ) -> None:
+        (tmp_path / "README.md").write_text(
+            "# Quartz\n\n" + body + "\n\n## Child\nA separate child-only condition.\n",
+            encoding="utf-8",
+        )
+        write_default_config(tmp_path)
+        embedder = FakeEmbedder(dim=32)
+        await sync_repo(
+            tmp_path, summarizer=FakeSummarizer(), embedder=embedder, index_config=IndexConfig()
+        )
+        result = await repo_context(
+            tmp_path,
+            embedder=embedder,
+            query="Quartz",
+            k=4,
+            sections_per_doc=4,
+            level="full",
+            max_section_chars=200,
+            include_details=include_details,
+        )
+        data = result["data"]
+        parent = next(s for s in data["context_sections"] if s["id"] == "quartz")
+        index = load_repo_document_index(tmp_path, doc_id=parent["doc"])
+        original = index.tree.require(parent["id"]).raw_text
+        assert parent["content"] == original[:200]
+        assert parent["source_characters"] == len(original)
+        assert parent["truncated"] is (len(original) > 200)
+        assert parent["content_scope"] == "section_body_only"
+        assert "child-only" not in parent["content"]
+        assert parent["anchor"] == index.anchor(parent["id"])
+        if not include_details:
+            assert "Reuse complete bodies" in data["next_step"]
+            assert "get_section" not in data["next_step"]
+
+    async def test_search_finds_evidence_at_end_of_long_section(self, tmp_path: Path) -> None:
+        (tmp_path / "README.md").write_text(
+            "# Configuration\n"
+            + ("Routine documentation with general options.\n" * 200)
+            + "\nEnable sapphire_dispatch_boundary to retain resources.\n"
+        )
+        write_default_config(tmp_path)
+        embedder = FakeEmbedder(dim=32)
+        await sync_repo(
+            tmp_path, summarizer=FakeSummarizer(), embedder=embedder, index_config=IndexConfig()
+        )
+        result = await search_repo_documents(
+            tmp_path, embedder=embedder, query="sapphire_dispatch_boundary", k=1
+        )
+        hit = result["data"]["hits"][0]
+        assert "body" in hit["match_sources"]
+        assert "sapphire_dispatch_boundary" in hit["evidence"]["text"]
+
+    async def test_budgeted_context_returns_source_exact_blocks_and_enforces_modes(
+        self, tmp_path: Path
+    ) -> None:
+        (tmp_path / "README.md").write_text(
+            "# Quartz\n\n"
+            + "General background.\n\n" * 80
+            + "Use the quartz timeout only for local handles.\n\n"
+            + "```python\nclient = Client(timeout=17)\n```\n\n"
+            + "Unless streaming, close the handle.\n\n"
+            + "General background.\n\n" * 80,
+            encoding="utf-8",
+        )
+        write_default_config(tmp_path)
+        embedder = FakeEmbedder(dim=32)
+        await sync_repo(
+            tmp_path, summarizer=FakeSummarizer(), embedder=embedder, index_config=IndexConfig()
+        )
+        result = await repo_context(
+            tmp_path,
+            embedder=embedder,
+            query="quartz Client timeout",
+            queries=["Client timeout", "streaming close handle"],
+            level="evidence",
+            max_section_chars=400,
+            max_context_chars=1000,
+        )
+        data = result["data"]
+        assert data["context_sections"]
+        assert 0 < data["returned_source_characters"] <= 1000
+        for section in data["context_sections"]:
+            assert section["level"] == "evidence" and "content" not in section
+            index = load_repo_document_index(tmp_path, doc_id=section["doc"])
+            body = index.tree.require(section["id"]).raw_text
+            for block in section["evidence_blocks"]:
+                span = block["span"]
+                assert block["text"] == body[span["start"] : span["end"]]
+        invalid: tuple[dict[str, Any], ...] = (
+            {"level": "evidence", "max_context_chars": 999},
+            {"level": "evidence", "include_details": True},
+            {"level": "full", "max_context_chars": 2000},
+            {"level": "full", "queries": ["timeout"]},
+            {"level": "evidence", "queries": []},
+            {"level": "evidence", "queries": [" "]},
+            {"level": "evidence", "queries": ["x"] * 9},
+        )
+        for kwargs in invalid:
+            with pytest.raises(ToolError):
+                await repo_context(tmp_path, embedder=embedder, query="quartz", **kwargs)
+
+    async def test_compact_context_can_select_multiple_sections_from_one_doc(
+        self, tmp_path: Path
+    ) -> None:
+        (tmp_path / "README.md").write_text(
+            "# Setup\nQuartz setup.\n## Start\nQuartz start.\n## Stop\nQuartz stop.\n"
+        )
+        write_default_config(tmp_path)
+        embedder = FakeEmbedder(dim=32)
+        await sync_repo(
+            tmp_path, summarizer=FakeSummarizer(), embedder=embedder, index_config=IndexConfig()
+        )
+        result = await repo_context(tmp_path, embedder=embedder, query="Quartz", k=3)
+        assert len(result["data"]["context_sections"]) == 3
+        for k in (0, 33):
+            with pytest.raises(ToolError):
+                await repo_context(tmp_path, embedder=embedder, query="Quartz", k=k)
+
+    def test_focused_query_fusion_preserves_ranks_and_all_recovery_signals(self) -> None:
+        def hit(section: str) -> dict[str, Any]:
+            return {"doc": "guide", "id": section}
+
+        searches: list[dict[str, Any]] = [
+            {
+                "data": {
+                    "hits": [hit("shared"), hit("first")],
+                    "stale_documents": ["a"],
+                    "skipped_documents": [{"doc": "b"}],
+                }
+            },
+            {
+                "data": {
+                    "hits": [hit("second"), hit("shared")],
+                    "stale_documents": ["a", "c"],
+                    "skipped_documents": [{"doc": "b"}],
+                    "embedding_mismatch": {"query_dim": 3},
+                }
+            },
+        ]
+        data = _merge_context_queries(searches)["data"]
+        assert data["hits"][0]["id"] == "shared"
+        assert data["hits"][0]["_query_ranks"] == [0, 1]
+        assert data["stale_documents"] == ["a", "c"]
+        assert data["skipped_documents"] == [{"doc": "b"}]
+        assert data["embedding_mismatch"] == {"query_dim": 3}
+        assert "_query_ranks" not in searches[0]["data"]["hits"][0]
 
     async def test_repo_graph_returns_relationship_map(self, tmp_path: Path) -> None:
         _write_complex_repo_docs(tmp_path)
@@ -909,8 +1122,9 @@ class TestRepoSearch:
             "docsgraph sync --force",
         ]
 
+    @pytest.mark.parametrize("level", ["synopsis", "evidence"])
     async def test_repo_context_surfaces_embedding_mismatch_next_steps(
-        self, tmp_path: Path
+        self, tmp_path: Path, level: Literal["synopsis", "evidence"]
     ) -> None:
         _write_repo_docs(tmp_path)
         write_default_config(tmp_path)
@@ -926,10 +1140,10 @@ class TestRepoSearch:
             embedder=FakeEmbedder(dim=64),
             query="detailed docs",
             k=4,
+            level=level,
         )
 
         data = result["data"]
-        assert data["hits"] == []
         assert data["context_sections"] == []
         assert data["embedding_mismatch"] == {
             "query_dim": 64,
