@@ -1,0 +1,14 @@
+{
+  "name": "cairn-friendly-docs",
+  "description": "Create and review repository documentation that indexes well in Cairn/DocsGraph.",
+  "version": "1.0.0",
+  "skill": {
+    "entry": "SKILL.md",
+    "tags": [
+      "cairn",
+      "docsgraph",
+      "documentation",
+      "ai-agents"
+    ]
+  }
+}

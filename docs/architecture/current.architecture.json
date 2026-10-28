@@ -1,0 +1,311 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Cairn architecture \u2014 0.1.0a13 alpha",
+    "locale": "en",
+    "output": "docs/architecture-current.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/jokeuncle/cairn.git",
+      "revision": "74c4cef2c895eea0062e2cb1e11bc94464fee471",
+      "link_mode": "local-only"
+    }
+  },
+  "components": [
+    {
+      "id": "agent",
+      "type": "external",
+      "label": "Agent / developer",
+      "sublabel": "Chooses tools and evidence",
+      "pos": [
+        40,
+        40
+      ],
+      "size": [
+        220,
+        86
+      ],
+      "sources": [
+        {
+          "path": "src/cairn/cli/app.py",
+          "line": 698,
+          "end_line": 750
+        },
+        {
+          "path": "src/cairn/mcp/server.py",
+          "line": 277,
+          "end_line": 305
+        }
+      ]
+    },
+    {
+      "id": "adapters",
+      "type": "backend",
+      "label": "CLI + MCP",
+      "sublabel": "query tool / stdio",
+      "pos": [
+        390,
+        40
+      ],
+      "size": [
+        220,
+        86
+      ],
+      "sources": [
+        {
+          "path": "src/cairn/cli/app.py",
+          "line": 698,
+          "end_line": 764
+        },
+        {
+          "path": "src/cairn/mcp/server.py",
+          "line": 261,
+          "end_line": 305
+        }
+      ]
+    },
+    {
+      "id": "dispatch",
+      "type": "backend",
+      "label": "Shared dispatch",
+      "sublabel": "Citations / typed envelopes",
+      "pos": [
+        740,
+        40
+      ],
+      "size": [
+        220,
+        86
+      ],
+      "sources": [
+        {
+          "path": "src/cairn/dispatch.py",
+          "line": 227,
+          "end_line": 244
+        },
+        {
+          "path": "src/cairn/dispatch.py",
+          "line": 304,
+          "end_line": 375
+        }
+      ]
+    },
+    {
+      "id": "tools",
+      "type": "backend",
+      "label": "Repository tools",
+      "sublabel": "Browse / search / references",
+      "pos": [
+        740,
+        240
+      ],
+      "size": [
+        220,
+        86
+      ],
+      "sources": [
+        {
+          "path": "src/cairn/repo.py",
+          "line": 1041,
+          "end_line": 1106
+        },
+        {
+          "path": "src/cairn/repo.py",
+          "line": 1500,
+          "end_line": 1619
+        },
+        {
+          "path": "src/cairn/repo_reference_impact.py",
+          "line": 24,
+          "end_line": 134
+        }
+      ],
+      "tag": "Graph / impact opt-in"
+    },
+    {
+      "id": "models",
+      "type": "backend",
+      "label": "Configured providers",
+      "sublabel": "Summaries / embeddings",
+      "pos": [
+        390,
+        240
+      ],
+      "size": [
+        220,
+        86
+      ],
+      "sources": [
+        {
+          "path": "src/cairn/providers.py",
+          "line": 17,
+          "end_line": 62
+        },
+        {
+          "path": "src/cairn/repo.py",
+          "line": 1081,
+          "end_line": 1093
+        }
+      ]
+    },
+    {
+      "id": "sources",
+      "type": "external",
+      "label": "Source documents",
+      "sublabel": "Read-only Markdown / PDF",
+      "pos": [
+        40,
+        440
+      ],
+      "size": [
+        220,
+        86
+      ],
+      "sources": [
+        {
+          "path": "src/cairn/engine/indexer.py",
+          "line": 103,
+          "end_line": 146
+        }
+      ]
+    },
+    {
+      "id": "indexer",
+      "type": "backend",
+      "label": "Parse + index builders",
+      "sublabel": "Fingerprint / incremental reuse",
+      "pos": [
+        390,
+        440
+      ],
+      "size": [
+        220,
+        86
+      ],
+      "sources": [
+        {
+          "path": "src/cairn/engine/indexer.py",
+          "line": 103,
+          "end_line": 146
+        },
+        {
+          "path": "src/cairn/engine/indexer.py",
+          "line": 148,
+          "end_line": 242
+        }
+      ]
+    },
+    {
+      "id": "cache",
+      "type": "database",
+      "label": "Cached document index",
+      "sublabel": ".cairn/documents/<doc>",
+      "pos": [
+        740,
+        440
+      ],
+      "size": [
+        220,
+        86
+      ],
+      "sources": [
+        {
+          "path": "src/cairn/tools/base.py",
+          "line": 60,
+          "end_line": 85
+        },
+        {
+          "path": "src/cairn/engine/indexer.py",
+          "line": 148,
+          "end_line": 242
+        },
+        {
+          "path": "src/cairn/repo.py",
+          "line": 1515,
+          "end_line": 1530
+        }
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "request",
+      "from": "agent",
+      "to": "adapters",
+      "label": "CLI / MCP",
+      "variant": "emphasis"
+    },
+    {
+      "id": "route",
+      "from": "adapters",
+      "to": "dispatch",
+      "label": "route"
+    },
+    {
+      "id": "run",
+      "from": "dispatch",
+      "to": "tools",
+      "label": "run tool"
+    },
+    {
+      "id": "cache-read",
+      "from": "tools",
+      "to": "cache",
+      "label": "cached reads"
+    },
+    {
+      "id": "hybrid",
+      "from": "tools",
+      "to": "models",
+      "label": "hybrid only"
+    },
+    {
+      "id": "parse",
+      "from": "sources",
+      "to": "indexer",
+      "label": "parse"
+    },
+    {
+      "id": "build-models",
+      "from": "indexer",
+      "to": "models",
+      "label": "index time"
+    },
+    {
+      "id": "persist",
+      "from": "indexer",
+      "to": "cache",
+      "label": "write index"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Cached query paths",
+      "items": [
+        "Section reads and lexical queries need no model call.",
+        "Explicit Markdown links support local reverse paths, cycles and deletion reachability.",
+        "Freshness checks hash originals; retrieved bodies come from the cache."
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Model boundary",
+      "items": [
+        "Hybrid search is the default search strategy and needs a compatible query embedder.",
+        "Index construction still builds summaries and document embeddings.",
+        "Providers are configurable; cached queries do not imply free cold indexing."
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Experimental alpha",
+      "items": [
+        "ADR-0016 / ADR-0017 ship as experimental features in alpha 0.1.0a13.",
+        "Link analysis excludes headings, code, HTML, external and unknown targets; fragments are not validated.",
+        "Stable citations and completeness warnings remain mandatory; no commercial cost superiority claim."
+      ]
+    }
+  ]
+}

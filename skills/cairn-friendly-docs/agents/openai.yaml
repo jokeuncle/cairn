@@ -1,0 +1,7 @@
+interface:
+  display_name: "Cairn-Friendly Docs"
+  short_description: "Design repository docs for Cairn retrieval"
+  default_prompt: "Use $cairn-friendly-docs to review this repository documentation and propose a Cairn-friendly docs architecture."
+
+policy:
+  allow_implicit_invocation: true

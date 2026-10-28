@@ -1,0 +1,549 @@
+"""Tests for the typer CLI surface (cairn.cli.app)."""
+
+from __future__ import annotations
+
+import importlib
+import json
+from pathlib import Path
+
+import pytest
+from pytest import MonkeyPatch
+from typer import Typer
+from typer.testing import CliRunner
+
+from cairn import __version__
+from cairn.cli.app import _mcp_env, app
+from cairn.embed.fake import FakeEmbedder
+from cairn.summarize.fake import FakeSummarizer
+
+
+@pytest.fixture
+def runner() -> CliRunner:
+    return CliRunner()
+
+
+@pytest.fixture
+def indexed_dir(tmp_path: Path, fixture_dir: Path, runner: CliRunner) -> Path:
+    out = tmp_path / "doc"
+    result = runner.invoke(
+        app,
+        [
+            "index",
+            str(fixture_dir / "simple.md"),
+            "--out",
+            str(out),
+            "--fake",
+        ],
+    )
+    assert result.exit_code == 0, result.output
+    return out
+
+
+class TestVersion:
+    def test_package_level_app_import_is_typer_app(self) -> None:
+        from cairn.cli import app as package_app
+
+        assert isinstance(package_app, Typer)
+
+    def test_prints_version(self, runner: CliRunner) -> None:
+        result = runner.invoke(app, ["version"])
+        assert result.exit_code == 0
+        assert __version__ in result.output
+
+    def test_client_command_is_discoverable(self, runner: CliRunner) -> None:
+        result = runner.invoke(app, ["client", "--help"])
+        assert result.exit_code == 0
+        assert "local AI.Knowledge client" in result.output
+
+
+class TestIndex:
+    def test_index_writes_manifest(self, indexed_dir: Path) -> None:
+        assert (indexed_dir / "manifest.json").exists()
+        assert (indexed_dir / "tree.json").exists()
+        assert (indexed_dir / "summaries.json").exists()
+        assert (indexed_dir / "vectors_manifest.json").exists()
+
+    def test_index_reports_output_path(
+        self, tmp_path: Path, fixture_dir: Path, runner: CliRunner
+    ) -> None:
+        out = tmp_path / "report"
+        result = runner.invoke(
+            app,
+            [
+                "index",
+                str(fixture_dir / "simple.md"),
+                "--out",
+                str(out),
+                "--fake",
+            ],
+        )
+        assert result.exit_code == 0
+        assert "indexed:" in result.output
+
+    def test_second_index_reports_no_op(
+        self, tmp_path: Path, fixture_dir: Path, runner: CliRunner
+    ) -> None:
+        out = tmp_path / "noop"
+        args = ["index", str(fixture_dir / "simple.md"), "--out", str(out), "--fake"]
+        first = runner.invoke(app, args)
+        assert first.exit_code == 0
+        assert "indexed:" in first.output
+        second = runner.invoke(app, args)
+        assert second.exit_code == 0
+        assert "already up to date" in second.output
+
+    def test_force_overrides_noop(
+        self, tmp_path: Path, fixture_dir: Path, runner: CliRunner
+    ) -> None:
+        out = tmp_path / "forced"
+        args = ["index", str(fixture_dir / "simple.md"), "--out", str(out), "--fake"]
+        runner.invoke(app, args)
+        result = runner.invoke(app, [*args, "--force"])
+        assert result.exit_code == 0
+        assert "indexed:" in result.output
+
+    def test_missing_source_file_fails(self, runner: CliRunner) -> None:
+        result = runner.invoke(app, ["index", "/no/such/file.md", "--fake"])
+        assert result.exit_code != 0
+
+
+class TestOutline:
+    def test_outline_prints_json(self, indexed_dir: Path, runner: CliRunner) -> None:
+        result = runner.invoke(app, ["outline", str(indexed_dir)])
+        assert result.exit_code == 0, result.output
+        payload = json.loads(result.output)
+        assert payload["doc"] == "simple"
+        assert "tree" in payload
+
+    def test_outline_respects_focus(self, indexed_dir: Path, runner: CliRunner) -> None:
+        result = runner.invoke(
+            app,
+            ["outline", str(indexed_dir), "--focus", "introduction"],
+        )
+        assert result.exit_code == 0
+        payload = json.loads(result.output)
+        assert payload["tree"][0]["id"] == "introduction"
+
+
+class TestQuery:
+    def test_semantic_query_runs_with_fake(self, indexed_dir: Path, runner: CliRunner) -> None:
+        result = runner.invoke(
+            app,
+            [
+                "query",
+                "semantic",
+                str(indexed_dir),
+                "intro body lines",
+                "--fake",
+            ],
+        )
+        assert result.exit_code == 0, result.output
+        payload = json.loads(result.output)
+        assert "hits" in payload
+
+    def test_keyword_query(self, indexed_dir: Path, runner: CliRunner) -> None:
+        result = runner.invoke(
+            app,
+            ["query", "keyword", str(indexed_dir), "pip"],
+        )
+        assert result.exit_code == 0, result.output
+        payload = json.loads(result.output)
+        ids = [h["id"] for h in payload["hits"]]
+        assert "introduction/quickstart" in ids
+
+    def test_keyword_invalid_mode_rejected(self, indexed_dir: Path, runner: CliRunner) -> None:
+        result = runner.invoke(
+            app,
+            [
+                "query",
+                "keyword",
+                str(indexed_dir),
+                "pip",
+                "--mode",
+                "bogus",
+            ],
+        )
+        assert result.exit_code != 0
+
+
+class TestInspect:
+    def test_inspect_writes_html(
+        self, indexed_dir: Path, tmp_path: Path, runner: CliRunner
+    ) -> None:
+        out = tmp_path / "inspect.html"
+        result = runner.invoke(app, ["inspect", str(indexed_dir), "--out", str(out)])
+        assert result.exit_code == 0, result.output
+        assert "inspector:" in result.output
+        text = out.read_text(encoding="utf-8")
+        assert "Cairn Inspector" in text
+        assert "simple" in text
+
+
+class TestRepoCommands:
+    def test_init_can_enable_markitdown(
+        self, tmp_path: Path, monkeypatch: MonkeyPatch, runner: CliRunner
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+
+        result = runner.invoke(app, ["init", "-y", "--markitdown"])
+
+        assert result.exit_code == 0, result.output
+        config = (tmp_path / ".cairn" / "config.toml").read_text(encoding="utf-8")
+        assert "enable_markitdown = true" in config
+        assert '"docs/**/*.html"' in config
+
+    def test_init_sync_status_and_repo_inspect(
+        self, tmp_path: Path, monkeypatch: MonkeyPatch, runner: CliRunner
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / "README.md").write_text("# Readme\n\nProject overview.\n", encoding="utf-8")
+        (tmp_path / "docs").mkdir()
+        (tmp_path / "docs" / "guide.md").write_text("# Guide\n\nDetailed docs.\n", encoding="utf-8")
+
+        init_result = runner.invoke(app, ["init", "-y"])
+        assert init_result.exit_code == 0, init_result.output
+        assert (tmp_path / ".cairn" / "config.toml").exists()
+
+        sync_result = runner.invoke(app, ["sync", "--fake"])
+        assert sync_result.exit_code == 0, sync_result.output
+        assert "synced: 2/2 documents" in sync_result.output
+        assert (tmp_path / ".cairn" / "documents" / "readme" / "manifest.json").exists()
+
+        status_result = runner.invoke(app, ["status"])
+        assert status_result.exit_code == 0, status_result.output
+        assert "`readme`" in status_result.output
+        assert "`docs-guide`" in status_result.output
+
+        doctor_result = runner.invoke(app, ["doctor", "--fake"])
+        assert doctor_result.exit_code == 0, doctor_result.output
+        assert "Cairn doctor: ok" in doctor_result.output
+
+        query_result = runner.invoke(app, ["query", "repo", "detailed docs", "--fake"])
+        assert query_result.exit_code == 0, query_result.output
+        query_payload = json.loads(query_result.output)
+        assert query_payload["query"] == "detailed docs"
+        assert any(hit["doc"] == "docs-guide" for hit in query_payload["hits"])
+        assert "explanation" in query_payload["hits"][0]
+
+        mcp_result = runner.invoke(app, ["mcp", "config", "--client", "claude"])
+        assert mcp_result.exit_code == 0, mcp_result.output
+        mcp_payload = json.loads(mcp_result.output)
+        assert mcp_payload["mcpServers"]["cairn"]["command"] == "docsgraph"
+        assert mcp_payload["mcpServers"]["cairn"]["args"] == ["serve"]
+
+        codex_result = runner.invoke(app, ["mcp", "config", "--client", "codex"])
+        assert codex_result.exit_code == 0, codex_result.output
+        assert "[mcp_servers.cairn]" in codex_result.output
+        assert 'args = ["serve"]' in codex_result.output
+
+        env_result = runner.invoke(
+            app,
+            [
+                "mcp",
+                "config",
+                "--client",
+                "codex",
+                "--env",
+                "CAIRN_EMBED_PROVIDER=doubao-vision",
+                "--env",
+                "CAIRN_EMBED_DIM=2048",
+            ],
+        )
+        assert env_result.exit_code == 0, env_result.output
+        assert "[mcp_servers.cairn.env]" in env_result.output
+        assert 'CAIRN_EMBED_PROVIDER = "doubao-vision"' in env_result.output
+        assert 'CAIRN_EMBED_DIM = "2048"' in env_result.output
+
+        fixed_result = runner.invoke(
+            app,
+            ["mcp", "config", "--client", "codex", "--repo", str(tmp_path)],
+        )
+        assert fixed_result.exit_code == 0, fixed_result.output
+        assert "--repo" in fixed_result.output
+        assert str(tmp_path) in fixed_result.output
+
+        inspect_result = runner.invoke(app, ["inspect", "--out", "repo-inspector.html"])
+        assert inspect_result.exit_code == 0, inspect_result.output
+        assert (tmp_path / "repo-inspector.html").exists()
+
+    def test_configured_fake_runtime_is_used_without_repeating_flag(
+        self, tmp_path: Path, monkeypatch: MonkeyPatch, runner: CliRunner
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / "README.md").write_text("# Readme\n\nProject overview.\n", encoding="utf-8")
+        init_result = runner.invoke(app, ["init", "-y"])
+        assert init_result.exit_code == 0, init_result.output
+        config_path = tmp_path / ".cairn" / "config.toml"
+        config_path.write_text(
+            config_path.read_text(encoding="utf-8").replace(
+                'runtime_mode = "real"',
+                'runtime_mode = "fake"',
+            ),
+            encoding="utf-8",
+        )
+        seen: list[tuple[str, bool]] = []
+
+        def make_test_summarizer(use_fake: bool) -> FakeSummarizer:
+            seen.append(("summarizer", use_fake))
+            return FakeSummarizer()
+
+        def make_test_embedder(use_fake: bool) -> FakeEmbedder:
+            seen.append(("embedder", use_fake))
+            return FakeEmbedder(dim=64)
+
+        cli_app_module = importlib.import_module("cairn.cli.app")
+        monkeypatch.setattr(cli_app_module, "_make_summarizer", make_test_summarizer)
+        monkeypatch.setattr(cli_app_module, "_make_embedder", make_test_embedder)
+
+        sync_result = runner.invoke(app, ["sync"])
+        assert sync_result.exit_code == 0, sync_result.output
+        doctor_result = runner.invoke(app, ["doctor"])
+        assert doctor_result.exit_code == 0, doctor_result.output
+        query_result = runner.invoke(app, ["query", "repo", "project overview"])
+        assert query_result.exit_code == 0, query_result.output
+
+        assert seen == [
+            ("summarizer", True),
+            ("embedder", True),
+            ("embedder", True),
+            ("embedder", True),
+        ]
+
+    def test_install_dry_run_prints_target_and_config(
+        self, tmp_path: Path, monkeypatch: MonkeyPatch, runner: CliRunner
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / "README.md").write_text("# Readme\n", encoding="utf-8")
+        init_result = runner.invoke(app, ["init", "-y"])
+        assert init_result.exit_code == 0, init_result.output
+
+        home = tmp_path / "home"
+        monkeypatch.setenv("HOME", str(home))
+
+        result = runner.invoke(app, ["install", "--client", "codex", "--dry-run", "--fake"])
+
+        assert result.exit_code == 0, result.output
+        assert "# target:" in result.output
+        assert "[mcp_servers.cairn]" in result.output
+        assert 'command = "docsgraph"' in result.output
+        assert 'args = ["serve", "--fake"]' in result.output
+        assert "--repo" not in result.output
+        assert not (home / ".codex" / "config.toml").exists()
+
+    def test_doctor_reports_query_embedding_dim_mismatch(
+        self, tmp_path: Path, monkeypatch: MonkeyPatch, runner: CliRunner
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / "README.md").write_text("# Readme\n\nProject overview.\n", encoding="utf-8")
+        assert runner.invoke(app, ["init", "-y"]).exit_code == 0
+        sync_result = runner.invoke(app, ["sync", "--fake"])
+        assert sync_result.exit_code == 0, sync_result.output
+        monkeypatch.setenv("CAIRN_EMBED_PROVIDER", "doubao-vision")
+        monkeypatch.setenv("CAIRN_EMBED_DIM", "2048")
+
+        result = runner.invoke(app, ["doctor"])
+
+        assert result.exit_code == 1, result.output
+        assert "This index was built with fake:bow-hash dim=64" in result.output
+        assert "Current query embedder is doubao-vision:" in result.output
+        assert "docsgraph serve --repo" in result.output
+        assert "docsgraph sync --force" in result.output
+
+    def test_discover_json_and_sync_dry_run_do_not_write_indexes(
+        self, tmp_path: Path, monkeypatch: MonkeyPatch, runner: CliRunner
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / "README.md").write_text("# Readme\n", encoding="utf-8")
+        (tmp_path / "src" / "content" / "blog").mkdir(parents=True)
+        (tmp_path / "src" / "content" / "blog" / "post.md").write_text("# Post\n", encoding="utf-8")
+        (tmp_path / "docs").mkdir()
+        (tmp_path / "docs" / "page.html").write_text("<h1>Page</h1>", encoding="utf-8")
+        assert runner.invoke(app, ["init", "-y"]).exit_code == 0
+        config = tmp_path / ".cairn" / "config.toml"
+        config.write_text(
+            "\n".join(
+                [
+                    'documents_dir = "documents"',
+                    'primary_doc = "readme"',
+                    'include = ["README.md"]',
+                    "exclude = []",
+                    "",
+                ]
+            ),
+            encoding="utf-8",
+        )
+
+        discover = runner.invoke(app, ["discover", "--json"])
+        dry_run = runner.invoke(app, ["sync", "--dry-run"])
+
+        assert discover.exit_code == 0, discover.output
+        payload = json.loads(discover.output)
+        assert [item["path"] for item in payload["included"]] == ["README.md"]
+        assert any(
+            item["path"] == "src/content/blog/post.md"
+            and item["reason"] == "no include rule matched"
+            for item in payload["candidate_not_included"]
+        )
+        assert any(item["path"] == "docs/page.html" for item in payload["unsupported"])
+        assert dry_run.exit_code == 0, dry_run.output
+        assert "Candidate but not included:" in dry_run.output
+        assert not (tmp_path / ".cairn" / "documents").exists()
+
+    def test_serve_refuses_fixed_repo_embedder_mismatch(
+        self, tmp_path: Path, monkeypatch: MonkeyPatch, runner: CliRunner
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / "README.md").write_text("# Readme\n\nProject overview.\n", encoding="utf-8")
+        assert runner.invoke(app, ["init", "-y"]).exit_code == 0
+        sync_result = runner.invoke(app, ["sync", "--fake"])
+        assert sync_result.exit_code == 0, sync_result.output
+        monkeypatch.setenv("CAIRN_EMBED_PROVIDER", "doubao-vision")
+        monkeypatch.setenv("CAIRN_EMBED_DIM", "2048")
+
+        result = runner.invoke(app, ["serve", "--repo", str(tmp_path)])
+
+        assert result.exit_code == 1, result.output
+        assert "This index was built with fake:bow-hash dim=64" in result.output
+        assert "docsgraph serve --repo" in result.output
+
+    def test_mcp_config_env_from_current(
+        self, tmp_path: Path, monkeypatch: MonkeyPatch, runner: CliRunner
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / "README.md").write_text("# Readme\n", encoding="utf-8")
+        init_result = runner.invoke(app, ["init", "-y"])
+        assert init_result.exit_code == 0, init_result.output
+        monkeypatch.setenv("CAIRN_EMBED_PROVIDER", "doubao-vision")
+        monkeypatch.setenv("CAIRN_EMBED_DIM", "2048")
+        monkeypatch.setenv("OTHER_TOOL_ENV", "ignored")
+
+        result = runner.invoke(
+            app,
+            ["mcp", "config", "--client", "claude", "--env-from-current"],
+        )
+
+        assert result.exit_code == 0, result.output
+        payload = json.loads(result.output)
+        env = payload["mcpServers"]["cairn"]["env"]
+        assert env["CAIRN_EMBED_PROVIDER"] == "doubao-vision"
+        assert env["CAIRN_EMBED_DIM"] == "2048"
+        assert "OTHER_TOOL_ENV" not in env
+
+    def test_mcp_config_rejects_invalid_env_name(
+        self, tmp_path: Path, monkeypatch: MonkeyPatch, runner: CliRunner
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / "README.md").write_text("# Readme\n", encoding="utf-8")
+        init_result = runner.invoke(app, ["init", "-y"])
+        assert init_result.exit_code == 0, init_result.output
+
+        result = runner.invoke(
+            app,
+            ["mcp", "config", "--client", "codex", "--env", "CAIRN.EMBED_DIM=2048"],
+        )
+
+        assert result.exit_code == 2, result.output
+        assert "Invalid value" in result.output
+
+    def test_mcp_env_rejects_invalid_env_name_directly(self) -> None:
+        with pytest.raises(Exception, match="invalid --env name"):
+            _mcp_env(explicit=("CAIRN.EMBED_DIM=2048",), from_current=False)
+
+    def test_install_codex_writes_managed_block(
+        self, tmp_path: Path, monkeypatch: MonkeyPatch, runner: CliRunner
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / "README.md").write_text("# Readme\n", encoding="utf-8")
+        init_result = runner.invoke(app, ["init", "-y"])
+        assert init_result.exit_code == 0, init_result.output
+
+        home = tmp_path / "home"
+        monkeypatch.setenv("HOME", str(home))
+
+        first = runner.invoke(app, ["install", "--client", "codex", "--yes", "--fake"])
+        assert first.exit_code == 0, first.output
+        config = home / ".codex" / "config.toml"
+        text = config.read_text(encoding="utf-8")
+        assert "[mcp_servers.cairn]" in text
+        assert 'command = "docsgraph"' in text
+        assert "--fake" in text
+        assert "--repo" not in text
+
+        second = runner.invoke(app, ["install", "--client", "codex", "--yes"])
+        assert second.exit_code == 0, second.output
+        updated = config.read_text(encoding="utf-8")
+        assert updated.count("BEGIN DOCSGRAPH MCP") == 1
+        assert "--fake" not in updated
+        assert 'args = ["serve"]' in updated
+
+    def test_install_cursor_merges_json_config(
+        self, tmp_path: Path, monkeypatch: MonkeyPatch, runner: CliRunner
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / "README.md").write_text("# Readme\n", encoding="utf-8")
+        init_result = runner.invoke(app, ["init", "-y"])
+        assert init_result.exit_code == 0, init_result.output
+
+        output = tmp_path / "mcp.json"
+        output.write_text('{"other": true, "mcpServers": {"existing": {}}}\n')
+
+        result = runner.invoke(
+            app,
+            [
+                "install",
+                "--client",
+                "cursor",
+                "--output",
+                str(output),
+                "--yes",
+            ],
+        )
+
+        assert result.exit_code == 0, result.output
+        payload = json.loads(output.read_text(encoding="utf-8"))
+        assert payload["other"] is True
+        assert "existing" in payload["mcpServers"]
+        assert payload["mcpServers"]["cairn"]["command"] == "docsgraph"
+        assert payload["mcpServers"]["cairn"]["args"] == ["serve"]
+
+    def test_install_with_repo_writes_fixed_repo_config(
+        self, tmp_path: Path, monkeypatch: MonkeyPatch, runner: CliRunner
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / "README.md").write_text("# Readme\n", encoding="utf-8")
+        init_result = runner.invoke(app, ["init", "-y"])
+        assert init_result.exit_code == 0, init_result.output
+
+        output = tmp_path / "mcp.json"
+        result = runner.invoke(
+            app,
+            [
+                "install",
+                "--client",
+                "cursor",
+                "--output",
+                str(output),
+                "--repo",
+                str(tmp_path),
+                "--yes",
+            ],
+        )
+
+        assert result.exit_code == 0, result.output
+        payload = json.loads(output.read_text(encoding="utf-8"))
+        assert payload["mcpServers"]["cairn"]["args"] == [
+            "serve",
+            "--repo",
+            str(tmp_path),
+        ]
+
+    def test_doctor_reports_missing_repo_config(
+        self, tmp_path: Path, monkeypatch: MonkeyPatch, runner: CliRunner
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+
+        result = runner.invoke(app, ["doctor"])
+
+        assert result.exit_code == 1
+        assert "docsgraph init -y" in result.output
+        assert "cairn" in result.output

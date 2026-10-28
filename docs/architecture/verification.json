@@ -1,0 +1,35 @@
+{
+  "version": "0.1.0a13",
+  "archify": "3.1.0",
+  "gates": {
+    "validate": "pass",
+    "deliver": "pass",
+    "check": "pass",
+    "browser-check": "pass"
+  },
+  "diagnostics": [],
+  "artifacts": {
+    "docs/architecture-current.html": {
+      "sha256": "f403150f1c783c52c58dcc49a5252180692a44e07d0126d9efc1a2b3bd49f985",
+      "bytes": 821514
+    },
+    "docs/architecture/current.architecture.json": {
+      "sha256": "3994578ab2383142e549163951bcc3ebb8fd771d0f9e730dd228bf85e2295c59",
+      "bytes": 6597
+    },
+    "docs/architecture/source-snapshot.json": {
+      "sha256": "ba27962c06e66c34dd00d12ab140a7b5f1d7d45e6780dc88fcf20e3b1598b520",
+      "bytes": 8039
+    },
+    "docs/assets/cairn-architecture-light.svg": {
+      "sha256": "fccc246f007bfe9727d7e1238e0849dff30d7a01a64202fd9efc6fd679e31285",
+      "bytes": 166943
+    },
+    "docs/assets/cairn-architecture-dark.svg": {
+      "sha256": "810e1a2494fd92141c520b688bef79cbdaa5ae54575e2c050f6833bf47e29aac",
+      "bytes": 166962
+    }
+  },
+  "scope": "Automated schema/source/artifact/real-browser checks passed after final source snapshot. Visible topology unchanged from inspected light/dark desktop and site desktop/mobile; existing viewer-exported SVGs retained. Source links local-only, snapshot is not upstream GitHub HEAD.",
+  "browser_limitation": "Original Ego taskspace9 is no longer available at final refresh. No replacement taskspace was opened; final checks use Archify automatic headless browser and HTTP publication verification."
+}

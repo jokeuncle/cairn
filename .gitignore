@@ -1,0 +1,94 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual envs
+.venv/
+venv/
+env/
+ENV/
+
+# Testing / coverage
+.pytest_cache/
+.hypothesis/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+
+# Linting / typing
+.mypy_cache/
+.ruff_cache/
+.pyre/
+
+# Tooling
+.uv/
+.codegraph/
+uv.lock
+.python-version
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Cairn runtime data
+.cairn/documents/
+.cairn/manifest.json
+.cairn/sync.lock
+.cairn/inspector.html
+*.lancedb/
+*.sqlite
+*.sqlite-*
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Frontend
+node_modules/
+apps/*/dist/
+apps/*/.vite/
+apps/*/release/
+
+# Local agent runs / benchmarks output
+runs/
+.playwright-mcp/
+results/
+benchmarks/output/
